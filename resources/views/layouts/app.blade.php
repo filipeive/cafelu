@@ -71,6 +71,7 @@
     <script src="{{ asset('assets/vendors/chart.js/Chart.min.js') }}"></script>
     <script src="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
     <script src="{{ asset('assets/vendors/select2/select2.min.js') }}"></script>
+    <script src="{{ asset('vendor/sweetalert2/sweetalert2.min.js') }}"></script>
 
     <!-- Scripts do StarAdmin -->
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
@@ -82,7 +83,7 @@
 
     <!-- Custom JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
-    <script src="{{ asset('assets/js/sweetalert/sweetalert2.min.js') }}"></script>
+    <script src="{{ asset('assets/js/sweetalert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/pos/pos.js') }}"></script>
     <script src="{{ asset('assets/js/webpack.js') }}"></script>
     <!-- Substitua o script existente por este -->
@@ -168,7 +169,6 @@
                 }
             });
         }
-    </script>
     </script>
     @stack('scripts')
 </body>

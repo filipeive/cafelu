@@ -113,9 +113,10 @@
                     </a>
                 </div>
             </li>
-            <span id="fullscreenBtn" class="btn btn-icon-text ms-3 text-white" title="Modo Tela Cheia" style="display: inline;">
+            <span id="fullscreenBtn" class="btn btn-icon-text ms-3 text-white" title="Modo Tela Cheia" style="display: inline;" onclick="toggleFullScreen()">
                 <i class="mdi mdi-fullscreen"></i>
             </span>
+
             <!-- Perfil do Usuário -->
             <li class="nav-item dropdown user-dropdown ms-2">
                 <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">

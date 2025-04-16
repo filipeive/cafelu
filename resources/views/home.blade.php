@@ -16,8 +16,8 @@
 
                     <div class="row text-center">
                         <div class="col-md-4">
-                            <a href="{{ route('menu.index') }}" class="btn btn-primary btn-block">
-                                {{ __('Gerenciar Cardápio') }}
+                            <a href="{{ route('tables.index') }}" class="btn btn-primary btn-block">
+                                {{ __('Registar Novo Pedido nas Mesas') }}
                             </a>
                         </div>
                         <div class="col-md-4">
@@ -26,8 +26,8 @@
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <a href="{{ route('reports.index') }}" class="btn btn-warning btn-block">
-                                {{ __('Relatórios') }}
+                            <a href="{{ route('sales.index') }}" class="btn btn-warning btn-block">
+                                {{ __('Vendas') }}
                             </a>
                         </div>
                     </div>

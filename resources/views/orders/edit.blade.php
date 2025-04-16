@@ -158,10 +158,12 @@
                                             </form>
                                         </td>
                                         <td>
-                                            <button onclick="removeItem({{ $item->id }})"
-                                                class="btn btn-action-sm btn-action-danger">
-                                                <i class="mdi mdi-delete"></i>
-                                            </button>
+                                        <button onclick="removeItem(this)"
+                                            data-id="{{ $item->id }}"
+                                            class="btn btn-action-sm btn-action-danger">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+
                                         </td>
                                     </tr>
                                 @empty
@@ -351,21 +353,31 @@
 
     @push('scripts')
         <script>
-            function removeItem(itemId) {
-                Swal.fire({
-                    title: 'Confirmar remoção',
-                    text: "Deseja remover este item do pedido?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sim, remover',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById(`remove-item-${itemId}`).submit();
-                    }
-                });
-            }
+             function removeItem(button) {
+                const itemId = button.getAttribute('data-id');
+                const confirmDelete = confirm("Deseja remover este item do pedido?");
 
+                if (confirmDelete) {
+                    fetch(`/orders/items/${itemId}/remove`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Item removido com sucesso!');
+                            location.reloadx();
+                        } else {
+                            alert('Erro ao remover o item.');
+                        }
+                    })
+                    .catch(() => {
+                        alert('Erro de comunicação com o servidor.');
+                    });
+                }
+            }
             // Quick Menu Search
             document.getElementById('quickMenuSearch').addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();

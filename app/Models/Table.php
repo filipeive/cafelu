@@ -13,9 +13,11 @@ class Table extends Model
         'number',
         'capacity',
         'status',
-        'is_main',
         'group_id',
-        'merged_capacity'
+        'is_main',
+        'merged_capacity',
+        'position_x',
+        'position_y'
     ];
 
     /**
@@ -23,11 +25,41 @@ class Table extends Model
      *
      * @return bool
      */
-    public function hasActiveOrders()
+    public function activeOrder()
     {
-        return $this->orders()->where('status', 'pending')->exists();
+        return $this->orders()
+                    ->whereIn('status', ['active', 'completed'])
+                    ->latest()
+                    ->first();
     }
 
+    public function hasActiveOrder()
+    {
+        return $this->orders()
+                    ->whereIn('status', ['active', 'completed'])
+                    ->exists();
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updating(function ($table) {
+            if ($table->isDirty('group_id') && $table->group_id === null) {
+                $table->is_main = false;
+                $table->merged_capacity = null;
+            }
+        });
+    }
+    //
+    public function getStatusAttribute($value)
+    {
+        // Se tiver um pedido ativo, a mesa está ocupada
+        if ($this->hasActiveOrder()) {
+            return 'occupied';
+        }
+        return $value;
+    }
     /**
      * Retorna o pedido ativo da mesa
      *
@@ -35,7 +67,7 @@ class Table extends Model
      */
     public function getActiveOrder()
     {
-        return $this->orders()->where('status', 'pending')->first();
+        return $this->orders()->where('status', 'active')->first();
     }
 
     /**
@@ -45,7 +77,23 @@ class Table extends Model
     {
         return $this->hasMany(Order::class);
     }
+    public function groupedTables()
+    {
+        return $this->hasMany(Table::class, 'group_id', 'group_id')
+                    ->where('id', '!=', $this->id);
+    }
 
+    public function getGroupedTablesNumbersAttribute()
+    {
+        if (!$this->group_id) {
+            return null;
+        }
+        
+        return $this->groupedTables()
+                    ->pluck('number')
+                    ->sort()
+                    ->implode(', ');
+    }   
     /**
      * Scope para filtrar mesas por status
      */

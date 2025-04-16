@@ -1,0 +1,33 @@
+/* Estilos personalizados */
+.img-xs {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.badge-on {
+    background-color: #28a745;
+}
+
+.badge-off {
+    background-color: #dc3545;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Ajustes para modais */
+.modal-dialog {
+    max-width: 600px;
+}
+
+/* Ajustes para tabelas */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Ajustes para paginação */
+.pagination {
+    justify-content: center;
+}

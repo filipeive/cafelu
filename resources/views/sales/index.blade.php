@@ -237,14 +237,19 @@
                                         </td>
                                         <td class="py-3">
                                             <div class="d-flex justify-content-center gap-2">
-                                                <button class="btn btn-primary btn-icon btn-sm" data-bs-toggle="tooltip"
-                                                    title="Ver Detalhes" onclick="viewSaleDetails({{ $sale->id }})">
+                                                <a href="{{ route('sales.show', $sale->id) }}" class="btn btn-primary btn-icon btn-sm" data-bs-toggle="tooltip"
+                                                    title="Ver Detalhes">
                                                     <i class="mdi mdi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-info btn-icon btn-sm" data-bs-toggle="tooltip"
-                                                    title="Imprimir" onclick="printReceipt({{ $sale->id }})">
-                                                    <i class="mdi mdi-printer"></i>
-                                                </button>
+                                                </a>
+                                                <form action="{{ route('sales.print', $sale->id) }}" method="POST" class="d-inline" target="_blank">
+                                                    @csrf
+                                                    <button type="submit" 
+                                                            class="btn btn-info btn-icon btn-sm" 
+                                                            data-bs-toggle="tooltip" 
+                                                            title="Imprimir">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
+                                                </form>
                                                 <button class="btn btn-warning btn-icon btn-sm" data-bs-toggle="tooltip"
                                                     title="Exportar PDF" onclick="exportSalePDF({{ $sale->id }})">
                                                     <i class="mdi mdi-download"></i>

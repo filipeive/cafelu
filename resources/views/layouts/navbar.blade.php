@@ -1,18 +1,18 @@
-<nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
+<nav class="navbar navbar-dark bg-dark default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
     <!-- Logo e Toggle -->
-    <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+    <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start" style="z-index: 0;">
         <div class="me-3">
             <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="minimize">
                 <span class="icon-menu"></span>
             </button>
         </div>
         <div>
-            <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
-                <img src="{{ asset('assets/images/Logo.png') }}" alt="Restaurant Logo" class="img-fluid"
+            {{-- <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="Restaurant Logo" class="img-fluid"
                     style="max-height: 40px;">
-            </a>
+            </a> --}}
             <a class="navbar-brand brand-logo-mini" href="{{ route('dashboard') }}">
-                <img src="{{ asset('assets/images/logo-mini.png') }}" alt="Mini Logo" class="img-fluid"
+                <img src="{{ asset('assets/images/Logo.png') }}" alt="Mini Logo" class="img-fluid"
                     style="max-height: 30px;">
             </a>
         </div>
@@ -24,8 +24,8 @@
         <ul class="navbar-nav">
             <li class="nav-item font-weight-semibold d-none d-lg-block ms-0">
                 <div class="d-flex flex-column">
-                    <h1 class="welcome-text">Bem-vindo, <span
-                            class="text-primary fw-bold">{{ Auth::user()->name }}</span></h1>
+                    <h1 class="welcome-text text-white">Bem-vindo, <span
+                            class="text-warning fw-bold">{{ Auth::user()->name }}</span></h1>
                    {{--  <nav aria-label="breadcrumb" class="welcome-sub-text">
                         <ol class="breadcrumb bg-transparent p-0 mb-0">
                             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
@@ -40,7 +40,7 @@
         <ul class="navbar-nav ms-auto">
             <!-- Quick Actions -->
             <li class="nav-item dropdown mx-1">
-                <a class="nav-link btn btn-sm btn-outline-primary rounded-pill px-3" id="quickActions" href="#"
+                <a class="nav-link btn btn-sm btn-outline-light rounded-pill px-3" id="quickActions" href="#"
                     data-bs-toggle="dropdown">
                     <i class="mdi mdi-plus-circle-outline me-1"></i> Ações Rápidas
                 </a>
@@ -63,7 +63,7 @@
 
             <!-- Notificações -->
             <li class="nav-item dropdown mx-1">
-                <a class="nav-link count-indicator position-relative" id="notificationDropdown" href="#"
+                <a class="nav-link count-indicator position-relative text-white" id="notificationDropdown" href="#"
                     data-bs-toggle="dropdown">
                     <i class="mdi mdi-bell-outline"></i>
                     <span class="count bg-danger">3</span>
@@ -107,7 +107,11 @@
                         </div>
                     </a>
                     <div class="dropdown-divider"></div>
-                    <a href="{{-- route('notifications.index') --}}" class="dropdown-item text-center text-primary py-2">Ver Todas</a>
+                    <a href="{{-- route('notifications.index') --}}" class="dropdown-item text-center py-2">
+                        <div class="d-inline-block rounded-circle border border-primary text-primary px-3 py-1">
+                            Ver Todas
+                        </div>
+                    </a>
                 </div>
             </li>
 
@@ -121,13 +125,13 @@
                                     src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="Profile image">
                             @else
                                 <div class="avatar-md mx-auto mb-2">
-                                    <i class="mdi mdi-account-circle text-primary fs-2"></i>
+                                    <i class="mdi mdi-account-circle text-warning fs-2"></i>
                                 </div>
                             @endif
                         </div>
                         <div class="d-none d-lg-block">
-                            <span class="fw-semibold">{{ Auth::user()->name }}</span>
-                            <small class="text-muted d-block">{{ Auth::user()->role->name ?? 'Usuário' }}</small>
+                            <span class="fw-semibold text-white">{{ Auth::user()->name }}</span>
+                            <small class="d-block text-white" style="color: #fff">{{ Auth::user()->role ?? 'Usuário' }}</small>
                         </div>
                     </div>
                 </a>
@@ -139,7 +143,7 @@
                                 src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="Profile image">
                         @else
                             <div class="avatar-md mx-auto mb-2">
-                                <i class="mdi mdi-account-circle text-primary fs-2"></i>
+                                <i class="mdi mdi-account-circle text-warning fs-2"></i>
                             </div>
                         @endif
                         <h6 class="mb-0">{{ Auth::user()->name }}</h6>

@@ -6,6 +6,7 @@ use App\Models\Table;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class TableController extends Controller
 {
@@ -13,10 +14,15 @@ class TableController extends Controller
      * Exibe a visualização das mesas do restaurante
      */
     public function index()
-    {
-        $tables = Table::orderBy('number')->get();
-        return view('tables.index', compact('tables'));
-    }
+{
+    $tables = Table::with(['orders' => function($query) {
+        $query->whereIn('status', ['active', 'completed'])
+              ->latest();
+    }])->orderBy('number')->get();
+
+    return view('tables.index', compact('tables'));
+}
+
 
     /**
      * Alterar o status da mesa (livre/ocupada)
@@ -36,6 +42,33 @@ class TableController extends Controller
     /**
      * Iniciar um novo pedido para uma mesa
      */
+    public function createOrder(Table $table)
+    {
+        if ($table->hasActiveOrder()) {
+            $activeOrder = $table->activeOrder();
+            return redirect()->route('orders.edit', $activeOrder->id)
+                ->with('info', 'Esta mesa já possui um pedido ativo.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $order = Order::create([
+                'table_id' => $table->id,
+                'user_id' => auth()->id(),
+                'status' => 'active'
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('orders.edit', $order->id)
+                ->with('success', 'Novo pedido criado com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Erro ao criar pedido: ' . $e->getMessage());
+        }
+    }/* 
     public function createOrder(Table $table)
     {
         // Verificar se a mesa já tem um pedido ativo
@@ -60,105 +93,100 @@ class TableController extends Controller
 
         return redirect()->route('orders.edit', $order->id);
     }
-
+ */
     /**
      * Unir mesas (criar um grupo)
      */
-    public function mergeTables(Request $request)
+        public function mergeTables(Request $request)
     {
-        $request->validate([
-            'table_ids' => 'required|array|min:2',
-            'table_ids.*' => 'exists:tables,id',
-            'main_table_id' => 'required|exists:tables,id',
-        ]);
-
-        $tableIds = $request->table_ids;
-        $mainTableId = $request->main_table_id;
-        
-        // Verificar se alguma das mesas já está em um grupo ou tem pedidos ativos
-        $tables = Table::whereIn('id', $tableIds)->get();
-        
-        foreach ($tables as $table) {
-            if ($table->group_id && $table->id != $mainTableId) {
-                return redirect()->route('tables.index')
-                    ->with('error', 'A mesa ' . $table->number . ' já está em um grupo.');
+        try {
+            $request->validate([
+                'table_ids' => 'required|array|min:2',
+                'table_ids.*' => 'exists:tables,id',
+                'main_table_id' => 'required|exists:tables,id|in:' . implode(',', $request->table_ids),
+            ]);
+    
+            DB::beginTransaction();
+    
+            // Buscar todas as mesas com lock para atualização
+            $tables = Table::whereIn('id', $request->table_ids)->lockForUpdate()->get();
+            $mainTable = $tables->firstWhere('id', $request->main_table_id);
+    
+            // Validações de negócio
+            $invalidTables = $tables->filter(function ($table) {
+                // Removida a verificação de status, apenas verifica se já está em grupo
+                return $table->group_id !== null;
+            });
+    
+            if ($invalidTables->isNotEmpty()) {
+                throw new \Exception('Uma ou mais mesas já fazem parte de um grupo.');
             }
-            
-            $hasActiveOrder = Order::where('table_id', $table->id)
-                ->whereIn('status', ['active', 'completed'])
-                ->exists();
+    
+            // Gerar ID único para o grupo
+            $groupId = 'group_' . Str::random(16);
+            $totalCapacity = $tables->sum('capacity');
+    
+            // Atualizar todas as mesas do grupo
+            foreach ($tables as $table) {
+                $updates = [
+                    'group_id' => $groupId,
+                    'is_main' => $table->id === $mainTable->id,
+                    'status' => 'occupied', // Força o status para ocupado
+                    'merged_capacity' => $table->id === $mainTable->id ? $totalCapacity : null
+                ];
                 
-            if ($hasActiveOrder && $table->id != $mainTableId) {
-                return redirect()->route('tables.index')
-                    ->with('error', 'A mesa ' . $table->number . ' já tem um pedido ativo.');
+                $table->fill($updates);
+                $table->save(); // Usar save() ao invés de update() para garantir eventos do modelo
             }
+    
+            DB::commit();
+    
+            return redirect()->route('tables.index')
+                ->with('success', 'Mesas unidas com sucesso! Todas as mesas do grupo estão ocupadas.');
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('tables.index')
+                ->with('error', 'Erro ao unir mesas: ' . $e->getMessage());
         }
-        
-        // Gerar ID de grupo único
-        $groupId = 'group_' . Str::random(16);
-        
-        // Calcular capacidade total
-        $totalCapacity = $tables->sum('capacity');
-        
-        // Atualizar tabelas
-        foreach ($tables as $table) {
-            $table->group_id = $groupId;
-            $table->is_main = ($table->id == $mainTableId) ? 1 : 0;
-            $table->status = 'occupied';
-            $table->save();
-        }
-        
-        // Atualizar mesa principal com a capacidade total
-        $mainTable = Table::find($mainTableId);
-        $mainTable->merged_capacity = $totalCapacity;
-        $mainTable->save();
-        
-        return redirect()->route('tables.index')
-            ->with('success', 'Mesas unidas com sucesso!');
     }
 
-    /**
-     * Separar mesas (desfazer grupo)
-     */
     public function splitTables(Request $request)
     {
-        $request->validate([
-            'group_id' => 'required|string',
-        ]);
-        
-        $groupId = $request->group_id;
-        
-        // Verificar se há algum pedido ativo no grupo
-        $mainTable = Table::where('group_id', $groupId)
-            ->where('is_main', 1)
-            ->first();
+        try {
+            $request->validate(['group_id' => 'required|string']);
+
+            DB::beginTransaction();
+
+            $tables = Table::where('group_id', $request->group_id)
+                        ->lockForUpdate()
+                        ->get();
+
+            if ($tables->isEmpty()) {
+                throw new \Exception('Grupo de mesas não encontrado.');
+            }
+
+            $mainTable = $tables->firstWhere('is_main', 1);
             
-        if (!$mainTable) {
-            return redirect()->route('tables.index')
-                ->with('error', 'Grupo de mesas não encontrado.');
+            if ($mainTable && $mainTable->hasActiveOrder()) {
+                throw new \Exception('Não é possível separar mesas com pedido ativo.');
+            }
+
+            foreach ($tables as $table) {
+                $table->update([
+                    'group_id' => null,
+                    'is_main' => false,
+                    'merged_capacity' => null,
+                    'status' => 'free'
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('tables.index')->with('success', 'Mesas separadas com sucesso!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('tables.index')->with('error', 'Erro ao separar mesas: ' . $e->getMessage());
         }
-        
-        $hasActiveOrder = Order::where('table_id', $mainTable->id)
-            ->whereIn('status', ['active', 'completed'])
-            ->exists();
-            
-        if ($hasActiveOrder) {
-            return redirect()->route('tables.index')
-                ->with('error', 'Não é possível separar mesas com pedido ativo.');
-        }
-        
-        // Separar todas as mesas do grupo
-        $tables = Table::where('group_id', $groupId)->get();
-        
-        foreach ($tables as $table) {
-            $table->group_id = null;
-            $table->is_main = 0;
-            $table->merged_capacity = null;
-            $table->status = 'free';
-            $table->save();
-        }
-        
-        return redirect()->route('tables.index')
-            ->with('success', 'Mesas separadas com sucesso!');
     }
 }

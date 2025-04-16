@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\StockMovement;
+use App\Models\SaleItem;
 use App\Http\Requests\ProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,8 +17,7 @@ class ProductController extends Controller
     {
         $query = Product::with('category');
 
-        // Aplicar filtros
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->get('search');
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -24,8 +25,12 @@ class ProductController extends Controller
             });
         }
 
-        if ($request->has('category') && $request->category != '') {
+        if ($request->filled('category')) {
             $query->where('category_id', $request->category);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status);
         }
 
         $products = $query->orderBy('name')->paginate(12);
@@ -49,16 +54,28 @@ class ProductController extends Controller
             Product::create($data);
 
             DB::commit();
-            return redirect()->route('products.index')->with('success', 'Produto criado com sucesso!');
+
+            return $request->expectsJson()
+                ? response()->json(['success' => true, 'message' => 'Item adicionado com sucesso!'])
+                : redirect()->route('products.index')->with('success', 'Item adicionado com sucesso ao cardápio!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erro ao criar produto: ' . $e->getMessage());
+            return $request->expectsJson()
+                ? response()->json(['success' => false, 'message' => 'Erro: ' . $e->getMessage()], 500)
+                : back()->with('error', 'Erro ao adicionar item: ' . $e->getMessage());
         }
+    }
+
+    public function show(Product $product)
+    {
+        $product->load('category');
+        return response()->json($product);
     }
 
     public function edit(Product $product)
     {
-        return response()->json($product->load('category'));
+        $product->load('category');
+        return response()->json($product);
     }
 
     public function update(ProductRequest $request, Product $product)
@@ -70,20 +87,54 @@ class ProductController extends Controller
             $data['is_active'] = $request->has('is_active');
 
             if ($request->hasFile('image')) {
-                // Remove imagem antiga se existir
                 if ($product->image_path) {
                     Storage::disk('public')->delete($product->image_path);
                 }
                 $data['image_path'] = $request->file('image')->store('products', 'public');
             }
 
+            if ($request->has('remove_image') && $product->image_path) {
+                Storage::disk('public')->delete($product->image_path);
+                $data['image_path'] = null;
+            }
+
             $product->update($data);
 
             DB::commit();
-            return redirect()->route('products.index')->with('success', 'Produto atualizado com sucesso!');
+
+            return $request->expectsJson()
+                ? response()->json(['success' => true, 'message' => 'Atualizado com sucesso!'])
+                : redirect()->route('products.index')->with('success', 'Item atualizado com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erro ao atualizar produto: ' . $e->getMessage());
+            return $request->expectsJson()
+                ? response()->json(['success' => false, 'message' => 'Erro: ' . $e->getMessage()], 500)
+                : back()->with('error', 'Erro ao atualizar item: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy(Request $request, Product $product)
+    {
+        try {
+            DB::beginTransaction();
+
+            if ($product->image_path) {
+                Storage::disk('public')->delete($product->image_path);
+            }
+
+            $product->delete();
+
+            DB::commit();
+
+            return $request->expectsJson()
+                ? response()->json(['success' => true, 'message' => 'Removido com sucesso!'])
+                : redirect()->route('products.index')->with('success', 'Item removido com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $request->expectsJson()
+                ? response()->json(['success' => false, 'message' => 'Erro: ' . $e->getMessage()], 500)
+                : back()->with('error', 'Erro ao remover item: ' . $e->getMessage());
         }
     }
 
@@ -110,29 +161,48 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy(Product $product)
+    public function export(Request $request)
     {
-        try {
-            DB::beginTransaction();
+        // Lógica de exportação pode ser inserida aqui
+        return $request->expectsJson()
+            ? response()->json(['message' => 'Funcionalidade de exportação será implementada em breve.'])
+            : back()->with('success', 'Funcionalidade de exportação será implementada em breve.');
+    }
 
-            // Remove a imagem se existir
-            if ($product->image_path) {
-                Storage::disk('public')->delete($product->image_path);
-            }
+    public function stockHistory(Product $product)
+    {
+        $history = StockMovement::where('product_id', $product->id)
+            ->orderBy('created_at')
+            ->get()
+            ->map(function ($movement) {
+                return [
+                    'date' => $movement->created_at->format('d/m/Y'),
+                    'quantity' => $movement->quantity
+                ];
+            });
 
-            $product->delete();
+        return response()->json([
+            'dates' => $history->pluck('date'),
+            'quantities' => $history->pluck('quantity')
+        ]);
+    }
 
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Produto excluído com sucesso!'
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao excluir produto: ' . $e->getMessage()
-            ], 422);
-        }
+    public function salesData(Product $product)
+    {
+        $sales = SaleItem::where('product_id', $product->id)
+            ->with('sale')
+            ->orderBy('created_at')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->sale->created_at->format('d/m/Y'),
+                    'quantity' => $item->quantity
+                ];
+            });
+
+        return response()->json([
+            'dates' => $sales->pluck('date'),
+            'quantities' => $sales->pluck('quantity')
+        ]);
     }
 }

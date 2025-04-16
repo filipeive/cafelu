@@ -7,6 +7,9 @@ use App\Models\Table;
 use App\Models\Product;
 use App\Models\OrderItem;
 use App\Models\Category;
+use App\Models\Sale;
+use App\Models\SaleItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -151,33 +154,53 @@ class OrderController extends Controller
     public function complete(Order $order)
     {
         if ($order->status !== 'active') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Apenas pedidos ativos podem ser finalizados.'
-            ], 400);
+            $message = 'Apenas pedidos ativos podem ser finalizados.';
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 400);
+            }
+
+            return redirect()->back()->with('error', $message);
         }
-    
+
         try {
             // Atualizar o status do pedido para 'completed'
             $order->status = 'completed';
             $order->save();
-    
-            return response()->json([
-                'success' => true,
-                'message' => 'Pedido finalizado com sucesso'
-            ]);
+
+            $message = 'Pedido finalizado com sucesso';
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ]);
+            }
+
+            return redirect()->route('tables.index')->with('success', $message);
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao finalizar pedido: ' . $e->getMessage()
-            ], 500);
+            $message = 'Erro ao finalizar pedido: ' . $e->getMessage();
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', $message);
         }
     }
+
 
     /**
      * Registrar pagamento do pedido
      */
-    public function pay(Request $request, Order $order)
+    /* public function pay(Request $request, Order $order)
     {
         $request->validate([
             'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh',
@@ -217,7 +240,96 @@ class OrderController extends Controller
         return redirect()->route('orders.show', $order->id)
             ->with('success', 'Pagamento registrado com sucesso!');
     }
+ */
+    /**
+     * Registrar pagamento do pedido
+     */
+    public function pay(Request $request, Order $order)
+    {
+        try {
+            DB::beginTransaction();
 
+            $request->validate([
+                'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh',
+                'notes' => 'nullable|string',
+                'amount_paid' => 'required|numeric|min:' . $order->total_amount,
+            ]);
+
+            if ($order->status !== 'completed') {
+                throw new \Exception('Apenas pedidos finalizados podem ser pagos.');
+            }
+
+            // 1. Registrar a venda
+            $sale = Sale::create([
+                'order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'customer_name' => $order->customer_name,
+                'total_amount' => $order->total_amount,
+                'payment_method' => $request->payment_method,
+                'amount_paid' => $request->amount_paid,
+                'change_amount' => $request->amount_paid - $order->total_amount,
+                'notes' => $request->notes ?? $order->notes,
+                'status' => 'completed'
+            ]);
+
+            // 2. Registrar os itens da venda
+            foreach ($order->items as $item) {
+                SaleItem::create([
+                    'sale_id' => $sale->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'total_price' => $item->total_price,
+                    'notes' => $item->notes
+                ]);
+
+                // 3. Atualizar o estoque do produto
+                $product = $item->product;
+                $product->stock_quantity -= $item->quantity;
+                $product->save();
+            }
+
+            // 4. Atualizar o status do pedido
+            $order->update([
+                'status' => 'paid',
+                'payment_method' => $request->payment_method,
+                'notes' => $request->notes,
+                'paid_at' => now()
+            ]);
+
+            // 5. Liberar e separar mesas
+            if ($order->table) {
+                if ($order->table->group_id) {
+                    // Busca todas as mesas do grupo
+                    $groupedTables = Table::where('group_id', $order->table->group_id)
+                        ->get();
+
+                    // Atualiza cada mesa do grupo
+                    foreach ($groupedTables as $table) {
+                        $table->update([
+                            'status' => 'free',
+                            'group_id' => null,
+                            'is_main' => false,
+                            'merged_capacity' => null
+                        ]);
+                    }
+                } else {
+                    // Se for mesa individual, apenas libera
+                    $order->table->update(['status' => 'free']);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('orders.show', $order->id)
+                ->with('success', 'Pagamento registrado e venda finalizada com sucesso!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Erro ao processar pagamento: ' . $e->getMessage());
+        }
+    }
     /**
      * Cancelar pedido
      */

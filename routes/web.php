@@ -83,15 +83,22 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/{product}/stock-history', [ProductController::class, 'stockHistory'])->name('products.stock-history');
+    Route::get('/{product}/sales-data', [ProductController::class, 'salesData'])->name('products.sales-data');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::put('/products/{product}/stock', [ProductController::class, 'updateStock'])->name('products.updateStock');
+    Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])
+    ->name('products.stock.update');
+    //product export
+    Route::get('/products/export', [ProductController::class, 'export'])->name('products.export');
     Route::resource('categories', CategoryController::class);
     
     // Sales Management
     Route::resource('sales', SaleController::class);
     Route::get('sales/{sale}/receipt', [SaleController::class, 'receipt'])->name('sales.receipt');
     //post
-    Route::post('sales/{sale}/print', [SaleController::class, 'print'])->name('sales.print');
+    Route::post('sales/{sale}/print', [SaleController::class, 'receipt'])->name('sales.print');
     //products.api.list
     Route::get('products/api/list', [ProductController::class, 'apiList'])->name('products.api.list');
 
@@ -116,6 +123,17 @@ Route::middleware(['auth'])->group(function () {
     Route::put('clients/{client}', [ClientController::class, 'update'])->name('client.update');
     //destroy
     Route::delete('clients/{client}', [ClientController::class, 'destroy'])->name('client.destroy');
+
+    //employes
+    Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+    Route::post('employees/store', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+    Route::get('employees/{employee}/show', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::get('employees/search', [EmployeeController::class, 'search'])->name('employees.search');
+
 
     
     // Profile Management

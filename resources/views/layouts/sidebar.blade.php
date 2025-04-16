@@ -1,250 +1,244 @@
-<nav class="sidebar sidebar-offcanvas" id="sidebar">
-    {{-- <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center">
+<nav class="sidebar sidebar-offcanvas bg-dark" id="sidebar" style="margin-top: -100px; z-index: 1098;">
+    <!-- Logo e Nome do Sistema -->
+   <div class="sidebar-brand-wrapper d-flex align-items-center justify-content-center py-4">
         <div class="sidebar-brand-icon">
-            <img src="{{ asset('assets/images/Logo.png') }}" alt="Restaurant Logo" style="max-height: 35px;">
+            <img src="{{ asset('assets/images/Logo.png') }}" alt="Restaurant Logo" style="height: 40px;">
         </div>
-        <div class="sidebar-brand-text mx-3">Restaurant Pro</div>
-    </div>
-     --}}
-    <ul class="nav">
+        <a href="{{ route('dashboard') }}" class="sidebar-brand-text ml-3 d-none d-lg-block text-decoration-none">
+            <span class="font-weight-bold text-white" style="font-size: 1.2rem;">CaféLufamina</span>
+            <span class="text-warning" style="font-size: 1.2rem;">POS</span>
+        </a>
+    </div> 
+
+    <!-- Menu de Navegação -->
+    <ul class="nav flex-column">
         <!-- Dashboard -->
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('dashboard') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-view-dashboard-outline"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                <i class="mdi mdi-view-dashboard-outline nav-icon"></i>
                 <span class="nav-title">Dashboard</span>
-                <span class="nav-badge badge bg-primary-light">Home</span>
+                <span class="nav-badge badge badge-light">Home</span>
             </a>
         </li>
         
-        <!-- Operações -->
+        <!-- Seção Operacional -->
         <li class="nav-section">
             <span class="nav-section-title">OPERACIONAL</span>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('pos.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-point-of-sale"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}" href="{{ route('pos.index') }}">
+                <i class="mdi mdi-point-of-sale nav-icon"></i>
                 <span class="nav-title">PDV</span>
-                <span class="nav-badge badge bg-success-light">Novo</span>
+                <span class="nav-badge badge badge-success">Novo</span>
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('orders.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-cart-outline"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') }}">
+                <i class="mdi mdi-cart-outline nav-icon"></i>
                 <span class="nav-title">Pedidos</span>
                 @php 
                     $pendingOrdersCount = \App\Models\Order::where('status', 'active')->count();
                 @endphp
-                <span class="nav-badge badge bg-danger">{{ $pendingOrdersCount ?? 0 }}</span>
+                @if($pendingOrdersCount > 0)
+                    <span class="nav-badge badge badge-danger">{{ $pendingOrdersCount }}</span>
+                @endif
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{-- route('reservations.index') --}}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-calendar-clock"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('reservations.*') ? 'active' : '' }}" href="#">
+                <i class="mdi mdi-calendar-clock nav-icon"></i>
                 <span class="nav-title">Reservas</span>
-                <span class="nav-badge badge bg-warning-light">{{ $todayReservationsCount ?? 0 }}</span>
+                @if(($todayReservationsCount ?? 0) > 0)
+                    <span class="nav-badge badge badge-warning">{{ $todayReservationsCount }}</span>
+                @endif
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('tables.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-table-furniture"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('tables.*') ? 'active' : '' }}" href="{{ route('tables.index') }}">
+                <i class="mdi mdi-table-furniture nav-icon"></i>
                 <span class="nav-title">Mesas</span>
+                @php
+                    $tablesAvailable = \App\Models\Table::where('status', 'free')->count();
+                @endphp
                 <span class="nav-badge">
-                    {{-- aplique isso Table::where('status', 'free')->count(); --}}
-                    @php
-                        $tablesAvailable = \App\Models\Table::where('status', 'free')->count() > 0;
-                    @endphp
-                    <i class="mdi mdi-circle text-{{ $tablesAvailable ? 'success' : 'danger' }}"></i>
+                    <span class="text-{{ $tablesAvailable > 0 ? 'success' : 'danger' }}">
+                        {{ $tablesAvailable }} {{ $tablesAvailable == 1 ? 'disponível' : 'disponíveis' }}
+                    </span>
                 </span>
             </a>
         </li>
         
-        <!-- Cardápio -->
+        <!-- Seção Cardápio -->
         <li class="nav-section">
             <span class="nav-section-title">CARDÁPIO</span>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('products.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-food"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
+                <i class="mdi mdi-food nav-icon"></i>
                 <span class="nav-title">Produtos</span>
-                <span class="nav-badge badge bg-danger-light">{{ $lowStockProductsCount ?? 0 }}</span>
+                @if(($lowStockProductsCount ?? 0) > 0)
+                    <span class="nav-badge badge badge-danger">{{ $lowStockProductsCount }}</span>
+                @endif
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('categories.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-food-variant"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}" href="{{ route('categories.index') }}">
+                <i class="mdi mdi-food-variant nav-icon"></i>
                 <span class="nav-title">Categorias</span>
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{-- route('menus.index') --}}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-book-open-variant"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('menus.*') ? 'active' : '' }}" href="#">
+                <i class="mdi mdi-book-open-variant nav-icon"></i>
                 <span class="nav-title">Cardápios</span>
             </a>
         </li>
         
-        <!-- Financeiro -->
+        <!-- Seção Financeiro -->
         <li class="nav-section">
             <span class="nav-section-title">FINANCEIRO</span>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('sales.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-cash-multiple"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}" href="{{ route('sales.index') }}">
+                <i class="mdi mdi-cash-multiple nav-icon"></i>
                 <span class="nav-title">Vendas</span>
-                <span class="nav-badge badge bg-primary-light">Hoje: MZN {{ $todaySales ?? '0,00' }}</span>
+                <span class="nav-badge badge badge-primary">Hoje: {{($todaySales ?? 0) }}</span>
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{-- route('expenses.index') --}}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-cash-remove"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}" href="#">
+                <i class="mdi mdi-cash-remove nav-icon"></i>
                 <span class="nav-title">Despesas</span>
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{-- route('reports.index') --}}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-chart-bar"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="#">
+                <i class="mdi mdi-chart-bar nav-icon"></i>
                 <span class="nav-title">Relatórios</span>
             </a>
         </li>
         
-        <!-- Pessoas -->
+        <!-- Seção Pessoas -->
         <li class="nav-section">
             <span class="nav-section-title">PESSOAS</span>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('clients.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-account-group"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}" href="{{ route('clients.index') }}">
+                <i class="mdi mdi-account-group nav-icon"></i>
                 <span class="nav-title">Clientes</span>
-                <span class="nav-badge badge bg-info-light">{{ $newClientsCount ?? 0 }}</span>
+                @if(($newClientsCount ?? 0) > 0)
+                    <span class="nav-badge badge badge-info">+{{ $newClientsCount }}</span>
+                @endif
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('employees.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-account-tie"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}" href="{{ route('employees.index') }}">
+                <i class="mdi mdi-account-tie nav-icon"></i>
                 <span class="nav-title">Funcionários</span>
             </a>
         </li>
         
         @if(Auth::user()->role == 'admin')
-        <!-- Administração -->
+        <!-- Seção Administração -->
         <li class="nav-section">
             <span class="nav-section-title">ADMINISTRAÇÃO</span>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('users.index') }}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-account-key"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                <i class="mdi mdi-account-key nav-icon"></i>
                 <span class="nav-title">Usuários</span>
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{-- route('settings.index') --}}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-cog-outline"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="#">
+                <i class="mdi mdi-cog-outline nav-icon"></i>
                 <span class="nav-title">Configurações</span>
             </a>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{-- route('backup.index') --}}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-cloud-upload"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}" href="#">
+                <i class="mdi mdi-cloud-upload nav-icon"></i>
                 <span class="nav-title">Backup</span>
             </a>
         </li>
         @endif
         
-        <!-- Suporte -->
+        <!-- Seção Suporte -->
         <li class="nav-section">
             <span class="nav-section-title">SUPORTE</span>
         </li>
         
         <li class="nav-item">
-            <a class="nav-link" href="{{-- route('help.index') --}}">
-                <span class="nav-icon">
-                    <i class="mdi mdi-help-circle"></i>
-                </span>
+            <a class="nav-link {{ request()->routeIs('help.*') ? 'active' : '' }}" href="#">
+                <i class="mdi mdi-help-circle nav-icon"></i>
                 <span class="nav-title">Ajuda</span>
             </a>
         </li>
     </ul>
     
-    <div class="sidebar-footer d-flex align-items-center justify-content-center">
-        <div class="sidebar-footer-content">
-            <p class="mb-1">Restaurant Pro v1.0</p>
-            <small class="text-muted">© {{ date('Y') }} Todos os direitos reservados</small>
+    <!-- Rodapé do Sidebar -->
+    <div class="sidebar-footer py-3 px-4">
+        <{{-- div class="d-flex align-items-center">
+            <div class="user-avatar">
+                <img src="{{ Auth::user()->avatar_url ?? asset('assets/images/faces/face8.jpg') }}" 
+                     alt="User Avatar" class="rounded-circle" width="40">
+            </div>
+            <div class="user-info ml-2">
+                <div class="user-name">{{ Auth::user()->name }}</div>
+                <small class="user-role text-muted text-capitalize">{{ Auth::user()->role }}</small>
+            </div>
+        </div> --}}
+        <div class="system-info mt-2 text-center">
+            <small class="text-muted d-block">v1.0.0</small>
+            <small class="text-muted">© {{ date('Y') }} Restaurant Pro</small>
         </div>
     </div>
 </nav>
 
 <style>
-   /*  .sidebar {
-        background: linear-gradient(180deg, #2a3042 0%, #1a1f2e 100%);
+    .sidebar {
+        background: #ffffff;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
     }
     
     .sidebar-brand-wrapper {
-        padding: 20px 0;
-        background: rgba(255,255,255,0.05);
-    } */
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 10px;
+    }
     
     .sidebar-brand-text {
         font-weight: 600;
-        font-size: 1.2rem;
-        color: #000000;
+        color: #2c3e50;
     }
     
     .nav-section {
-        padding: 10px 25px;
-        margin-top: 15px;
+        padding: 10px 30px;
+        margin-top: 10px;
     }
     
     .nav-section-title {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: rgba(0, 0, 0, 0.5);
+        font-weight: 600;
+        color: #7f8c8d;
     }
     
     .nav-item {
@@ -254,49 +248,68 @@
     .nav-link {
         display: flex;
         align-items: center;
-        padding: 12px 25px;
-        color: rgba(255, 163, 76, 0.8);
-        transition: all 0.3s;
+        padding: 12px 20px;
+        color: #34495e;
+        transition: all 0.2s;
+        border-radius: 4px;
+        margin: 0 10px;
     }
     
     .nav-link:hover {
-        color: #c95824;
-        background: rgba(255,255,255,0.1); 
+        color: #e67e22;
+        background-color: rgba(230, 126, 34, 0.1);
     }
     
     .nav-link.active {
-        background: rgba(41, 121, 255, 0.2);
-        color: #ff7b00;
-        border-left: 3px solid #2979ff;
+        background-color: rgba(230, 126, 34, 0.15);
+        color: #e67e22;
+        font-weight: 500;
+    }
+    
+    .nav-link.active .nav-icon {
+        color: #e67e22;
     }
     
     .nav-icon {
-        margin-right: 15px;
+        margin-right: 12px;
         font-size: 1.2rem;
-        min-width: 25px;
-        display: flex;
-        align-items: center;
+        color: #7f8c8d;
+        width: 24px;
+        text-align: center;
     }
     
     .nav-title {
         flex-grow: 1;
+        font-size: 0.9rem;
     }
     
     .nav-badge {
         font-size: 0.7rem;
         padding: 3px 6px;
         border-radius: 10px;
+        font-weight: 500;
     }
     
     .sidebar-footer {
-        padding: 20px;
-        border-top: 1px solid rgba(255,255,255,0.1);
         margin-top: auto;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        padding-top: 15px;
     }
     
-    .sidebar-footer-content {
-        text-align: center;
-        color: rgba(255,255,255,0.6);
-        font-size: 0.8rem;
+    .user-avatar img {
+        border: 2px solid rgba(230, 126, 34, 0.3);
+    }
+    
+    .user-name {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .user-role {
+        font-size: 0.7rem;
+    }
+    
+    .system-info {
+        font-size: 0.7rem;
     }
 </style>

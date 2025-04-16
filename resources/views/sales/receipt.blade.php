@@ -167,7 +167,7 @@
     <script>
         function closeAndReturn() {
             setTimeout(function() {
-                window.close();
+            window.close();
             }, 100);
         }
 

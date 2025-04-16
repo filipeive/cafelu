@@ -79,6 +79,8 @@ if (!function_exists('get_status_class_staradmin')) {
                 return 'text-danger';
             case 'active':
                 return 'text-warning';
+            case 'paid':
+                return 'text-success';
             default:
                 return 'text-secondary'; // Default case
         }
@@ -130,4 +132,12 @@ if (!function_exists('get_status_class_staradmin')) {
                 return 'text-secondary'; // Default case
         }
     }
+}
+function get_role_class($role) {
+    return match($role) {
+        'admin' => 'danger',
+        'manager' => 'warning',
+        'waiter' => 'info',
+        default => 'secondary'
+    };
 }

@@ -1,713 +1,443 @@
 @extends('layouts.app')
 
 @section('styles')
-    <style>
-        /* Estilos gerais */
-        .page-header {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .badge.bg-info {
-            background-color: rgba(13, 202, 240, 0.1) !important;
-            color: #0dcaf0;
-            font-weight: 500;
-            padding: 0.35rem 0.65rem;
-            margin-left: 0.5rem;
-        }
-
-        .badge.bg-info i {
-            margin-right: 0.25rem;
-        }
-
-        /* Status badges */
-        .status-badge {
-            padding: 0.5rem 0.75rem;
-            border-radius: 20px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-
-        .status-pending {
-            background-color: #FFF3CD;
-            color: #856404;
-        }
-
-        .status-preparing {
-            background-color: #D1ECF1;
-            color: #0C5460;
-        }
-
-        .status-ready {
-            background-color: #D4EDDA;
-            color: #155724;
-        }
-
-        .status-delivered {
-            background-color: #CFF4FC;
-            color: #055160;
-        }
-
-        .status-cancelled {
-            background-color: #F8D7DA;
-            color: #721C24;
-        }
-
-        /* Items table */
-        .items-table {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .items-table th {
-            background-color: #f8f9fa;
-            border-top: none;
-            font-weight: 600;
-        }
-
-        .items-table .form-control-sm {
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        /* Product cards */
-        .product-card {
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .product-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-        }
-
-        // Adicione ao bloco de estilos existente
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 0.875rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .status-badge i {
-            font-size: 0.75rem;
-        }
-
-        .status-active {
-            background-color: #E3F2FD;
-            color: #1976D2;
-        }
-
-        .status-completed {
-            background-color: #E8F5E9;
-            color: #2E7D32;
-        }
-
-        .status-cancelled {
-            background-color: #FFEBEE;
-            color: #C62828;
-        }
-
-        .gap-3 {
-            gap: 1rem;
-        }
-
-        /* Tabs */
-        .nav-tabs {
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .nav-tabs .nav-link {
-            border: none;
-            color: #6c757d;
-            font-weight: 500;
-            padding: 0.75rem 1rem;
-            transition: all 0.2s ease;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: #4B49AC;
-            border-bottom: 2px solid #4B49AC;
-        }
-
-        .tab-content {
-            padding-top: 1.5rem;
-        }
-
-        /* Action buttons */
-        .action-btn {
-            padding: 0.5rem 1.25rem;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-
-        .action-btn-sm {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-        }
-
-        /* Order info card */
-        .order-info-card {
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .order-info-card .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            padding: 1rem 1.25rem;
-        }
-
-        /* Order total summary */
-        .order-total {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        /* Item row hover effect */
-        .item-row {
-            transition: background-color 0.2s ease;
-        }
-
-        .item-row:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* Status selector styling */
-        .item-status-select {
-            border: none;
-            font-weight: 500;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .item-status-select:focus {
-            box-shadow: 0 0 0 0.2rem rgba(75, 73, 172, 0.25);
-        }
-
-        /* Alert animations */
-        .alert {
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
 @endsection
 
 @section('content')
-    <div class="container-wrapper">
-        <!-- Cabeçalho da página -->
-        <div class="page-header d-flex justify-content-between align-items-center">
-            <div>
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <h2 class="mb-0">
-                        <i class="mdi mdi-receipt text-primary"></i>
-                        Pedido #{{ $order->id }}
-                    </h2>
-                    <span class="badge {{ get_status_class_staradmins($order->status) }}">
-                        <i class="mdi mdi-circle"></i>
-                        {{ ucfirst(trans($order->status)) }}
-                    </span>
-                    @if ($order->status === 'completed')
-                        <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-primary action-btn-sm">
-                            <i class="mdi mdi-eye"></i> Ver Detalhes
-                        </a>
-                    @endif
-                </div>
-                <p class="text-muted mb-0">
-                    <i class="mdi mdi-chair-rolling"></i> Mesa {{ $order->table->number }}
-                    @if ($order->table->group_id)
-                        <span class="badge bg-info">
-                            <i class="mdi mdi-link"></i>
-                            Unida com
-                            {{ $order->table->groupedTablesNumbers ? 'Mesa(s) ' . $order->table->groupedTablesNumbers : '' }}
+    <div class="page-container">
+        <!-- Order Header -->
+        <div class="order-header card mb-4">
+            <div class="card-body">
+                <!-- Título e Status do Pedido -->
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <h5 class="mb-0">
+                            <i class="mdi mdi-receipt text-primary"></i>
+                            Pedido #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
+                        </h5>
+                        <span class="badge {{ get_status_class_staradmins($order->status) }}">
+                            {{ ucfirst(trans($order->status)) }}
                         </span>
-                    @endif |
-                    <i class="mdi mdi-account"></i> {{ $order->customer_name ?: 'Cliente não identificado' }}
-                </p>
-            </div>
-            <div>
-                <a href="{{ route('tables.index') }}" class="btn btn-outline-secondary action-btn">
-                    <i class="mdi mdi-arrow-left"></i> Voltar
-                </a>
-                {{-- ver pedidos --}}
-                <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary action-btn">
-                    <i class="mdi mdi-format-list-bulleted"></i> Ver Pedidos
-                </a>
-                <div class="btn-group ml-2">
-                    <button type="button" class="btn btn-success action-btn dropdown-toggle" data-toggle="dropdown">
-                        <i class="mdi mdi-cog"></i> Ações
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <form action="{{ route('orders.complete', $order) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="dropdown-item text-success">
-                                <i class="mdi mdi-check-circle"></i> Finalizar Pedido
+
+                        <!-- Botão de Pagamento -->
+                        @if ($order->status === 'completed' && !$order->is_paid)
+                            <button type="button" class="btn btn-success btn-sm ms-2" data-bs-toggle="modal"
+                                data-bs-target="#paymentModal">
+                                <i class="mdi mdi-cash-multiple me-1"></i>
+                                Registrar Pagamento
                             </button>
-                        </form>
-                        <form action="{{ route('orders.cancel', $order) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="dropdown-item text-danger"
-                                onclick="return confirm('Tem certeza que deseja cancelar este pedido?')">
-                                <i class="mdi mdi-close-circle"></i> Cancelar Pedido
-                            </button>
-                        </form>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ route('orders.print', $order->id) }}" class="dropdown-item text-info">
-                            <i class="mdi mdi-printer"></i> Imprimir Pedido
+                        @endif
+                    </div>
+                    <div class="order-actions">
+                        <a href="{{ route('tables.index') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="mdi mdi-table"></i> Mesas
                         </a>
+                        <a href="{{ route('orders.index') }}" class="btn btn-sm btn-outline-secondary ms-2">
+                            <i class="mdi mdi-clipboard-list"></i> Pedidos
+                        </a>
+                        <button onclick="printOrder()" class="btn btn-sm btn-outline-primary ms-2">
+                            <i class="mdi mdi-printer"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Informações do Pedido -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card p-2">
+                            <div class="order-info-grid">
+                                <div class="info-item">
+                                    <i class="mdi mdi-clock-outline text-muted"></i>
+                                    <span>{{ $order->created_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="mdi mdi-cash text-success"></i>
+                                    <span class="fw-bold">MZN {{ number_format($order->total_amount, 2, ',', '.') }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="mdi mdi-account text-primary"></i>
+                                    <span>{{ $order->customer_name ?: 'Cliente não identificado' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-2">
+                            <div class="order-info-grid">
+                                @if ($order->table)
+                                    <div class="info-item">
+                                        <i class="mdi mdi-table-furniture text-info"></i>
+                                        <span>Mesa {{ $order->table->number }}
+                                            @if ($order->table->group_id)
+                                                <span class="badge bg-info ms-1">
+                                                    <i class="mdi mdi-link-variant"></i>
+                                                    {{ $order->table->groupedTablesNumbers ? 'Unida: ' . $order->table->groupedTablesNumbers : '' }}
+                                                </span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endif
+                                @if ($order->notes)
+                                    <div class="info-item">
+                                        <i class="mdi mdi-note-text text-warning"></i>
+                                        <span>{{ $order->notes }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Alertas -->
+        <!-- Alert System -->
         @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
-                <i class="mdi mdi-check-circle-outline mr-2"></i>
-                <span>{{ session('success') }}</span>
-                <button type="button" class="close ml-auto" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="toast-notification toast-success">
+                <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
+                <div class="toast-message">{{ session('success') }}</div>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
-                <i class="mdi mdi-alert-circle-outline mr-2"></i>
-                <span>{{ session('error') }}</span>
-                <button type="button" class="close ml-auto" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="toast-notification toast-error">
+                <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
+                <div class="toast-message">{{ session('error') }}</div>
             </div>
         @endif
 
-        <div class="row">
-            <!-- Coluna dos itens do pedido -->
-            <div class="col-lg-7">
-                <div class="card mb-4 items-table">
-                    <div class="card-header bg-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="mdi mdi-format-list-bulleted text-primary"></i> Itens do Pedido</h5>
-                            <span class="order-total text-success">Total: MZN
-                                {{ number_format($order->total_amount, 2, ',', '.') }}</span>
-                        </div>
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Items Table -->
+                <div class="items-table card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="mdi mdi-format-list-bulleted me-2"></i>Itens do Pedido</h5>
+                        <span class="badge bg-primary">{{ $order->items->count() }} itens</span>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Produto</th>
-                                        <th style="width: 80px">Qtd</th>
-                                        <th style="width: 120px">Preço</th>
-                                        <th style="width: 120px">Total</th>
-                                        <th style="width: 150px">Status</th>
-                                        <th style="width: 50px">Ações</th>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th style="width: 100px">Qtd</th>
+                                    <th style="width: 120px">Preço</th>
+                                    <th style="width: 120px">Total</th>
+                                    <th style="width: 150px">Status</th>
+                                    <th style="width: 100px">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($order->items as $item)
+                                    <tr class="item-row">
+                                        <td>
+                                            <div class="item-details">
+                                                <span class="item-name">{{ $item->product->name }}</span>
+                                                @if ($item->notes)
+                                                    <small class="item-notes">
+                                                        <i class="mdi mdi-note-text"></i>
+                                                        {{ $item->notes }}
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{ $item->quantity }}</td>
+                                        <td>{{ number_format($item->unit_price, 2, ',', '.') }}</td>
+                                        <td>{{ number_format($item->total_price, 2, ',', '.') }}</td>
+                                        <td>
+                                            <form action="{{ route('orders.update-item-status', $item) }}" method="POST">
+                                                @csrf
+                                                <select name="status" class="status-select" onchange="this.form.submit()">
+                                                    <option value="pending" @selected($item->status === 'pending')>Pendente</option>
+                                                    <option value="preparing" @selected($item->status === 'preparing')>Preparando
+                                                    </option>
+                                                    <option value="ready" @selected($item->status === 'ready')>Pronto</option>
+                                                    <option value="delivered" @selected($item->status === 'delivered')>Entregue</option>
+                                                    <option value="cancelled" @selected($item->status === 'cancelled')>Cancelado
+                                                    </option>
+                                                </select>
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <button onclick="removeItem({{ $item->id }})"
+                                                class="btn btn-action-sm btn-action-danger">
+                                                <i class="mdi mdi-delete"></i>
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($order->items as $item)
-                                        <tr class="item-row">
-                                            <td>
-                                                <div>
-                                                    <strong>{{ $item->product->name }}</strong>
-                                                    @if ($item->notes)
-                                                        <div class="small text-muted">
-                                                            <i class="mdi mdi-comment-text-outline"></i> {{ $item->notes }}
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td>{{ $item->quantity }}</td>
-                                            <td>{{ number_format($item->unit_price, 2, ',', '.') }} MZN</td>
-                                            <td class="text-success font-weight-bold">
-                                                {{ number_format($item->total_price, 2, ',', '.') }} MZN
-                                            </td>
-                                            <td>
-                                                <form action="{{ route('orders.update-item-status', $item) }}"
-                                                    method="POST" class="status-form">
-                                                    @csrf
-                                                    <select name="status" class="form-control item-status-select"
-                                                        data-item-id="{{ $item->id }}"
-                                                        data-status="{{ $item->status }}">
-                                                        <option value="pending"
-                                                            @if ($item->status === 'pending') selected @endif>Pendente
-                                                        </option>
-                                                        <option value="preparing"
-                                                            @if ($item->status === 'preparing') selected @endif>Preparando
-                                                        </option>
-                                                        <option value="ready"
-                                                            @if ($item->status === 'ready') selected @endif>Pronto
-                                                        </option>
-                                                        <option value="delivered"
-                                                            @if ($item->status === 'delivered') selected @endif>Entregue
-                                                        </option>
-                                                        <option value="cancelled"
-                                                            @if ($item->status === 'cancelled') selected @endif>Cancelado
-                                                        </option>
-                                                    </select>
-                                                </form>
-                                            </td>
-                                            <td>
-                                                <form action="{{ route('orders.remove-item', $item) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit"
-                                                        class="btn btn-outline-danger btn-sm action-btn-sm"
-                                                        onclick="return confirm('Tem certeza que deseja remover este item?')">
-                                                        <i class="mdi mdi-delete"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="6" class="text-center py-4">
-                                                <div class="text-muted">
-                                                    <i class="mdi mdi-cart-outline fa-2x mb-2"></i>
-                                                    <p>Nenhum item adicionado ao pedido</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                @empty
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="empty-state">
+                                                <i class="mdi mdi-cart-outline empty-icon"></i>
+                                                <p class="empty-text">Nenhum item adicionado ao pedido</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Formulário para adicionar itens -->
-                <div class="card mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="mdi mdi-plus-circle-outline text-primary"></i> Adicionar Item</h5>
+                <!-- Quick Menu -->
+                <div class="card mt-4">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="mdi mdi-food text-primary me-2"></i>Menu Rápido</h5>
+                        <div class="search-container">
+                            <i class="mdi mdi-magnify search-icon"></i>
+                            <input type="text" class="form-control search-input" id="quickMenuSearch"
+                                placeholder="Buscar produtos...">
+                        </div>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('orders.add-item', $order) }}" method="POST">
-                            @csrf
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="product_id"><i class="mdi mdi-tag"></i> Produto</label>
-                                    <select name="product_id" id="product_id" class="form-control" required>
-                                        <option value="">Selecione um produto</option>
-                                        @foreach ($categories as $category)
-                                            <optgroup label="{{ $category->name }}">
-                                                @foreach ($category->products as $product)
-                                                    <option value="{{ $product->id }}"
-                                                        data-price="{{ $product->price }}">
-                                                        {{ $product->name }} -
-                                                        {{ number_format($product->price, 2, ',', '.') }} MZN
-                                                    </option>
-                                                @endforeach
-                                            </optgroup>
-                                        @endforeach
-                                    </select>
+                        <!-- Tabs para categorias -->
+                        <div class="custom-tabs">
+                            @foreach ($categories as $category)
+                                <button class="custom-tab {{ $loop->first ? 'active' : '' }}"
+                                    data-category="{{ $category->id }}">
+                                    {{ $category->name }}
+                                    <span class="custom-tab-badge">{{ $category->products->count() }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+
+                        <!-- Grid de produtos -->
+                        <div class="product-grid mt-3">
+                            @foreach ($categories as $category)
+                                <div class="category-products" data-category="{{ $category->id }}"
+                                    style="{{ !$loop->first ? 'display: none;' : '' }}">
+                                    @foreach ($category->products as $product)
+                                        <div class="product-card" onclick="addProduct({{ $product->id }})">
+                                            <div class="product-card-body">
+                                                <h6 class="product-name">{{ $product->name }}</h6>
+                                                <div class="product-price">MZN
+                                                    {{ number_format($product->price, 2, ',', '.') }}</div>
+                                                <button class="btn btn-sm btn-primary product-add">
+                                                    <i class="mdi mdi-plus"></i> Adicionar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div class="form-group col-md-2">
-                                    <label for="quantity"><i class="mdi mdi-numeric"></i> Qtd</label>
-                                    <input type="number" name="quantity" id="quantity" class="form-control"
-                                        value="1" min="1" required>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="item_total"><i class="mdi mdi-calculator"></i> Subtotal</label>
-                                    <input type="text" id="item_total" class="form-control bg-light" readonly>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="notes"><i class="mdi mdi-comment-text"></i> Observações</label>
-                                <textarea name="notes" id="notes" class="form-control" rows="2"
-                                    placeholder="Ex: Sem cebola, bem passado, etc"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary action-btn">
-                                <i class="mdi mdi-plus"></i> Adicionar Item
-                            </button>
-                        </form>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Coluna lateral -->
-            <div class="col-lg-5">
-                <!-- Card de menu rápido -->
-                <div class="card mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="mdi mdi-food text-primary"></i> Menu Rápido</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="nav nav-tabs" id="categoryTabs" role="tablist">
-                            @foreach ($categories as $index => $category)
-                                <li class="nav-item">
-                                    <a class="nav-link @if ($index === 0) active @endif"
-                                        id="category-{{ $category->id }}-tab" data-toggle="tab"
-                                        href="#category-{{ $category->id }}" role="tab">
-                                        {{ $category->name }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                        <div class="tab-content mt-3" id="categoryTabsContent">
-                            @foreach ($categories as $index => $category)
-                                <div class="tab-pane fade @if ($index === 0) show active @endif"
-                                    id="category-{{ $category->id }}" role="tabpanel">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-transparent">
-                                                <i class="mdi mdi-magnify"></i>
-                                            </span>
-                                        </div>
-                                        <input type="text" class="form-control product-search"
-                                            placeholder="Buscar produtos...">
-                                    </div>
-                                    <div class="row">
-                                        @foreach ($category->products as $product)
-                                            <div class="col-md-6 mb-3 product-item">
-                                                <div class="card product-card h-100">
-                                                    <div class="card-body p-3">
-                                                        <h6 class="card-title product-name">{{ $product->name }}</h6>
-                                                        <p class="card-text text-success font-weight-bold mb-2">
-                                                            {{ number_format($product->price, 2, ',', '.') }} MZN
-                                                        </p>
-                                                        <form action="{{ route('orders.add-item', $order) }}"
-                                                            method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="product_id"
-                                                                value="{{ $product->id }}">
-                                                            <input type="hidden" name="quantity" value="1">
-                                                            <button type="submit"
-                                                                class="btn btn-sm btn-outline-primary w-100">
-                                                                <i class="mdi mdi-plus"></i> Adicionar
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card de informações do cliente -->
-                <div class="card order-info-card">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="mdi mdi-account text-primary"></i> Informações do Cliente</h5>
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Customer Info -->
+                <div class="order-info-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="mdi mdi-account text-primary me-2"></i>Informações do Cliente</h5>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('orders.update', $order) }}" method="POST">
                             @csrf
                             @method('PUT')
-                            <div class="form-group">
-                                <label for="customer_name"><i class="mdi mdi-card-account-details"></i> Nome do Cliente</label>
-                                <input type="text" name="customer_name" id="customer_name" class="form-control"
-                                    value="{{ $order->customer_name }}" placeholder="Digite o nome do cliente">
+                            <div class="info-group">
+                                <label class="info-label">
+                                    <i class="mdi mdi-account"></i> Nome do Cliente
+                                </label>
+                                <input type="text" name="customer_name" class="form-control"
+                                    value="{{ $order->customer_name }}" placeholder="Nome do Cliente">
                             </div>
-                            <div class="form-group">
-                                <label for="notes"><i class="mdi mdi-note-text"></i> Observações</label>
-                                <textarea name="notes" id="notes" class="form-control" rows="3"
-                                    placeholder="Observações gerais sobre o pedido">{{ $order->notes }}</textarea>
+                            <div class="info-group">
+                                <label class="info-label">
+                                    <i class="mdi mdi-note"></i> Observações
+                                </label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Observações">{{ $order->notes }}</textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary action-btn">
-                                <i class="mdi mdi-content-save"></i> Atualizar Informações
+                            <button type="submit" class="btn btn-action btn-action-primary w-100">
+                                <i class="mdi mdi-content-save"></i> Salvar Alterações
                             </button>
                         </form>
                     </div>
                 </div>
-            </div>
-        </div>
-        <!-- Adicione antes do fechamento da div container-wrapper -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="mb-3">Total do Pedido:
-                            <span class="text-success">
-                                MZN {{ number_format($order->total_amount, 2, ',', '.') }}
-                            </span>
-                        </h5>
-                        <form action="{{ route('orders.complete', $order) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="mdi mdi-check-circle"></i> Finalizar Pedido
-                            </button>
-                        </form>
+
+                <!-- Order Summary -->
+                <div class="order-summary-footer">
+                    <div>
+                        <span class="order-total-label">Total do Pedido</span>
+                        <div class="order-total-display">
+                            MZN {{ number_format($order->total_amount, 2, ',', '.') }}
+                        </div>
                     </div>
+                    <form action="{{ route('orders.complete', $order) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-action btn-action-success">
+                            <i class="mdi mdi-check-circle"></i>
+                            Finalizar Pedido
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Adicione o Modal de Pagamento no final da página -->
+    @if ($order->status === 'completed' && !$order->is_paid)
+        <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="{{ route('orders.pay', $order) }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Registrar Pagamento #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group mb-3">
+                                <label for="payment_method">Método de Pagamento</label>
+                                <select name="payment_method" id="payment_method" class="form-select" required>
+                                    <option value="">Selecione um método</option>
+                                    <option value="cash">Dinheiro</option>
+                                    <option value="card">Cartão</option>
+                                    <option value="mpesa">M-Pesa</option>
+                                    <option value="emola">E-Mola</option>
+                                    <option value="mkesh">M-Kesh</option>
+                                </select>
+                            </div>
+
+                            <!-- Campo para Troco (aparece apenas quando método é dinheiro) -->
+                            <div id="cashFields" style="display: none;">
+                                <div class="form-group mb-3">
+                                    <label for="cash_amount">Valor Recebido</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">MZN</span>
+                                        <input type="number" class="form-control" id="cash_amount" name="cash_amount"
+                                            step="0.01" min="{{ $order->total_amount }}">
+                                    </div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label>Troco</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">MZN</span>
+                                        <input type="text" class="form-control" id="change_amount" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="amount_paid" value="{{ $order->total_amount }}">
+
+                            <div class="form-group mb-3">
+                                <label for="notes">Observações</label>
+                                <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>Total a Pagar:</strong>
+                                    <span class="h5 mb-0">MZN
+                                        {{ number_format($order->total_amount, 2, ',', '.') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="mdi mdi-check-circle me-1"></i>
+                                Confirmar Pagamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endsection
+
     @push('scripts')
         <script>
-            $(document).ready(function() {
-                // Estilizar os selects de status com cores diferentes
-                function styleStatusSelects() {
-                    $('.item-status-select').each(function() {
-                        const status = $(this).val();
-                        $(this).removeClass(
-                            'status-pending status-preparing status-ready status-delivered status-cancelled'
-                        );
-
-                        switch (status) {
-                            case 'pending':
-                                $(this).addClass('status-pending');
-                                break;
-                            case 'preparing':
-                                $(this).addClass('status-preparing');
-                                break;
-                            case 'ready':
-                                $(this).addClass('status-ready');
-                                break;
-                            case 'delivered':
-                                $(this).addClass('status-delivered');
-                                break;
-                            case 'cancelled':
-                                $(this).addClass('status-cancelled');
-                                break;
-                        }
-                    });
-                }
-
-                // Calcular subtotal ao mudar produto ou quantidade
-                function calculateSubtotal() {
-                    const productPrice = $('#product_id option:selected').data('price') || 0;
-                    const quantity = $('#quantity').val();
-                    const subtotal = productPrice * quantity;
-                    $('#item_total').val(subtotal.toLocaleString('pt-BR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    }) + ' MZN');
-                }
-
-                // Event listeners
-                $('#product_id, #quantity').on('change', calculateSubtotal);
-
-                // Atualizar status do item automaticamente
-                $('.item-status-select').on('change', function() {
-                    const oldStatus = $(this).data('status');
-                    const newStatus = $(this).val();
-
-                    if (oldStatus !== newStatus) {
-                        $(this).closest('form').submit();
+            function removeItem(itemId) {
+                Swal.fire({
+                    title: 'Confirmar remoção',
+                    text: "Deseja remover este item do pedido?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim, remover',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(`remove-item-${itemId}`).submit();
                     }
                 });
+            }
 
-                // Pesquisa de produtos dentro das abas
-                $('.product-search').on('input', function() {
-                    const searchTerm = $(this).val().toLowerCase();
-                    const tabPane = $(this).closest('.tab-pane');
-
-                    tabPane.find('.product-item').each(function() {
-                        const productName = $(this).find('.product-name').text().toLowerCase();
-
-                        if (productName.includes(searchTerm)) {
-                            $(this).show();
-                        } else {
-                            $(this).hide();
-                        }
-                    });
+            // Quick Menu Search
+            document.getElementById('quickMenuSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                    card.style.display = productName.includes(searchTerm) ? 'flex' : 'none';
                 });
-
-                // Inicializar estilos e cálculo
-                styleStatusSelects();
-                calculateSubtotal();
-
-                // Efeito de clique nas cards de produtos
-                $('.product-card').on('click', function(e) {
-                    if (!$(e.target).is('button') && !$(e.target).is('input')) {
-                        $(this).find('button[type="submit"]').click();
-                    }
-                });
-
-                // Notificação visual ao alterar status
-                $('.status-form').on('submit', function() {
-                    const row = $(this).closest('tr');
-                    row.css('background-color', '#f8f9fa');
-                    setTimeout(() => {
-                        row.css('background-color', '');
-                    }, 300);
-                });
-                // Adicione ao bloco de scripts existente
-                function completeOrder(orderId) {
-                    Swal.fire({
-                        title: 'Finalizar Pedido?',
-                        text: 'Isso irá concluir o pedido e liberar a mesa.',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#28a745',
-                        cancelButtonColor: '#dc3545',
-                        confirmButtonText: 'Sim, finalizar!',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Mostrar loading
-                            Swal.fire({
-                                title: 'Processando...',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            });
-
-                            // Fazer requisição
-                            fetch(`/orders/${orderId}/complete`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                            .content,
-                                        'Accept': 'application/json'
-                                    }
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        Swal.fire({
-                                            title: 'Sucesso!',
-                                            text: data.message,
-                                            icon: 'success',
-                                            confirmButtonText: 'OK'
-                                        }).then(() => {
-                                            window.location.href = '/tables';
-                                        });
-                                    } else {
-                                        throw new Error(data.message || 'Erro ao finalizar pedido');
-                                    }
-                                })
-                                .catch(error => {
-                                    Swal.fire({
-                                        title: 'Erro!',
-                                        text: error.message,
-                                        icon: 'error',
-                                        confirmButtonText: 'OK'
-                                    });
-                                });
-                        }
-                    });
-                }
             });
+
+            // Category Tabs
+            document.querySelectorAll('.custom-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const categoryId = this.dataset.category;
+
+                    // Update active tab
+                    document.querySelectorAll('.custom-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Show/hide products
+                    document.querySelectorAll('.category-products').forEach(products => {
+                        products.style.display = products.dataset.category === categoryId ? 'grid' :
+                            'none';
+                    });
+                });
+            });
+
+            // Add Product Function
+            function addProduct(productId) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `{{ route('orders.add-item', $order->id) }}`;
+
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value = '{{ csrf_token() }}';
+
+                const product = document.createElement('input');
+                product.type = 'hidden';
+                product.name = 'product_id';
+                product.value = productId;
+
+                const quantity = document.createElement('input');
+                quantity.type = 'hidden';
+                quantity.name = 'quantity';
+                quantity.value = '1';
+
+                form.appendChild(csrf);
+                form.appendChild(product);
+                form.appendChild(quantity);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+            // Lógica para calcular troco
+            document.getElementById('payment_method').addEventListener('change', function() {
+                const cashFields = document.getElementById('cashFields');
+                cashFields.style.display = this.value === 'cash' ? 'block' : 'none';
+            });
+
+            document.getElementById('cash_amount').addEventListener('input', function() {
+                const received = parseFloat(this.value) || 0;
+                const total = {{ $order->total_amount }};
+                const change = received - total;
+
+                document.getElementById('change_amount').value =
+                    change >= 0 ? change.toFixed(2) : '0.00';
+            });
+            // Print Function
+            function printOrder() {
+                window.open("{{ route('orders.print', $order) }}", '_blank');
+            }
         </script>
     @endpush
-@endsection
+    @endif

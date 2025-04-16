@@ -71,7 +71,7 @@
 @endsection
 
 @section('content')
-    <div class="content-wrapper">
+    <div class="container-wrapper">
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card shadow-sm">
                 <div class="card-body">

@@ -334,49 +334,63 @@ function generateReceiptContent(isPreview = false) {
             <title>${isPreview ? 'Pré-visualização do Recibo' : 'Recibo'}</title>
             <style>
                 body {
-                    font-family: 'arial', monospace;
+                    font-family: 'Arial', sans-serif;
                     margin: 0;
                     padding: 10px;
-                    font-size: 15px;
+                    font-size: 12px;
                 }
                 .receipt {
-                    max-width: 250px;
+                    max-width: 80mm;
                     margin: 0 auto;
+                    padding: 10px;
                 }
                 .header {
                     text-align: center;
-                    margin-bottom: 5px;
+                    margin-bottom: 10px;
                 }
                 .logo {
                     max-width: 100px;
                     margin-bottom: 5px;
                 }
-                .header img {
-                    max-width: 120px;
+                .company-name {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin: 5px 0;
+                }
+                .company-info {
+                    font-size: 11px;
+                    margin: 5px 0;
                 }
                 .divider {
                     border-top: 1px dashed #000;
+                    margin: 8px 0;
+                }
+                .items table {
+                    width: 100%;
+                    border-collapse: collapse;
                     margin: 10px 0;
                 }
-                .items, .totals, .payment-methods, .footer {
-                    margin-top: 15px;
+                .items th, .items td {
+                    text-align: left;
+                    padding: 3px;
+                }
+                .totals {
+                    margin: 10px 0;
                 }
                 .item {
                     display: flex;
                     justify-content: space-between;
-                }
-                .totals strong {
-                    font-weight: bold;
+                    margin: 3px 0;
                 }
                 .footer {
                     text-align: center;
-                    font-size: 12px;
-                    margin-top: 20px;
+                    font-size: 11px;
+                    margin-top: 15px;
                 }
                 @media print {
                     @page {
                         margin: 0;
-                        size: 80mm 297mm;
+                        size: 80mm auto;
                     }
                     body {
                         margin: 0;
@@ -390,22 +404,29 @@ function generateReceiptContent(isPreview = false) {
         <body>
             <div class="receipt">
                 <div class="header">
-                    <img src="/assets/images/Logo.png" alt="Lu & Yosh Catering Logo">
-                    <h2>Lu & Yosh Catering</h2>
+                    <img src="/assets/images/logo.png" alt="Lu & Yoshi Catering Logo" class="logo">
+                    <div class="company-name">Lu & Yoshi Catering</div>
+                    <div class="company-name">Café Lufamina</div>
                     <div class="company-info">
-                        <p>Av. Eduardo Mondlane, 1234<br>Quelimane, Moçambique<br>Tel: +258 21 123 456<br>NUIT: 123456789</p>
+                        <p>
+                            Av. Samora Machel<br>
+                            Cidade de Quelimane<br>
+                            Tel: (+258) 878643715 / 844818014<br>
+                            Email: cafelufamina@gmail.com<br>
+                            NUIT: 1110947722
+                        </p>
                     </div>
                     <p>Data: ${date}</p>
-                    ${isPreview ? '<h3 style="color: red;">PRÉ-VISUALIZAÇÃO</h3>' : ''}
+                    ${isPreview ? '<div style="color: red; font-weight: bold;">PRÉ-VISUALIZAÇÃO</div>' : ''}
                 </div>
                 
                 <div class="divider"></div>
                 
                 <div class="items">
-                    <table style="width: 100%;">
+                    <table>
                         <thead>
                             <tr>
-                                <th style="text-align: left;">Item</th>
+                                <th>Item</th>
                                 <th style="text-align: right;">Qtd</th>
                                 <th style="text-align: right;">Preço</th>
                                 <th style="text-align: right;">Total</th>
@@ -416,47 +437,55 @@ function generateReceiptContent(isPreview = false) {
                                 <tr>
                                     <td>${item.name}</td>
                                     <td style="text-align: right;">${item.quantity}</td>
-                                    <td style="text-align: right;"> ${item.price.toFixed(2)}</td>
-                                    <td style="text-align: right;"> ${item.total.toFixed(2)}</td>
+                                    <td style="text-align: right;">MZN ${item.price.toFixed(2)}</td>
+                                    <td style="text-align: right;">MZN ${item.total.toFixed(2)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
                 </div>
                 
+                <div class="divider"></div>
+                
                 <div class="totals">
                     <div class="item">
                         <strong>Total:</strong>
-                        <span> ${total.toFixed(2)}</span>
+                        <span>MZN ${total.toFixed(2)}</span>
                     </div>
                 </div>
                 
                 <div class="payment-methods">
-                    <h4>Método de Pagamento:</h4>
-                    ${cashAmount > 0 ? `<div class="item">Dinheiro: <span> ${cashAmount.toFixed(2)}</span></div>` : ''}
-                    ${cardAmount > 0 ? `<div class="item">Cartão: <span> ${cardAmount.toFixed(2)}</span></div>` : ''}
-                    ${mpesaAmount > 0 ? `<div class="item">M-Pesa: <span> ${mpesaAmount.toFixed(2)}</span></div>` : ''}
-                    ${emolaAmount > 0 ? `<div class="item">E-mola: <span> ${emolaAmount.toFixed(2)}</span></div>` : ''}
-                    <div class="item"><strong>Total Pago:</strong><span> ${totalPaid.toFixed(2)}</span></div>
-                    ${change > 0 ? `<div class="item">Troco: <span> ${change.toFixed(2)}</span></div>` : ''}
+                    <div class="item"><strong>Forma de Pagamento:</strong></div>
+                    ${cashAmount > 0 ? `<div class="item">Dinheiro: <span>MZN ${cashAmount.toFixed(2)}</span></div>` : ''}
+                    ${cardAmount > 0 ? `<div class="item">Cartão: <span>MZN ${cardAmount.toFixed(2)}</span></div>` : ''}
+                    ${mpesaAmount > 0 ? `<div class="item">M-Pesa: <span>MZN ${mpesaAmount.toFixed(2)}</span></div>` : ''}
+                    ${emolaAmount > 0 ? `<div class="item">E-mola: <span>MZN ${emolaAmount.toFixed(2)}</span></div>` : ''}
+                    <div class="item"><strong>Total Pago: </strong><span>MZN ${totalPaid.toFixed(2)}</span></div>
+                    ${change > 0 ? `<div class="item"><strong>Troco: </strong><span>MZN ${change.toFixed(2)}</span></div>` : ''}
                 </div>
                 
                 <div class="divider"></div>
                 
                 <div class="footer">
                     <p>Obrigado pela preferência!</p>
-                    <p>www.luyoshcatering.co.mz</p>
-                    ${isPreview ? '<p style="color: red;">ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO</p>' : '<p>Este documento não serve como fatura</p>'}
+                    ${isPreview ? 
+                        '<p style="color: red; font-weight: bold;">ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO</p>' : 
+                        '<p>Este documento não serve como fatura</p>'}
                 </div>
                 
                 ${isPreview ? `
                     <div class="no-print" style="margin-top: 20px; text-align: center;">
-                        <button onclick="window.print()" style="padding: 10px 20px;">
+                        <button onclick="window.print()" class="btn btn-primary">
                             Imprimir Pré-visualização
                         </button>
                     </div>
                 ` : ''}
             </div>
+            
+            <script>
+                // Auto-print para recibos não preview
+                ${!isPreview ? 'window.onload = function() { window.print(); };' : ''}
+            </script>
         </body>
         </html>
     `;

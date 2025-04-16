@@ -1,6 +1,7 @@
 <nav class="navbar navbar-dark bg-dark default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
     <!-- Logo e Toggle -->
-    <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start" style="z-index: 0;">
+    <div class="text-center bg-dark navbar-brand-wrapper d-flex align-items-center justify-content-start"
+        style="z-index: 0;">
         <div class="me-3">
             <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="minimize">
                 <span class="icon-menu"></span>
@@ -26,12 +27,6 @@
                 <div class="d-flex flex-column">
                     <h1 class="welcome-text text-white">Bem-vindo, <span
                             class="text-warning fw-bold">{{ Auth::user()->name }}</span></h1>
-                   {{--  <nav aria-label="breadcrumb" class="welcome-sub-text">
-                        <ol class="breadcrumb bg-transparent p-0 mb-0">
-                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">@yield('page-title', 'Página Atual')</li>
-                        </ol>
-                    </nav> --}}
                 </div>
             </li>
         </ul>
@@ -60,11 +55,15 @@
                     </a>
                 </div>
             </li>
+            <!-- Adicione este botão no navbar ou onde preferir -->
+            <button id="fullscreenBtn" class="btn btn-icon-text" title="Modo Tela Cheia">
+                <i class="mdi mdi-fullscreen"></i>
+            </button>
 
             <!-- Notificações -->
             <li class="nav-item dropdown mx-1">
-                <a class="nav-link count-indicator position-relative text-white" id="notificationDropdown" href="#"
-                    data-bs-toggle="dropdown">
+                <a class="nav-link count-indicator position-relative text-white" id="notificationDropdown"
+                    href="#" data-bs-toggle="dropdown">
                     <i class="mdi mdi-bell-outline"></i>
                     <span class="count bg-danger">3</span>
                 </a>
@@ -114,7 +113,9 @@
                     </a>
                 </div>
             </li>
-
+            <span id="fullscreenBtn" class="btn btn-icon-text ms-3 text-white" title="Modo Tela Cheia" style="display: inline;">
+                <i class="mdi mdi-fullscreen"></i>
+            </span>
             <!-- Perfil do Usuário -->
             <li class="nav-item dropdown user-dropdown ms-2">
                 <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
@@ -122,7 +123,8 @@
                         <div class="me-2">
                             @if (Auth::user()->profile_photo_path)
                                 <img class="img-xs rounded-circle"
-                                    src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="Profile image">
+                                    src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}"
+                                    alt="Profile image">
                             @else
                                 <div class="avatar-md mx-auto mb-2">
                                     <i class="mdi mdi-account-circle text-warning fs-2"></i>
@@ -131,7 +133,8 @@
                         </div>
                         <div class="d-none d-lg-block">
                             <span class="fw-semibold text-white">{{ Auth::user()->name }}</span>
-                            <small class="d-block text-white" style="color: #fff">{{ Auth::user()->role ?? 'Usuário' }}</small>
+                            <small class="d-block text-white"
+                                style="color: #fff">{{ Auth::user()->role ?? 'Usuário' }}</small>
                         </div>
                     </div>
                 </a>

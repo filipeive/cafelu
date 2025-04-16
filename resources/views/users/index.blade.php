@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="content-wrapper">
+    <div class="container-wrapper">
         <div class="row">
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
@@ -101,18 +101,18 @@
                                                     data-bs-target="#editUserModal{{ $user->id }}" title="Editar">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </button>
-
-                                                <button type="button" class="btn btn-outline-danger btn-icon btn-sm"
-                                                    onclick="confirmDelete({{ $user->id }})" title="Excluir">
-                                                    <i class="mdi mdi-delete"></i>
-                                                </button>
-
-                                                <form id="deleteForm{{ $user->id }}"
-                                                    action="{{ route('users.destroy', $user->id) }}" method="POST"
-                                                    class="d-none">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
+                                                @if ($loggedId !== intval($user->id))
+                                                    <form class="d-inline" action="{{ route('users.destroy', $user->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Tem certeza que deseja excluir este usuário?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                            title="Excluir">
+                                                            <i class="mdi mdi-delete"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty

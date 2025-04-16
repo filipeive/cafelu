@@ -59,14 +59,20 @@
 </head>
 <body>
     <div class="receipt">
-        <div class="header">
+        <<div class="header">
             <img src="/assets/images/Logo.png" alt="Lu & Yosh Catering Logo" class="logo">
-            <h2>Lu & Yosh Catering</h2>
+            <h2>Lu & Yoshi Catering</h2>
+            <h3>Café Lufamina</h3>
             <div class="company-info">
-                <p>Av. Eduardo Mondlane, 1234<br>Quelimane, Moçambique<br>Tel: +258 21 123 456<br>NUIT: 123456789</p>
+                <p>
+                    Av. Samora Machel<br>
+                    Cidade de Quelimane<br>
+                    Tel: (+258) 878643715 / 844818014<br>
+                    Email: cafelufamina@gmail.com<br>
+                    NUIT: 1110947722
+                </p>
             </div>
             <p>Data: {{ date('d/m/Y H:i', strtotime($sale->sale_date)) }}</p>
-            <h3 class="text-danger" style="color: red;">PRÉ-VISUALIZAÇÃO</h3>
         </div>
         
         <div class="divider"></div>
@@ -102,7 +108,7 @@
         </div>
         
         <div class="payment-methods">
-            <h4>Método de Pagamento:</h4>
+            <h6>Método de Pagamento:</h6>
             @if($sale->payment_method == 'multiple')
                 <div class="item">Múltiplos métodos</div>
             @else
@@ -120,17 +126,16 @@
             @if($sale->emola_amount > 0)
                 <div class="item">E-mola: <span>MZN {{ number_format($sale->emola_amount, 2) }}</span></div>
             @endif
-            @if($sale->cash_amount > 0 && $sale->cash_amount > $sale->total_amount)
+            {{-- @if($sale->cash_amount > 0 && $sale->cash_amount > $sale->total_amount)
                 <div class="item">Troco: <span>MZN {{ number_format($sale->cash_amount - $sale->total_amount, 2) }}</span></div>
-            @endif
+            @endif --}}
         </div>
         
         <div class="divider"></div>
         
         <div class="footer">
-            <p>Obrigado pela preferência!</p>
-            <p>www.luyoshcatering.co.mz</p>
-            <p style="color: red;">ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO</p>
+            <p style="color: red; font-weight: bold;">Obrigado Pela Preferencia!!!</p>
+            <p>Volte Sempre!</p>
         </div>
         <div class="no-print">
             <button class="btn btn-primary" onclick="closeAndReturn()">Fechar e Voltar</button>

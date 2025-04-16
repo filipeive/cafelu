@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recibo #{{ $order->id }}</title>
     <style>
+        @page {
+            size: 80mm auto; /* Largura fixa de 80mm, altura automática */
+            margin: 0;
+        }
+
         body {
             font-family: 'Courier New', Courier, monospace;
             font-size: 10pt;
@@ -12,59 +17,81 @@
             padding: 0;
             width: 80mm;
         }
+
         .receipt {
-            padding: 5mm;
+            padding: 3mm;
+            width: 74mm; /* 80mm - 6mm de padding */
         }
+
         .header {
             text-align: center;
-            margin-bottom: 5mm;
+            margin-bottom: 3mm;
         }
-        .header h1 {
-            font-size: 12pt;
-            margin: 0;
+
+        .logo {
+            max-width: 40mm;
+            height: auto;
+            margin-bottom: 2mm;
         }
-        .header p {
-            margin: 2mm 0;
-        }
+
         .info {
-            margin-bottom: 5mm;
+            margin-bottom: 3mm;
         }
+
         .info p {
-            margin: 0;
+            margin: 1mm 0;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 5mm;
+            margin: 3mm 0;
         }
+
         th, td {
-            text-align: left;
             padding: 1mm;
+            text-align: left;
         }
-        th {
-            border-bottom: 1px solid #000;
+
+        td:nth-child(2) {
+            text-align: center;
         }
+
+        td:last-child {
+            text-align: right;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 2mm 0;
+        }
+
         .total {
             text-align: right;
             font-weight: bold;
-            margin-top: 3mm;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 10mm;
-            font-size: 9pt;
-        }
-        .divider {
-            border-top: 1px dashed #000;
+            font-size: 12pt;
             margin: 3mm 0;
         }
+
+        .footer {
+            text-align: center;
+            margin-top: 3mm;
+        }
+
         @media print {
+            @page {
+                margin: 0;
+            }
+
             body {
                 width: 80mm;
-                margin: 0;
-                padding: 0;
             }
-            .print-button {
+
+            .receipt {
+                page-break-after: always;
+            }
+
+            .no-print {
                 display: none;
             }
         }
@@ -73,22 +100,24 @@
 <body>
     <div class="receipt">
         <div class="header">
-            <h1>Lu Yosh Catering</h1>
-            <p>Av. Principal, 123 - Maputo</p>
-            <p>Tel: (21) 123-4567</p>
-            <p>NUIT: 12345678</p>
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo">
+            <h2 style="margin: 1mm 0; font-size: 12pt;">Lu & Yoshi Catering</h2>
+            <h3 style="margin: 1mm 0; font-size: 11pt;">Café Lufamina</h3>
+            <p style="font-size: 9pt;">Av. Samora Machel</p>
+            <p style="font-size: 9pt;">Cidade de Quelimane</p>
+            <p style="font-size: 9pt;">Tel: (+258) 878643715 / 844818014</p>
+            <p style="font-size: 9pt;">NUIT: 1110947722</p>
         </div>
 
         <div class="divider"></div>
 
         <div class="info">
-            <p><strong>Recibo #{{ $order->id }}</strong></p>
+            <p><strong>Recibo #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</strong></p>
             <p><strong>Data:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
-            <p><strong>Mesa:</strong> {{ $order->table->number }}</p>
-            @if($order->customer_name)
-                <p><strong>Cliente:</strong> {{ $order->customer_name }}</p>
+            @if($order->table)
+                <p><strong>Mesa:</strong> {{ $order->table->number }}</p>
             @endif
-            <p><strong>Atendente:</strong> {{ $order->user->name ?? 'Sistema' }}</p>
+            <p><strong>Atend:</strong> {{ Str::limit($order->user->name ?? 'Sistema', 15) }}</p>
         </div>
 
         <div class="divider"></div>
@@ -96,19 +125,17 @@
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th>Qtd</th>
-                    <th>Preço</th>
-                    <th>Total</th>
+                    <th style="width: 50%">Item</th>
+                    <th style="width: 20%">Qtd</th>
+                    <th style="width: 30%">Total</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->items as $item)
                     @if($item->status !== 'cancelled')
                         <tr>
-                            <td>{{ $item->product->name }}</td>
+                            <td>{{ Str::limit($item->product->name, 20) }}</td>
                             <td>{{ $item->quantity }}</td>
-                            <td>{{ number_format($item->unit_price, 2, ',', '.') }}</td>
                             <td>{{ number_format($item->total_price, 2, ',', '.') }}</td>
                         </tr>
                     @endif
@@ -119,68 +146,52 @@
         <div class="divider"></div>
 
         <div class="total">
-            <p>SUBTOTAL: {{ number_format($order->total_amount, 2, ',', '.') }} MZN</p>
-            <p>TOTAL: {{ number_format($order->total_amount, 2, ',', '.') }} MZN</p>
+            <p>TOTAL: MZN {{ number_format($order->total_amount, 2, ',', '.') }}</p>
         </div>
 
         @if($order->payment_method)
-            <div class="info">
-                <p><strong>Forma de Pagamento:</strong> 
-                    @switch($order->payment_method)
-                        @case('cash')
-                            Dinheiro
-                            @break
-                        @case('card')
-                            Cartão
-                            @break
-                        @case('mpesa')
-                            M-Pesa
-                            @break
-                        @case('emola')
-                            E-Mola
-                            @break
-                        @case('mkesh')
-                            M-Kesh
-                            @break
-                        @default
-                            Não informado
-                    @endswitch
-                </p>
+            <div class="info" style="text-align: center;">
+                <p><strong>Forma de Pagamento:</strong></p>
+                <p>{{ [
+                    'cash' => 'Dinheiro',
+                    'card' => 'Cartão',
+                    'mpesa' => 'M-Pesa',
+                    'emola' => 'E-Mola',
+                    'mkesh' => 'M-Kesh'
+                ][$order->payment_method] ?? 'Não informado' }}</p>
             </div>
         @endif
 
         <div class="divider"></div>
 
         <div class="footer">
-            <p>Obrigado pela preferência!</p>
-            <p>Volte Sempre!</p>
-            <p>{{ now()->format('d/m/Y H:i') }}</p>
+            <p style="font-weight: bold;">Obrigado pela preferência!</p>
+            <small>Este documento não serve como fatura</small>
         </div>
     </div>
 
-    <div class="print-button" style="text-align: center; margin: 20px;">
-        <button onclick="window.print()">Imprimir Recibo</button>
-        <button class="btn btn-primary" onclick="closeAndReturn()">Fechar e Voltar</button>
-    </div>
-
     <script>
-        // Auto-print when page loads
         window.onload = function() {
-            // Wait a second to ensure everything is rendered
-            setTimeout(function() {
+            // Abre a gaveta de dinheiro antes de imprimir (se suportado)
+            try {
+                const port = new SerialPort({ path: 'COM1' }); // Ajuste a porta conforme necessário
+                port.write(Buffer.from([0x1B, 0x70, 0x00, 0x19, 0xFA])); // Comando para abrir gaveta
+            } catch (e) {
+                console.log('Gaveta não disponível:', e);
+            }
+
+            // Imprime após um pequeno delay
+            setTimeout(() => {
                 window.print();
-            }, 1000);
+            }, 500);
+
+            // Retorna à página anterior após a impressão
+            window.onafterprint = function() {
+                setTimeout(() => {
+                    window.location.href = '/orders';
+                }, 1000);
+            };
         };
-        function closeAndReturn() {
-            setTimeout(function() {
-                    window.close(); // Fecha a aba
-                }, 1000); // 1 segundo
-            window.location.href = '/orders'; // Redireciona para a página de pedidos
-        }
-        window.onload = function() {
-            window.print(); // Abre a caixa de diálogo de impressão
-            setTimeout(closeAndReturn, 1000);
-         };
     </script>
 </body>
 </html>

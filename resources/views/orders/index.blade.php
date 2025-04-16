@@ -330,6 +330,9 @@
                                                                                 <option value="mkesh">M-Kesh</option>
                                                                             </select>
                                                                         </div>
+                                                                        <input type="hidden" name="amount_paid"
+                                                                            value="{{ $order->total_amount }}">
+
 
                                                                         <div class="form-group mb-3">
                                                                             <label
@@ -384,7 +387,7 @@
                                                         method="POST" class="d-inline">
                                                         @csrf
                                                         <button type="submit" class="btn btn-success btn-icon btn-sm"
-                                                            data-bs-toggle="tooltip" title="Finalizar" 
+                                                            data-bs-toggle="tooltip" title="Finalizar"
                                                             onclick="return confirm('Tem certeza que deseja finalizar este pedido?')">
                                                             <i class="mdi mdi-check"></i>
                                                         </button>

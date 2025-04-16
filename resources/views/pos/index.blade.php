@@ -3,7 +3,7 @@
 @section('title', 'POS - Sistema de Vendas')
 
 @section('content')
-<div class="pos-wrapper">
+<div class="pos-wrapper container-wrapper">
     <div class="row g-4">
         <!-- Products Area -->
         <div class="col-lg-8">

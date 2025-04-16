@@ -10,24 +10,30 @@
             font-size: 12pt;
             margin: 0;
             padding: 0;
-            width: 80mm;
+            width: 72mm; /* Reduzido para economizar papel */
         }
         .receipt {
-            padding: 5mm;
+            padding: 3mm; /* Reduzido */
         }
         .header {
             text-align: center;
-            margin-bottom: 5mm;
+            margin-bottom: 3mm; /* Reduzido */
         }
-        .header h1 {
-            font-size: 12pt;
-            margin: 0;
+        .logo {
+            max-width: 35mm; /* Reduzido */
+            height: auto;
+            margin-bottom: 2mm; /* Reduzido */
+        }
+        .header h1, .header h2 {
+            font-size: 12pt; /* Reduzido */
+            margin: 1mm 0; /* Reduzido */
         }
         .header p {
-            margin: 2mm 0;
+            margin: 0.5mm 0; /* Reduzido */
+            font-size: 10pt; /* Reduzido */
         }
         .info {
-            margin-bottom: 5mm;
+            margin-bottom: 3mm; /* Reduzido */
         }
         .info p {
             margin: 0;
@@ -35,11 +41,11 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 5mm;
+            margin-bottom: 3mm; /* Reduzido */
         }
         th, td {
             text-align: left;
-            padding: 1mm;
+            padding: 0.5mm; /* Reduzido */
         }
         th {
             border-bottom: 1px solid #000;
@@ -47,20 +53,20 @@
         .total {
             text-align: right;
             font-weight: bold;
-            margin-top: 3mm;
+            margin-top: 2mm; /* Reduzido */
         }
         .footer {
             text-align: center;
-            margin-top: 10mm;
-            font-size: 9pt;
+            margin-top: 5mm; /* Reduzido */
+            font-size: 8pt; /* Reduzido */
         }
         .divider {
             border-top: 1px dashed #000;
-            margin: 3mm 0;
+            margin: 2mm 0; /* Reduzido */
         }
         @media print {
             body {
-                width: 80mm;
+                width: 72mm; /* Reduzido */
                 margin: 0;
                 padding: 0;
             }
@@ -73,16 +79,20 @@
 <body>
     <div class="receipt">
         <div class="header">
-            <h1>Lucafé</h1>
-            <p>Av. Principal, 123 - Maputo</p>
-            <p>Tel: (21) 123-4567</p>
-            <p>NUIT: 12345678</p>
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo">
+            <h1>Lu & Yoshi Catering</h1>
+            <h2>Café Lufamina</h2>
+            <p>Av. Samora Machel</p>
+            <p>Cidade de Quelimane</p>
+            <p>Tel: (+258) 878643715 / 844818014</p>
+            <p>Email: cafelufamina@gmail.com</p>
+            <p>NUIT: 1110947722</p>
         </div>
 
         <div class="divider"></div>
 
         <div class="info">
-            <p><strong>Venda #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</strong></p>
+            <p><strong>Recibo #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</strong></p>
             <p><strong>Data:</strong> {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y H:i') }}</p>
             @if($sale->table)
                 <p><strong>Mesa:</strong> {{ $sale->table->number }}</p>
@@ -153,8 +163,9 @@
         <div class="divider"></div>
 
         <div class="footer">
-            <p>Obrigado pela preferência!</p>
+            <p style="font-weight: bold; color: #FF0000;">Obrigado Pela Preferência!!!</p>
             <p>Volte Sempre!</p>
+            <small style="font-size: 8pt;">Este documento não serve como fatura</small>
             <p>{{ now()->format('d/m/Y H:i') }}</p>
         </div>
     </div>

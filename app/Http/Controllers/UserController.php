@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class UserController extends Controller
@@ -12,13 +13,15 @@ class UserController extends Controller
     public function index(Request $request)
     {
         //search
-        $search = request()->query('search');
-        if ($search) {
-            $users = User::where('name', 'LIKE', "%$search%")->orWhere('email', 'LIKE', "%$search%")->paginate(10);
-        } else {
-            $users = User::paginate(10);
-        }
-        return view('users.index', compact('users', 'search'));
+        $search = $request->input('search');
+        // Filtrar os usuários pelo nome ou email
+        $users = User::when($search, function ($query, $search) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+        })->paginate(8);
+        $loggedId = intval(Auth::id());
+
+        return view('users.index', compact('users', 'search', 'loggedId'));
     }
     // Show the form for creating a new user
     public function create()

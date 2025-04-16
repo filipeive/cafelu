@@ -192,6 +192,18 @@
                 }, 1000);
             };
         };
+<<<<<<< HEAD
+=======
+        function closeAndReturn() {
+            setTimeout(function() {
+                    window.close(); // Fecha a aba
+                }, 1000); // 1 segundo
+              };
+        window.onload = function() {
+            window.print(); // Abre a caixa de diálogo de impressão
+            setTimeout(closeAndReturn, 100);
+         };
+>>>>>>> bc41b69 (Minhas alterações locais antes do pull)
     </script>
 </body>
 </html>

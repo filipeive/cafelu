@@ -25,7 +25,11 @@ Route::get('/', function () {
 //home
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 // Authentication routes (provided by Laravel)
-Auth::routes(['register' => true]); // Disable public registration
+Auth::routes(['register' => false]); // Disable public registration
+Route::middleware(['auth', 'is_admin'])->group(function () {
+    Route::get('/register', [RegisteredUserController::class, 'create']);
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+});
 
 // Dashboard
 Route::get('dashboard/', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');

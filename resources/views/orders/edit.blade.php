@@ -195,15 +195,9 @@
                                                 </select>
                                             </form>
                                         </td>
-                                        <td class="text-center">
-                                            <form id="remove-item-{{ $item->id }}"
-                                                action="{{ route('orders.remove-item', $item->id) }}" method="POST"
-                                                class="d-inline">
-                                                @csrf
-                                                @method('POST')
-                                            </form>
+                                        <td>
                                             <button onclick="removeItem({{ $item->id }})"
-                                                class="btn btn-outline-danger btn-sm">
+                                                class="btn btn-action-sm btn-action-danger">
                                                 <i class="mdi mdi-delete"></i>
                                             </button>
                                         </td>
@@ -416,33 +410,48 @@
     @endif
 @endsection
 
-@push('scripts')
-    <script>
-        // Remove item with confirmation
-        function removeItem(itemId) {
-            Swal.fire({
-                title: 'Confirmar remoção',
-                text: "Deseja remover este item do pedido?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sim, remover',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#dc3545',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById(`remove-item-${itemId}`).submit();
-                }
-            });
-        }
+    @push('scripts')
+        <script>
+            function removeItem(itemId) {
+                Swal.fire({
+                    title: 'Confirmar remoção',
+                    text: "Deseja remover este item do pedido?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim, remover',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(`remove-item-${itemId}`).submit();
+                    }
+                });
+            }
 
-        // Quick Menu Search
-        document.getElementById('quickMenuSearch').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('.product-item').forEach(item => {
-                const productName = item.querySelector('.product-name').textContent.toLowerCase();
-                item.style.display = productName.includes(searchTerm) ? '' : 'none';
+            // Quick Menu Search
+            document.getElementById('quickMenuSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                    card.style.display = productName.includes(searchTerm) ? 'flex' : 'none';
+                });
             });
-        });
+
+            // Category Tabs
+            document.querySelectorAll('.custom-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const categoryId = this.dataset.category;
+
+                    // Update active tab
+                    document.querySelectorAll('.custom-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Show/hide products
+                    document.querySelectorAll('.category-products').forEach(products => {
+                        products.style.display = products.dataset.category === categoryId ? 'grid' :
+                            'none';
+                    });
+                });
+            });
 
         // Add Product Function
         function addProduct(productId) {

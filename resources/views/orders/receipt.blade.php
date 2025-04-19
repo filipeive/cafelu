@@ -65,9 +65,34 @@
 
     <div class="divider"></div>
 
-    <div class="footer">
-        <p style="font-weight: bold;">Obrigado pela preferência!</p>
-        <p>Volte Sempre!</p>
-        <small>Este documento não serve como fatura</small>
+        <div class="footer">
+            <p style="font-weight: bold;">Obrigado pela preferência!</p>
+            <small>Este documento não serve como fatura</small>
+        </div>
     </div>
-</div>
+
+    <script>
+        window.onload = function() {
+            // Abre a gaveta de dinheiro antes de imprimir (se suportado)
+            try {
+                const port = new SerialPort({ path: 'COM1' }); // Ajuste a porta conforme necessário
+                port.write(Buffer.from([0x1B, 0x70, 0x00, 0x19, 0xFA])); // Comando para abrir gaveta
+            } catch (e) {
+                console.log('Gaveta não disponível:', e);
+            }
+
+            // Imprime após um pequeno delay
+            setTimeout(() => {
+                window.print();
+            }, 500);
+
+            // Retorna à página anterior após a impressão
+            window.onafterprint = function() {
+                setTimeout(() => {
+                    window.location.href = '/orders';
+                }, 1000);
+            };
+        };
+    </script>
+</body>
+</html>

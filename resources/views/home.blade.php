@@ -16,8 +16,8 @@
 
                     <div class="row text-center">
                         <div class="col-md-4">
-                            <a href="{{ route('menu.index') }}" class="btn btn-primary btn-block">
-                                {{ __('Gerenciar Cardápio') }}
+                            <a href="{{ route('tables.index') }}" class="btn btn-primary btn-block">
+                                {{ __('Gerenciar Mesas') }}
                             </a>
                         </div>
                         <div class="col-md-4">

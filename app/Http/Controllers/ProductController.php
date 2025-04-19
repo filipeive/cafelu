@@ -33,7 +33,7 @@ class ProductController extends Controller
             $query->where('is_active', $request->status);
         }
 
-        $products = $query->orderBy('name')->paginate(12);
+        $products = $query->orderBy('name')->paginate(6);
         $categories = Category::orderBy('name')->get();
 
         return view('products.index', compact('products', 'categories'));

@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
+//validator
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -20,7 +21,7 @@ class OrderController extends Controller
     public function index()
     {
         $search = request('search');
-        $orders = Order::with('table')->orderBy('created_at', 'desc')->paginate(15);
+        $orders = Order::with('table')->orderBy('created_at', 'desc')->paginate(6);
         $total_orders = Order::count();
          // Obtém o total de pedidos feitos hoje
          $totalToday = $this->orderGetTotalToday();
@@ -58,7 +59,7 @@ class OrderController extends Controller
     public function edit(Order $order)
     {
         if ($order->status === 'paid' || $order->status === 'canceled') {
-            return redirect()->route('orders.show', $order->id)
+            return redirect()->route('orders.index', $order->id)
                 ->with('error', 'Não é possível editar um pedido que já foi pago ou cancelado.');
         }
 
@@ -120,7 +121,7 @@ class OrderController extends Controller
         $order = $orderItem->order;
 
         if ($order->status === 'paid' || $order->status === 'canceled') {
-            return redirect()->route('orders.show', $order->id)
+            return redirect()->route('orders.edit', $order->id)
                 ->with('error', 'Não é possível modificar um pedido que já foi pago ou cancelado.');
         }
 
@@ -195,52 +196,6 @@ class OrderController extends Controller
             return redirect()->back()->with('error', $message);
         }
     }
-
-
-    /**
-     * Registrar pagamento do pedido
-     */
-    /* public function pay(Request $request, Order $order)
-    {
-        $request->validate([
-            'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh',
-            'notes' => 'nullable|string',
-        ]);
-
-        if ($order->status !== 'completed') {
-            return redirect()->route('orders.show', $order->id)
-                ->with('error', 'Apenas pedidos finalizados podem ser pagos.');
-        }
-
-        $order->status = 'paid';
-        $order->payment_method = $request->payment_method;
-        $order->notes = $request->notes;
-        $order->save();
-
-        // Liberar a mesa ou grupo de mesas
-        if ($order->table) {
-            if ($order->table->group_id) {
-                // Se for parte de um grupo, liberar todas as mesas do grupo
-                if ($order->table->is_main) {
-                    Table::where('group_id', $order->table->group_id)
-                        ->update([
-                            'status' => 'free',
-                            'group_id' => null,
-                            'is_main' => 0,
-                            'merged_capacity' => null
-                        ]);
-                }
-            } else {
-                // Se for mesa individual, apenas liberar esta mesa
-                $order->table->status = 'free';
-                $order->table->save();
-            }
-        }
-
-        return redirect()->route('orders.show', $order->id)
-            ->with('success', 'Pagamento registrado com sucesso!');
-    }
- */
     /**
      * Registrar pagamento do pedido
      */
@@ -321,7 +276,7 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return redirect()->route('orders.show', $order->id)
+            return redirect()->route('orders.edit', $order->id)
                 ->with('success', 'Pagamento registrado e venda finalizada com sucesso!');
 
         } catch (\Exception $e) {
@@ -335,6 +290,9 @@ class OrderController extends Controller
      */
     public function cancel(Order $order)
     {
+        //chamar o request
+        $request = request();
+        // Verificar se o pedido já foi cancelado ou pago
         if ($order->status === 'canceled' || $order->status === 'paid') {
             $message = 'Este pedido não pode ser cancelado.';
 
@@ -346,7 +304,16 @@ class OrderController extends Controller
         }
 
         try {
+            //validar o campo notes da tabela orders
+            $request->validate([
+                'notes' => 'nullable|string',
+            ]);
+            // Verificar se o pedido já foi pago
+            if ($order->status === 'paid') {
+                return redirect()->back()->with('error', 'Não é possível cancelar um pedido já pago.');
+            }
             // Atualizar o status do pedido para 'canceled'
+            $order->notes = $request->notes;
             $order->status = 'canceled';
             $order->save();
 
@@ -393,6 +360,31 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erro ao atualizar informações: ' . $e->getMessage());
         }
+    }
+    public function getOrderData(Order $order)
+    {
+        $order->load('items.product', 'table', 'user');
+
+        return response()->json([
+            'id' => $order->id,
+            'created_at' => $order->created_at,
+            'total_amount' => $order->total_amount,
+            'table' => $order->table ? ['number' => $order->table->number] : null,
+            'user' => ['name' => $order->user->name ?? 'Sistema'],
+            'items' => $order->items->map(function ($item) {
+                return [
+                    'product' => ['name' => $item->product->name],
+                    'quantity' => $item->quantity,
+                    'total_price' => $item->total_price,
+                ];
+            }),
+            'logo' => asset('assets/images/logo.png'),
+            'companyName' => 'Lu & Yoshi Catering - Café Lufamina',
+            'address' => 'Av. Samora Machel, Cidade de Quelimane',
+            'phone' => 'Tel: (+258) 878643715 / 844818014',
+            'nuit' => '1110947722',
+            'email' => 'cafelufamina@gmail.com',
+        ]);
     }
     /**
      * Imprimir recibo do pedido

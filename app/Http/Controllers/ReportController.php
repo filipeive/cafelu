@@ -92,7 +92,7 @@ class ReportController extends Controller
             ->orderByDesc('total')
             ->get();
             
-        return view('reports.sales_by_product', compact('salesByProduct', 'startDate', 'endDate'));
+        return view('reports.sales-by-product', compact('salesByProduct', 'startDate', 'endDate'));
     }
     public function salesByCategory(Request $request)
     {
@@ -113,7 +113,7 @@ class ReportController extends Controller
             ->orderByDesc('total')
             ->get();
             
-        return view('reports.sales_by_category', compact('salesByCategory', 'startDate', 'endDate'));
+        return view('reports.sales-by-category', compact('salesByCategory', 'startDate', 'endDate'));
     }
     public function salesByPaymentMethod(Request $request)
     {
@@ -125,7 +125,7 @@ class ReportController extends Controller
             ->groupBy('payment_method')
             ->get();
             
-        return view('reports.sales_by_payment_method', compact('salesByPaymentMethod', 'startDate', 'endDate'));
+        return view('reports.sales-by-payment-method', compact('salesByPaymentMethod', 'startDate', 'endDate'));
     }
     public function salesByDate(Request $request)
     {
@@ -138,6 +138,6 @@ class ReportController extends Controller
             ->orderBy('date')
             ->get();
             
-        return view('reports.sales_by_date', compact('salesByDate', 'startDate', 'endDate'));
+        return view('reports.sales-by-date', compact('salesByDate', 'startDate', 'endDate'));
     }
 }

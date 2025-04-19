@@ -370,11 +370,10 @@
                                                     </button>
                                                 @endif
                                                 @if ($order->status == 'paid')
-                                                    <a href="{{ route('orders.print', $order->id) }}"
-                                                        class="btn btn-info btn-icon btn-sm" data-bs-toggle="tooltip"
-                                                        title="Imprimir">
+                                                    <button class="btn btn-info btn-icon btn-sm" data-bs-toggle="tooltip"
+                                                        title="Imprimir" onclick="printRecibo({{ $order->id }})">
                                                         <i class="mdi mdi-printer"></i>
-                                                    </a>
+                                                    </button>
                                                 @endif
                                                 @if ($order->status != 'completed' && $order->status != 'canceled' && $order->status != 'paid')
                                                     <a href="{{ route('orders.edit', $order->id) }}"

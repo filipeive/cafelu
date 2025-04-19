@@ -74,6 +74,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/{order}/print-receipt', [OrderController::class, 'printReceipt'])->name('orders.print-receipt');
     Route::post('/orders/complete/{order}', [OrderController::class, 'complete'])->name('orders.complete');
+    Route::get('/orders/data/{order}', [OrderController::class, 'getOrderData'])->name('orders.data');
     Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
     Route::get('/orders/kitchen', [OrderController::class, 'kitchen'])->name('orders.kitchen');
@@ -137,14 +138,17 @@ Route::middleware(['auth'])->group(function () {
 
     
     // Profile Management
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'save'])->name('save');
 
     //reports
-    Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
-    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('reports/stock', [ReportController::class, 'stock'])->name('reports.stock');
-    Route::get('reports/stock/low', [ReportController::class, 'lowStock'])->name('reports.stock.low');
-    Route::get('reports/stock/expired', [ReportController::class, 'expiredStock'])->name('reports.stock.expired');
+    Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/sales', 'sales')->name('sales');
+        Route::get('/inventory', 'inventory')->name('inventory');
+        Route::get('/sales-by-product', 'salesByProduct')->name('salesByProduct');
+        Route::get('/sales-by-category', 'salesByCategory')->name('salesByCategory');
+        Route::get('/sales-by-payment-method', 'salesByPaymentMethod')->name('salesByPaymentMethod');
+        Route::get('/sales-by-date', 'salesByDate')->name('salesByDate');
+    });
 });

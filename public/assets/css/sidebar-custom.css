@@ -1,0 +1,87 @@
+/* Estilo para os dropdowns da sidebar */
+.sidebar .collapse .nav-item {
+    padding-left: 10px;
+}
+
+.sidebar .collapse .sub-menu {
+    padding-left: 10px;
+}
+
+/* Estilos para itens ativos */
+.sidebar .nav-item.active {
+    background-color: rgba(243, 186, 0, 0.1);
+    border-radius: 5px;
+}
+
+.sidebar .collapse .nav-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+/* Estilo para o item ativo no menu principal */
+.sidebar .nav-link.active {
+    background-color: #fcbf49 !important;
+    color: #000 !important;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+/* Estilo para os itens ativos nos submenus */
+.sidebar .sub-menu .nav-link.active {
+    background-color: rgba(252, 191, 73, 0.3) !important;
+    color: #fff !important;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+/* Elementos do menu */
+.sidebar .nav-item .menu-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.sidebar .badge {
+    margin-left: 5px;
+}
+
+/* Dropdown e animações */
+.sidebar .collapse {
+    transition: all 0.3s ease;
+}
+
+.sidebar .menu-arrow {
+    display: inline-block !important;
+    margin-left: auto;
+    font-size: 16px;
+}
+
+.sidebar .nav-link[aria-expanded="true"] .menu-arrow {
+    transform: rotate(90deg);
+    transition: transform 0.3s ease;
+}
+
+/* Sidebar footer */
+.sidebar-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 11.4%;
+    padding: 10px;
+    color: #fff;
+    font-size: 14px;
+    border-top: 1px solid #495057;
+    z-index: 1000;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+    .sidebar .nav-link .menu-title {
+        font-size: 14px;
+    }
+    
+    .sidebar .badge {
+        padding: 0.2rem 0.4rem;
+        font-size: 10px;
+    }
+}

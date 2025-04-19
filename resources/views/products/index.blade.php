@@ -164,20 +164,22 @@
                                                 MZN {{ number_format($product->price, 2, ',', '.') }}
                                             </span>
                                         </div>
-                                        <div class="btn-group btn-group-sm w-100">
-                                            <button class="btn btn-outline-secondary"
-                                                onclick="editProduct({{ $product->id }})" title="Editar">
-                                                <i class="mdi mdi-pencil"></i>
-                                            </button>
-                                            <button class="btn btn-outline-secondary"
-                                                onclick="updateStock({{ $product->id }})" title="Atualizar Estoque">
-                                                <i class="mdi mdi-package"></i>
-                                            </button>
-                                            <button class="btn btn-outline-danger"
-                                                onclick="deleteProduct({{ $product->id }})" title="Excluir">
-                                                <i class="mdi mdi-delete"></i>
-                                            </button>
-                                        </div>
+                                        @if (Auth::user()->role == 'admin')
+                                            <div class="btn-group btn-group-sm w-100">
+                                                <button class="btn btn-outline-secondary"
+                                                    onclick="editProduct({{ $product->id }})" title="Editar">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary"
+                                                    onclick="updateStock({{ $product->id }})" title="Atualizar Estoque">
+                                                    <i class="mdi mdi-package"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger"
+                                                    onclick="deleteProduct({{ $product->id }})" title="Excluir">
+                                                    <i class="mdi mdi-delete"></i>
+                                                </button>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -288,26 +290,26 @@
         window.editProduct = function(productId) {
             console.log('Fetching product data for ID:', productId);
             $.get("{{ route('products.index') }}/" + productId, function(data) {
-            console.log('Product data fetched successfully:', data);
-            $('#productForm').attr('action', "{{ route('products.index') }}/" + productId);
-            $('#method').val('PUT');
-            $('#productModalLabel').text('Editar Produto');
-            $('#product_id').val(data.id);
-            $('#name').val(data.name);
-            $('#description').val(data.description);
-            $('#price').val(data.price);
-            $('#stock_quantity').val(data.stock_quantity);
-            $('#category_id').val(data.category_id);
-            $('#is_active').prop('checked', data.is_active);
-            $('#productModal').modal('show');
+                console.log('Product data fetched successfully:', data);
+                $('#productForm').attr('action', "{{ route('products.index') }}/" + productId);
+                $('#method').val('PUT');
+                $('#productModalLabel').text('Editar Produto');
+                $('#product_id').val(data.id);
+                $('#name').val(data.name);
+                $('#description').val(data.description);
+                $('#price').val(data.price);
+                $('#stock_quantity').val(data.stock_quantity);
+                $('#category_id').val(data.category_id);
+                $('#is_active').prop('checked', data.is_active);
+                $('#productModal').modal('show');
             }).fail(function(xhr, status, error) {
-            console.error('Error fetching product data:', error);
-            console.error('Response:', xhr.responseText);
-            Swal.fire(
-                'Erro!',
-                'Não foi possível buscar os dados do produto. Por favor, tente novamente.',
-                'error'
-            );
+                console.error('Error fetching product data:', error);
+                console.error('Response:', xhr.responseText);
+                Swal.fire(
+                    'Erro!',
+                    'Não foi possível buscar os dados do produto. Por favor, tente novamente.',
+                    'error'
+                );
             });
         };
         window.updateProduct = function(productId) {

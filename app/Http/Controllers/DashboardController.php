@@ -1,25 +1,78 @@
 <?php
-// app/Http/Controllers/DashboardController.php
+
 namespace App\Http\Controllers;
 
-use App\Models\Sale;
-use App\Models\Table;
-use App\Models\Product;
-use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Sale;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Table;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    /**
+     * Mostrar o dashboard principal do sistema.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-     /*    $totalSales = Sale::where('status', 'completed')->sum('total_amount');
-        $availableTables = Table::where('status', 'free')->count();
+        // Vendas de hoje
+        $totalSalesToday = Sale::whereDate('created_at', Carbon::today())->sum('total_amount');
+        
+        // Pedidos abertos
+        $openOrders = Order::where('status', 'active')->count();
+        
+        // Produtos com estoque baixo (menos de 10 unidades)
         $lowStockProducts = Product::where('stock_quantity', '<', 10)->get();
         
-        return view('dashboard.index', compact('totalSales', 'availableTables', 'lowStockProducts')); */
-        // abrir o pos
-        return redirect()->route('pos.index');
+        // Todas as mesas
+        $tables = Table::all();
+        
+        // Dados de vendas por hora para o gráfico
+        $hourlySalesData = $this->getHourlySalesData();
+        
+        return view('dashboard.index', compact(
+            'totalSalesToday',
+            'openOrders',
+            'lowStockProducts',
+            'tables',
+            'hourlySalesData'
+        ));
     }
+    
+    /**
+     * Obter os dados de vendas por hora para o gráfico.
+     *
+     * @return array
+     */
+    private function getHourlySalesData()
+    {
+        $data = [];
+        $today = Carbon::today();
+        
+        // Gerar dados para as 24 horas do dia
+        for ($hour = 0; $hour < 24; $hour++) {
+            $startTime = $today->copy()->addHours($hour);
+            $endTime = $today->copy()->addHours($hour + 1);
+            
+            $totalAmount = Sale::whereBetween('created_at', [$startTime, $endTime])
+                ->sum('total_amount');
+            
+            $data[] = [
+                'hour' => $hour . ':00',
+                'value' => (float) $totalAmount
+            ];
+        }
+        
+        return $data;
+    }
+    /**
+     * Mostrar o menu de produtos.
+     *
+     * @return \Illuminate\Http\Response
+     */
     //crie essas funcoes Route::get('menu', [DashboardController::class, 'menu'])->name('menu');Route::get('menu/{category}', [DashboardController::class, 'menuCategory'])->name('menu.category');
     public function menu()
     {

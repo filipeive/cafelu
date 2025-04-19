@@ -1,0 +1,79 @@
+/* Estilos para corrigir textos nos modais */
+.modal .modal-content {
+    color: #212529 !important; /* Texto escuro padrão do Bootstrap */
+    background-color: #fff;
+  }
+  
+  .modal .modal-header,
+  .modal .modal-body,
+  .modal .modal-footer {
+    color: #212529 !important;
+  }
+  
+  /* Garantir que os inputs dentro dos modais também tenham texto visível */
+  .modal input,
+  .modal select,
+  .modal textarea,
+  .modal .form-control {
+    color: #495057 !important;
+    background-color: #fff !important;
+  }
+  
+  /* Garantir que os labels tenham cor escura nos modais */
+  .modal label {
+    color: #212529 !important;
+  }
+  
+  /* Corrigir possíveis títulos dentro do modal */
+  .modal h1, .modal h2, .modal h3, 
+  .modal h4, .modal h5, .modal h6,
+  .modal .modal-title {
+    color: #212529 !important;
+  }
+  
+  /* Se houver pequenos textos auxiliares */
+  .modal small, .modal .text-muted {
+    color: #6c757d !important;
+  }
+  /* Estilos para corrigir textos nos toasts */
+.toast {
+    color: #212529 !important; /* Texto escuro padrão */
+    background-color: #fff !important;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .toast-header {
+    color: #6c757d !important;
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .toast-body {
+    color: #212529 !important;
+  }
+  
+  /* Para toasts coloridos (success, danger, warning, info) */
+  .toast.bg-success, 
+  .toast.bg-danger, 
+  .toast.bg-warning, 
+  .toast.bg-info {
+    color: #fff !important; /* Texto branco para toasts com fundo colorido */
+  }
+  
+  /* Para o texto nos toasts coloridos */
+  .toast.bg-success .toast-header,
+  .toast.bg-danger .toast-header,
+  .toast.bg-warning .toast-header,
+  .toast.bg-info .toast-header {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Para o corpo do toast em fundos coloridos */
+  .toast.bg-success .toast-body,
+  .toast.bg-danger .toast-body,
+  .toast.bg-warning .toast-body,
+  .toast.bg-info .toast-body {
+    color: #fff !important;
+  }

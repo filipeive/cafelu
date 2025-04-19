@@ -128,6 +128,18 @@ if (!function_exists('get_status_class_staradmin')) {
                 return 'text-warning';
             case 'canceled':
                 return 'text-danger';
+                case 'active':
+                return 'text-warning';
+            case 'paid':
+                return 'text-success';
+            case 'preparing':
+                return 'text-primary';
+            case 'ready':
+                return 'text-info';
+            case 'delivered':
+                return 'text-success';
+            case 'cancelled':
+                return 'text-danger';
             default:
                 return 'text-secondary'; // Default case
         }

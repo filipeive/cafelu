@@ -203,17 +203,18 @@
                 </div>
             </div>
         </div>
-
-        <!-- Tabela de Pedidos -->
+        <!-- Notifications -->
         @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
+            <div class="toast-notification toast-success bg-success">
+                <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
+                <div class="toast-message">{{ session('success') }}</div>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
+            <div class="toast-notification toast-error bg-danger">
+                <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
+                <div class="toast-message">{{ session('error') }}</div>
             </div>
         @endif
 

@@ -1,0 +1,4 @@
+ // Verificar se o pedido já foi pago
+            if ($order->status === 'paid') {
+                return redirect()->back()->with('error', 'Não é possível cancelar um pedido já pago.');
+            }

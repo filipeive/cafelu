@@ -3,8 +3,7 @@
 @section('title', 'Dashboard de Relatórios')
 
 @section('content')
-<div class="content-wrapper">
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
@@ -81,6 +80,5 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
 @endsection

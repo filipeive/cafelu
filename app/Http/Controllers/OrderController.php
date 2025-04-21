@@ -172,7 +172,7 @@ class OrderController extends Controller
             $order->status = 'completed';
             $order->save();
 
-            $message = 'Pedido finalizado com sucesso';
+            $message = 'Pedido finalizado com sucesso, Por favor Registe o Pagamento para Fechar o Pedido.';
 
             if (request()->wantsJson() || request()->ajax()) {
                 return response()->json([
@@ -181,7 +181,7 @@ class OrderController extends Controller
                 ]);
             }
 
-            return redirect()->route('tables.index')->with('success', $message);
+            return redirect()->route('orders.edit')->with('success', $message);
 
         } catch (\Exception $e) {
             $message = 'Erro ao finalizar pedido: ' . $e->getMessage();
@@ -276,7 +276,7 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return redirect()->route('orders.edit', $order->id)
+            return redirect()->route('orders.show', $order->id)
                 ->with('success', 'Pagamento registrado e venda finalizada com sucesso!');
 
         } catch (\Exception $e) {

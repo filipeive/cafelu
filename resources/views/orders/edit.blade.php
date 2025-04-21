@@ -41,10 +41,10 @@
                         {{-- @endif --}}
                         {{-- botao de cancelar pedido --}}
                         @if ($order->status == 'active')
-                            <button type="button" class="btn btn-danger btn-icon btn-sm ms-2" data-bs-toggle="modal"
+                            {{-- <button type="button" class="btn btn-danger btn-icon btn-sm ms-2" data-bs-toggle="modal"
                                 data-bs-target="#cancelOrderModal" title="Cancelar Pedido">
                                 <i class="mdi mdi-delete"></i> Cancelar Pedido
-                            </button>
+                            </button> --}}
                             <!-- Modal de Confirmação -->
                             <div class="modal fade" id="cancelOrderModal" tabindex="-1"
                                 aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
@@ -127,14 +127,14 @@
 
         <!-- Notifications -->
         @if (session('success'))
-            <div class="toast-notification toast-success">
+            <div class="toast-notification toast-success bg-success">
                 <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
                 <div class="toast-message">{{ session('success') }}</div>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="toast-notification toast-error">
+            <div class="toast-notification toast-error bg-danger">
                 <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
                 <div class="toast-message">{{ session('error') }}</div>
             </div>
@@ -329,9 +329,33 @@
 
                         <form action="{{ route('orders.complete', $order) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-success btn-lg w-100">
-                                <i class="mdi mdi-check-circle me-1"></i> Finalizar Pedido
-                            </button>
+                            @if($order->status === 'completed' && !$order->is_paid)
+                                <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal"
+                                    data-bs-target="#paymentModal">
+                                    <i class="mdi mdi-cash-multiple me-1"></i> Registrar Pagamento
+                                </button>
+                            @endif
+                            @if($order->status === 'active')
+                                <button type="submit" class="btn btn-success btn-lg w-100" style="margin-bottom: 10px;">
+                                    <i class="mdi mdi-check-circle me-1"></i> Finalizar Pedido
+                                </button> 
+                            @endif
+                            @if($order->status === 'completed' && $order->is_paid)
+                                <button type="button" class="btn btn-success btn-lg w-100" disabled>
+                                    <i class="mdi mdi-check-circle me-1"></i> Pedido Pago
+                                </button>
+                            @endif
+                            @if($order->status === 'cancelled')
+                                <button type="button" class="btn btn-danger btn-lg w-100" disabled>
+                                    <i class="mdi mdi-alert-circle me-1"></i> Pedido Cancelado
+                                </button>
+                            @endif
+                            @if($order->status === 'active')
+                                <button type="button" class="btn btn-danger btn-lg w-100" data-bs-toggle="modal"
+                                    data-bs-target="#cancelOrderModal">
+                                    <i class="mdi mdi-delete me-1"></i> Cancelar Pedido
+                                </button>
+                            @endif
                         </form>
                     </div>
                 </div>

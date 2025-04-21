@@ -146,8 +146,7 @@
         function closeAndReturn() {
             setTimeout(function() {
                     window.close(); // Fecha a aba
-                }, 1000); // 1 segundo
-            window.location.href = '/pos'; // Redireciona para a página de pedidos
+                }, 80); // 1 segundo
         }
         window.onload = function() {
             window.print(); // Abre a caixa de diálogo de impressão

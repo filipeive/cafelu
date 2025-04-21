@@ -437,7 +437,7 @@
                                         </button>
                                     </form>
                                 @elseif($hasActiveOrder && (!$isGrouped || $isMain))
-                                    <a href="{{ route('orders.edit', $activeOrder->id) }}" class="btn btn-table-action">
+                                    <a href="{{ route('orders.edit', $activeOrder->id) }}" class="btn btn-table-action ">
                                         <i class="mdi mdi-pencil"></i>Editar Pedido
                                     </a>
                                 @endif

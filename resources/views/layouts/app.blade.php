@@ -8,7 +8,7 @@
     <meta name="description" content="Sistema de Gestão de Restaurantes">
     <meta name="author" content="Filipe dos Santos">
     <title>{{ config('app.name', 'Restaurant System') }} | @yield('title')</title>
-
+    @livewireStyles
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
@@ -108,6 +108,7 @@
     <script src="{{ asset('assets/vendors/select2/select2.min.js') }}"></script>
     {{-- toast --}}
     <script src="{{ asset('assets/vendors/jquery-toast-plugin/jquery.toast.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <!-- Scripts do StarAdmin -->
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
@@ -123,6 +124,7 @@
     <script src="{{ asset('assets/pos/pos.js') }}"></script>
     <script src="{{ asset('assets/pos/printRecibo.js') }}"></script>
     <script src="{{ asset('assets/js/sidebar/sidebar.js') }}"></script>
+    @livewireScripts
     <script>
         // Função para verificar se o documento está em modo tela cheia
         function isFullScreen() {

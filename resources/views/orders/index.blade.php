@@ -383,6 +383,7 @@
                                                         <i class="mdi mdi-pencil"></i>
                                                     </a>
                                                     <!-- Substitua os botões existentes por estes -->
+                                                    @if($order->status == 'active' && $order->items->count() > 0)
                                                     <form action="{{ route('orders.complete', $order->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
@@ -392,7 +393,7 @@
                                                             <i class="mdi mdi-check"></i>
                                                         </button>
                                                     </form>
-
+                                                    @endif
                                                     <form action="{{ route('orders.cancel', $order->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf

@@ -34,12 +34,18 @@
                         </div>
 
                         <!-- Alertas de Feedback -->
+                        <!-- Notifications -->
                         @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="mdi mdi-check-circle-outline me-2"></i>
-                                {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
+                            <div class="toast-notification toast-success bg-success">
+                                <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
+                                <div class="toast-message">{{ session('success') }}</div>
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="toast-notification toast-error bg-danger">
+                                <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
+                                <div class="toast-message">{{ session('error') }}</div>
                             </div>
                         @endif
 
@@ -78,10 +84,10 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                @if ($user->email_verified_at)
+                                                @if ($user->status == 'active')
                                                     <span class="badge bg-success">Ativo</span>
                                                 @else
-                                                    <span class="badge bg-warning">Pendente</span>
+                                                    <span class="badge bg-warning">Inativo</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -90,11 +96,9 @@
                                                 </small>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-outline-info btn-icon btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#viewUserModal{{ $user->id }}" title="Detalhes">
+                                                <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-info btn-icon btn-sm" title="Detalhes">
                                                     <i class="mdi mdi-eye"></i>
-                                                </button>
+                                                </a>
 
                                                 <button type="button" class="btn btn-outline-warning btn-icon btn-sm"
                                                     data-bs-toggle="modal"

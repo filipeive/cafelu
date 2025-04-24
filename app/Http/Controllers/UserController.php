@@ -38,6 +38,7 @@ class UserController extends Controller
             'password' => 'required|min:8',
             'name' => 'required|max:100',
             'role' => 'required|in:admin,manager,waiter',
+            'status' => 'required|in:active,inactive, suspended',
         ]);
 
         $user = new User();

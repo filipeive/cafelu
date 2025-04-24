@@ -33,12 +33,12 @@
                         <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary btn-sm ms-2">
                             <i class="mdi mdi-clipboard-list me-1"></i> Pedidos
                         </a>
-                        {{-- @if ($order->status == 'paid') --}}
-                        <button class="btn btn-info btn-icon btn-sm ms-2" data-bs-toggle="tooltip" title="Imprimir"
-                            onclick="printRecibo({{ $order->id }})">
-                            <i class="mdi mdi-printer"></i> Imprimir Conta!
-                        </button>
-                        {{-- @endif --}}
+                        @if ($order->status != 'active')
+                            <button class="btn btn-info btn-icon btn-sm ms-2" data-bs-toggle="tooltip" title="Imprimir"
+                                onclick="printRecibo({{ $order->id }})">
+                                <i class="mdi mdi-printer"></i> Imprimir Conta
+                            </button>
+                        @endif {{-- @endif --}}
                         {{-- botao de cancelar pedido --}}
                         @if ($order->status == 'active')
                             {{-- <button type="button" class="btn btn-danger btn-icon btn-sm ms-2" data-bs-toggle="modal"
@@ -56,11 +56,13 @@
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form action="{{ route('orders.cancel', $order) }}" method="POST" id="cancelForm">
+                                            <form action="{{ route('orders.cancel', $order) }}" method="POST"
+                                                id="cancelForm">
                                                 @csrf
                                                 @method('POST')
                                                 <div class="mb-3">
-                                                    <label for="cancel_reason" class="form-label">Motivo do Cancelamento</label>
+                                                    <label for="cancel_reason" class="form-label">Motivo do
+                                                        Cancelamento</label>
                                                     <textarea class="form-control" id="cancel_reason" name="notes" rows="3" required></textarea>
                                                 </div>
                                             </form>
@@ -68,7 +70,8 @@
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Não</button>
-                                            <button type="submit" form="cancelForm" class="btn btn-danger">Sim, Cancelar</button>
+                                            <button type="submit" form="cancelForm" class="btn btn-danger">Sim,
+                                                Cancelar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -329,28 +332,27 @@
 
                         <form action="{{ route('orders.complete', $order) }}" method="POST">
                             @csrf
-                            @if($order->status === 'completed' && !$order->is_paid)
+                            @if ($order->status === 'completed' && !$order->is_paid)
                                 <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal"
                                     data-bs-target="#paymentModal">
                                     <i class="mdi mdi-cash-multiple me-1"></i> Registrar Pagamento
                                 </button>
                             @endif
-                            @if($order->status === 'active')
+                            @if ($order->status === 'active' && $order->items->count() > 0)
                                 <button type="submit" class="btn btn-success btn-lg w-100" style="margin-bottom: 10px;">
                                     <i class="mdi mdi-check-circle me-1"></i> Finalizar Pedido
-                                </button> 
-                            @endif
-                            @if($order->status === 'completed' && $order->is_paid)
+                                </button>
+                            @endif                            @if ($order->status === 'completed' && $order->is_paid)
                                 <button type="button" class="btn btn-success btn-lg w-100" disabled>
                                     <i class="mdi mdi-check-circle me-1"></i> Pedido Pago
                                 </button>
                             @endif
-                            @if($order->status === 'cancelled')
+                            @if ($order->status === 'cancelled')
                                 <button type="button" class="btn btn-danger btn-lg w-100" disabled>
                                     <i class="mdi mdi-alert-circle me-1"></i> Pedido Cancelado
                                 </button>
                             @endif
-                            @if($order->status === 'active')
+                            @if ($order->status === 'active')
                                 <button type="button" class="btn btn-danger btn-lg w-100" data-bs-toggle="modal"
                                     data-bs-target="#cancelOrderModal">
                                     <i class="mdi mdi-delete me-1"></i> Cancelar Pedido

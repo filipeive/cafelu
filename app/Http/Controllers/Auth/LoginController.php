@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -17,9 +17,22 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
-    // 🔁 Aqui você define que o login será feito com 'username' em vez de 'email'
     public function username()
     {
         return 'username';
+    }
+
+    // ✅ Verifica o status e atualiza o último login
+    protected function authenticated($request, $user)
+    {
+        if ($user->status !== 'active') {
+            Auth::logout();
+
+            return redirect()->route('login')->withErrors([
+                'username' => 'Sua conta está ' . $user->status . '. Por favor, contacte o administrador.',
+            ]);
+        }
+
+        $user->update(['last_login_at' => now()]);
     }
 }

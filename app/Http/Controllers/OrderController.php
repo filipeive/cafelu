@@ -58,7 +58,7 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        if ($order->status === 'paid' || $order->status === 'canceled') {
+        if ($order->status === 'paid' || $order->status === 'canceled' ) {
             return redirect()->route('orders.index', $order->id)
                 ->with('error', 'Não é possível editar um pedido que já foi pago ou cancelado.');
         }
@@ -167,6 +167,19 @@ class OrderController extends Controller
             return redirect()->back()->with('error', $message);
         }
 
+        if ($order->items->isEmpty()) {
+            $message = 'Não é possível finalizar um pedido vazio. Por favor, cancele o pedido.';
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 400);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
+
         try {
             // Atualizar o status do pedido para 'completed'
             $order->status = 'completed';
@@ -181,7 +194,7 @@ class OrderController extends Controller
                 ]);
             }
 
-            return redirect()->route('orders.edit')->with('success', $message);
+            return redirect()->route('orders.edit', $order)->with('success', $message);
 
         } catch (\Exception $e) {
             $message = 'Erro ao finalizar pedido: ' . $e->getMessage();
@@ -195,8 +208,7 @@ class OrderController extends Controller
 
             return redirect()->back()->with('error', $message);
         }
-    }
-    /**
+    }    /**
      * Registrar pagamento do pedido
      */
     public function pay(Request $request, Order $order)

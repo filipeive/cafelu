@@ -69,7 +69,9 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('category');
-        return response()->json($product);
+        return request()->expectsJson()
+            ? response()->json($product)
+            : view('products.show', compact('product'));
     }
 
     public function edit(Product $product)

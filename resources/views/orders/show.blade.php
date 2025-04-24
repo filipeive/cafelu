@@ -34,6 +34,10 @@
                                     <i class="mdi mdi-calendar-clock me-2"></i>
                                     <strong>Data:</strong> {{ $order->created_at->format('d/m/Y H:i') }}
                                 </div>
+                                <div class="detail-item">
+                                    <i class="mdi mdi-account-circle me-2"></i>
+                                    <strong>Atendente:</strong> {{ $order->user->name }}
+                                </div>
                                 @if ($order->status === 'paid')
                                     <div class="detail-item">
                                         <i class="mdi mdi-credit-card me-2"></i>
@@ -73,10 +77,12 @@
                                 <i class="mdi mdi-arrow-left"></i> Voltar
                             </a>
 
-                            @if ($order->status === 'active')
+                            @if ($order->status === 'active' || $order->status === 'completed')
                                 <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-primary">
                                     <i class="mdi mdi-pencil"></i> Editar
                                 </a>
+                            @endif
+                            @if ($order->status === 'active' && $order->items->count() > 0)
                                 <form action="{{ route('orders.complete', $order) }}" method="POST" class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn btn-success">
@@ -102,11 +108,11 @@
                                 </form>
                             @endif
 
-                            @if (!in_array($order->status, ['paid', 'canceled']))
-                                <a href="{{ route('orders.print-receipt', $order->id) }}" class="btn btn-info"
-                                    target="_blank">
-                                    <i class="mdi mdi-printer"></i> Imprimir
-                                </a>
+                            @if (!in_array($order->status, ['paid', 'canceled', 'active']))
+                                <button class="btn btn-info btn-icon btn-sm ms-2" data-bs-toggle="tooltip" title="Imprimir"
+                                    onclick="printRecibo({{ $order->id }})">
+                                    <i class="mdi mdi-printer"></i> Imprimir Conta
+                                </button>
                             @endif
                         </div>
                     </div>

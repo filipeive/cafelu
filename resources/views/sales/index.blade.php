@@ -1,5 +1,16 @@
 @extends('layouts.app')
 
+@section('title', 'Gestão de Vendas')
+@section('page-title', 'Gestão de Vendas')
+@php
+    $titleIcon = 'mdi mdi-cart';
+@endphp
+
+
+@section('breadcrumbs')
+    <li class="breadcrumb-item active">Vendas</li>
+@endsection
+
 @section('content')
     <div class="row">
         <div class="row mb-4">

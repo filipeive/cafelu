@@ -1,53 +1,29 @@
-
-@props([
-    'icon' => 'mdi-folder',
-    'title' => '',
-    'id' => '',
-    'expanded' => false
-])
+@props(['icon', 'title', 'id'])
 
 @php
-    $uniqueId = $id ?: 'dropdown-' . uniqid();
-    $hasActiveChild = false;
+    // Verificar se alguma rota filha está ativa
+    $isActive = false;
     
-    // Check if any child is active - this would require custom logic
-    // For now, we'll use a simple check
-    $currentRoute = request()->route()->getName();
-    $isExpanded = $expanded || $hasActiveChild;
+    // Vamos usar o conteúdo do slot para verificar se há itens ativos
+    $content = $slot->toHtml();
+    if (strpos($content, 'active') !== false) {
+        $isActive = true;
+    }
 @endphp
 
-<div class="nav-dropdown mb-2" data-dropdown="{{ $uniqueId }}">
-    <div class="nav-dropdown-toggle" 
-         data-bs-toggle="collapse" 
-         data-bs-target="#{{ $uniqueId }}" 
-         role="button"
-         aria-expanded="{{ $isExpanded ? 'true' : 'false' }}"
-         aria-controls="{{ $uniqueId }}">
-        <i class="{{ $icon }} me-2"></i>
-        <span class="flex-grow-1">{{ $title }}</span>
-        <i class="mdi mdi-chevron-down transition-transform ms-auto dropdown-arrow"></i>
-    </div>
-    
-    <div class="collapse {{ $isExpanded ? 'show' : '' }}" id="{{ $uniqueId }}">
-        <div class="nav-dropdown-content">
+<li class="nav-item">
+    <a class="nav-link {{ $isActive ? 'active' : '' }}" 
+       data-bs-toggle="collapse" 
+       href="#{{ $id }}" 
+       aria-expanded="{{ $isActive ? 'true' : 'false' }}" 
+       aria-controls="{{ $id }}">
+        <i class="menu-icon mdi {{ $icon }}"></i>
+        <span class="menu-title">{{ $title }}</span>
+        <i class="menu-arrow"></i>  <!-- Certifique-se de que esta linha existe -->
+    </a>
+    <div class="collapse {{ $isActive ? 'show' : '' }}" id="{{ $id }}">
+        <ul class="nav flex-column sub-menu">
             {{ $slot }}
-        </div>
+        </ul>
     </div>
-</div>
-
-<style>
-.dropdown-arrow {
-    transition: transform 0.3s ease;
-}
-
-.nav-dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
-    transform: rotate(180deg);
-}
-
-.nav-dropdown-content {
-    padding-left: 0.5rem;
-    border-left: 2px solid rgba(255, 255, 255, 0.1);
-    margin-left: 1rem;
-    margin-top: 0.5rem;
-}
-</style>
+</li>

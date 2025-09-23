@@ -56,11 +56,13 @@
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form action="{{ route('orders.cancel', $order) }}" method="POST" id="cancelForm">
+                                            <form action="{{ route('orders.cancel', $order) }}" method="POST"
+                                                id="cancelForm">
                                                 @csrf
                                                 @method('POST')
                                                 <div class="mb-3">
-                                                    <label for="cancel_reason" class="form-label">Motivo do Cancelamento</label>
+                                                    <label for="cancel_reason" class="form-label">Motivo do
+                                                        Cancelamento</label>
                                                     <textarea class="form-control" id="cancel_reason" name="notes" rows="3" required></textarea>
                                                 </div>
                                             </form>
@@ -68,7 +70,8 @@
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Não</button>
-                                            <button type="submit" form="cancelForm" class="btn btn-danger">Sim, Cancelar</button>
+                                            <button type="submit" form="cancelForm" class="btn btn-danger">Sim,
+                                                Cancelar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -167,7 +170,13 @@
                                     <tr>
                                         <td>
                                             <div>
-                                                <strong>{{ $item->product->name }}</strong>
+                                                <strong>
+                                                    @if ($item->product)
+                                                        {{ $item->product->name }}
+                                                    @else
+                                                        <span class="text-danger">Produto não encontrado</span>
+                                                    @endif
+                                                </strong>
                                                 @if ($item->notes)
                                                     <div class="small text-muted">
                                                         <i class="mdi mdi-note-text me-1"></i>{{ $item->notes }}
@@ -410,48 +419,48 @@
     @endif
 @endsection
 
-    @push('scripts')
-        <script>
-            function removeItem(itemId) {
-                Swal.fire({
-                    title: 'Confirmar remoção',
-                    text: "Deseja remover este item do pedido?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sim, remover',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById(`remove-item-${itemId}`).submit();
-                    }
-                });
-            }
+@push('scripts')
+    <script>
+        function removeItem(itemId) {
+            Swal.fire({
+                title: 'Confirmar remoção',
+                text: "Deseja remover este item do pedido?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, remover',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`remove-item-${itemId}`).submit();
+                }
+            });
+        }
 
-            // Quick Menu Search
-            document.getElementById('quickMenuSearch').addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                document.querySelectorAll('.product-card').forEach(card => {
-                    const productName = card.querySelector('.product-name').textContent.toLowerCase();
-                    card.style.display = productName.includes(searchTerm) ? 'flex' : 'none';
+        // Quick Menu Search
+        document.getElementById('quickMenuSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.product-card').forEach(card => {
+                const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                card.style.display = productName.includes(searchTerm) ? 'flex' : 'none';
+            });
+        });
+
+        // Category Tabs
+        document.querySelectorAll('.custom-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const categoryId = this.dataset.category;
+
+                // Update active tab
+                document.querySelectorAll('.custom-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show/hide products
+                document.querySelectorAll('.category-products').forEach(products => {
+                    products.style.display = products.dataset.category === categoryId ? 'grid' :
+                        'none';
                 });
             });
-
-            // Category Tabs
-            document.querySelectorAll('.custom-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const categoryId = this.dataset.category;
-
-                    // Update active tab
-                    document.querySelectorAll('.custom-tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-
-                    // Show/hide products
-                    document.querySelectorAll('.category-products').forEach(products => {
-                        products.style.display = products.dataset.category === categoryId ? 'grid' :
-                            'none';
-                    });
-                });
-            });
+        });
 
         // Add Product Function
         function addProduct(productId) {

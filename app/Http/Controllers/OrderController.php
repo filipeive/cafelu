@@ -10,7 +10,6 @@ use App\Models\Category;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
-//validator
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -23,32 +22,32 @@ class OrderController extends Controller
         $search = request('search');
         $orders = Order::with('table')->orderBy('created_at', 'desc')->paginate(6);
         $total_orders = Order::count();
-         // Obtém o total de pedidos feitos hoje
-         $totalToday = $this->orderGetTotalToday();
-         // Obtém o total de pedidos abertos
-         $totalOpen = $this->order_get_open_count();
+        $totalToday = $this->orderGetTotalToday();
+        $totalRevenueToday = Order::whereDate('created_at', now()->toDateString())
+        ->whereIn('status', ['completed', 'paid'])
+        ->sum('total_amount');
+        $tables = Table::get();
+        $totalOpen = $this->order_get_open_count();
 
-        return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalOpen', 'search'));
+        return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalRevenueToday', 'tables', 'totalOpen', 'search'));
     }
+
     public function orderGetTotalToday()
     {
-        // Calcula o total de pedidos feitos hoje
-        $total = Order::whereDate('created_at', today())->sum('total_amount'); // Ou qualquer campo que represente o valor total
-
-        return $total;
+        return Order::whereDate('created_at', today())->sum('total_amount');
     }
+
     public function order_get_open_count()
     {
-        // Obtém o total de pedidos abertos
-        $total = Order::where('status', 'active')->count();
-
-        return $total;
+        return Order::where('status', 'active')->count();
     }
+
     /**
      * Mostrar detalhes de um pedido específico
      */
     public function show(Order $order)
     {
+        // 👇 GARANTIR CARREGAMENTO DO PRODUTO
         $order->load('items.product', 'table', 'user');
         return view('orders.show', compact('order'));
     }
@@ -59,21 +58,24 @@ class OrderController extends Controller
     public function edit(Order $order)
     {
         if ($order->status === 'paid' || $order->status === 'canceled') {
-            return redirect()->route('orders.index', $order->id)
+            return redirect()->route('orders.index')
                 ->with('error', 'Não é possível editar um pedido que já foi pago ou cancelado.');
         }
 
+        // 👇 GARANTIR CARREGAMENTO DO PRODUTO (com trashed, por segurança)
         $order->load([
             'items.product' => function($query) {
-                $query->withTrashed(); // 👈 Isso carrega até produtos excluídos
+                $query->withTrashed();
             },
             'table'
         ]);
+
         $categories = Category::with(['products' => function($query) {
             $query->where('is_active', 1);
         }])->get();
+
         $products = Product::where('is_active', 1)->get();
-        
+
         return view('orders.edit', compact('order', 'categories', 'products'));
     }
 
@@ -89,13 +91,12 @@ class OrderController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-        
-        // Verificar se o produto já existe no pedido
+
         $existingItem = OrderItem::where('order_id', $order->id)
             ->where('product_id', $product->id)
             ->where('status', 'pending')
             ->first();
-            
+
         if ($existingItem) {
             $existingItem->quantity += $request->quantity;
             $existingItem->total_price = $existingItem->quantity * $existingItem->unit_price;
@@ -111,7 +112,6 @@ class OrderController extends Controller
             $orderItem->save();
         }
 
-        // Atualizar valor total do pedido
         $this->updateOrderTotal($order);
 
         return redirect()->route('orders.edit', $order->id)
@@ -131,8 +131,6 @@ class OrderController extends Controller
         }
 
         $orderItem->delete();
-        
-        // Atualizar valor total do pedido
         $this->updateOrderTotal($order);
 
         return redirect()->route('orders.edit', $order->id)
@@ -173,7 +171,6 @@ class OrderController extends Controller
         }
 
         try {
-            // Atualizar o status do pedido para 'completed'
             $order->status = 'completed';
             $order->save();
 
@@ -201,6 +198,7 @@ class OrderController extends Controller
             return redirect()->back()->with('error', $message);
         }
     }
+
     /**
      * Registrar pagamento do pedido
      */
@@ -219,7 +217,6 @@ class OrderController extends Controller
                 throw new \Exception('Apenas pedidos finalizados podem ser pagos.');
             }
 
-            // 1. Registrar a venda
             $sale = Sale::create([
                 'order_id' => $order->id,
                 'user_id' => auth()->id(),
@@ -232,7 +229,6 @@ class OrderController extends Controller
                 'status' => 'completed'
             ]);
 
-            // 2. Registrar os itens da venda
             foreach ($order->items as $item) {
                 SaleItem::create([
                     'sale_id' => $sale->id,
@@ -243,13 +239,13 @@ class OrderController extends Controller
                     'notes' => $item->notes
                 ]);
 
-                // 3. Atualizar o estoque do produto
-                $product = $item->product;
-                $product->stock_quantity -= $item->quantity;
-                $product->save();
+                $product = $item->product; // 👈 AQUI VOCÊ ACESSA O PRODUTO — ENTÃO PRECISA ESTAR CARREGADO!
+                if ($product) {
+                    $product->stock_quantity -= $item->quantity;
+                    $product->save();
+                }
             }
 
-            // 4. Atualizar o status do pedido
             $order->update([
                 'status' => 'paid',
                 'payment_method' => $request->payment_method,
@@ -257,14 +253,9 @@ class OrderController extends Controller
                 'paid_at' => now()
             ]);
 
-            // 5. Liberar e separar mesas
             if ($order->table) {
                 if ($order->table->group_id) {
-                    // Busca todas as mesas do grupo
-                    $groupedTables = Table::where('group_id', $order->table->group_id)
-                        ->get();
-
-                    // Atualiza cada mesa do grupo
+                    $groupedTables = Table::where('group_id', $order->table->group_id)->get();
                     foreach ($groupedTables as $table) {
                         $table->update([
                             'status' => 'free',
@@ -274,7 +265,6 @@ class OrderController extends Controller
                         ]);
                     }
                 } else {
-                    // Se for mesa individual, apenas libera
                     $order->table->update(['status' => 'free']);
                 }
             }
@@ -290,14 +280,14 @@ class OrderController extends Controller
                 ->with('error', 'Erro ao processar pagamento: ' . $e->getMessage());
         }
     }
+
     /**
      * Cancelar pedido
      */
     public function cancel(Order $order)
     {
-        //chamar o request
         $request = request();
-        // Verificar se o pedido já foi cancelado ou pago
+
         if ($order->status === 'canceled' || $order->status === 'paid') {
             $message = 'Este pedido não pode ser cancelado.';
 
@@ -309,20 +299,18 @@ class OrderController extends Controller
         }
 
         try {
-            //validar o campo notes da tabela orders
             $request->validate([
                 'notes' => 'nullable|string',
             ]);
-            // Verificar se o pedido já foi pago
+
             if ($order->status === 'paid') {
                 return redirect()->back()->with('error', 'Não é possível cancelar um pedido já pago.');
             }
-            // Atualizar o status do pedido para 'canceled'
+
             $order->notes = $request->notes;
             $order->status = 'canceled';
             $order->save();
 
-            // Se houver mesa associada, liberar a mesa
             if ($order->table) {
                 $order->table->status = 'free';
                 $order->table->save();
@@ -345,7 +333,8 @@ class OrderController extends Controller
             return redirect()->back()->with('error', $message);
         }
     }
-        /**
+
+    /**
      * Atualizar informações do pedido
      */
     public function update(Request $request, Order $order)
@@ -355,22 +344,27 @@ class OrderController extends Controller
                 'customer_name' => 'nullable|string|max:255',
                 'notes' => 'nullable|string'
             ]);
-    
+
             $order->update([
                 'customer_name' => $request->customer_name,
                 'notes' => $request->notes
             ]);
-    
+
             return redirect()->back()->with('success', 'Informações atualizadas com sucesso!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erro ao atualizar informações: ' . $e->getMessage());
         }
     }
-   public function getOrderData(Order $order)
+
+    /**
+     * Retornar dados do pedido em JSON (para impressão, API, etc)
+     */
+    public function getOrderData(Order $order)
     {
+        // 👇 GARANTIR CARREGAMENTO DO PRODUTO — ESSE ERA O CULPADO!
         $order->load([
             'items.product' => function($query) {
-                $query->withTrashed(); // 👈 ADICIONE ISSO!
+                $query->withTrashed();
             },
             'table',
             'user'
@@ -385,7 +379,7 @@ class OrderController extends Controller
             'items' => $order->items->map(function ($item) {
                 return [
                     'product' => [
-                        'name' => $item->product ? $item->product->name : '[Produto Excluído]'
+                        'name' => $item->product ? $item->product->name : '[Produto não encontrado]'
                     ],
                     'quantity' => $item->quantity,
                     'total_price' => $item->total_price,
@@ -399,20 +393,25 @@ class OrderController extends Controller
             'email' => 'cafelufamina@gmail.com',
         ]);
     }
+
     /**
      * Imprimir recibo do pedido
      */
     public function printReceipt(Order $order)
     {
+        // 👇 GARANTIR CARREGAMENTO DO PRODUTO
         $order->load('items.product', 'table', 'user');
         return view('orders.receipt', compact('order'));
     }
-    //print
+
+    // Alias para print
     public function print(Order $order)
     {
+        // 👇 GARANTIR CARREGAMENTO DO PRODUTO
         $order->load('items.product', 'table', 'user');
         return view('orders.receipt', compact('order'));
     }
+
     /**
      * Método para atualizar o valor total do pedido
      */

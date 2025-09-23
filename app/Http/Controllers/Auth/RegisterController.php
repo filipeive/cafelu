@@ -31,8 +31,14 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
-
     /**
+     * Mostrar o formulário de registro.
+     */
+    public function showRegistrationForm()
+    {
+        return view('auth.register');
+    }
+   /**
      * Criação de um novo usuário após validação.
      */
     protected function create(array $data)

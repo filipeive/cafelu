@@ -1,31 +1,31 @@
-
 @props([
-    'route' => '#',
-    'icon' => 'mdi-circle-outline',
-    'title' => '',
-    'badge' => null,
+    'route', 
+    'icon', 
+    'title', 
+    'badge' => null, 
     'badgeClass' => 'badge-primary',
     'badgePrefix' => '',
-    'showBadge' => true,
-    'active' => false
+    'showBadge' => true
 ])
 
 @php
-    $isActive = $active || (is_string($route) && $route !== '#' && request()->routeIs($route . '*'));
-    $href = $route !== '#' && \Illuminate\Support\Facades\Route::has($route) ? route($route) : $route;
+    $isActive = request()->routeIs($route);
+    $href = $route !== '#' ? route($route) : '#';
 @endphp
 
-<a class="nav-dropdown-item {{ $isActive ? 'active' : '' }}" 
-   href="{{ $href }}"
-   @if($route === '#') onclick="return false;" style="opacity: 0.6; cursor: not-allowed;" @endif>
-    <i class="{{ $icon }} me-2"></i>
-    <span class="flex-grow-1">{{ $title }}</span>
-    
-    @if($badge && $showBadge)
-        <span class="badge {{ $badgeClass }} ms-auto">
-            {{ $badgePrefix }}{{ $badge }}
-        </span>
-    @endif
-    
-    {{ $slot }}
-</a>
+<li class="nav-item">
+    <a href="{{ $href }}" class="nav-link {{ $isActive ? 'active' : '' }}">
+        <i class="menu-icon mdi {{ $icon }}"></i>
+        <span class="menu-title">{{ $title }}</span>
+        
+        @if(isset($badge) && $showBadge && $badge)
+            <span class="badge {{ $badgeClass }} ml-auto">
+                {{ $badgePrefix }}{{ $badge }}
+            </span>
+        @endif
+        
+        @if(isset($slot) && !empty(trim($slot->toHtml())))
+            {{ $slot }}
+        @endif
+    </a>
+</li>

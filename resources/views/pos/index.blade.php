@@ -66,7 +66,7 @@
                             <i class="mdi mdi-cart"></i>
                             Pedido Atual
                         </h4>
-                        <button class="btn btn-outline-danger btn-sm" onclick="resetSale()">
+                        <button class="btn btn-outline-warning btn-sm" onclick="resetSale()">
                             <i class="mdi mdi-delete"></i> Limpar
                         </button>
                     </div>
@@ -153,3 +153,9 @@
     </div>
 </div>
 @endsection
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/pos/pos.css') }}">
+@endpush
+@push('scripts')
+    <script src="{{ asset('assets/pos/pos.js') }}"></script>
+@endpush

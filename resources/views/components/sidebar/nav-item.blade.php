@@ -1,29 +1,28 @@
 @props([
     'route' => '#',
-    'icon' => 'mdi-circle-outline',
+    'icon' => '',
     'title' => '',
     'badge' => null,
-    'badgeClass' => 'badge-primary',
+    'badgeClass' => 'badge-light',
     'badgePrefix' => '',
-    'showBadge' => true,
-    'active' => false
+    'showBadge' => true
 ])
 
-@php
-    $isActive = $active || (is_string($route) && $route !== '#' && request()->routeIs($route));
-    $href = $route !== '#' && \Illuminate\Support\Facades\Route::has($route) ? route($route) : $route;
-@endphp
-
-<li class="nav-item mb-2">
-    <a class="nav-link {{ $isActive ? 'active' : '' }}" 
-       href="{{ $href }}"
-       @if($route === '#') onclick="return false;" style="opacity: 0.6; cursor: not-allowed;" @endif>
-        <i class="{{ $icon }}"></i>
-        <span>{{ $title }}</span>
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs($route) ? 'active' : '' }}" 
+       href="{{ $route !== '#' ? route($route) : '#' }}">
+        <i class="mdi {{ $icon }} menu-icon"></i>
+        <span class="menu-title">{{ $title }}</span>
         
-        @if($badge && $showBadge)
-            <span class="badge {{ $badgeClass }} ms-auto">
+        @if(isset($badge) && $showBadge && $badge)
+            <span class="badge {{ $badgeClass }} ml-auto">
                 {{ $badgePrefix }}{{ $badge }}
+            </span>
+        @endif
+        
+        @if(isset($slot) && $slot->isNotEmpty())
+            <span class="ml-auto">
+                {{ $slot }}
             </span>
         @endif
     </a>

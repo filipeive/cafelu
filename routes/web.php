@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ExpenseController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,12 +29,7 @@ Route::get('/', function () {
 });
 //home
 Route::get('/home', [HomeController::class, 'index'])->name('home');
-// Authentication routes (provided by Laravel)
-Auth::routes(['register' => false]); // Disable public registration
-Route::middleware(['auth', 'is_admin'])->group(function () {
-    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
-});
+Auth::routes();
 
 // Dashboard
 Route::get('dashboard/', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
@@ -147,7 +144,7 @@ Route::middleware(['auth'])->group(function () {
 
     
     // Profile Management
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'save'])->name('save');
 
     //reports
@@ -267,4 +264,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export-pdf', [ReportController::class, 'exportPDF'])->name('export.pdf');
         Route::get('/export-csv', [ReportController::class, 'exportCSV'])->name('export.csv');
     });
+    // Rotas de busca
+        Route::middleware(['auth'])->group(function () {
+            
+            // Busca completa (página de resultados)
+            Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+            
+            // API de busca rápida (para autocomplete/dropdown)
+            Route::get('/search/api', [SearchController::class, 'api'])->name('search.api');
+        });
+
 });

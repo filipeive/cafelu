@@ -257,10 +257,14 @@
                             <tbody>
                                 @forelse ($orders as $order)
                                     <tr>
+                                        <!-- ID -->
                                         <td class="py-3">
-                                            <span
-                                                class="fw-medium text-primary">#{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                            <span class="fw-medium text-primary">
+                                                #{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}
+                                            </span>
                                         </td>
+
+                                        <!-- Data -->
                                         <td class="py-3">
                                             <div class="d-flex align-items-center">
                                                 <span class="bg-primary bg-opacity-10 p-2 rounded me-2">
@@ -273,29 +277,39 @@
                                                 </div>
                                             </div>
                                         </td>
+
+                                        <!-- Mesa -->
                                         <td class="py-3">
                                             <span class="badge bg-light text-dark">Mesa {{ $order->table_id }}</span>
                                         </td>
+
+                                        <!-- Total -->
                                         <td class="py-3">
                                             <div class="fw-medium">MZN {{ number_format($order->total_amount, 2) }}</div>
                                         </td>
+
+                                        <!-- Status -->
                                         <td class="py-3">
                                             <div
-                                                class="badge {{ get_status_class_staradmin2($order->status) }} bg-secondary rounded-pill px-3">
-                                                <i class="mdi mdi-circle-medium me-1"></i>
+                                                class="badge rounded-pill px-3 py-2 text-white {{ get_status_class_staradmin2($order->status) }}">
+                                                <i class="mdi mdi-circle me-1"></i>
                                                 {{ ucfirst($order->status) }}
                                             </div>
                                         </td>
+
+                                        <!-- Ações -->
                                         <td class="py-3">
                                             <div class="d-flex justify-content-center gap-2">
+
+                                                <!-- Ver detalhes -->
                                                 <a href="{{ route('orders.show', $order->id) }}"
-                                                    class="btn btn-primary btn-icon btn-sm" data-bs-toggle="tooltip"
-                                                    title="Ver Detalhes">
+                                                    class="btn btn-primary btn-icon btn-sm text-white"
+                                                    data-bs-toggle="tooltip" title="Ver Detalhes">
                                                     <i class="mdi mdi-eye"></i>
                                                 </a>
-                                                <!-- Substitua o botão existente por este -->
+
+                                                <!-- Registrar Pagamento -->
                                                 @if ($order->status == 'completed')
-                                                    <!-- Modal de Pagamento -->
                                                     <div class="modal fade" id="paymentModal{{ $order->id }}"
                                                         tabindex="-1"
                                                         aria-labelledby="paymentModalLabel{{ $order->id }}"
@@ -308,7 +322,8 @@
                                                                     <div class="modal-header">
                                                                         <h5 class="modal-title"
                                                                             id="paymentModalLabel{{ $order->id }}">
-                                                                            Registrar Pagamento #{{ $order->id }}</h5>
+                                                                            Registrar Pagamento #{{ $order->id }}
+                                                                        </h5>
                                                                         <button type="button" class="btn-close"
                                                                             data-bs-dismiss="modal"
                                                                             aria-label="Close"></button>
@@ -332,14 +347,11 @@
                                                                         </div>
                                                                         <input type="hidden" name="amount_paid"
                                                                             value="{{ $order->total_amount }}">
-
-
                                                                         <div class="form-group mb-3">
                                                                             <label
                                                                                 for="notes{{ $order->id }}">Observações</label>
                                                                             <textarea name="notes" id="notes{{ $order->id }}" class="form-control" rows="3"></textarea>
                                                                         </div>
-
                                                                         <div class="alert alert-info">
                                                                             <div
                                                                                 class="d-flex justify-content-between align-items-center">
@@ -353,7 +365,8 @@
                                                                     <div class="modal-footer">
                                                                         <button type="button" class="btn btn-secondary"
                                                                             data-bs-dismiss="modal">Cancelar</button>
-                                                                        <button type="submit" class="btn btn-success">
+                                                                        <button type="submit"
+                                                                            class="btn btn-success text-white">
                                                                             <i class="mdi mdi-check-circle me-1"></i>
                                                                             Confirmar Pagamento
                                                                         </button>
@@ -362,30 +375,37 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <button type="button" class="btn btn-success btn-icon btn-sm"
+                                                    <button type="button"
+                                                        class="btn btn-success btn-icon btn-sm text-white"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#paymentModal{{ $order->id }}"
                                                         title="Registrar Pagamento">
                                                         <i class="mdi mdi-cash"></i>
                                                     </button>
                                                 @endif
+
+                                                <!-- Imprimir -->
                                                 @if ($order->status == 'paid')
-                                                    <button class="btn btn-info btn-icon btn-sm" data-bs-toggle="tooltip"
-                                                        title="Imprimir" onclick="printRecibo({{ $order->id }})">
+                                                    <button class="btn btn-info btn-icon btn-sm text-white"
+                                                        data-bs-toggle="tooltip" title="Imprimir"
+                                                        onclick="printRecibo({{ $order->id }})">
                                                         <i class="mdi mdi-printer"></i>
                                                     </button>
                                                 @endif
-                                                @if ($order->status != 'completed' && $order->status != 'canceled' && $order->status != 'paid')
+
+                                                <!-- Editar, Finalizar e Cancelar -->
+                                                @if (!in_array($order->status, ['completed', 'canceled', 'paid']))
                                                     <a href="{{ route('orders.edit', $order->id) }}"
-                                                        class="btn btn-warning btn-icon btn-sm" data-bs-toggle="tooltip"
-                                                        title="Editar">
+                                                        class="btn btn-warning btn-icon btn-sm text-white"
+                                                        data-bs-toggle="tooltip" title="Editar">
                                                         <i class="mdi mdi-pencil"></i>
                                                     </a>
-                                                    <!-- Substitua os botões existentes por estes -->
+
                                                     <form action="{{ route('orders.complete', $order->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
-                                                        <button type="submit" class="btn btn-success btn-icon btn-sm"
+                                                        <button type="submit"
+                                                            class="btn btn-success btn-icon btn-sm text-white"
                                                             data-bs-toggle="tooltip" title="Finalizar"
                                                             onclick="return confirm('Tem certeza que deseja finalizar este pedido?')">
                                                             <i class="mdi mdi-check"></i>
@@ -395,13 +415,15 @@
                                                     <form action="{{ route('orders.cancel', $order->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
-                                                        <button type="submit" class="btn btn-danger btn-icon btn-sm"
+                                                        <button type="submit"
+                                                            class="btn btn-danger btn-icon btn-sm text-white"
                                                             data-bs-toggle="tooltip" title="Cancelar"
                                                             onclick="return confirm('Tem certeza que deseja cancelar este pedido?')">
                                                             <i class="mdi mdi-close"></i>
                                                         </button>
                                                     </form>
                                                 @endif
+
                                             </div>
                                         </td>
                                     </tr>
@@ -414,9 +436,9 @@
                                     </tr>
                                 @endforelse
                             </tbody>
+
                         </table>
                     </div>
-
                     <!-- Paginação -->
                     <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
                         {{ $orders->links('pagination::bootstrap-5') }}
@@ -426,6 +448,10 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/pos/pos.js') }}"></script>
+@endpush
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {

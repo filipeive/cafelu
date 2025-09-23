@@ -13,12 +13,31 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Material Design Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
+    {{-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet"> --}}
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Costom -->
-    {{-- <link rel="stylesheet" href="{{ asset('assets/css/orders.css') }}"> --}}
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
+    <!-- Fontes -->
+    <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
+
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
+
+     <!-- CSS Plugins -->
+    <link rel="stylesheet" href="{{ asset('assets/vendors/select2/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendors/jquery-toast-plugin/jquery.toast.min.css') }}">
+
+    <!-- Material Design Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Costom -->
+    <link rel="stylesheet" href="{{ asset('assets/pos/pos.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/orders.css') }}">
     <style>
         :root {
             /* Cores do tema praia/beach */
@@ -155,8 +174,8 @@
         }
 
         .brand-title {
-            font-family: 'montserrate', cursive;
-            font-size: 1.6rem;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
             font-weight: 700;
             color: white;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -362,7 +381,7 @@
         }
 
         .navbar-brand-mobile {
-            font-family: 'montserrate', cursive;
+            font-family: 'Dancing Script', cursive;
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--primary-color);
@@ -665,7 +684,7 @@
                 <div class="brand-subtitle">Restaurante • Bar • Gestão</div>
             </div>
             
-            {{-- <div class="business-info">
+           {{--  <div class="business-info">
                 <div class="info-item">
                     <i class="mdi mdi-map-marker"></i>
                     <span>ER470, Bairro Zalala, Quelimane</span>
@@ -687,7 +706,7 @@
             <div class="nav-section">
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') ?? '#' }}">
+                        <a class="nav-link active" href="{{ route('dashboard') ?? '#' }}">
                             <i class="mdi mdi-view-dashboard"></i>
                             <span>Dashboard</span>
                         </a>
@@ -703,39 +722,28 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}" href="{{ route('pos.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('pos.index') ?? '#' }}">
                             <i class="mdi mdi-point-of-sale"></i>
                             <span>PDV (Ponto de Venda)</span>
                             <span class="badge bg-success ms-auto">Live</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('orders.index') ?? '#' }}">
                             <i class="mdi mdi-receipt"></i>
                             <span>Pedidos</span>
-                            @php
-                                $pendingOrdersCount = \App\Models\Order::where('status', 'pending')->count();
-                            @endphp
-                            @if($pendingOrdersCount > 0)
-                                <span class="badge bg-warning ms-auto">{{ $pendingOrdersCount }}</span>
-                            @endif
+                            <span class="badge bg-warning ms-auto">5</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('tables.*') ? 'active' : '' }}" href="{{ route('tables.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('tables.index') ?? '#' }}">
                             <i class="mdi mdi-table-furniture"></i>
                             <span>Mesas</span>
-                            @php
-                                $availableTablesCount = \App\Models\Table::where('status', 'available')->count();
-                                $totalTables = \App\Models\Table::count();
-                            @endphp
-                            @if($totalTables > 0)
-                                <span class="badge bg-info ms-auto">{{ $availableTablesCount }}/{{ $totalTables }}</span>
-                            @endif
+                            <span class="badge bg-info ms-auto">12</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('reservations.*') ? 'active' : '' }}" href="#">
+                        <a class="nav-link" href="#">
                             <i class="mdi mdi-calendar-check"></i>
                             <span>Reservas</span>
                         </a>
@@ -751,13 +759,13 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('products.index') ?? '#' }}">
                             <i class="mdi mdi-food"></i>
                             <span>Produtos</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}" href="{{ route('categories.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('categories.index') ?? '#' }}">
                             <i class="mdi mdi-format-list-bulleted"></i>
                             <span>Categorias</span>
                         </a>
@@ -785,19 +793,19 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}" href="{{ route('sales.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('sales.index') ?? '#' }}">
                             <i class="mdi mdi-currency-usd"></i>
                             <span>Vendas</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('reports.index') ?? '#' }}">
                             <i class="mdi mdi-chart-line"></i>
                             <span>Relatórios</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}" href="{{ route('expenses.index') ?? '#' }}">
+                        <a class="nav-link" href="#">
                             <i class="mdi mdi-cash-remove"></i>
                             <span>Despesas</span>
                         </a>
@@ -819,7 +827,7 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}" href="{{ route('clients.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('clients.index') ?? '#' }}">
                             <i class="mdi mdi-account-heart"></i>
                             <span>Clientes</span>
                         </a>
@@ -841,13 +849,13 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}" href="{{ route('employees.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('employees.index') ?? '#' }}">
                             <i class="mdi mdi-account-tie"></i>
                             <span>Funcionários</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') ?? '#' }}">
+                        <a class="nav-link" href="{{ route('users.index') ?? '#' }}">
                             <i class="mdi mdi-account-key"></i>
                             <span>Usuários</span>
                         </a>
@@ -919,13 +927,6 @@
                         <div class="position-relative">
                             <i class="mdi mdi-magnify search-icon"></i>
                             <input type="text" class="form-control search-input" placeholder="Buscar produtos, pedidos, clientes..." id="global-search">
-                            <!-- Search Results Dropdown -->
-                            <div class="dropdown-menu w-100 mt-1" id="search-results" style="display: none; max-height: 300px; overflow-y: auto;">
-                                <div class="p-3 text-center text-muted">
-                                    <i class="mdi mdi-magnify"></i>
-                                    Digite para buscar...
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -1140,7 +1141,6 @@
 
             <!-- Content Area -->
             @yield('content')
-        </div>
 
         <!-- Footer -->
         <footer class="main-footer">
@@ -1164,8 +1164,29 @@
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+     <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
 
+    <!-- Plugins -->
+    <script src="{{ asset('assets/vendors/chart.js/Chart.min.js') }}"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <script src="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ asset('assets/vendors/select2/select2.min.js') }}"></script>
+
+    <!-- Scripts do StarAdmin -->
+    <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
+    <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
+    {{--  <script src="{{ asset('assets/js/misc.js') }}"></script> --}}
+    <script src="{{ asset('assets/js/settings.js') }}"></script>
+    <script src="{{ asset('assets/js/todolist.js') }}"></script>
+    <script src="{{ asset('assets/js/dashboard.js') }}"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ asset('assets/pos/pos.js') }}"></script>
+    <script src="{{ asset('assets/pos/printRecibo.js') }}"></script>
     <script>
         // ===== SIDEBAR MANAGEMENT =====
         class SidebarManager {
@@ -1311,45 +1332,30 @@
             return container;
         }
 
-        // ===== PROFESSIONAL SEARCH MANAGER =====
-        class ProfessionalSearch {
-            constructor() {
-                this.searchInput = document.querySelector('.search-input');
-                this.searchTimeout = null;
-                this.init();
-            }
-
-            init() {
-                if (!this.searchInput) return;
-
-                this.searchInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.performSearch(e.target.value);
-                    }
+        // ===== SEARCH FUNCTIONALITY =====
+        function setupSearch() {
+            const searchInputs = document.querySelectorAll('#global-search, .search-input');
+            
+            searchInputs.forEach(input => {
+                let searchTimeout;
+                
+                input.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    const query = e.target.value.trim();
+                    
+                    if (query.length < 2) return;
+                    
+                    searchTimeout = setTimeout(() => {
+                        performSearch(query);
+                    }, 300);
                 });
+            });
+        }
 
-                this.searchInput.addEventListener('input', (e) => {
-                    if (e.target.value.length > 2) {
-                        this.debounceSearch(e.target.value);
-                    }
-                });
-            }
-
-            debounceSearch(query) {
-                clearTimeout(this.searchTimeout);
-                this.searchTimeout = setTimeout(() => {
-                    this.performSearch(query);
-                }, 500);
-            }
-
-            performSearch(query) {
-                if (query.trim().length === 0) return;
-
-                // Para Laravel, adapte a rota conforme necessário
-                const searchUrl = window.location.origin + '/search?q=' + encodeURIComponent(query);
-                window.location.href = searchUrl;
-            }
+        function performSearch(query) {
+            // Implement search logic here
+            console.log('Searching for:', query);
+            // You can add AJAX call to Laravel backend here
         }
 
         // ===== INITIALIZATION =====
@@ -1361,7 +1367,7 @@
             // Initialize components
             try {
                 new SidebarManager();
-                new ProfessionalSearch();
+                setupSearch();
             } catch (error) {
                 console.error('Error initializing components:', error);
             }
@@ -1382,7 +1388,7 @@
 
             // Show welcome message
             setTimeout(() => {
-                console.log('Bem-vindo ao ZALALA BEACH BAR!', 'info');
+                showToast('Bem-vindo ao ZALALA BEACH BAR!', 'info');
             }, 1000);
         });
 
@@ -1394,3 +1400,4 @@
     @stack('scripts')
 </body>
 </html>
+        

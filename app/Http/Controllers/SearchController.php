@@ -8,7 +8,10 @@ use App\Models\Sale;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Category;
-use App\Models\Debt;
+use App\Models\Client;
+use App\Models\Employee;
+use App\Models\Table;
+use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
 
 class SearchController extends Controller
@@ -39,7 +42,7 @@ class SearchController extends Controller
     public function api(Request $request)
     {
         $query = $request->get('q', '');
-        $limit = $request->get('limit', 10);
+        $limit = $request->get('limit', 8);
         
         if (empty($query) || strlen($query) < 2) {
             return response()->json([
@@ -66,6 +69,7 @@ class SearchController extends Controller
         if ($type === 'all' || $type === 'products') {
             $products = Product::where('name', 'LIKE', "%{$query}%")
                 ->orWhere('description', 'LIKE', "%{$query}%")
+                /* ->orWhere('barcode', 'LIKE', "%{$query}%") */
                 ->with('category')
                 ->where('is_active', true)
                 ->limit(20)
@@ -77,10 +81,10 @@ class SearchController extends Controller
                         'title' => $product->name,
                         'subtitle' => $product->category->name ?? 'Sem categoria',
                         'description' => $product->description ?? 'Sem descrição',
-                        'price' => $product->selling_price,
-                        'stock' => $product->stock_quantity,
+                        'price' => number_format($product->selling_price, 2) . ' MZN',
+                        'stock' => $product->stock_quantity ?? 0,
                         'url' => route('products.show', $product->id),
-                        'icon' => 'fas fa-cube',
+                        'icon' => 'mdi-food',
                         'badge' => $product->stock_quantity > 0 ? 'Em estoque' : 'Fora de estoque',
                         'badge_class' => $product->stock_quantity > 0 ? 'bg-success' : 'bg-danger'
                     ];
@@ -93,9 +97,12 @@ class SearchController extends Controller
 
         // Buscar Vendas
         if (($type === 'all' || $type === 'sales') && $this->userCan('view_sales')) {
-            $sales = Sale::where('customer_name', 'LIKE', "%{$query}%")
-                ->orWhere('customer_phone', 'LIKE', "%{$query}%")
-                ->orWhere('id', 'LIKE', "%{$query}%") // Buscar por ID da venda
+            $sales = Sale::where(function($q) use ($query) {
+                    $q->where('customer_name', 'LIKE', "%{$query}%")
+                      ->orWhere('customer_phone', 'LIKE', "%{$query}%")
+                      ->orWhere('id', 'LIKE', "%{$query}%");
+                      /* ->orWhere('invoice_number', 'LIKE', "%{$query}%") */
+                })
                 ->with('user')
                 ->orderBy('created_at', 'desc')
                 ->limit(10)
@@ -106,12 +113,18 @@ class SearchController extends Controller
                         'id' => $sale->id,
                         'title' => "Venda #{$sale->id}",
                         'subtitle' => $sale->customer_name ?: 'Cliente não informado',
-                        'description' => "Total: " . number_format($sale->total_amount, 2) . " MZN - " . $sale->sale_date,
+                        'description' => "Total: " . number_format($sale->total_amount, 2) . " MZN - " . $sale->sale_date?->format('d/m/Y'),
                         'date' => $sale->created_at->format('d/m/Y H:i'),
                         'url' => route('sales.show', $sale->id),
-                        'icon' => 'fas fa-shopping-cart',
-                        'badge' => ucfirst($sale->payment_method),
-                        'badge_class' => $sale->payment_method === 'cash' ? 'bg-success' : 'bg-info'
+                        'icon' => 'mdi-cash-register',
+                        'badge' => ucfirst($sale->payment_method ?? 'N/A'),
+                        'badge_class' => match($sale->payment_method) {
+                            'cash' => 'bg-success',
+                            'card' => 'bg-info',
+                            'transfer' => 'bg-warning',
+                            'credit' => 'bg-danger',
+                            default => 'bg-secondary'
+                        }
                     ];
                 });
 
@@ -121,12 +134,14 @@ class SearchController extends Controller
         }
 
         // Buscar Pedidos
-        if (($type === 'all' || $type === 'orders') && $this->userCanAny(['view_orders', 'create_orders'])) {
-            $orders = Order::where('customer_name', 'LIKE', "%{$query}%")
-                ->orWhere('customer_phone', 'LIKE', "%{$query}%")
-                ->orWhere('customer_email', 'LIKE', "%{$query}%")
-                ->orWhere('id', 'LIKE', "%{$query}%")
-                ->with('user')
+        if (($type === 'all' || $type === 'orders') && $this->userCan('view_orders')) {
+            $orders = Order::where(function($q) use ($query) {
+                    $q->where('customer_name', 'LIKE', "%{$query}%")
+                      ->orWhere('customer_phone', 'LIKE', "%{$query}%")
+                      ->orWhere('customer_email', 'LIKE', "%{$query}%")
+                      ->orWhere('id', 'LIKE', "%{$query}%");
+                })
+                ->with('user', 'table')
                 ->orderBy('created_at', 'desc')
                 ->limit(10)
                 ->get()
@@ -135,13 +150,12 @@ class SearchController extends Controller
                         'type' => 'order',
                         'id' => $order->id,
                         'title' => "Pedido #{$order->id}",
-                        'subtitle' => $order->customer_name,
-                        'description' => "Valor estimado: " . number_format($order->estimated_amount, 2) . " MZN",
+                        'subtitle' => $order->customer_name ?? 'Cliente não informado',
+                        'description' => "Mesa: " . ($order->table->number ?? 'N/A') . " - Total: " . number_format($order->total_amount ?? 0, 2) . " MZN",
                         'date' => $order->created_at->format('d/m/Y H:i'),
-                        'delivery' => $order->delivery_date ? $order->delivery_date->format('d/m/Y') : 'Não definido',
                         'url' => route('orders.show', $order->id),
-                        'icon' => 'fas fa-clipboard-list',
-                        'badge' => ucfirst($order->status),
+                        'icon' => 'mdi-receipt',
+                        'badge' => $this->getOrderStatusLabel($order->status),
                         'badge_class' => $this->getOrderStatusClass($order->status)
                     ];
                 });
@@ -151,57 +165,81 @@ class SearchController extends Controller
             }
         }
 
-        // Buscar Usuários (apenas para admins)
-        if (($type === 'all' || $type === 'users') && $this->userCan('manage_users')) {
-            $users = User::where('name', 'LIKE', "%{$query}%")
+        // Buscar Clientes
+        if ($type === 'all' || $type === 'clients') {
+            $clients = Client::where('name', 'LIKE', "%{$query}%")
+                ->orWhere('phone', 'LIKE', "%{$query}%")
                 ->orWhere('email', 'LIKE', "%{$query}%")
-                ->limit(10)
+                /* ->orWhere('document', 'LIKE', "%{$query}%") */
+                ->limit(15)
                 ->get()
-                ->map(function ($user) {
+                ->map(function ($client) {
                     return [
-                        'type' => 'user',
-                        'id' => $user->id,
-                        'title' => $user->name,
-                        'subtitle' => $user->email,
-                        'description' => 'Usuário do sistema',
-                        'url' => route('users.show', $user->id),
-                        'icon' => 'fas fa-user',
-                        'badge' => $user->is_active ? 'Ativo' : 'Inativo',
-                        'badge_class' => $user->is_active ? 'bg-success' : 'bg-secondary'
+                        'type' => 'client',
+                        'id' => $client->id,
+                        'title' => $client->name,
+                        'subtitle' => $client->phone ?? 'Sem telefone',
+                        'description' => $client->email ?? 'Cliente do restaurante',
+                        'url' => route('clients.show', $client->id),
+                        'icon' => 'mdi-account-heart',
+                        'badge' => $client->is_active ? 'Ativo' : 'Inativo',
+                        'badge_class' => $client->is_active ? 'bg-success' : 'bg-secondary'
                     ];
                 });
 
-            if ($users->isNotEmpty()) {
-                $results['users'] = $users;
+            if ($clients->isNotEmpty()) {
+                $results['clients'] = $clients;
             }
         }
 
-        // Buscar Dívidas
-        if (($type === 'all' || $type === 'debts') && $this->userCan('view_debts')) {
-            $debts = Debt::where('customer_name', 'LIKE', "%{$query}%")
-                ->orWhere('customer_phone', 'LIKE', "%{$query}%")
-                ->orWhere('customer_document', 'LIKE', "%{$query}%")
-                ->orderBy('debt_date', 'desc')
+        // Buscar Mesas
+        if ($type === 'all' || $type === 'tables') {
+            $tables = Table::where('number', 'LIKE', "%{$query}%")
+                /* ->orWhere('name', 'LIKE', "%{$query}%") */
+                ->orWhere('capacity', 'LIKE', "%{$query}%")
                 ->limit(10)
                 ->get()
-                ->map(function ($debt) {
+                ->map(function ($table) {
                     return [
-                        'type' => 'debt',
-                        'id' => $debt->id,
-                        'title' => "Dívida de {$debt->customer_name}",
-                        'subtitle' => $debt->customer_phone ?: 'Sem telefone',
-                        'description' => "Valor: " . number_format($debt->remaining_amount, 2) . " MZN",
-                        'date' => $debt->debt_date,
-                        'due_date' => $debt->due_date,
-                        'url' => route('debts.show', $debt->id),
-                        'icon' => 'fas fa-money-bill-wave',
-                        'badge' => ucfirst($debt->status),
-                        'badge_class' => $this->getDebtStatusClass($debt->status)
+                        'type' => 'table',
+                        'id' => $table->id,
+                        'title' => "Mesa {$table->number}",
+                        //'subtitle' => $table->name ?? "Capacidade: {$table->capacity} pessoas",
+                        'capacity' => $table->description ?? 'Mesa do restaurante',
+                        'url' => route('tables.show', $table->id),
+                        'icon' => 'mdi-table-furniture',
+                        'badge' => $this->getTableStatusLabel($table->status),
+                        'badge_class' => $this->getTableStatusClass($table->status)
                     ];
                 });
 
-            if ($debts->isNotEmpty()) {
-                $results['debts'] = $debts;
+            if ($tables->isNotEmpty()) {
+                $results['tables'] = $tables;
+            }
+        }
+
+        // Buscar Funcionários (apenas para admins/gerentes)
+        if (($type === 'all' || $type === 'employees')) {
+            $employees = Employee::where('name', 'LIKE', "%{$query}%")
+                ->orWhere('role', 'LIKE', "%{$query}%")
+                ->limit(10)
+                ->get()
+                ->map(function ($employee) {
+                    return [
+                        'type' => 'employee',
+                        'id' => $employee->id,
+                        'title' => $employee->name,
+                        'subtitle' => $employee->position ?? 'Funcionário',
+                        'description' => $employee->role ?? $employee->email ?? 'Funcionário do restaurante',
+                        'url' => route('employees.show', $employee->id),
+                        'icon' => 'mdi-account-tie',
+                        'badge' => $employee->is_active ? 'Ativo' : 'Inativo',
+                        'badge_class' => $employee->is_active ? 'bg-success' : 'bg-secondary'
+                    ];
+                });
+
+            if ($employees->isNotEmpty()) {
+                $results['employees'] = $employees;
             }
         }
 
@@ -209,7 +247,7 @@ class SearchController extends Controller
         if (($type === 'all' || $type === 'categories') && $this->userCan('manage_categories')) {
             $categories = Category::where('name', 'LIKE', "%{$query}%")
                 ->orWhere('description', 'LIKE', "%{$query}%")
-                ->where('status', 'active')
+                ->where('is_active', true)
                 ->limit(10)
                 ->get()
                 ->map(function ($category) {
@@ -217,11 +255,11 @@ class SearchController extends Controller
                         'type' => 'category',
                         'id' => $category->id,
                         'title' => $category->name,
-                        'subtitle' => ucfirst($category->type),
+                        'subtitle' => 'Categoria de produtos',
                         'description' => $category->description ?: 'Sem descrição',
                         'url' => route('categories.show', $category->id),
-                        'icon' => $category->icon ?: 'fas fa-folder',
-                        'badge' => ucfirst($category->type),
+                        'icon' => 'mdi-format-list-bulleted',
+                        'badge' => 'Categoria',
                         'badge_class' => 'bg-primary'
                     ];
                 });
@@ -231,6 +269,35 @@ class SearchController extends Controller
             }
         }
 
+        // Buscar Despesas (apenas para admins/gerentes)
+        if (($type === 'all' || $type === 'expenses') && $this->userCan('view_expenses')) {
+            $expenses = Expense::where('description', 'LIKE', "%{$query}%")
+               /*  ->orWhere('supplier', 'LIKE', "%{$query}%") */
+                ->orWhere('receipt_number', 'LIKE', "%{$query}%")
+                ->with('category')
+                ->orderBy('expense_date', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($expense) {
+                    return [
+                        'type' => 'expense',
+                        'id' => $expense->id,
+                        'title' => $expense->description,
+                        'subtitle' => $expense->supplier ?? 'Sem fornecedor',
+                        'description' => "Valor: " . number_format($expense->amount, 2) . " MZN - " . $expense->date?->format('d/m/Y'),
+                        'expense_date' => $expense->expense_date?->format('d/m/Y'),
+                        'url' => route('expenses.show', $expense->id),
+                        'icon' => 'mdi-cash-remove',
+                        'badge' => $expense->category->name ?? 'Sem categoria',
+                        'badge_class' => 'bg-danger'
+                    ];
+                });
+
+            if ($expenses->isNotEmpty()) {
+                $results['expenses'] = $expenses;
+            }
+        }
+        
         return $results;
     }
 
@@ -247,59 +314,59 @@ class SearchController extends Controller
         if ($products->isNotEmpty()) {
             $results['products'] = [
                 'title' => 'Produtos',
-                'icon' => 'fas fa-cube',
+                'icon' => 'mdi-food',
                 'items' => $products->map(function ($product) {
                     return [
                         'id' => $product->id,
                         'text' => $product->name,
                         'subtitle' => number_format($product->selling_price, 2) . ' MZN',
                         'url' => route('products.show', $product->id),
-                        'stock' => $product->stock_quantity
+                        'stock' => $product->stock_quantity ?? 0
                     ];
                 })->toArray()
             ];
         }
 
-        // Busca rápida de clientes (baseado em vendas)
-        if ($this->userCan('view_sales')) {
-            $customers = Sale::where('customer_name', 'LIKE', "%{$query}%")
-                ->orWhere('customer_phone', 'LIKE', "%{$query}%")
-                ->select('customer_name', 'customer_phone')
-                ->distinct()
-                ->limit(5)
-                ->get()
-                ->filter(fn($sale) => !empty($sale->customer_name));
+        // Busca rápida de clientes
+        $clients = Client::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('phone', 'LIKE', "%{$query}%")
+            ->limit(5)
+            ->get(['id', 'name', 'phone']);
 
-            if ($customers->isNotEmpty()) {
-                $results['customers'] = [
-                    'title' => 'Clientes',
-                    'icon' => 'fas fa-users',
-                    'items' => $customers->map(function ($customer) {
-                        return [
-                            'text' => $customer->customer_name,
-                            'subtitle' => $customer->customer_phone ?: 'Sem telefone',
-                            'url' => route('sales.index', ['customer' => $customer->customer_name])
-                        ];
-                    })->toArray()
-                ];
-            }
+        if ($clients->isNotEmpty()) {
+            $results['clients'] = [
+                'title' => 'Clientes',
+                'icon' => 'mdi-account-group',
+                'items' => $clients->map(function ($client) {
+                    return [
+                        'id' => $client->id,
+                        'text' => $client->name,
+                        'subtitle' => $client->phone ?? 'Sem telefone',
+                        'url' => route('clients.show', $client->id)
+                    ];
+                })->toArray()
+            ];
         }
 
         // Busca rápida de pedidos pendentes
         if ($this->userCan('view_orders')) {
-            $pendingOrders = Order::where('customer_name', 'LIKE', "%{$query}%")
-                ->where('status', '!=', 'completed')
+            $pendingOrders = Order::where(function($q) use ($query) {
+                    $q->where('customer_name', 'LIKE', "%{$query}%")
+                      ->orWhere('id', 'LIKE', "%{$query}%");
+                })
+                ->whereIn('status', ['pending', 'preparing', 'ready'])
                 ->limit(3)
-                ->get(['id', 'customer_name', 'status', 'delivery_date']);
+                ->get(['id', 'customer_name', 'status', 'total_amount']);
 
             if ($pendingOrders->isNotEmpty()) {
                 $results['orders'] = [
-                    'title' => 'Pedidos Pendentes',
-                    'icon' => 'fas fa-clipboard-list',
+                    'title' => 'Pedidos Ativos',
+                    'icon' => 'mdi-receipt',
                     'items' => $pendingOrders->map(function ($order) {
                         return [
+                            'id' => $order->id,
                             'text' => "Pedido #{$order->id}",
-                            'subtitle' => $order->customer_name . ' - ' . ucfirst($order->status),
+                            'subtitle' => ($order->customer_name ?? 'Cliente') . ' - ' . $this->getOrderStatusLabel($order->status),
                             'url' => route('orders.show', $order->id)
                         ];
                     })->toArray()
@@ -307,51 +374,106 @@ class SearchController extends Controller
             }
         }
 
+        // Busca rápida de mesas
+        $tables = Table::where('number', 'LIKE', "%{$query}%")
+            ->orWhere('name', 'LIKE', "%{$query}%")
+            ->limit(4)
+            ->get(['id', 'number', 'name', 'status', 'capacity']);
+
+        if ($tables->isNotEmpty()) {
+            $results['tables'] = [
+                'title' => 'Mesas',
+                'icon' => 'mdi-table-furniture',
+                'items' => $tables->map(function ($table) {
+                    return [
+                        'id' => $table->id,
+                        'text' => "Mesa {$table->number}",
+                        'subtitle' => ($table->name ?? '') . " - " . $this->getTableStatusLabel($table->status),
+                        'url' => route('tables.show', $table->id)
+                    ];
+                })->toArray()
+            ];
+        }
+
         return $results;
+    }
+
+    private function getOrderStatusLabel($status)
+    {
+        return match($status) {
+            'pending' => 'Pendente',
+            'preparing' => 'Preparando',
+            'ready' => 'Pronto',
+            'served' => 'Servido',
+            'completed' => 'Finalizado',
+            'cancelled' => 'Cancelado',
+            default => 'Desconhecido'
+        };
     }
 
     private function getOrderStatusClass($status)
     {
         return match($status) {
             'pending' => 'bg-warning',
-            'in_progress' => 'bg-info',
+            'preparing' => 'bg-info',
+            'ready' => 'bg-primary',
+            'served' => 'bg-success',
             'completed' => 'bg-success',
-            'delivered' => 'bg-success',
             'cancelled' => 'bg-danger',
             default => 'bg-secondary'
         };
     }
 
-    private function getDebtStatusClass($status)
+    private function getTableStatusLabel($status)
     {
         return match($status) {
-            'active' => 'bg-warning',
-            'partial' => 'bg-info',
-            'paid' => 'bg-success',
-            'overdue' => 'bg-danger',
-            'cancelled' => 'bg-secondary',
+            'available' => 'Disponível',
+            'occupied' => 'Ocupada',
+            'reserved' => 'Reservada',
+            'cleaning' => 'Limpeza',
+            'maintenance' => 'Manutenção',
+            default => 'Desconhecido'
+        };
+    }
+
+    private function getTableStatusClass($status)
+    {
+        return match($status) {
+            'available' => 'bg-success',
+            'occupied' => 'bg-danger',
+            'reserved' => 'bg-warning',
+            'cleaning' => 'bg-info',
+            'maintenance' => 'bg-secondary',
             default => 'bg-secondary'
         };
     }
 
     /**
-     * Helper function para verificar permissões do usuário
+     * Helper para verificar permissões do usuário
      * Adapte conforme seu sistema de permissões
      */
     private function userCan($permission)
     {
-        // Implementar conforme seu sistema de permissões
-        // Por enquanto, retorna true para todos os usuários logados
-        return auth()->check();
-    }
-
-    /**
-     * Helper function para verificar múltiplas permissões
-     */
-    private function userCanAny($permissions)
-    {
-        // Implementar conforme seu sistema de permissões
-        // Por enquanto, retorna true para todos os usuários logados
-        return auth()->check();
+        $user = auth()->user();
+        
+        if (!$user) return false;
+        
+        // Se for admin, pode tudo
+        if ($user->role === 'admin') return true;
+        
+        // Permissões básicas para gerentes
+        if ($user->role === 'manager') {
+            return in_array($permission, [
+                'view_sales', 'view_orders', 'view_employees', 
+                'manage_categories', 'view_expenses'
+            ]);
+        }
+        
+        // Permissões básicas para funcionários
+        if ($user->role === 'employee') {
+            return in_array($permission, ['view_orders']);
+        }
+        
+        return false;
     }
 }

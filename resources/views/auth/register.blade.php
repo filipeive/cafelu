@@ -1,108 +1,94 @@
 @extends('layouts.auth')
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Register') }}</div>
+@section('title', 'Registrar-se')
 
-                <div class="card-body">
-                    <form method="POST" action="{{ route('register') }}">
-                        @csrf
+@section('form-title', 'Crie sua Conta')
+@section('form-subtitle', 'Preencha os campos abaixo para registrar-se no sistema')
 
-                        <!-- Nome -->
-                        <div class="row mb-3">
-                            <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
+@section('form-content')
+    <form method="POST" action="{{ route('register') }}">
+        @csrf
 
-                            <div class="col-md-6">
-                                <input id="name" type="text"
-                                    class="form-control @error('name') is-invalid @enderror"
-                                    name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+        <!-- Nome -->
+        <div class="form-group">
+            <label for="name" class="form-label">Nome Completo</label>
+            <div class="input-group">
+                <i class="mdi mdi-account input-icon"></i>
+                <input id="name" type="text" 
+                    class="form-control with-icon @error('name') is-invalid @enderror" 
+                    name="name" value="{{ old('name') }}" required autofocus>
+            </div>
+            @error('name')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
 
-                                @error('name')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
+        <!-- Nome de usuário -->
+        <div class="form-group">
+            <label for="username" class="form-label">Usuário</label>
+            <div class="input-group">
+                <i class="mdi mdi-account-circle input-icon"></i>
+                <input id="username" type="text" 
+                    class="form-control with-icon @error('username') is-invalid @enderror" 
+                    name="username" value="{{ old('username') }}" required>
+            </div>
+            @error('username')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
 
-                        <!-- Nome de usuário -->
-                        <div class="row mb-3">
-                            <label for="username" class="col-md-4 col-form-label text-md-end">{{ __('Username') }}</label>
+        <!-- Email -->
+        <div class="form-group">
+            <label for="email" class="form-label">E-mail</label>
+            <div class="input-group">
+                <i class="mdi mdi-email input-icon"></i>
+                <input id="email" type="email" 
+                    class="form-control with-icon @error('email') is-invalid @enderror" 
+                    name="email" value="{{ old('email') }}" required>
+            </div>
+            @error('email')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
 
-                            <div class="col-md-6">
-                                <input id="username" type="text"
-                                    class="form-control @error('username') is-invalid @enderror"
-                                    name="username" value="{{ old('username') }}" required autocomplete="username">
+        <!-- Senha -->
+        <div class="form-group">
+            <label for="password" class="form-label">Senha</label>
+            <div class="input-group">
+                <i class="mdi mdi-lock input-icon"></i>
+                <input id="password" type="password" 
+                    class="form-control with-icon @error('password') is-invalid @enderror" 
+                    name="password" required autocomplete="new-password">
+                <button type="button" class="password-toggle">
+                    <i class="mdi mdi-eye-outline"></i>
+                </button>
+            </div>
+            @error('password')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
 
-                                @error('username')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email"
-                                    class="form-control @error('email') is-invalid @enderror"
-                                    name="email" value="{{ old('email') }}" required autocomplete="email">
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Senha -->
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password"
-                                    class="form-control @error('password') is-invalid @enderror"
-                                    name="password" required autocomplete="new-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Confirmação de senha -->
-                        <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password"
-                                    class="form-control"
-                                    name="password_confirmation" required autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <!-- Botão de Registro -->
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Register') }}
-                                </button>
-                            </div>
-                        </div>
-                        
-                    </form>
-                </div>
+        <!-- Confirmar Senha -->
+        <div class="form-group">
+            <label for="password-confirm" class="form-label">Confirmar Senha</label>
+            <div class="input-group">
+                <i class="mdi mdi-lock-check input-icon"></i>
+                <input id="password-confirm" type="password" 
+                    class="form-control with-icon" 
+                    name="password_confirmation" required autocomplete="new-password">
             </div>
         </div>
-    </div>
-</div>
+
+        <!-- Botão -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">
+                Registrar-se
+            </button>
+        </div>
+
+        <!-- Link de login -->
+        <div class="auth-links mt-3">
+            <p>Já tem uma conta? <a href="{{ route('login') }}">Entrar</a></p>
+        </div>
+    </form>
 @endsection

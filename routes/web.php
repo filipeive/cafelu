@@ -6,6 +6,9 @@ use App\Http\Controllers\POSController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\OrderController;
@@ -27,7 +30,7 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 // Authentication routes (provided by Laravel)
 Auth::routes(['register' => false]); // Disable public registration
 Route::middleware(['auth', 'is_admin'])->group(function () {
-    Route::get('/register', [RegisteredUserController::class, 'create']);
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
 });
 
@@ -82,9 +85,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
     Route::get('/orders/kitchen', [OrderController::class, 'kitchen'])->name('orders.kitchen');
+
     // Products & Categories
     Route::resource('products', ProductController::class);
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
@@ -146,7 +151,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'save'])->name('save');
 
     //reports
-    Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {
+   /*  Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/sales', 'sales')->name('sales');
         Route::get('/inventory', 'inventory')->name('inventory');
@@ -154,5 +159,112 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sales-by-category', 'salesByCategory')->name('salesByCategory');
         Route::get('/sales-by-payment-method', 'salesByPaymentMethod')->name('salesByPaymentMethod');
         Route::get('/sales-by-date', 'salesByDate')->name('salesByDate');
+    }); */
+    //expense category
+    Route::resource('expense-categories', ExpenseCategoryController::class)->only(['store']);
+    // ===== DESPESAS =====
+    Route::prefix('expenses')->name('expenses.')->group(function () {
+        // Visualizar despesas - todos podem
+        Route::get('/', [ExpenseController::class, 'index'])->name('index');
+        Route::get('/{expense}', [ExpenseController::class, 'show'])->name('show');
+        Route::get('/{expense}/details', [ExpenseController::class, 'showData'])->name('details');
+        
+        // Criar despesas - create_expenses permission
+        Route::middleware('permissions:create_expenses')->group(function () {
+            Route::get('/create', [ExpenseController::class, 'create'])->name('create');
+            Route::post('/', [ExpenseController::class, 'store'])->name('store');
+        });
+        
+        // Editar despesas - edit_expenses permission
+        Route::middleware('permissions:edit_expenses')->group(function () {
+            Route::get('/{expense}/edit', [ExpenseController::class, 'edit'])->name('edit');
+            Route::put('/{expense}', [ExpenseController::class, 'update'])->name('update');
+        });
+        
+        // Deletar despesas - delete_expenses permission
+        Route::middleware('permissions:delete_expenses')->group(function () {
+            Route::delete('/{expense}', [ExpenseController::class, 'destroy'])->name('destroy');
+        });
+    });
+    
+    // ===== MOVIMENTAÇÕES DE ESTOQUE =====
+    Route::prefix('stock-movements')->name('stock-movements.')->group(function () {
+        // Visualizar movimentações - view_stock_movements permission
+        Route::middleware('permissions:view_stock_movements')->group(function () {
+            Route::get('/', [StockMovementController::class, 'index'])->name('index');
+            Route::get('/{stockMovement}', [StockMovementController::class, 'show'])->name('show');
+        });
+        
+        // Criar movimentações - create_stock_movements permission
+        Route::middleware('permissions:create_stock_movements')->group(function () {
+            Route::get('/create', [StockMovementController::class, 'create'])->name('create');
+            Route::post('/', [StockMovementController::class, 'store'])->name('store');
+        });
+        
+        // Gerenciar estoque - manage_stock permission (admin only)
+        Route::middleware('permissions:manage_stock')->group(function () {
+             // Rota para listagem (index)
+        Route::get('/stock-movements', [StockMovementController::class, 'index'])
+            ->name('stock-movements.index');
+        
+        // Rota para mostrar formulário de criação
+        Route::get('/stock-movements', [StockMovementController::class, 'create'])
+            ->name('create');
+        
+            Route::get('/stock-movements/{stockMovement}/edit', [StockMovementController::class, 'edit'])
+            ->name('edit');
+        
+        // Rota para armazenar novo movimento
+        Route::post('/stock-movements', [StockMovementController::class, 'store'])
+            ->name('store');
+        // Edit
+        
+        // Rota para mostrar detalhes de um movimento específico
+        Route::get('/stock-movements/{stockMovement}', [StockMovementController::class, 'show'])
+            ->name('show');
+        
+        // Rota para atualizar movimento
+        Route::put('/stock-movements/{stockMovement}', [StockMovementController::class, 'update'])
+            ->name('update');
+        
+        // Rota para excluir movimento
+        Route::delete('/stock-movements/{stockMovement}', [StockMovementController::class, 'destroy'])
+            ->name('destroy');
+            });
+        });
+        
+    // ===== RELATÓRIOS =====
+        Route::prefix('reports')->name('reports.')->group(function () {
+        // ===== DASHBOARD PRINCIPAL =====
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/dashboard', [ReportController::class, 'dashboard'])->name('dashboard');
+
+        // ===== RELATÓRIOS BÁSICOS =====
+        Route::get('/daily-sales', [ReportController::class, 'dailySales'])->name('daily-sales');
+        Route::get('/monthly-sales', [ReportController::class, 'monthlySales'])->name('monthly-sales');
+        Route::get('/sales-by-product', [ReportController::class, 'salesByProduct'])->name('sales-by-product');
+        Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
+        Route::get('/low-stock', [ReportController::class, 'lowStock'])->name('low-stock');
+
+        // ===== RELATÓRIOS FINANCEIROS =====
+        Route::get('/profit-loss', [ReportController::class, 'profitLoss'])->name('profit-loss');
+        Route::get('/cash-flow', [ReportController::class, 'cashFlow'])->name('cash-flow');
+
+        // ===== ANÁLISES AVANÇADAS =====
+        Route::get('/customer-profitability', [ReportController::class, 'customerProfitability'])->name('customer-profitability');
+        Route::get('/abc-analysis', [ReportController::class, 'abcAnalysis'])->name('abc-analysis');
+        Route::get('/period-comparison', [ReportController::class, 'periodComparison'])->name('period-comparison');
+        Route::get('/business-insights', [ReportController::class, 'businessInsights'])->name('business-insights');
+
+        // ===== RELATÓRIOS ESPECIALIZADOS =====
+        Route::get('/sales-specialized', [ReportController::class, 'salesReport'])->name('sales-specialized');
+        Route::get('/expenses-specialized', [ReportController::class, 'expensesReport'])->name('expenses-specialized');
+        Route::get('/comparison-specialized', [ReportController::class, 'comparisonReport'])->name('comparison-specialized');
+
+        // ===== EXPORTAÇÕES =====
+        Route::get('/export', [ReportController::class, 'export'])->name('export');
+        Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/export-pdf', [ReportController::class, 'exportPDF'])->name('export.pdf');
+        Route::get('/export-csv', [ReportController::class, 'exportCSV'])->name('export.csv');
     });
 });

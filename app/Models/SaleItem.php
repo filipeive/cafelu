@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class SaleItem extends Model
 {
     protected $fillable = [
-        'sale_id', 'product_id', 'quantity', 'unit_price'
+        'sale_id', 'product_id', 'quantity', 'unit_price', 'total_price'
     ];
 
     // A sale item belongs to a sale
@@ -20,4 +20,10 @@ class SaleItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function getTotalPriceAttribute()
+    {
+        return $this->unit_price * $this->quantity;
+    }
+
 }

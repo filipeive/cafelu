@@ -3,12 +3,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sale extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $fillable = [ 
+        'client_id',
         'sale_date',
         'total_amount',
         'payment_method',
@@ -39,6 +42,11 @@ class Sale extends Model
         return $this->hasMany(SaleItem::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -52,4 +60,9 @@ class Sale extends Model
                $this->mpesa_amount +
                $this->emola_amount;
     }
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'client_id');
+    }
+
 }

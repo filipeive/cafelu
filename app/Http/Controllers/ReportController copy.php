@@ -183,29 +183,28 @@ class ReportController extends Controller
 
         if ($reportType === 'sales' || $reportType === 'all') {
 
-        $dados['sales'] = Sale::with(['user', 'client', 'items.product'])
-            ->whereBetween('sale_date', [$dateFrom, $dateTo])
-            ->latest()
-            ->get()
-            ->map(function ($sale) {
+    $dados['sales'] = Sale::with(['user', 'client', 'items.product'])
+        ->whereBetween('sale_date', [$dateFrom, $dateTo])
+        ->latest()
+        ->get()
+        ->map(function ($sale) {
 
-                // Calcular margem por venda
-                $cost = $sale->items->sum(function ($item) {
-                    return $item->quantity * ($item->product->purchase_price ?? 0);
-                });
-
-                $sale->cost = $cost;
-                $sale->profit = $sale->total_amount - $cost;
-                $sale->margin = $sale->total_amount > 0 ? (($sale->profit / $sale->total_amount) * 100) : 0;
-
-                // Substituir customer_name e customer_phone pelo relacionamento client
-                $sale->customer_name = $sale->client->name ?? 'Cliente desconhecido';
-                $sale->customer_phone = $sale->client->phone ?? 'Sem telefone';
-
-                return $sale;
+            // Calcular margem por venda
+            $cost = $sale->items->sum(function ($item) {
+                return $item->quantity * ($item->product->purchase_price ?? 0);
             });
 
-        }
+            $sale->cost = $cost;
+            $sale->profit = $sale->total_amount - $cost;
+            $sale->margin = $sale->total_amount > 0 ? (($sale->profit / $sale->total_amount) * 100) : 0;
+
+            // Substituir customer_name e customer_phone pelo relacionamento client
+            $sale->customer_name = $sale->client->name ?? 'Cliente desconhecido';
+            $sale->customer_phone = $sale->client->phone ?? 'Sem telefone';
+
+            return $sale;
+        });
+}
 
         if ($reportType === 'expenses' || $reportType === 'all') {
             $dados['expenses'] = Expense::with(['user', 'category'])

@@ -63,7 +63,12 @@ class OrderController extends Controller
                 ->with('error', 'Não é possível editar um pedido que já foi pago ou cancelado.');
         }
 
-        $order->load('items.product', 'table');
+        $order->load([
+            'items.product' => function($query) {
+                $query->withTrashed(); // 👈 Isso carrega até produtos excluídos
+            },
+            'table'
+        ]);
         $categories = Category::with(['products' => function($query) {
             $query->where('is_active', 1);
         }])->get();
@@ -361,9 +366,15 @@ class OrderController extends Controller
             return redirect()->back()->with('error', 'Erro ao atualizar informações: ' . $e->getMessage());
         }
     }
-    public function getOrderData(Order $order)
+   public function getOrderData(Order $order)
     {
-        $order->load('items.product', 'table', 'user');
+        $order->load([
+            'items.product' => function($query) {
+                $query->withTrashed(); // 👈 ADICIONE ISSO!
+            },
+            'table',
+            'user'
+        ]);
 
         return response()->json([
             'id' => $order->id,
@@ -373,7 +384,9 @@ class OrderController extends Controller
             'user' => ['name' => $order->user->name ?? 'Sistema'],
             'items' => $order->items->map(function ($item) {
                 return [
-                    'product' => ['name' => $item->product->name],
+                    'product' => [
+                        'name' => $item->product ? $item->product->name : '[Produto Excluído]'
+                    ],
                     'quantity' => $item->quantity,
                     'total_price' => $item->total_price,
                 ];

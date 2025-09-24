@@ -321,21 +321,35 @@
                 <!-- Order Summary Card -->
                 <div class="card mb-4">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="mdi mdi-cash-register text-primary me-2"></i>Resumo do Pedido</h5>
+                        <h5 class="mb-0">
+                            <i class="mdi mdi-cash-register text-primary me-2"></i>Resumo do Pedido
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <span class="h6 mb-0">Total</span>
-                            <span class="h3 mb-0 text-primary">MZN
-                                {{ number_format($order->total_amount, 2, ',', '.') }}</span>
+                            <span class="h3 mb-0 text-primary">
+                                MZN {{ number_format($order->total_amount, 2, ',', '.') }}
+                            </span>
                         </div>
 
-                        <form action="{{ route('orders.complete', $order) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-success btn-lg w-100">
-                                <i class="mdi mdi-check-circle me-1"></i> Finalizar Pedido
+                        {{-- Só mostra se ainda não estiver concluído --}}
+                        @if ($order->status !== 'completed')
+                            <form action="{{ route('orders.complete', $order) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-warning btn-lg w-100">
+                                    <i class="mdi mdi-check-circle me-1"></i> Finalizar Pedido
+                                </button>
+                            </form>
+                        @endif
+
+                        {{-- Botão de pagamento aparece só quando finalizado e ainda não pago --}}
+                        @if ($order->status === 'completed' && !$order->is_paid)
+                            <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal"
+                                data-bs-target="#paymentModal">
+                                <i class="mdi mdi-cash-multiple me-1"></i> Registrar Pagamento
                             </button>
-                        </form>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -444,7 +458,15 @@
                 card.style.display = productName.includes(searchTerm) ? 'flex' : 'none';
             });
         });
+        // Inicializa todos os tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
 
+            // Adiciona listener para o evento de sucesso do modal
+            const paymentModals = document.querySelectorAll('.modal');
+            
         // Category Tabs
         document.querySelectorAll('.custom-tab').forEach(tab => {
             tab.addEventListener('click', function() {

@@ -66,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/tables/split', [TableController::class, 'splitTables'])->name('tables.split');
 
     // Rotas dos pedidos
+    Route::get('/orders/data/{order}', [OrderController::class, 'getOrderData'])->name('orders.data');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
@@ -78,7 +79,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/{order}/print-receipt', [OrderController::class, 'printReceipt'])->name('orders.print-receipt');
     Route::post('/orders/complete/{order}', [OrderController::class, 'complete'])->name('orders.complete');
-    Route::get('/orders/data/{order}', [OrderController::class, 'getOrderData'])->name('orders.data');
     Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
     Route::get('/orders/kitchen', [OrderController::class, 'kitchen'])->name('orders.kitchen');

@@ -15,7 +15,9 @@
     <!-- Material Design Icons -->
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Costom -->
     {{-- <link rel="stylesheet" href="{{ asset('assets/css/orders.css') }}"> --}}
 
@@ -33,19 +35,19 @@
             --info-color: #3b82f6;
             --dark-color: #1f2937;
             --light-color: #f8fafc;
-            
+
             /* Gradientes */
             --primary-gradient: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
             --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
             --beach-gradient: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #fbbf24 100%);
             --sunset-gradient: linear-gradient(135deg, #f59e0b 0%, #fb923c 50%, #f97316 100%);
-            
+
             /* Sombras */
             --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            
+
             /* Outros */
             --border-radius: 12px;
             --border-radius-lg: 16px;
@@ -75,7 +77,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 20% 50%, rgba(8, 145, 178, 0.03) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.03) 0%, transparent 50%),
                 radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
@@ -519,6 +521,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -526,10 +529,13 @@
         }
 
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: scale(1);
                 opacity: 1;
             }
+
             50% {
                 transform: scale(1.1);
                 opacity: 0.8;
@@ -561,7 +567,7 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0, 0, 0, 0.5);
-                z-index: 1035;
+                z-index: 1040 !important;
                 opacity: 0;
                 visibility: hidden;
                 transition: all 0.3s ease;
@@ -664,7 +670,7 @@
                 <h1 class="brand-title">ZALALA BEACH BAR</h1>
                 <div class="brand-subtitle">Restaurante • Bar • Gestão</div>
             </div>
-            
+
             {{-- <div class="business-info">
                 <div class="info-item">
                     <i class="mdi mdi-map-marker"></i>
@@ -687,7 +693,8 @@
             <div class="nav-section">
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+                            href="{{ route('dashboard') ?? '#' }}">
                             <i class="mdi mdi-view-dashboard"></i>
                             <span>Dashboard</span>
                         </a>
@@ -703,43 +710,58 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}" href="{{ route('pos.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}"
+                            href="{{ route('pos.index') ?? '#' }}">
                             <i class="mdi mdi-point-of-sale"></i>
                             <span>PDV (Ponto de Venda)</span>
                             <span class="badge bg-success ms-auto">Live</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}"
+                            href="{{ route('orders.index') }}">
                             <i class="mdi mdi-receipt"></i>
                             <span>Pedidos</span>
                             @php
-                                $pendingOrdersCount = \App\Models\Order::where('status', 'pending')->count();
+                                $pendingOrdersCount = \App\Models\Order::whereIn('status', [
+                                    'active',
+                                    'pending',
+                                ])->count();
                             @endphp
-                            @if($pendingOrdersCount > 0)
-                                <span class="badge bg-warning ms-auto">{{ $pendingOrdersCount }}</span>
+                            @if ($pendingOrdersCount > 0)
+                                <span class="nav-badge" style="background: var(--warning-color);">
+                                    {{ $pendingOrdersCount }}
+                                </span>
                             @endif
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('tables.*') ? 'active' : '' }}" href="{{ route('tables.index') ?? '#' }}">
-                            <i class="mdi mdi-table-furniture"></i>
+                        <a class="nav-link {{ request()->routeIs('tables.*') ? 'active' : '' }}"
+                            href="{{ route('tables.index') }}">
+                            <i class="mdi mdi-table-chair"></i>
                             <span>Mesas</span>
                             @php
-                                $availableTablesCount = \App\Models\Table::where('status', 'available')->count();
+                                // Conta mesas com pedidos ativos (status 'active' ou 'completed')
+                                $occupiedTables = \App\Models\Table::whereHas('orders', function ($query) {
+                                    $query->whereIn('status', ['active', 'completed']);
+                                })->count();
+
                                 $totalTables = \App\Models\Table::count();
+                                $availableTables = $totalTables - $occupiedTables;
                             @endphp
-                            @if($totalTables > 0)
-                                <span class="badge bg-info ms-auto">{{ $availableTablesCount }}/{{ $totalTables }}</span>
-                            @endif
+                            <span class="badge bg-success ms-auto"
+                                title="Livre: {{ $availableTables }} | Ocupada: {{ $occupiedTables }}"
+                                style="background: {{ $availableTables > 0 ? 'var(--success-color)' : 'var(--danger-color)' }};">
+                                {{ $availableTables }}
+                            </span>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('reservations.*') ? 'active' : '' }}" href="#">
                             <i class="mdi mdi-calendar-check"></i>
                             <span>Reservas</span>
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
             </div>
 
@@ -751,13 +773,15 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                            href="{{ route('products.index') ?? '#' }}">
                             <i class="mdi mdi-food"></i>
                             <span>Produtos</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}" href="{{ route('categories.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
+                            href="{{ route('categories.index') ?? '#' }}">
                             <i class="mdi mdi-format-list-bulleted"></i>
                             <span>Categorias</span>
                         </a>
@@ -785,19 +809,22 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}" href="{{ route('sales.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}"
+                            href="{{ route('sales.index') ?? '#' }}">
                             <i class="mdi mdi-currency-usd"></i>
                             <span>Vendas</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+                            href="{{ route('reports.index') ?? '#' }}">
                             <i class="mdi mdi-chart-line"></i>
                             <span>Relatórios</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}" href="{{ route('expenses.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}"
+                            href="{{ route('expenses.index') ?? '#' }}">
                             <i class="mdi mdi-cash-remove"></i>
                             <span>Despesas</span>
                         </a>
@@ -819,7 +846,8 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}" href="{{ route('clients.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}"
+                            href="{{ route('clients.index') ?? '#' }}">
                             <i class="mdi mdi-account-heart"></i>
                             <span>Clientes</span>
                         </a>
@@ -841,13 +869,15 @@
                 </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}" href="{{ route('employees.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}"
+                            href="{{ route('employees.index') ?? '#' }}">
                             <i class="mdi mdi-account-tie"></i>
                             <span>Funcionários</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') ?? '#' }}">
+                        <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
+                            href="{{ route('users.index') ?? '#' }}">
                             <i class="mdi mdi-account-key"></i>
                             <span>Usuários</span>
                         </a>
@@ -883,7 +913,8 @@
 
             <form method="POST" action="{{ route('logout') ?? '#' }}">
                 @csrf
-                <button type="submit" class="btn btn-outline-light btn-sm w-100 d-flex align-items-center justify-content-center">
+                <button type="submit"
+                    class="btn btn-outline-light btn-sm w-100 d-flex align-items-center justify-content-center">
                     <i class="mdi mdi-logout me-2"></i>
                     Sair do Sistema
                 </button>
@@ -909,7 +940,7 @@
                             <i class="mdi @yield('title-icon', 'mdi-view-dashboard') text-primary me-2 fs-4"></i>
                             <div>
                                 <h1 class="navbar-brand-mobile mb-0">@yield('page-title', 'Dashboard')</h1>
-                               {{--  <small class="text-muted d-none d-md-block">@yield('page-subtitle', 'Painel de Controle')</small> --}}
+                                {{--  <small class="text-muted d-none d-md-block">@yield('page-subtitle', 'Painel de Controle')</small> --}}
                             </div>
                         </div>
                     </div>
@@ -918,9 +949,11 @@
                     <div class="search-container d-none d-md-block flex-grow-1 mx-4">
                         <div class="position-relative">
                             <i class="mdi mdi-magnify search-icon"></i>
-                            <input type="text" class="form-control search-input" placeholder="Buscar produtos, pedidos, clientes..." id="global-search">
+                            <input type="text" class="form-control search-input"
+                                placeholder="Buscar produtos, pedidos, clientes..." id="global-search">
                             <!-- Search Results Dropdown -->
-                            <div class="dropdown-menu w-100 mt-1" id="search-results" style="display: none; max-height: 300px; overflow-y: auto;">
+                            <div class="dropdown-menu w-100 mt-1" id="search-results"
+                                style="display: none; max-height: 300px; overflow-y: auto;">
                                 <div class="p-3 text-center text-muted">
                                     <i class="mdi mdi-magnify"></i>
                                     Digite para buscar...
@@ -933,13 +966,18 @@
                     <div class="d-flex align-items-center gap-3">
                         <!-- Quick Actions -->
                         <div class="dropdown d-none d-md-block">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
                                 <i class="mdi mdi-lightning-bolt me-1"></i>
                                 Ações Rápidas
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><h6 class="dropdown-header">Ações Rápidas</h6></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <h6 class="dropdown-header">Ações Rápidas</h6>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ route('pos.index') ?? '#' }}">
                                         <i class="mdi mdi-point-of-sale text-success me-2"></i>
@@ -958,7 +996,9 @@
                                         Adicionar Produto
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ route('reports.index') ?? '#' }}">
                                         <i class="mdi mdi-chart-line text-info me-2"></i>
@@ -970,9 +1010,11 @@
 
                         <!-- Notifications -->
                         <div class="dropdown">
-                            <button class="btn btn-outline-primary position-relative" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-outline-primary position-relative" type="button"
+                                data-bs-toggle="dropdown">
                                 <i class="mdi mdi-bell-outline"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                <span
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                     3
                                 </span>
                             </button>
@@ -982,7 +1024,7 @@
                                     <button class="btn btn-link btn-sm p-0">Marcar como lidas</button>
                                 </div>
                                 <div class="dropdown-divider"></div>
-                                
+
                                 <div class="px-3 py-2 border-bottom">
                                     <div class="d-flex">
                                         <div class="flex-shrink-0 me-3">
@@ -1037,7 +1079,8 @@
 
                         <!-- User Profile -->
                         <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
+                                type="button" data-bs-toggle="dropdown">
                                 <div class="user-avatar me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
                                     {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
                                 </div>
@@ -1050,10 +1093,13 @@
                                             {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
                                         </div>
                                         <div class="fw-semibold">{{ auth()->user()->name ?? 'Administrador' }}</div>
-                                        <div class="text-muted small">{{ auth()->user()->email ?? 'admin@zalalabeachbar.com' }}</div>
+                                        <div class="text-muted small">
+                                            {{ auth()->user()->email ?? 'admin@zalalabeachbar.com' }}</div>
                                     </div>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ route('profile.edit') ?? '#' }}">
                                         <i class="mdi mdi-account-edit text-primary me-2"></i>
@@ -1072,7 +1118,9 @@
                                         Configurações
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') ?? '#' }}" class="mb-0">
                                         @csrf
@@ -1153,8 +1201,8 @@
                     </div>
                     <div class="col-md-6 text-md-end">
                         <small class="text-muted">
-                            Versão 2.0 | 
-                            <a href="#" class="text-primary text-decoration-none">Suporte</a> | 
+                            Versão 2.0 |
+                            <a href="#" class="text-primary text-decoration-none">Suporte</a> |
                             <a href="#" class="text-primary text-decoration-none">Documentação</a>
                         </small>
                     </div>
@@ -1165,7 +1213,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="{{ asset('assets/pos/printRecibo.js') }}"></script>
     <script>
         // ===== SIDEBAR MANAGEMENT =====
         class SidebarManager {
@@ -1254,17 +1302,17 @@
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-bs-theme') || 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
+
             html.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            
+
             showToast(`Tema ${newTheme === 'dark' ? 'escuro' : 'claro'} ativado`, 'info');
         }
 
         // ===== TOAST NOTIFICATIONS =====
         function showToast(message, type = 'success') {
             const toastContainer = document.getElementById('toast-container') || createToastContainer();
-            
+
             const iconMap = {
                 success: 'mdi-check-circle',
                 error: 'mdi-alert-circle',
@@ -1274,7 +1322,7 @@
 
             const colorMap = {
                 success: 'text-bg-success',
-                error: 'text-bg-danger', 
+                error: 'text-bg-danger',
                 warning: 'text-bg-warning',
                 info: 'text-bg-info'
             };
@@ -1293,8 +1341,11 @@
             toastContainer.insertAdjacentHTML('beforeend', toastHtml);
 
             const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 4000 });
-            
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 4000
+            });
+
             toast.show();
 
             toastElement.addEventListener('hidden.bs.toast', () => {
@@ -1393,4 +1444,5 @@
 
     @stack('scripts')
 </body>
+
 </html>

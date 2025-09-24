@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -7,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
-    protected $table = 'orders'; // Specify the table name if different from the model name
+
+    protected $table = 'orders';
+
     protected $fillable = [
         'table_id',
         'user_id',
@@ -16,14 +19,20 @@ class Order extends Model
         'total_amount',
         'payment_status',
         'payment_method',
-        'notes'
+        'notes',
+        'paid_at'
     ];
-    
+
+    protected $casts = [
+        'paid_at' => 'datetime',
+        'total_amount' => 'decimal:2'
+    ];
+
+    // Relacionamentos
     public function table()
     {
         return $this->belongsTo(Table::class);
     }
-
 
     public function user()
     {
@@ -35,40 +44,96 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // Define os possíveis status do pedido
+    // Status do pedido (alinhado com controller e view)
     public static function statuses()
     {
         return [
-            'pending' => 'Pendente',
-            'preparing' => 'Preparando',
-            'ready' => 'Pronto',
-            'delivered' => 'Entregue',
-            'cancelled' => 'Cancelado',
-            'completed' => 'Concluído'
+            'active' => 'Ativo',
+            'completed' => 'Finalizado',
+            'canceled' => 'Cancelado',
+            'paid' => 'Pago'
         ];
     }
 
-    // Define os possíveis status de pagamento
+    // Status de pagamento
     public static function paymentStatuses()
     {
         return [
             'pending' => 'Pendente',
             'paid' => 'Pago',
-            'cancelled' => 'Cancelado',
-            'refunded' => 'Reembolsado'
+            'canceled' => 'Cancelado'
         ];
     }
 
-    // Define os métodos de pagamento disponíveis
+    // Métodos de pagamento (alinhado com view)
     public static function paymentMethods()
     {
         return [
             'cash' => 'Dinheiro',
-            'credit_card' => 'Cartão de Crédito',
-            'debit_card' => 'Cartão de Débito',
-            'pix' => 'PIX',
-            'transfer' => 'Transferência',
-            'app' => 'Aplicativo'
+            'card' => 'Cartão',
+            'mpesa' => 'M-Pesa',
+            'emola' => 'E-Mola',
+            'mkesh' => 'M-Kesh',
+            'outros' => 'Outros'
         ];
+    }
+
+    // Método para classes CSS do badge de status
+    public function getStatusBadgeClass()
+    {
+        $classes = [
+            'active' => 'bg-warning text-white',
+            'completed' => 'bg-success text-white',
+            'canceled' => 'bg-danger text-white',
+            'paid' => 'bg-info text-white',
+        ];
+        return $classes[$this->status] ?? 'bg-secondary text-white';
+    }
+
+    // Método para texto legível do status
+    public function getStatusText()
+    {
+        $texts = [
+            'active' => 'Em Andamento',
+            'completed' => 'Finalizado',
+            'canceled' => 'Cancelado',
+            'paid' => 'Pago'
+        ];
+        return $texts[$this->status] ?? ucfirst($this->status);
+    }
+
+    // Scopes úteis
+    public function scopeToday($query)
+    {
+        return $query->whereDate('created_at', today());
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'paid');
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        if (empty($search)) return $query;
+
+        return $query->where(function($q) use ($search) {
+            $q->where('customer_name', 'like', "%{$search}%")
+              ->orWhere('id', 'like', "%{$search}%")
+              ->orWhere('notes', 'like', "%{$search}%")
+              ->orWhereHas('table', function($tableQuery) use ($search) {
+                  $tableQuery->where('number', 'like', "%{$search}%");
+              });
+        });
     }
 }

@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'POS - Sistema de Vendas')
+
+@section('page-title', 'PDV')
+@section('title-icon', 'mdi-cart')
+
+@section('breadcrumbs')
+    <li class="breadcrumb-item active" aria-current="page">POS - Sistema de Vendas</li>
+@endsection
 
 @section('content')
 <div class="pos-wrapper container-wrapper">

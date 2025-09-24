@@ -20,17 +20,33 @@ class OrderController extends Controller
     public function index()
     {
         $search = request('search');
-        $orders = Order::with('table')->orderBy('created_at', 'desc')->paginate(6);
+        
+        // ✅ ADICIONE busca se necessário
+        $orders = Order::with('table')
+            ->when($search, function($query, $search) {
+                return $query->where('customer_name', 'like', "%{$search}%")
+                            ->orWhereHas('table', function($q) use ($search) {
+                                $q->where('number', 'like', "%{$search}%");
+                            })
+                            ->orWhere('id', 'like', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(6);
+            
         $total_orders = Order::count();
-        $totalToday = $this->orderGetTotalToday();
-        $totalRevenueToday = Order::whereDate('created_at', now()->toDateString())
-        ->whereIn('status', ['completed', 'paid'])
-        ->sum('total_amount');
+        $totalToday = Order::today()->sum('total_amount');
+        $totalRevenueToday = Order::today()
+            ->whereIn('status', ['completed', 'paid'])
+            ->sum('total_amount');
         $tables = Table::get();
-        $totalOpen = $this->order_get_open_count();
+        $totalOpen = Order::active()->count();
 
-        return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalRevenueToday', 'tables', 'totalOpen', 'search'));
+        return view('orders.index', compact(
+            'orders', 'total_orders', 'totalToday', 
+            'totalRevenueToday', 'tables', 'totalOpen', 'search'
+        ));
     }
+
 
     public function orderGetTotalToday()
     {
@@ -183,7 +199,8 @@ class OrderController extends Controller
                 ]);
             }
 
-            return redirect()->route('tables.index')->with('success', $message);
+            return redirect()->route('orders.edit', $order->id)
+                ->with('success', 'Pedido finalizada com sucesso! Registe o Pagamento para Confirmar a Venda');
 
         } catch (\Exception $e) {
             $message = 'Erro ao finalizar pedido: ' . $e->getMessage();
@@ -208,10 +225,15 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $request->validate([
-                'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh',
+                'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh,outros',
                 'notes' => 'nullable|string',
-                'amount_paid' => 'required|numeric|min:' . $order->total_amount,
+                'amount_paid' => 'required|numeric|min:0', // Alterado para permitir qualquer valor positivo
             ]);
+
+            // Verificar se o valor pago é suficiente
+            if ($request->amount_paid < $order->total_amount) {
+                throw new \Exception('O valor pago não pode ser menor que o total do pedido.');
+            }
 
             if ($order->status !== 'completed') {
                 throw new \Exception('Apenas pedidos finalizados podem ser pagos.');
@@ -226,7 +248,9 @@ class OrderController extends Controller
                 'amount_paid' => $request->amount_paid,
                 'change_amount' => $request->amount_paid - $order->total_amount,
                 'notes' => $request->notes ?? $order->notes,
-                'status' => 'completed'
+                'status' => 'completed',
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             foreach ($order->items as $item) {
@@ -235,11 +259,10 @@ class OrderController extends Controller
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,
-                    'total_price' => $item->total_price,
-                    'notes' => $item->notes
+                    'notes' => $item->notes ?? null
                 ]);
 
-                $product = $item->product; // 👈 AQUI VOCÊ ACESSA O PRODUTO — ENTÃO PRECISA ESTAR CARREGADO!
+                $product = $item->product; 
                 if ($product) {
                     $product->stock_quantity -= $item->quantity;
                     $product->save();
@@ -271,11 +294,28 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return redirect()->route('orders.edit', $order->id)
+            // Resposta para AJAX
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pagamento registrado e venda finalizada com sucesso!'
+                ]);
+            }
+
+            return redirect()->route('orders.index')
                 ->with('success', 'Pagamento registrado e venda finalizada com sucesso!');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            // Resposta para AJAX
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao processar pagamento: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()
                 ->with('error', 'Erro ao processar pagamento: ' . $e->getMessage());
         }
@@ -359,9 +399,8 @@ class OrderController extends Controller
     /**
      * Retornar dados do pedido em JSON (para impressão, API, etc)
      */
-    public function getOrderData(Order $order)
+   public function getOrderData(Order $order)
     {
-        // 👇 GARANTIR CARREGAMENTO DO PRODUTO — ESSE ERA O CULPADO!
         $order->load([
             'items.product' => function($query) {
                 $query->withTrashed();
@@ -372,6 +411,7 @@ class OrderController extends Controller
 
         return response()->json([
             'id' => $order->id,
+            'customer_name' => $order->customer_name,
             'created_at' => $order->created_at,
             'total_amount' => $order->total_amount,
             'table' => $order->table ? ['number' => $order->table->number] : null,
@@ -385,12 +425,12 @@ class OrderController extends Controller
                     'total_price' => $item->total_price,
                 ];
             }),
-            'logo' => asset('assets/images/logo.png'),
-            'companyName' => 'Lu & Yoshi Catering - Café Lufamina',
-            'address' => 'Av. Samora Machel, Cidade de Quelimane',
-            'phone' => 'Tel: (+258) 878643715 / 844818014',
-            'nuit' => '1110947722',
-            'email' => 'cafelufamina@gmail.com',
+            'logo' => asset('assets/images/logo_zalala.png'),
+            'companyName' => 'ZALALA BEACH BAR',
+            'address' => 'Bairro de Zalala, ER470',
+            'phone' => 'Tel: (+258) 846 885 214',
+            'nuit' => '110735901',
+            'email' => 'info@zalalabeach.com',
         ]);
     }
 
@@ -399,7 +439,6 @@ class OrderController extends Controller
      */
     public function printReceipt(Order $order)
     {
-        // 👇 GARANTIR CARREGAMENTO DO PRODUTO
         $order->load('items.product', 'table', 'user');
         return view('orders.receipt', compact('order'));
     }
@@ -407,7 +446,6 @@ class OrderController extends Controller
     // Alias para print
     public function print(Order $order)
     {
-        // 👇 GARANTIR CARREGAMENTO DO PRODUTO
         $order->load('items.product', 'table', 'user');
         return view('orders.receipt', compact('order'));
     }

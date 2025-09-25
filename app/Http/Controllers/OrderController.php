@@ -7,6 +7,7 @@ use App\Models\Table;
 use App\Models\Product;
 use App\Models\OrderItem;
 use App\Models\Category;
+use App\Models\Client;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
@@ -198,7 +199,9 @@ class OrderController extends Controller
                     'message' => $message
                 ]);
             }
-
+             // Criar notificação
+            \App\Services\NotificationService::orderCompletedNotification($order);
+            
             return redirect()->route('orders.edit', $order->id)
                 ->with('success', 'Pedido finalizada com sucesso! Registe o Pagamento para Confirmar a Venda');
 
@@ -301,7 +304,7 @@ class OrderController extends Controller
                     'message' => 'Pagamento registrado e venda finalizada com sucesso!'
                 ]);
             }
-
+           
             return redirect()->route('orders.index')
                 ->with('success', 'Pagamento registrado e venda finalizada com sucesso!');
 

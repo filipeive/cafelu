@@ -180,7 +180,7 @@ class SearchController extends Controller
                         'title' => $client->name,
                         'subtitle' => $client->phone ?? 'Sem telefone',
                         'description' => $client->email ?? 'Cliente do restaurante',
-                        'url' => route('clients.show', $client->id),
+                        'url' => route('client.show', $client->id),
                         'icon' => 'mdi-account-heart',
                         'badge' => $client->is_active ? 'Ativo' : 'Inativo',
                         'badge_class' => $client->is_active ? 'bg-success' : 'bg-secondary'

@@ -464,10 +464,10 @@
                                         <div class="btn-group btn-group-sm">
                                             <a href="{{ route('sales.show', $sale) }}" class="btn btn-outline-info"
                                                 title="Ver Detalhes">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="fas fa-eye"></i> ver
                                             </a>
                                             <a href="{{ route('sales.print', $sale) }}" class="btn btn-outline-secondary"
-                                                 title="Imprimir">
+                                                 title="Imprimir"> imprimir
                                                 <i class="fas fa-print"></i>
                                             </a>
                                         </div>

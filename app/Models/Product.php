@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,21 +8,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes; 
+
+    protected $dates = ['deleted_at']; 
 
     protected $fillable = [
-        'category_id',
-        'name',
-        'description',
-        'type',
-        'purchase_price',
-        'selling_price',
-        'stock_quantity',
-        'min_stock_level',
-        'unit',
-        'is_active',
-        'deleted_at',
-        'original_name',
+        'category_id', 'name', 'description', 'type', 
+        'purchase_price', 'selling_price', 'stock_quantity',
+        'min_stock_level', 'unit', 'is_active',
+        'deleted_at','original_name',
     ];
 
     protected $casts = [
@@ -32,7 +25,6 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    // Relacionamentos
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -48,12 +40,6 @@ class Product extends Model
         return $this->hasMany(StockMovement::class);
     }
 
-    public function orderItems(): HasMany
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-
-    // Métodos de negócio
     public function isLowStock(): bool
     {
         return $this->stock_quantity <= $this->min_stock_level;
@@ -67,54 +53,24 @@ class Product extends Model
             $this->increment('stock_quantity', $quantity);
         }
     }
-
-    // 👇 Accessor: exibe nome com marcação se estiver excluído
+    // Accessor para exibir o nome com marcação de exclusão
     public function getNameAttribute($value)
     {
-        if ($this->trashed()) {
+        if ($this->is_deleted) {
             return $value . ' 🚫 (EXCLUÍDO)';
         }
         return $value;
     }
-
-    // 👇 Método para marcar como excluído (soft delete) corretamente
+       // Mutator para salvar o nome original ao excluir
     public function markAsDeleted()
     {
-        if (!$this->trashed()) {
+        if (!$this->is_deleted) {
             $this->original_name = $this->name;
+            $this->name = $this->name . ' (EXCLUÍDO)';
+            $this->is_deleted = true;
+            $this->deleted_at = now();
             $this->is_active = false;
             $this->save();
-            $this->delete(); // Define deleted_at = now()
         }
-    }
-
-    // 👇 Formata o preço para exibição
-    public function getFormattedPriceAttribute()
-    {
-        // Prioriza selling_price (se for reprografia ou produto normal)
-        if (!is_null($this->selling_price)) {
-            return number_format($this->selling_price, 2, ',', '.');
-        }
-
-        // Fallback para price (caso catering ou outro tipo)
-        if (!is_null($this->price ?? null)) {
-            return number_format($this->price, 2, ',', '.');
-        }
-
-        return '0,00';
-    }
-
-    // 👇 Retorna status visual do estoque
-    public function getStockStatusAttribute()
-    {
-        if ($this->stock_quantity > 10) return 'high';
-        if ($this->stock_quantity > 5) return 'medium';
-        return 'low';
-    }
-
-    // 👇 Getter inteligente para selling_price (com fallback para price)
-    public function getSellingPriceAttribute()
-    {
-        return $this->attributes['selling_price'] ?? ($this->attributes['price'] ?? null);
     }
 }

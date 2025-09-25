@@ -23,11 +23,20 @@ class AppBaseController extends LaravelBaseController
      */
     protected function redirectWithToast(string $route, string $message, string $type = 'success', array $parameters = []): RedirectResponse
     {
-        return redirect()->route($route, $parameters)->with([
-            'toast_message' => $message,
-            'toast_type' => $type
-        ]);
+        try {
+            return redirect()->route($route, $parameters)->with([
+                'toast_message' => $message,
+                'toast_type' => $type
+            ]);
+        } catch (\Illuminate\Routing\Exceptions\UrlGenerationException $e) {
+            // fallback: volta para a lista
+            return redirect()->route('products.index')->with([
+                'toast_message' => $message,
+                'toast_type' => $type
+            ]);
+        }
     }
+
 
     /**
      * Retorna um redirecionamento de volta (back) com uma mensagem de toast.

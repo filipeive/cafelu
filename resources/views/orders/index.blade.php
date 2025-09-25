@@ -295,20 +295,20 @@
                                                     </button>
                                                 @endif
                                                 @if ($order->status === 'paid')
-                                                <!-- Print Receipt -->
-                                                <button onclick="printRecibo({{ $order->id }})"
-                                                    class="btn btn-sm btn-outline-info action-btn print-btn"
-                                                    data-bs-toggle="tooltip" title="Imprimir Recibo">
-                                                    <i class="mdi mdi-printer"></i>
-                                                </button>
+                                                    <!-- Print Receipt -->
+                                                    <button onclick="printRecibo({{ $order->id }})"
+                                                        class="btn btn-sm btn-outline-info action-btn print-btn"
+                                                        data-bs-toggle="tooltip" title="Imprimir Recibo">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
                                                 @endif
                                                 @if ($order->status === 'completed')
-                                                <!-- Print Receipt -->
-                                                <button onclick="printRecibo({{ $order->id }})"
-                                                    class="btn btn-sm btn-outline-info action-btn print-btn"
-                                                    data-bs-toggle="tooltip" title="Imprimir Conta">
-                                                    <i class="mdi mdi-printer"></i>
-                                                </button>
+                                                    <!-- Print Receipt -->
+                                                    <button onclick="printRecibo({{ $order->id }})"
+                                                        class="btn btn-sm btn-outline-info action-btn print-btn"
+                                                        data-bs-toggle="tooltip" title="Imprimir Conta">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
                                                 @endif
                                                 <!-- More Actions Dropdown -->
                                                 <div class="btn-group" role="group">
@@ -317,7 +317,8 @@
                                                         data-bs-toggle="dropdown">
                                                         <span class="visually-hidden">Toggle Dropdown</span>
                                                     </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end custom-dropdown" style="z-index: 1040;">
+                                                    <ul class="dropdown-menu dropdown-menu-end custom-dropdown"
+                                                        style="z-index: 1040;">
                                                         @if ($order->status !== 'canceled' && $order->status !== 'paid')
                                                             <li>
                                                                 <a class="dropdown-item text-danger cancel-item"
@@ -449,14 +450,19 @@
     <style>
         /* Stats Cards Customization */
         .stats-card {
-            border-radius: var(--border-radius-lg);
-            padding: 1.5rem;
+            border-radius: 10px;
+            /* um pouco menor */
+            padding: 1rem;
+            /* antes 1.5rem */
             box-shadow: var(--shadow-soft);
             transition: var(--transition);
             position: relative;
             overflow: hidden;
             background: white;
-            border-left: 4px solid transparent;
+            border-left: 3px solid transparent;
+            /* mais fino */
+            min-height: 110px;
+            /* mantém compacto */
         }
 
         .stats-card.primary {
@@ -472,22 +478,28 @@
         }
 
         .stats-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
+        /* Ícone menor */
         .stats-card .stats-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            width: 38px;
+            /* antes 50px */
+            height: 38px;
+            /* antes 50px */
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
+            font-size: 1rem;
+            /* antes 1.3rem */
+            margin-bottom: 0.5rem;
+            /* antes 1rem */
             color: white;
         }
 
+        /* Gradientes */
         .stats-card.primary .stats-icon {
             background: var(--primary-gradient);
         }
@@ -500,25 +512,31 @@
             background: linear-gradient(135deg, var(--success-color), #34d399);
         }
 
+        /* Números e labels menores */
         .stats-number {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 1.3rem;
+            /* antes 1.8rem */
+            font-weight: 600;
             color: var(--dark-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .stats-label {
             color: #6b7280;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
+            /* antes 0.875rem */
             font-weight: 500;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .stats-trend {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.2rem;
+            font-size: 0.75rem;
+            /* trend mais discreto */
         }
+
 
         /* Order Row Styles */
         .order-row {
@@ -1009,7 +1027,7 @@
             }
         }
 
-        function showStatusUpdateIndicator() {
+        /* function showStatusUpdateIndicator() {
             // Create a subtle notification
             const indicator = document.createElement('div');
             indicator.className = 'position-fixed top-0 end-0 m-3 alert alert-info alert-dismissible fade show';
@@ -1026,7 +1044,7 @@
                 const alert = bootstrap.Alert.getInstance(indicator);
                 if (alert) alert.close();
             }, 1000);
-        }
+        } */
 
         // Initialize auto refresh when page loads
         document.addEventListener('DOMContentLoaded', function() {

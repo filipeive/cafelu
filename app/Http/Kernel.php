@@ -36,6 +36,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+             \App\Http\Middleware\AuditMiddleware::class,
         ],
 
         'api' => [
@@ -49,6 +50,9 @@ class Kernel extends HttpKernel
         // Other middleware...
         'role' => \App\Http\Middleware\CheckRole::class,
         'admin' => \App\Http\Middleware\IsAdmin::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'permission' => \App\Http\Middleware\PermissionMiddleware::class,
+        'audit' => \App\Http\Middleware\AuditMiddleware::class,
     ];
 
     /**

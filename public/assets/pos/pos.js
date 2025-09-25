@@ -1,507 +1,833 @@
-let saleItems = [];
+/**
+ * POS System JavaScript
+ * Zalala Beach Bar Restaurant Management System
+ */
+
+// ===== GLOBAL VARIABLES =====
+let cart = [];
 let selectedPaymentMethod = null;
+let currentTotal = 0;
 
-// Função para adicionar item ao carrinho
+// ===== CART MANAGEMENT =====
 function addToCart(product) {
-    const existingItem = saleItems.find(item => item.id === product.id);
-
+    const existingItem = cart.find(item => item.id === product.id);
+    
     if (existingItem) {
         existingItem.quantity += 1;
-        existingItem.total = existingItem.quantity * existingItem.price;
+        showToast(`${product.name} - Quantidade atualizada!`, 'success');
     } else {
-        saleItems.push({
+        cart.push({
             id: product.id,
             name: product.name,
-            quantity: 1,
             price: parseFloat(product.price),
-            total: parseFloat(product.price)
+            quantity: 1
         });
+        showToast(`${product.name} adicionado ao carrinho!`, 'success');
     }
-
+    
     updateCartDisplay();
-    calculateTotals();
+    updateCartTotal();
+    
+    // Add bounce animation to cart icon
+    const cartHeader = document.querySelector('.cart-header');
+    if (cartHeader) {
+        cartHeader.classList.add('bounce-in');
+        setTimeout(() => cartHeader.classList.remove('bounce-in'), 400);
+    }
 }
 
-// Função para atualizar a exibição do carrinho
-function updateCartDisplay() {
-    const cartItems = document.getElementById('cartItems');
-    cartItems.innerHTML = '';
+function removeFromCart(productId) {
+    const itemIndex = cart.findIndex(item => item.id === productId);
+    if (itemIndex > -1) {
+        const itemName = cart[itemIndex].name;
+        cart.splice(itemIndex, 1);
+        updateCartDisplay();
+        updateCartTotal();
+        showToast(`${itemName} removido do carrinho`, 'warning');
+        calculateChange();
+    }
+}
 
-    saleItems.forEach((item, index) => {
-        const itemElement = document.createElement('div');
-        itemElement.className = 'cart-item';
-        itemElement.innerHTML = `
-            <div class="cart-item-info">
-                <h6 class="mb-0">${item.name}</h6>
-                <small class="text-muted">MZN ${item.price.toFixed(2)} x ${item.quantity}</small>
-            </div>
-            <div class="cart-item-controls">
-                <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${index}, -1)">-</button>
-                <span class="mx-2">${item.quantity}</span>
-                <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${index}, 1)">+</button>
-                <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItem(${index})">
-                    <i class="mdi mdi-delete"></i>
-                </button>
+function updateQuantity(productId, newQuantity) {
+    const item = cart.find(item => item.id === productId);
+    if (item) {
+        if (newQuantity <= 0) {
+            removeFromCart(productId);
+        } else {
+            item.quantity = newQuantity;
+            updateCartDisplay();
+            updateCartTotal();
+            calculateChange();
+        }
+    }
+}
+
+function updateCartDisplay() {
+    const cartItemsContainer = document.getElementById('cartItems');
+    if (!cartItemsContainer) return;
+
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `
+            <div class="empty-cart">
+                <i class="mdi mdi-cart-outline"></i>
+                <p class="mb-1">Carrinho vazio</p>
+                <small>Clique nos produtos para adicionar</small>
             </div>
         `;
-        cartItems.appendChild(itemElement);
-    });
+        return;
+    }
+
+    cartItemsContainer.innerHTML = cart.map(item => `
+        <div class="cart-item fade-in">
+            <div class="item-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+            <div class="item-controls">
+                <div class="quantity-controls">
+                    <button class="qty-btn" 
+                            onclick="updateQuantity(${item.id}, ${item.quantity - 1})"
+                            title="Diminuir quantidade"
+                            ${item.quantity <= 1 ? 'style="background: #ef4444;"' : ''}>
+                        <i class="mdi mdi-minus"></i>
+                    </button>
+                    <span class="qty-display" title="Quantidade atual">${item.quantity}</span>
+                    <button class="qty-btn" 
+                            onclick="updateQuantity(${item.id}, ${item.quantity + 1})"
+                            title="Aumentar quantidade">
+                        <i class="mdi mdi-plus"></i>
+                    </button>
+                </div>
+                <div class="d-flex flex-column align-items-end gap-2">
+                    <div class="item-price" title="Preço total do item">
+                        MZN ${formatCurrency(item.price * item.quantity)}
+                    </div>
+                    <button class="remove-btn" 
+                            onclick="removeFromCart(${item.id})" 
+                            title="Remover item completamente">
+                        <i class="mdi mdi-trash-can"></i>
+                        Remover
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2 d-flex justify-content-between align-items-center text-muted small">
+                <span>Preço unitário: MZN ${formatCurrency(item.price)}</span>
+                <span>${item.quantity} × MZN ${formatCurrency(item.price)}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    // Add scroll to bottom for new items
+    setTimeout(() => {
+        cartItemsContainer.scrollTop = cartItemsContainer.scrollHeight;
+    }, 100);
 }
 
-// Função para atualizar quantidade
-function updateQuantity(index, change) {
-    const item = saleItems[index];
-    const newQuantity = item.quantity + change;
+function updateCartTotal() {
+    currentTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    
+    const subtotalElement = document.getElementById('subtotal');
+    const totalElement = document.getElementById('total');
+    
+    if (subtotalElement) {
+        subtotalElement.textContent = `MZN ${formatCurrency(currentTotal)}`;
+    }
+    
+    if (totalElement) {
+        totalElement.textContent = `MZN ${formatCurrency(currentTotal)}`;
+    }
+    
+    updateFinalizeButton();
+}
 
-    if (newQuantity > 0) {
-        item.quantity = newQuantity;
-        item.total = item.price * newQuantity;
+function resetSale() {
+    if (cart.length === 0) {
+        showToast('Carrinho já está vazio', 'info');
+        return;
+    }
+    
+    if (confirm('Tem certeza que deseja limpar o carrinho?')) {
+        cart = [];
+        selectedPaymentMethod = null;
+        currentTotal = 0;
+        
         updateCartDisplay();
-        calculateTotals();
-    } else if (newQuantity === 0) {
-        removeItem(index);
+        updateCartTotal();
+        clearPaymentInputs();
+        clearChangeAmount();
+        
+        showToast('Carrinho limpo com sucesso', 'success');
     }
 }
 
-// Função para remover item
-function removeItem(index) {
-    saleItems.splice(index, 1);
-    updateCartDisplay();
-    calculateTotals();
-}
-
-// Função para calcular totais
-function calculateTotals() {
-    const subtotal = saleItems.reduce((sum, item) => sum + item.total, 0);
-    document.getElementById('subtotal').textContent = `MZN ${subtotal.toFixed(2)}`;
-    document.getElementById('total').textContent = `MZN ${subtotal.toFixed(2)}`;
-    calculateChange();
-}
-
-// Função para selecionar método de pagamento
+// ===== PAYMENT MANAGEMENT =====
 function selectPayment(method) {
     selectedPaymentMethod = method;
+    
+    // Update UI
     document.querySelectorAll('.payment-card').forEach(card => {
         card.classList.remove('selected');
     });
-    document.querySelector(`[onclick="selectPayment('${method}')"]`).classList.add('selected');
+    
+    event.currentTarget.classList.add('selected');
+    showToast(`Método ${getPaymentMethodName(method)} selecionado`, 'info');
 }
 
-// Função para calcular troco
+function getPaymentMethodName(method) {
+    const names = {
+        'cash': 'Dinheiro',
+        'card': 'Cartão',
+        'mpesa': 'M-Pesa',
+        'emola': 'E-mola'
+    };
+    return names[method] || method;
+}
+
 function calculateChange() {
-    const totalText = document.getElementById('total').textContent;
-    const total = parseFloat(totalText.replace('MZN ', '')) || 0;
-    const cashAmount = parseFloat(document.getElementById('cashAmount').value) || 0;
-    const cardAmount = parseFloat(document.getElementById('cardAmount').value) || 0;
-    const mpesaAmount = parseFloat(document.getElementById('mpesaAmount').value) || 0;
-    const emolaAmount = parseFloat(document.getElementById('emolaAmount').value) || 0;
+    const cashAmount = parseFloat(document.getElementById('cashAmount')?.value || 0);
+    const cardAmount = parseFloat(document.getElementById('cardAmount')?.value || 0);
+    const mpesaAmount = parseFloat(document.getElementById('mpesaAmount')?.value || 0);
+    const emolaAmount = parseFloat(document.getElementById('emolaAmount')?.value || 0);
 
     const totalPaid = cashAmount + cardAmount + mpesaAmount + emolaAmount;
-    const change = totalPaid - total;
+    const nonCashPayments = cardAmount + mpesaAmount + emolaAmount;
 
-    document.getElementById('changeAmount').value = change >= 0 ? `MZN ${change.toFixed(2)}` : 'Pagamento insuficiente';
-    document.getElementById('btnFinalizeOrder').disabled = change < 0;
-}
+    let change = 0;
+    let displayText = '';
 
-// Função para processar a venda utilizando o controller Laravel
-// Função para processar a venda utilizando o controller Laravel
-async function processSale() {
-    if (saleItems.length === 0) {
-        showNotification('Erro', 'Adicione itens ao carrinho antes de finalizar.', 'error');
-        return;
+    // Apenas dinheiro gera troco
+    if (cashAmount > 0) {
+        const remainingAfterNonCash = Math.max(0, currentTotal - nonCashPayments);
+        if (cashAmount > remainingAfterNonCash) {
+            change = cashAmount - remainingAfterNonCash;
+        }
     }
 
-    // Formatar os itens para o formato que o controller espera
-    const formattedItems = saleItems.map(item => ({
-        product_id: item.id,
-        quantity: item.quantity,
-        unit_price: item.price
-    }));
+    // Determina o que exibir no campo de troco
+    if (totalPaid >= currentTotal) {
+        displayText = `MZN ${formatCurrency(change)}`;
+    } else {
+        displayText = 'Pagamento insuficiente';
+        change = -1; // flag para desabilitar botão
+    }
 
-    const saleData = {
-        items: formattedItems,
-        cashPayment: parseFloat(document.getElementById('cashAmount').value) || 0,
-        cardPayment: parseFloat(document.getElementById('cardAmount').value) || 0,
-        mpesaPayment: parseFloat(document.getElementById('mpesaAmount').value) || 0,
-        emolaPayment: parseFloat(document.getElementById('emolaAmount').value) || 0
-    };
+    const changeElement = document.getElementById('changeAmount');
+    if (changeElement) {
+        changeElement.value = displayText;
 
-    // Obter o token CSRF
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    try {
-        const response = await fetch('/pos/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify(saleData)
-        });
-
-        // Tentar processar a resposta como JSON
-        let result;
-        try {
-            result = await response.json();
-        } catch (parseError) {
-            console.error('Erro ao converter resposta em JSON:', parseError);
-            const responseText = await response.text();
-            console.log('Resposta bruta do servidor:', responseText);
-            showNotification('Erro', 'Resposta inválida do servidor.', 'error');
-            return;
+        // Feedback visual
+        if (change > 0) {
+            changeElement.classList.add('text-success');
+            changeElement.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+        } else {
+            changeElement.classList.remove('text-success');
+            changeElement.style.backgroundColor = '';
         }
+    }
 
-        if (result.success) {
-            // Se houver troco, mostra uma notificação com o valor
-            if (result.change && result.change > 0) {
-                showNotification('Troco', `Devolva ao cliente: MZN ${result.change.toFixed(2)}`, 'info');
+    // Atualiza estado do botão Finalizar
+    const btnFinalize = document.getElementById('btnFinalizeOrder');
+    if (btnFinalize) {
+        btnFinalize.disabled = change < 0;
+    }
+
+    return change;
+}
+
+
+function clearPaymentInputs() {
+    document.getElementById('cashAmount').value = '';
+    document.getElementById('cardAmount').value = '';
+    document.getElementById('mpesaAmount').value = '';
+    document.getElementById('emolaAmount').value = '';
+    
+    document.querySelectorAll('.payment-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+}
+
+function clearChangeAmount() {
+    const changeElement = document.getElementById('changeAmount');
+    if (changeElement) {
+        changeElement.value = 'MZN 0.00';
+        changeElement.classList.remove('text-success');
+        changeElement.style.backgroundColor = '';
+    }
+}
+
+function updateFinalizeButton() {
+    const finalizeBtn = document.getElementById('btnFinalizeOrder');
+    if (!finalizeBtn) return;
+    
+    const canFinalize = cart.length > 0 && validatePayment();
+    
+    if (canFinalize) {
+        finalizeBtn.disabled = false;
+        finalizeBtn.classList.remove('btn-secondary');
+        finalizeBtn.classList.add('btn-success');
+    } else {
+        finalizeBtn.disabled = true;
+        finalizeBtn.classList.remove('btn-success');
+        finalizeBtn.classList.add('btn-secondary');
+    }
+}
+
+function validatePayment() {
+    const cashAmount = parseFloat(document.getElementById('cashAmount')?.value || 0);
+    const cardAmount = parseFloat(document.getElementById('cardAmount')?.value || 0);
+    const mpesaAmount = parseFloat(document.getElementById('mpesaAmount')?.value || 0);
+    const emolaAmount = parseFloat(document.getElementById('emolaAmount')?.value || 0);
+    
+    const totalPaid = cashAmount + cardAmount + mpesaAmount + emolaAmount;
+    const nonCashPayments = cardAmount + mpesaAmount + emolaAmount;
+    
+    // Check if non-cash payments exceed total
+    if (nonCashPayments > currentTotal) {
+        return false;
+    }
+    
+    // Check if total payment covers the sale amount
+    const remainingAmount = currentTotal - nonCashPayments;
+    if (cashAmount < remainingAmount) {
+        return false;
+    }
+    
+    return true;
+}
+
+// ===== SALE PROCESSING =====
+function processSale() {
+    if (cart.length === 0) {
+        showToast('Adicione produtos ao carrinho primeiro', 'warning');
+        return;
+    }
+    
+    if (!validatePayment()) {
+        showToast('Pagamento insuficiente ou inválido', 'error');
+        return;
+    }
+    
+    const finalizeBtn = document.getElementById('btnFinalizeOrder');
+    if (finalizeBtn) {
+        finalizeBtn.disabled = true;
+        finalizeBtn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
+    }
+    
+    const saleData = {
+        items: cart.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price
+        })),
+        cashPayment: parseFloat(document.getElementById('cashAmount')?.value || 0),
+        cardPayment: parseFloat(document.getElementById('cardAmount')?.value || 0),
+        mpesaPayment: parseFloat(document.getElementById('mpesaAmount')?.value || 0),
+        emolaPayment: parseFloat(document.getElementById('emolaAmount')?.value || 0)
+    };
+    
+    // Send to backend
+    fetch('/pos/checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        },
+        body: JSON.stringify(saleData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Venda concluída com sucesso!', 'success');
+            
+            // Show change if applicable
+            if (data.change > 0) {
+                showToast(`Troco: MZN ${formatCurrency(data.change)}`, 'info');
             }
             
-            showNotification('Sucesso', 'Venda realizada com sucesso!', 'success');
-            printReceipt(result.sale_id);
-            resetSale();
+            // Open receipt in new tab
+            setTimeout(() => {
+                window.open(`/pos/receipt/${data.sale_id}`, '_blank');
+            }, 1000);
+            
+            // Reset the sale
+            resetSaleAfterSuccess();
+            
         } else {
-            showNotification('Erro', result.message || 'Erro ao processar a venda.', 'error');
+            showToast(data.message || 'Erro ao processar venda', 'error');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Erro de conexão. Tente novamente.', 'error');
+    })
+    .finally(() => {
+        // Reset finalize button
+        if (finalizeBtn) {
+            finalizeBtn.disabled = false;
+            finalizeBtn.innerHTML = '<i class="mdi mdi-check-circle-outline"></i> Finalizar Pedido';
+        }
+    });
+}
 
-    } catch (error) {
-        console.error('Erro na requisição fetch:', error);
-        showNotification('Erro', 'Erro ao processar a venda.', 'error');
+function resetSaleAfterSuccess() {
+    cart = [];
+    selectedPaymentMethod = null;
+    currentTotal = 0;
+    
+    updateCartDisplay();
+    updateCartTotal();
+    clearPaymentInputs();
+    clearChangeAmount();
+    
+    // Show success animation
+    const cartHeader = document.querySelector('.cart-header');
+    if (cartHeader) {
+        cartHeader.classList.add('slide-up');
+        setTimeout(() => cartHeader.classList.remove('slide-up'), 500);
     }
 }
 
-// Função para imprimir recibo
-function printReceipt(saleId) {
-    // Redirecionar para a página de impressão do recibo
-    window.open(`/pos/receipt/${saleId}`, '_blank');
-}
-
-// Função para pré-visualizar recibo
 function previewReceipt() {
-    if (saleItems.length === 0) {
-        showNotification('Erro', 'Adicione itens ao carrinho antes de visualizar o recibo.', 'error');
+    if (cart.length === 0) {
+        showToast('Adicione produtos ao carrinho primeiro', 'warning');
         return;
     }
     
-    // Você pode implementar a pré-visualização sem salvar a venda
-    // Por simplicidade, apenas notificaremos o usuário
-    showNotification('Info', 'Esta função será implementada em breve.', 'info');
-}
-
-// Função para limpar a venda
-function resetSale() {
-    saleItems = [];
-    updateCartDisplay();
-    calculateTotals();
-    document.querySelectorAll('#cashAmount, #cardAmount, #mpesaAmount, #emolaAmount').forEach(input => {
-        input.value = '';
-    });
-    document.getElementById('changeAmount').value = '';
-    document.querySelectorAll('.payment-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-}
-
-// Função para mostrar notificações
-function showNotification(title, message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <i class="mdi mdi-${type === 'success' ? 'check-circle' : type === 'info' ? 'information' : 'alert-circle'}"></i>
-        <div>
-            <h6 class="mb-1">${title}</h6>
-            <p class="mb-0">${message}</p>
-        </div>
-    `;
-
-    document.body.appendChild(notification);
-    setTimeout(() => notification.classList.add('show'), 100);
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Função para filtrar produtos através do Laravel
-function filterProducts() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const categoryId = document.getElementById('categorySelect').value;
-
-    // Construir URL com parâmetros
-    let url = '/pos';
-    const params = new URLSearchParams();
-
-    if (searchTerm) {
-        params.append('search', searchTerm);
-    }
-
-    if (categoryId) {
-        params.append('category', categoryId);
-    }
-
-    if (params.toString()) {
-        url += '?' + params.toString();
-    }
-
-    // Redirecionar para a URL filtrada 
-    window.location.href = url;
-}
-
-// Função para carregar mais produtos (paginação)
-function loadMoreProducts(page) {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const categoryId = document.getElementById('categorySelect').value;
-
-    // Construir URL com parâmetros
-    let url = '/pos';
-    const params = new URLSearchParams();
-
-    params.append('page', page);
-
-    if (searchTerm) {
-        params.append('search', searchTerm);
-    }
-
-    if (categoryId) {
-        params.append('category', categoryId);
-    }
-
-    if (params.toString()) {
-        url += '?' + params.toString();
-    }
-
-    // Redirecionar para a URL paginada
-    window.location.href = url;
-}
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar listeners para inputs de pagamento
-    document.querySelectorAll('#cashAmount, #cardAmount, #mpesaAmount, #emolaAmount')
-        .forEach(input => input.addEventListener('input', calculateChange));
-
-    // Inicializar filtros de categoria
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const categoryId = btn.dataset.category === 'all' ? '' : btn.dataset.category;
-
-            // Redirecionar com filtro de categoria
-            window.location.href = `/pos?category=${categoryId}`;
-        });
-    });
-});
-/* // Função para imprimir recibo
-function printReceipt(saleId) {
-    // Redirecionar para a página de impressão do recibo
-    window.open(`/pos/receipt/${saleId}`, '_blank');
-}
- */
-// Função para imprimir o recibo final
-function printReceipt(saleId) {
-    if (!saleId) {
-        const receiptContent = generateReceiptContent(false);
-        const printWindow = window.open('', '', 'width=400,height=600');
-        printWindow.document.write(receiptContent);
-        printWindow.document.close();
-        printWindow.print();
-        printWindow.close();
-    } else {
-        // Se tiver um ID de venda, usa a rota do Laravel
-        window.open(`/pos/receipt/${saleId}`, '_blank');
-    }
-}
-// Função para gerar o conteúdo do recibo
-function generateReceiptContent(isPreview = false) {
-    const date = new Date().toLocaleString('pt-BR');
-    const total = saleItems.reduce((sum, item) => sum + item.total, 0);
+    const cashAmount = parseFloat(document.getElementById('cashAmount')?.value || 0);
+    const cardAmount = parseFloat(document.getElementById('cardAmount')?.value || 0);
+    const mpesaAmount = parseFloat(document.getElementById('mpesaAmount')?.value || 0);
+    const emolaAmount = parseFloat(document.getElementById('emolaAmount')?.value || 0);
     
-    const cashAmount = parseFloat(document.getElementById('cashAmount').value) || 0;
-    const cardAmount = parseFloat(document.getElementById('cardAmount').value) || 0;
-    const mpesaAmount = parseFloat(document.getElementById('mpesaAmount').value) || 0;
-    const emolaAmount = parseFloat(document.getElementById('emolaAmount').value) || 0;
+    const change = calculateChange();
     
-    const totalPaid = cashAmount + cardAmount + mpesaAmount + emolaAmount;
-    const change = totalPaid - total;
-
-    let content = `
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-            <meta charset="UTF-8">
-            <title>${isPreview ? 'Pré-visualização do Recibo' : 'Recibo'}</title>
-            <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    margin: 0;
-                    padding: 10px;
-                    font-size: 12px;
-                }
-                .receipt {
-                    max-width: 80mm;
-                    margin: 0 auto;
-                    padding: 10px;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 10px;
-                }
-                .logo {
-                    max-width: 100px;
-                    margin-bottom: 5px;
-                }
-                .company-name {
-                    font-size: 16px;
-                    font-weight: bold;
-                    margin: 5px 0;
-                }
-                .company-info {
-                    font-size: 11px;
-                    margin: 5px 0;
-                }
-                .divider {
-                    border-top: 1px dashed #000;
-                    margin: 8px 0;
-                }
-                .items table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin: 10px 0;
-                }
-                .items th, .items td {
-                    text-align: left;
-                    padding: 3px;
-                }
-                .totals {
-                    margin: 10px 0;
-                }
-                .item {
-                    display: flex;
-                    justify-content: space-between;
-                    margin: 3px 0;
-                }
-                .footer {
-                    text-align: center;
-                    font-size: 11px;
-                    margin-top: 15px;
-                }
-                @media print {
-                    @page {
-                        margin: 0;
-                        size: 80mm auto;
-                    }
-                    body {
-                        margin: 0;
-                    }
-                    .no-print {
-                        display: none;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="receipt">
-                <div class="header">
-                    <img src="/assets/images/logo.png" alt="Lu & Yoshi Catering Logo" class="logo">
-                    <div class="company-name">Lu & Yoshi Catering</div>
-                    <div class="company-name">Café Lufamina</div>
-                    <div class="company-info">
-                        <p>
-                            Av. Samora Machel<br>
-                            Cidade de Quelimane<br>
-                            Tel: (+258) 878643715 / 844818014<br>
-                            Email: cafelufamina@gmail.com<br>
-                            NUIT: 1110947722
-                        </p>
-                    </div>
-                    <p>Data: ${date}</p>
-                    ${isPreview ? '<div style="color: red; font-weight: bold;">PRÉ-VISUALIZAÇÃO</div>' : ''}
-                </div>
-                
-                <div class="divider"></div>
-                
-                <div class="items">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th style="text-align: right;">Qtd</th>
-                                <th style="text-align: right;">Preço</th>
-                                <th style="text-align: right;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${saleItems.map(item => `
-                                <tr>
-                                    <td>${item.name}</td>
-                                    <td style="text-align: right;">${item.quantity}</td>
-                                    <td style="text-align: right;">MZN ${item.price.toFixed(2)}</td>
-                                    <td style="text-align: right;">MZN ${item.total.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="divider"></div>
-                
-                <div class="totals">
-                    <div class="item">
-                        <strong>Total:</strong>
-                        <span>MZN ${total.toFixed(2)}</span>
-                    </div>
-                </div>
-                
-                <div class="payment-methods">
-                    <div class="item"><strong>Forma de Pagamento:</strong></div>
-                    ${cashAmount > 0 ? `<div class="item">Dinheiro: <span>MZN ${cashAmount.toFixed(2)}</span></div>` : ''}
-                    ${cardAmount > 0 ? `<div class="item">Cartão: <span>MZN ${cardAmount.toFixed(2)}</span></div>` : ''}
-                    ${mpesaAmount > 0 ? `<div class="item">M-Pesa: <span>MZN ${mpesaAmount.toFixed(2)}</span></div>` : ''}
-                    ${emolaAmount > 0 ? `<div class="item">E-mola: <span>MZN ${emolaAmount.toFixed(2)}</span></div>` : ''}
-                    <div class="item"><strong>Total Pago: </strong><span>MZN ${totalPaid.toFixed(2)}</span></div>
-                    ${change > 0 ? `<div class="item"><strong>Troco: </strong><span>MZN ${change.toFixed(2)}</span></div>` : ''}
-                </div>
-                
-                <div class="divider"></div>
-                
-                <div class="footer">
-                    <p>Obrigado pela preferência!</p>
-                    ${isPreview ? 
-                        '<p style="color: red; font-weight: bold;">ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO</p>' : 
-                        '<p>Este documento não serve como fatura</p>'}
-                </div>
-                
-                ${isPreview ? `
-                    <div class="no-print" style="margin-top: 20px; text-align: center;">
-                        <button onclick="window.print()" class="btn btn-primary">
-                            Imprimir Pré-visualização
-                        </button>
-                    </div>
-                ` : ''}
+    let receiptContent = `
+        <div class="receipt-preview">
+            <div class="text-center mb-3">
+                <h4>ZALALA BEACH BAR</h4>
+                <p class="mb-1">Bairro de Zalala, ER470</p>
+                <p class="mb-1">Tel: +258 846 885 214</p>
+                <p class="mb-3">NUIT: 110735901</p>
+                <small>${new Date().toLocaleString('pt-BR')}</small>
             </div>
             
-            <script>
-                // Auto-print para recibos não preview
-                ${!isPreview ? 'window.onload = function() { window.print(); };' : ''}
-            </script>
-        </body>
-        </html>
+            <hr>
+            
+            <div class="items">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-end">Qtd</th>
+                            <th class="text-end">Preço</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
     `;
-
-    return content;
-}
-
-// Função para pré-visualizar o recibo
-function previewReceipt() {
-    if (saleItems.length === 0) {
-        showNotification('Erro', 'Adicione itens ao carrinho antes de pré-visualizar o recibo.', 'error');
-        return;
+    
+    cart.forEach(item => {
+        receiptContent += `
+            <tr>
+                <td>${escapeHtml(item.name)}</td>
+                <td class="text-end">${item.quantity}</td>
+                <td class="text-end">MZN ${formatCurrency(item.price)}</td>
+                <td class="text-end">MZN ${formatCurrency(item.price * item.quantity)}</td>
+            </tr>
+        `;
+    });
+    
+    receiptContent += `
+                    </tbody>
+                </table>
+            </div>
+            
+            <hr>
+            
+            <div class="totals">
+                <div class="d-flex justify-content-between">
+                    <strong>Total:</strong>
+                    <strong>MZN ${formatCurrency(currentTotal)}</strong>
+                </div>
+            </div>
+            
+            <div class="payment-info mt-3">
+                <h6>Métodos de Pagamento:</h6>
+    `;
+    
+    if (cashAmount > 0) {
+        receiptContent += `<p>Dinheiro: MZN ${formatCurrency(cashAmount)}</p>`;
     }
-
-    const receiptContent = generateReceiptContent(true);
-    const previewWindow = window.open('', '_blank', 'width=400,height=600');
-    previewWindow.document.write(receiptContent);
-    previewWindow.document.close();
+    if (cardAmount > 0) {
+        receiptContent += `<p>Cartão: MZN ${formatCurrency(cardAmount)}</p>`;
+    }
+    if (mpesaAmount > 0) {
+        receiptContent += `<p>M-Pesa: MZN ${formatCurrency(mpesaAmount)}</p>`;
+    }
+    if (emolaAmount > 0) {
+        receiptContent += `<p>E-mola: MZN ${formatCurrency(emolaAmount)}</p>`;
+    }
+    
+    if (change > 0) {
+        receiptContent += `<p class="text-success"><strong>Troco: MZN ${formatCurrency(change)}</strong></p>`;
+    }
+    
+    receiptContent += `
+            </div>
+            
+            <hr>
+            
+            <div class="text-center">
+                <p class="text-danger"><strong>Obrigado Pela Preferência!</strong></p>
+                <p>Volte Sempre!</p>
+            </div>
+        </div>
+    `;
+    
+    // Show in modal or new window
+    showReceiptPreview(receiptContent);
 }
+
+function showReceiptPreview(content) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('receiptPreviewModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'receiptPreviewModal';
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="mdi mdi-receipt me-2"></i>
+                            Pré-visualização do Recibo
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="receiptPreviewContent">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" onclick="window.print()">
+                            <i class="mdi mdi-printer me-1"></i>
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('receiptPreviewContent').innerHTML = content;
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// ===== PRODUCT FILTERING =====
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const categoryId = document.getElementById('categorySelect')?.value || '';
+    
+    const productItems = document.querySelectorAll('.product-item');
+    let visibleCount = 0;
+    
+    productItems.forEach(item => {
+        const productName = item.querySelector('.card-title')?.textContent.toLowerCase() || '';
+        const productCategory = item.dataset.category || '';
+        
+        const matchesSearch = !searchTerm || productName.includes(searchTerm);
+        const matchesCategory = !categoryId || productCategory === categoryId;
+        
+        if (matchesSearch && matchesCategory) {
+            item.style.display = 'block';
+            item.classList.add('fade-in');
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+            item.classList.remove('fade-in');
+        }
+    });
+    
+    // Show no results message
+    showNoResultsMessage(visibleCount === 0);
+}
+
+function showNoResultsMessage(show) {
+    let noResultsDiv = document.getElementById('noResults');
+    
+    if (show && !noResultsDiv) {
+        noResultsDiv = document.createElement('div');
+        noResultsDiv.id = 'noResults';
+        noResultsDiv.className = 'col-12 text-center py-5';
+        noResultsDiv.innerHTML = `
+            <div class="text-muted">
+                <i class="mdi mdi-magnify-close" style="font-size: 4rem;"></i>
+                <h5 class="mt-3">Nenhum produto encontrado</h5>
+                <p>Tente ajustar os filtros de busca</p>
+            </div>
+        `;
+        document.getElementById('productsGrid').appendChild(noResultsDiv);
+    } else if (!show && noResultsDiv) {
+        noResultsDiv.remove();
+    }
+}
+
+// ===== CATEGORY FILTERING =====
+function setupCategoryFilters() {
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.dataset.category;
+            
+            // Update active state
+            categoryButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update select dropdown
+            const categorySelect = document.getElementById('categorySelect');
+            if (categorySelect) {
+                categorySelect.value = category === 'all' ? '' : category;
+            }
+            
+            filterProducts();
+        });
+    });
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+function setupPOSKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        // Only trigger when not typing in inputs
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        switch(e.key.toLowerCase()) {
+            case 'f1': // Help
+                e.preventDefault();
+                showPOSHelp();
+                break;
+                
+            case 'f2': // New Sale
+                e.preventDefault();
+                resetSale();
+                break;
+                
+            case 'f3': // Focus search
+                e.preventDefault();
+                document.getElementById('searchInput')?.focus();
+                break;
+                
+            case 'f4': // Quick cash payment
+                e.preventDefault();
+                setQuickCashPayment();
+                break;
+                
+            case 'escape': // Clear search or close modals
+                e.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.value) {
+                    searchInput.value = '';
+                    filterProducts();
+                } else {
+                    // Close any open modals
+                    const openModal = document.querySelector('.modal.show');
+                    if (openModal) {
+                        bootstrap.Modal.getInstance(openModal)?.hide();
+                    }
+                }
+                break;
+                
+            case 'enter': // Finalize if ready
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    const finalizeBtn = document.getElementById('btnFinalizeOrder');
+                    if (finalizeBtn && !finalizeBtn.disabled) {
+                        processSale();
+                    }
+                }
+                break;
+        }
+    });
+}
+
+function setQuickCashPayment() {
+    if (currentTotal > 0) {
+        const cashInput = document.getElementById('cashAmount');
+        if (cashInput) {
+            cashInput.value = currentTotal.toFixed(2);
+            selectPayment('cash');
+            cashInput.focus();
+            calculateChange();
+            showToast('Pagamento exato em dinheiro definido', 'success');
+        }
+    } else {
+        showToast('Adicione produtos ao carrinho primeiro', 'warning');
+    }
+}
+
+function setExactCashPayment() {
+    return setQuickCashPayment();
+}
+
+function showPOSHelp() {
+    const helpContent = `
+        <div class="pos-help">
+            <h6>Atalhos de Teclado:</h6>
+            <ul class="list-unstyled">
+                <li><kbd>F1</kbd> - Mostrar ajuda</li>
+                <li><kbd>F2</kbd> - Nova venda</li>
+                <li><kbd>F3</kbd> - Buscar produtos</li>
+                <li><kbd>F4</kbd> - Pagamento rápido em dinheiro</li>
+                <li><kbd>Esc</kbd> - Limpar busca / Fechar modais</li>
+                <li><kbd>Ctrl+Enter</kbd> - Finalizar venda</li>
+            </ul>
+            
+            <h6 class="mt-3">Dicas de Uso:</h6>
+            <ul class="list-unstyled">
+                <li>• Clique nos produtos para adicionar ao carrinho</li>
+                <li>• Use os botões +/- para ajustar quantidades</li>
+                <li>• Combine diferentes métodos de pagamento</li>
+                <li>• O troco é calculado automaticamente</li>
+                <li>• Use a busca para encontrar produtos rapidamente</li>
+            </ul>
+        </div>
+    `;
+    
+    showInfoModal('Ajuda do POS', helpContent);
+}
+
+function showInfoModal(title, content) {
+    let modal = document.getElementById('infoModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'infoModal';
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="infoModalTitle"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="infoModalContent"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('infoModalTitle').textContent = title;
+    document.getElementById('infoModalContent').innerHTML = content;
+    
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+// ===== UTILITY FUNCTIONS =====
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('pt-MZ', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount);
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function showToast(message, type = 'success') {
+    // Use the global toast function if available
+    if (typeof window.ZalalaSystem?.showToast === 'function') {
+        window.ZalalaSystem.showToast(message, type);
+    } else {
+        // Fallback simple toast
+        console.log(`${type.toUpperCase()}: ${message}`);
+        
+        // Create simple toast element
+        const toast = document.createElement('div');
+        toast.className = `toast-simple toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#06b6d4'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+}
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup event listeners
+    setupCategoryFilters();
+    setupPOSKeyboardShortcuts();
+    
+    // Setup payment input listeners
+    ['cashAmount', 'cardAmount', 'mpesaAmount', 'emolaAmount'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                calculateChange();
+                updateFinalizeButton();
+            });
+            
+            input.addEventListener('focus', function() {
+                // Auto-select payment method when focusing input
+                const paymentCard = this.closest('.payment-card');
+                if (paymentCard) {
+                    const method = id.replace('Amount', '').toLowerCase();
+                    selectPayment(method);
+                }
+            });
+        }
+    });
+    
+    // Initial setup
+    updateCartDisplay();
+    updateCartTotal();
+    
+    // Auto-focus search input
+    setTimeout(() => {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }, 500);
+    
+    console.log('🏖️ POS System initialized successfully!');
+});
+
+// ===== EXPORT FOR GLOBAL ACCESS =====
+window.POSSystem = {
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    resetSale,
+    processSale,
+    previewReceipt,
+    filterProducts,
+    calculateChange,
+    selectPayment
+};

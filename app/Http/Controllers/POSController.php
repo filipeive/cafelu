@@ -8,14 +8,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class POSController extends Controller
-{
-    public function index(Request $request)
+    {
+        public function index(Request $request)
     {
         $categoryFilter = $request->query('category');
         $searchTerm = $request->query('search');
-        $limit = 12;
-        $page = $request->query('page', 1);
-        $offset = ($page - 1) * $limit;
+        $perPage = 12;
 
         $categories = Category::all();
 
@@ -29,7 +27,8 @@ class POSController extends Controller
             $query->where('name', 'LIKE', "%$searchTerm%");
         }
 
-        $products = $query->offset($offset)->limit($limit)->get();
+        // Paginação automática
+        $products = $query->paginate($perPage)->withQueryString();
 
         return view('pos.index', [
             'categories' => $categories,

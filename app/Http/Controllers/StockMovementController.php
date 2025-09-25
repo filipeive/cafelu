@@ -1,8 +1,4 @@
 <?php
-
-// ===================================================
-// app/Http/Controllers/StockMovementController.php
-// ===================================================
 namespace App\Http\Controllers;
 
 use App\Models\StockMovement;

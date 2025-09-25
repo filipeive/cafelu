@@ -148,7 +148,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="action-buttons">
+                    <div class="action-buttons" style="padding: 10px">
                         <button id="btnFinalizeOrder" class="btn-finalize" onclick="processSale()">
                             <i class="mdi mdi-check-circle-outline"></i>
                             Finalizar Pedido

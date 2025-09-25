@@ -2,7 +2,7 @@
 
 @section('title', 'Perfil do Usuário')
 @section('page-title', 'Perfil do Usuário')
-@section('title-icon', 'fa-user')
+@section('title-icon', 'mdi-user')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('users.index') }}">Usuários</a></li>
@@ -24,24 +24,24 @@
                     <div class="d-flex justify-content-center gap-2 mb-4">
                         @if (auth()->user()->canEdit($user))
                             <a href="{{ route('users.edit', $user) }}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-edit me-1"></i>Editar
+                                <i class="mdi mdi-edit me-1"></i>Editar
                             </a>
                         @endif
                         @if (auth()->user()->canDelete($user))
                             <button class="btn btn-outline-danger btn-sm" onclick="showDeleteModal()">
-                                <i class="fas fa-trash me-1"></i>Excluir
+                                <i class="mdi mdi-trash me-1"></i>Excluir
                             </button>
                         @endif
                     </div>
 
                     <div class="alert alert-{{ $user->is_active ? 'success' : 'danger' }} text-center">
-                        <i class="fas fa-{{ $user->is_active ? 'check' : 'times' }} me-2"></i>
+                        <i class="mdi mdi-{{ $user->is_active ? 'check' : 'times' }} me-2"></i>
                         <strong>Status:</strong> {{ $user->status_display }}
                     </div>
 
                     @if ($user->hasActiveTemporaryPassword())
                         <div class="alert alert-warning text-center">
-                            <i class="fas fa-key me-2"></i>
+                            <i class="mdi mdi-key me-2"></i>
                             <strong>Senha Temporária Ativa</strong><br>
                             <small>{{ $user->getActiveTemporaryPassword()->expiration_status }}</small>
                         </div>
@@ -51,7 +51,7 @@
 
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-white">
-                    <h6 class="mb-0"><i class="fas fa-info text-primary me-2"></i>Informações do Sistema</h6>
+                    <h6 class="mb-0"><i class="mdi mdi-info text-primary me-2"></i>Informações do Sistema</h6>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
@@ -84,7 +84,7 @@
                     @if ($user->photo_path)
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Foto de Perfil:</span>
-                            <span class="text-success"><i class="fas fa-check"></i> Sim</span>
+                            <span class="text-success"><i class="mdi mdi-check"></i> Sim</span>
                         </div>
                     @endif
 
@@ -102,9 +102,9 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0"><i class="fas fa-history text-primary me-2"></i>Atividades Recentes</h6>
+                    <h6 class="mb-0"><i class="mdi mdi-history text-primary me-2"></i>Atividades Recentes</h6>
                     <a href="{{ route('users.activity', $user) }}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-chart-line me-1"></i>Ver Todas
+                        <i class="mdi mdi-chart-line me-1"></i>Ver Todas
                     </a>
                 </div>
                 <div class="card-body">
@@ -114,7 +114,7 @@
                                 <div class="timeline-item mb-3">
                                     <div class="d-flex">
                                         <div class="timeline-marker">
-                                            <i class="fas {{ $activity->icon }} text-{{ $activity->badge_color }}"></i>
+                                            <i class="mdi {{ $activity->icon }} text-{{ $activity->badge_color }}"></i>
                                         </div>
                                         <div class="timeline-content">
                                             <h6 class="mb-1">{{ $activity->description }}</h6>
@@ -131,7 +131,7 @@
                         </div>
                     @else
                         <div class="alert alert-info text-center">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="mdi mdi-info-circle me-2"></i>
                             Nenhuma atividade registrada ainda
                         </div>
                     @endif
@@ -140,7 +140,7 @@
 
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-white">
-                    <h6 class="mb-0"><i class="fas fa-cog text-primary me-2"></i>Permissões e Ações</h6>
+                    <h6 class="mb-0"><i class="mdi mdi-cog text-primary me-2"></i>Permissões e Ações</h6>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -149,13 +149,13 @@
                                 <div class="card bg-light border-0">
                                     <div class="card-body">
                                         <h6 class="fw-bold mb-3">
-                                            <i class="fas fa-history text-info me-2"></i>
+                                            <i class="mdi mdi-history text-info me-2"></i>
                                             Histórico de Senhas
                                         </h6>
                                         <p class="text-muted small mb-3">Ver todas as senhas temporárias</p>
                                         <a href="{{ route('users.temporary-passwords', $user) }}"
                                             class="btn btn-outline-info btn-sm">
-                                            <i class="fas fa-history me-1"></i> Ver Histórico
+                                            <i class="mdi mdi-history me-1"></i> Ver Histórico
                                         </a>
                                     </div>
                                 </div>
@@ -173,7 +173,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                        <i class="mdi mdi-exclamation-triangle me-2"></i>Confirmar Exclusão
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -182,7 +182,7 @@
                         Tem certeza que deseja excluir o usuário <strong>{{ $user->name }}</strong>?
                     </p>
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="mdi mdi-exclamation-triangle me-2"></i>
                         Esta ação não pode ser desfeita e todos os dados relacionados serão perdidos.
                     </div>
                 </div>
@@ -192,7 +192,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-1"></i> Excluir Usuário
+                            <i class="mdi mdi-trash me-1"></i> Excluir Usuário
                         </button>
                     </form>
                 </div>
@@ -272,7 +272,7 @@
 
             // Mostrar loading
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processando...';
+            button.innerHTML = '<i class="mdi mdi-spinner mdi-spin me-1"></i>Processando...';
 
             fetch(`/users/{{ $user->id }}/toggle-status`, {
                     method: 'POST',
@@ -317,7 +317,7 @@
 
             // Mostrar loading
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gerando...';
+            button.innerHTML = '<i class="mdi mdi-spinner mdi-spin me-1"></i>Gerando...';
 
             fetch(`/users/${userId}/reset-password`, {
                     method: 'POST',
@@ -359,7 +359,7 @@
                         <div class="modal-content">
                             <div class="modal-header bg-warning text-white">
                                 <h5 class="modal-title">
-                                    <i class="fas fa-key me-2"></i>Senha Temporária Gerada
+                                    <i class="mdi mdi-key me-2"></i>Senha Temporária Gerada
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
@@ -371,17 +371,17 @@
                                             <h2 class="fw-bold font-monospace mb-0" style="letter-spacing: 2px;">${password}</h2>
                                             <button type="button" class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-2" 
                                                     onclick="copyPassword('${password}')" title="Copiar senha">
-                                                <i class="fas fa-copy"></i>
+                                                <i class="mdi mdi-copy"></i>
                                             </button>
                                         </div>
                                         <small class="text-muted">
-                                            <i class="fas fa-clock me-1"></i>
+                                            <i class="mdi mdi-clock me-1"></i>
                                             <strong>Válida até:</strong> ${expiresAt}
                                         </small>
                                     </div>
                                     
                                     <div class="alert alert-info border-0 text-start">
-                                        <i class="fas fa-info-circle me-2"></i>
+                                        <i class="mdi mdi-info-circle me-2"></i>
                                         <strong>Instruções importantes:</strong>
                                         <ul class="mt-2 mb-0 ps-3">
                                             <li>Esta senha expira em 24 horas</li>
@@ -394,13 +394,13 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="fas fa-times me-1"></i>Fechar
+                                    <i class="mdi mdi-times me-1"></i>Fechar
                                 </button>
                                 <button type="button" class="btn btn-warning" onclick="copyPassword('${password}')">
-                                    <i class="fas fa-copy me-2"></i>Copiar Senha
+                                    <i class="mdi mdi-copy me-2"></i>Copiar Senha
                                 </button>
                                 <button type="button" class="btn btn-primary" onclick="printPassword('${password}', '${expiresAt}')">
-                                    <i class="fas fa-print me-2"></i>Imprimir
+                                    <i class="mdi mdi-print me-2"></i>Imprimir
                                 </button>
                             </div>
                         </div>
@@ -579,7 +579,7 @@
             const originalContent = button.innerHTML;
 
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Invalidando...';
+            button.innerHTML = '<i class="mdi mdi-spinner mdi-spin me-1"></i>Invalidando...';
 
             fetch(`/users/{{ $user->id }}/invalidate-temporary-passwords`, {
                     method: 'POST',

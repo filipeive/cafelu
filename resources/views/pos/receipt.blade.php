@@ -141,6 +141,7 @@
                     Bairro de Zalala, ER470<br>
                     Quelimane, Zambézia<br>
                     Tel: (+258) 846 885 214<br>
+                    Email: zalalabeachbar@gmail.com<br>
                     NUIT: 110735901
                 </p>
             </div>

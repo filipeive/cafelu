@@ -70,6 +70,7 @@ body {
     padding: 1.5rem;
     max-width: 100%;
     min-height: 100vh;
+    background-color:  linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #fbbf24 100%) !important;
 }
 
 .container-wrapper {

@@ -344,11 +344,11 @@
 
 /* ===== FOOTER COMPACTO FIXO ===== */
 .main-footer {
-    background: linear-gradient(135deg, #1fb3d4 0%, #072b31 50%, #ff9100 100%);
+    background: linear-gradient(135deg, #1fb3d4 0%, #000000 50%, #ff9100 100%);
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.8);
-    font-size: 0.75rem;
+    font-size: 0.1rem;
     padding: 0.5rem 1rem;
     position: relative;
     bottom: 0;

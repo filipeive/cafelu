@@ -17,7 +17,7 @@
                     <img src="{{ $user->avatar_url }}" class="rounded-circle mb-3" width="150" height="150">
                     <h4 class="fw-bold mb-1">{{ $user->name }}</h4>
                     <span
-                        class="badge bg-{{ $user->role?->name === 'admin' ? 'danger' : ($user->role?->name === 'manager' ? 'primary' : 'success') }} mb-3">
+                        class="badge bg-{{ $user->role === 'admin' ? 'danger' : ($user->role === 'manager' ? 'primary' : 'success') }} mb-3">
                         {{ $user->role_display }}
                     </span>
 

@@ -42,10 +42,21 @@ Route::middleware(['auth'])->group(function () {
     
     // Dashboard - Todos os usuários autenticados
     Route::get('dashboard/', [DashboardController::class, 'index'])->name('dashboard');
-    
-    // Perfil - Todos os usuários
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [ProfileController::class, 'save'])->name('save');
+    //Route::get('/dashboard', [DashboardController::class, 'menu'])->name('dashboard.menu');
+
+    // ===== PERFIL DO USUÁRIO =====
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        Route::patch('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+        Route::get('/stats', [ProfileController::class, 'stats'])->name('stats');
+        Route::get('/performance', [ProfileController::class, 'performance'])->name('performance');
+        Route::get('/show', [ProfileController::class, 'show'])->name('show');
+        //update-photo
+        Route::patch('/photo', [ProfileController::class, 'updatePhoto'])->name('update-photo');
+
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -105,8 +116,8 @@ Route::middleware(['auth'])->group(function () {
             // API Routes para atualizações em tempo real
             Route::get('/active-orders', [KitchenController::class, 'getActiveOrders'])->name('active-orders');
             Route::post('/items/{item}/status', [KitchenController::class, 'updateItemStatus'])->name('update-item-status');
-            Route::post('/orders/{order}/start-all', [KitchenController::class, 'startAllItems'])->name('start-all-items');
-            Route::post('/orders/{order}/finish-all', [KitchenController::class, 'finishAllItems'])->name('finish-all-items');
+            Route::post('/orders/{order}/start-all', [KitchenController::class, 'startAllItems'])->name('start-all');
+            Route::post('/orders/{order}/finish-all', [KitchenController::class, 'finishAllItems'])->name('finish-all');
         });
 
     // ===== MESAS =====
@@ -310,7 +321,7 @@ Route::middleware(['auth'])->group(function () {
     */
     
     // ===== CLIENTES =====
-    Route::prefix('clients')->name('clients.')->group(function () {
+    Route::prefix('client')->name('client.')->group(function () {
         Route::middleware(['permission:view_clients'])->group(function () {
             Route::get('/', [ClientController::class, 'index'])->name('index');
             Route::get('/{client}/show', [ClientController::class, 'show'])->name('show');
@@ -364,9 +375,29 @@ Route::middleware(['auth'])->group(function () {
     
     // ===== USUÁRIOS DO SISTEMA =====
     Route::middleware(['role:admin'])->group(function () {
-        Route::resource('users', UserController::class);
+        //Route::resource('users', UserController::class);
     });
-
+    Route::prefix('users')->name('users.')->middleware(['role:admin'])->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        
+        // Rotas de atividade
+        Route::get('/{user}/activity', [UserController::class, 'activity'])->name('activity');
+        
+        // Rotas de ação
+        Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
+        
+        // Rotas de senhas temporárias
+        Route::get('/{user}/temporary-passwords', [UserController::class, 'temporaryPasswords'])->name('temporary-passwords');
+        Route::post('/{user}/invalidate-temporary-passwords', [UserController::class, 'invalidateTemporaryPasswords'])->name('invalidate-temporary-passwords');
+    });
+    
     // ===== MENU DIGITAL =====
     Route::middleware(['permission:view_products'])->group(function () {
         Route::get('menu', [DashboardController::class, 'menu'])->name('menu.index');

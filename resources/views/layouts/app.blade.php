@@ -11,7 +11,10 @@
     <title>ZALALA BEACH BAR - @yield('title', 'Sistema de Gestão')</title>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    {{--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
+    <!-- CSS -->
+    <link href="{{ asset('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+
     <!-- Material Design Icons -->
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- Google Fonts -->
@@ -84,7 +87,7 @@
             z-index: -1;
         }
 
-        /* ===== SIDEBAR ===== */
+        /* ===== SIDEBAR STYLES ===== */
         .sidebar {
             position: fixed;
             top: 0;
@@ -97,6 +100,8 @@
             transition: transform 0.3s ease;
             overflow-y: auto;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar::-webkit-scrollbar {
@@ -122,7 +127,8 @@
             padding: 2rem 1.5rem;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            position: relative;
+            position: sticky;
+            flex-shrink: 0;
         }
 
         .sidebar-brand::before {
@@ -157,8 +163,8 @@
         }
 
         .brand-title {
-            font-family: 'montserrate', cursive;
-            font-size: 1.6rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
             font-weight: 700;
             color: white;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -168,7 +174,7 @@
 
         .brand-subtitle {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             margin-top: 0.5rem;
         }
@@ -178,7 +184,7 @@
             padding: 1rem;
             margin-top: 1rem;
             border-radius: var(--border-radius);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: rgba(255, 255, 255, 0.8);
             text-align: left;
         }
@@ -197,48 +203,54 @@
             width: 16px;
             margin-right: 0.5rem;
             color: var(--secondary-color);
+            font-size: 0.8rem;
         }
 
         /* Navigation */
         .sidebar-nav {
             padding: 1.5rem 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        .top-navbar{
-            background: linear-gradient(135deg, #c5f1fc 0%, #61fff7 50%, #fdd97c 100%) !important;
-        }
         .nav-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section:last-child {
+            margin-bottom: 0;
         }
 
         .nav-section-title {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 1rem;
-            padding: 0 0.75rem;
+            margin-bottom: 0.75rem;
+            padding: 0 0.5rem;
             display: flex;
             align-items: center;
         }
 
         .nav-section-title i {
             margin-right: 0.5rem;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         .nav-pills .nav-link {
             color: rgba(255, 255, 255, 0.85);
             border-radius: var(--border-radius);
-            margin: 0.25rem 0;
-            padding: 0.875rem 1rem;
+            margin: 0.2rem 0;
+            padding: 0.75rem 0.875rem;
             transition: var(--transition);
             font-weight: 500;
             position: relative;
             overflow: hidden;
             display: flex;
             align-items: center;
+            font-size: 0.9rem;
         }
 
         .nav-pills .nav-link::before {
@@ -260,23 +272,23 @@
         .nav-pills .nav-link:hover {
             color: white;
             background: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
+            transform: translateX(3px);
         }
 
         .nav-pills .nav-link.active {
             background: rgba(255, 255, 255, 0.2);
             color: white;
             box-shadow: var(--shadow-md);
-            border-left: 4px solid var(--secondary-color);
+            border-left: 3px solid var(--secondary-color);
         }
 
         .nav-pills .nav-link i {
-            width: 24px;
+            width: 20px;
             text-align: center;
             margin-right: 0.75rem;
             position: relative;
             z-index: 1;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .nav-pills .nav-link span {
@@ -288,49 +300,99 @@
         .nav-pills .nav-link .badge {
             position: relative;
             z-index: 1;
-            font-size: 0.7rem;
-            padding: 0.25rem 0.5rem;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            min-width: 20px;
+            text-align: center;
         }
 
-        /* User Area */
-        .user-area {
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 1.5rem 1rem;
+        /* User Profile Section */
+        .user-profile-section {
             margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            color: white;
-            margin-bottom: 1rem;
+        .user-profile-card {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            text-align: center;
         }
 
         .user-avatar {
-            width: 48px;
-            height: 48px;
+            margin-bottom: 0.75rem;
+        }
+
+        .avatar-circle {
+            width: 50px;
+            height: 50px;
             background: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 0.75rem;
+            margin: 0 auto;
             border: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
         }
 
-        .user-avatar .status-dot {
+        .avatar-circle i {
+            font-size: 1.8rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .status-dot {
             position: absolute;
             bottom: 2px;
             right: 2px;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             background: var(--success-color);
-            border: 2px solid white;
+            border: 2px solid rgba(0, 0, 0, 0.3);
             border-radius: 50%;
             animation: pulse 2s ease-in-out infinite;
+        }
+
+        .user-info {
+            margin-bottom: 0.75rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .user-actions {
+            width: 100%;
+        }
+
+        .btn-logout {
+            width: 100%;
+            background: rgba(239, 68, 68, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--border-radius);
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: white;
+            transform: translateY(-1px);
         }
 
         .user-info .user-name {
@@ -356,41 +418,76 @@
 
         /* ===== TOP NAVBAR ===== */
         .top-navbar {
-            background: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--shadow-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 0;
             position: sticky;
             top: 0;
             z-index: 1030;
-            padding: 1rem 0;
         }
 
-        .navbar-brand-mobile {
-            font-family: 'montserrate', cursive;
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        /* Left Section */
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .sidebar-toggle {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        .page-title i {
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--secondary-color);
+        }
+
+        .page-title h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
             margin: 0;
+            color: white;
+        }
+
+        .page-title small {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Center Section */
+        .navbar-center {
+            flex: 1;
+            max-width: 400px;
         }
 
         .search-container {
             position: relative;
-            max-width: 400px;
-        }
-
-        .search-input {
-            border-radius: 25px;
-            border: 2px solid #e5e7eb;
-            padding: 0.75rem 1rem 0.75rem 2.5rem;
-            transition: var(--transition);
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .search-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(8, 145, 178, 0.15);
-            background: white;
+            width: 100%;
         }
 
         .search-icon {
@@ -398,7 +495,279 @@
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #6b7280;
+            color: var(--text-muted);
+            z-index: 2;
+        }
+
+        .search-input {
+            padding-left: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .search-results {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .search-placeholder {
+            padding: 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .search-placeholder i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Right Section */
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        /* Quick Actions */
+        .quick-actions-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+        }
+
+        .quick-actions-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Notifications */
+        .notifications-btn {
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #f59e0b 0%, #fb923c 50%, #f97316 100%);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .notifications-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .notifications-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.4rem;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .notifications-menu {
+            min-width: 380px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+        }
+
+        .btn-mark-read {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .notifications-loading {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .notifications-footer {
+            padding: 0.75rem;
+        }
+
+        /* User Dropdown */
+        .user-btn {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 50px;
+            padding: 0.1rem 0.75rem;
+            transition: var(--transition);
+        }
+
+        .user-btn:hover {
+            background: rgba(255, 145, 0, 0.2);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-menu {
+            min-width: 250px;
+        }
+
+        .user-header {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .user-avatar-large {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0 auto 0.75rem;
+        }
+
+        .user-info {
+            line-height: 1.4;
+        }
+
+        /* Dropdown Improvements */
+        .dropdown-menu {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .dropdown-header {
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-content {
+                gap: 0.5rem;
+            }
+
+            .navbar-center {
+                display: none !important;
+            }
+
+            .quick-actions-dropdown {
+                display: none !important;
+            }
+
+            .page-title h1 {
+                font-size: 1.1rem;
+            }
+
+            .user-name {
+                display: none !important;
+            }
+
+            .notifications-menu {
+                min-width: 300px;
+                max-width: 90vw;
+            }
+
+            .navbar-right {
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .top-navbar {
+                padding: 0.5rem 0;
+            }
+
+            .navbar-left {
+                gap: 0.5rem;
+            }
+
+            .page-title i {
+                font-size: 1.25rem;
+            }
+
+            .user-btn {
+                padding: 0.100rem;
+            }
+
+            .notifications-btn {
+                width: 36px;
+                height: 36px;
+            }
+        }
+
+        /* Animation for notifications */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-menu.show {
+            animation: slideIn 0.2s ease-out;
         }
 
         /* ===== CARDS ===== */
@@ -592,16 +961,6 @@
             box-shadow: var(--shadow-soft);
         }
 
-        /* ===== FOOTER ===== */
-        .main-footer {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            margin-top: 3rem;
-            box-shadow: var(--shadow-soft);
-        }
-
         /* ===== ALERTS ===== */
         .alert {
             border: none;
@@ -659,12 +1018,13 @@
 </head>
 
 <body>
+    @include('partials.footer')
     <!-- Sidebar Overlay (Mobile) -->
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
-        <!-- Brand -->
+        <!-- Brand Section -->
         <div class="sidebar-brand">
             <div class="brand-logo text-center">
                 <div class="logo-icon mb-2">
@@ -674,7 +1034,7 @@
                 <h1 class="brand-title">ZALALA BEACH BAR</h1>
                 <div class="brand-subtitle">Restaurante • Bar • Gestão</div>
             </div>
-            <div class="business-info">
+            {{-- <div class="business-info">
                 <div class="info-item">
                     <i class="mdi mdi-map-marker"></i>
                     <span>ER470, Bairro Zalala, Quelimane</span>
@@ -687,13 +1047,17 @@
                     <i class="mdi mdi-card-account-details"></i>
                     <span>NUIT: 110735901</span>
                 </div>
-            </div>
+            </div> --}}
         </div>
-
-        <!-- Navigation -->
+        <hr>
+        <!-- Navigation Sections -->
         <div class="sidebar-nav">
-            <!-- Dashboard - Todos os usuários -->
+            <!-- Dashboard -->
             <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="mdi mdi-menu"></i>
+                    <span>Navegação</span>
+                </div>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
@@ -705,7 +1069,7 @@
                 </ul>
             </div>
 
-            <!-- OPERACIONAL - Baseado em permissões operacionais -->
+            <!-- OPERACIONAL -->
             @if (\App\Http\Middleware\PermissionHelper::canAny(['view_products', 'create_sales', 'view_orders', 'manage_tables']))
                 <div class="nav-section">
                     <div class="nav-section-title">
@@ -713,7 +1077,6 @@
                         <span>Operacional</span>
                     </div>
                     <ul class="nav nav-pills flex-column">
-                        <!-- PDV - Cashiers, Managers, Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::canAll(['view_products', 'create_sales']))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}"
@@ -725,7 +1088,6 @@
                             </li>
                         @endif
 
-                        <!-- Pedidos - Waiters, Managers, Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_orders'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}"
@@ -747,7 +1109,6 @@
                             </li>
                         @endif
 
-                        <!-- Cozinha - Cooks, Managers, Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::can('manage_kitchen'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('kitchen.*') ? 'active' : '' }}"
@@ -773,7 +1134,6 @@
                             </li>
                         @endif
 
-                        <!-- Mesas - Waiters, Managers, Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::canAny(['view_orders', 'manage_tables']))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('tables.*') ? 'active' : '' }}"
@@ -799,7 +1159,7 @@
                 </div>
             @endif
 
-            <!-- MENU & PRODUTOS - Baseado em permissões de produtos -->
+            <!-- MENU & PRODUTOS -->
             @if (\App\Http\Middleware\PermissionHelper::canAny(['view_products', 'manage_categories', 'view_stock_movements']))
                 <div class="nav-section">
                     <div class="nav-section-title">
@@ -807,7 +1167,6 @@
                         <span>Menu & Produtos</span>
                     </div>
                     <ul class="nav nav-pills flex-column">
-                        <!-- Produtos - Todos exceto cook básico -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_products'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
@@ -830,7 +1189,6 @@
                             </li>
                         @endif
 
-                        <!-- Categorias - Managers e Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::can('manage_categories'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
@@ -841,7 +1199,6 @@
                             </li>
                         @endif
 
-                        <!-- Cardápio Digital - Todos com view_products -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_products'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('menu.*') ? 'active' : '' }}"
@@ -852,7 +1209,6 @@
                             </li>
                         @endif
 
-                        <!-- Movimentos de Stock - Managers e Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_stock_movements'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('stock-movements.*') ? 'active' : '' }}"
@@ -866,7 +1222,7 @@
                 </div>
             @endif
 
-            <!-- VENDAS & FINANCEIRO - Baseado em permissões financeiras -->
+            <!-- VENDAS & FINANCEIRO -->
             @if (\App\Http\Middleware\PermissionHelper::canAny(['view_sales', 'view_reports', 'view_expenses']))
                 <div class="nav-section">
                     <div class="nav-section-title">
@@ -874,7 +1230,6 @@
                         <span>Vendas & Financeiro</span>
                     </div>
                     <ul class="nav nav-pills flex-column">
-                        <!-- Vendas - Cashiers, Managers, Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_sales'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}"
@@ -893,7 +1248,6 @@
                             </li>
                         @endif
 
-                        <!-- Despesas - Managers e Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_expenses'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}"
@@ -904,7 +1258,6 @@
                             </li>
                         @endif
 
-                        <!-- Relatórios - Baseado em permissões específicas -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_reports'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
@@ -918,7 +1271,6 @@
                             </li>
                         @endif
 
-                        <!-- Fluxo de Caixa - Apenas com relatórios financeiros -->
                         @if (\App\Http\Middleware\PermissionHelper::can('financial_reports'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('reports.cash-flow') ? 'active' : '' }}"
@@ -932,7 +1284,7 @@
                 </div>
             @endif
 
-            <!-- RELACIONAMENTO - Clientes -->
+            <!-- RELACIONAMENTO -->
             @if (\App\Http\Middleware\PermissionHelper::can('view_clients'))
                 <div class="nav-section">
                     <div class="nav-section-title">
@@ -942,7 +1294,7 @@
                     <ul class="nav nav-pills flex-column">
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}"
-                                href="{{ route('clients.index') }}">
+                                href="{{ route('client.index') }}">
                                 <i class="mdi mdi-account-heart"></i>
                                 <span>Clientes</span>
                                 @php
@@ -959,7 +1311,7 @@
                 </div>
             @endif
 
-            <!-- GESTÃO DE PESSOAS - Funcionários e Usuários -->
+            <!-- GESTÃO DE PESSOAS -->
             @if (\App\Http\Middleware\PermissionHelper::canAny(['view_employees', 'view_users']))
                 <div class="nav-section">
                     <div class="nav-section-title">
@@ -967,7 +1319,6 @@
                         <span>Gestão de Pessoas</span>
                     </div>
                     <ul class="nav nav-pills flex-column">
-                        <!-- Funcionários - Managers e Admin -->
                         @if (\App\Http\Middleware\PermissionHelper::can('view_employees'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}"
@@ -984,7 +1335,6 @@
                             </li>
                         @endif
 
-                        <!-- Usuários do Sistema - Apenas Admin -->
                         @if (auth()->user()->role === 'admin')
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
@@ -1004,7 +1354,7 @@
                 </div>
             @endif
 
-            <!-- SISTEMA - Configurações e Logs (Apenas Admin) -->
+            <!-- SISTEMA -->
             @if (auth()->user()->role === 'admin')
                 <div class="nav-section">
                     <div class="nav-section-title">
@@ -1021,14 +1371,14 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#"
-                                onclick="showToast('Backup automático ativo', 'success')">
+                                onclick="showToast('Funcionalidade em desenvolvimento', 'success')">
                                 <i class="mdi mdi-backup-restore"></i>
                                 <span>Backup & Restore</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#"
-                                onclick="showToast('Logs de auditoria disponíveis', 'info')">
+                                onclick="showToast('Funcionalidade em desenvolvimento', 'info')">
                                 <i class="mdi mdi-file-document-outline"></i>
                                 <span>Logs de Auditoria</span>
                             </a>
@@ -1037,48 +1387,9 @@
                 </div>
             @endif
 
-            <!-- ATALHOS RÁPIDOS - Baseado no role do usuário -->
-            <div class="nav-section">
-                <div class="nav-section-title">
-                    <i class="mdi mdi-lightning-bolt"></i>
-                    <span>Ações Rápidas</span>
-                </div>
-                <ul class="nav nav-pills flex-column">
-                    @if (\App\Http\Middleware\PermissionHelper::can('create_orders'))
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('tables.index') }}"
-                                style="background: rgba(16, 185, 129, 0.1); color: var(--success-color);">
-                                <i class="mdi mdi-plus-circle"></i>
-                                <span>Novo Pedido</span>
-                            </a>
-                        </li>
-                    @endif
-
-                    @if (\App\Http\Middleware\PermissionHelper::can('create_products'))
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('products.create') }}"
-                                style="background: rgba(245, 158, 11, 0.1); color: var(--warning-color);">
-                                <i class="mdi mdi-food-variant"></i>
-                                <span>Novo Produto</span>
-                            </a>
-                        </li>
-                    @endif
-
-                    @if (\App\Http\Middleware\PermissionHelper::can('create_clients'))
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('clients.create') }}"
-                                style="background: rgba(59, 130, 246, 0.1); color: var(--info-color);">
-                                <i class="mdi mdi-account-plus"></i>
-                                <span>Novo Cliente</span>
-                            </a>
-                        </li>
-                    @endif
-                </ul>
-            </div>
-
-            <!-- INDICADOR DE ROLE -->
-            <div class="nav-section">
-                <div class="user-role-indicator p-3 text-center">
+            <!-- User Profile Section -->
+            <div class="nav-section user-profile-section">
+                <div class="user-profile-card">
                     @php
                         $roleInfo = [
                             'admin' => [
@@ -1109,67 +1420,78 @@
                         ];
                         $currentRole = $roleInfo[auth()->user()->role] ?? $roleInfo['admin'];
                     @endphp
-                    <div class="role-badge"
-                        style="background: {{ $currentRole['color'] }}20; border: 2px solid {{ $currentRole['color'] }}30; border-radius: var(--border-radius); padding: 0.75rem;">
-                        <i class="{{ $currentRole['icon'] }}"
-                            style="color: {{ $currentRole['color'] }}; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-                        <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem; font-weight: 600;">
-                            {{ $currentRole['name'] }}
+
+                    <div class="user-avatar">
+                        <div class="avatar-circle">
+                            <i class="mdi mdi-account-circle"></i>
+                            <div class="status-dot"></div>
                         </div>
-                        <div style="color: rgba(255,255,255,0.7); font-size: 0.7rem; margin-top: 0.25rem;">
-                            Nível: {{ ucfirst(auth()->user()->role) }}
-                        </div>
+                    </div>
+
+                    <div class="user-info">
+                        <div class="user-name">{{ auth()->user()->name }}</div>
+                        <div class="user-role">{{ $currentRole['name'] }}</div>
+                    </div>
+
+                    <div class="user-actions">
+                        <form method="POST" action="{{ route('logout') }}" class="w-100">
+                            @csrf
+                            <button type="submit" class="btn-logout">
+                                <i class="mdi mdi-logout-variant"></i>
+                                Sair
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
+
     <!-- Main Content -->
     <div class="main-content" id="main-content">
         <!-- Top Navbar -->
         <nav class="top-navbar">
             <div class="container-fluid">
-                <div class="d-flex align-items-center justify-content-between">
+                <div class="navbar-content">
                     <!-- Left Section -->
-                    <div class="d-flex align-items-center">
+                    <div class="navbar-left">
                         <!-- Mobile Sidebar Toggle -->
-                        <button class="btn btn-outline-primary d-lg-none me-3" type="button" id="sidebar-toggle">
+                        <button class="btn btn-outline-primary sidebar-toggle d-lg-none" type="button"
+                            id="sidebar-toggle">
                             <i class="mdi mdi-menu"></i>
                         </button>
 
                         <!-- Page Title -->
-                        <div class="d-flex align-items-center">
-                            <i class="mdi @yield('title-icon', 'mdi-view-dashboard') text-primary me-2 fs-4"></i>
+                        <div class="page-title">
+                            <i class="mdi @yield('title-icon', 'mdi-view-dashboard') text-light me-2"></i>
                             <div>
-                                <h1 class="navbar-brand-mobile mb-0">@yield('page-title', 'Dashboard')</h1>
-                                {{--  <small class="text-muted d-none d-md-block">@yield('page-subtitle', 'Painel de Controle')</small> --}}
+                                <h1 class="mb-0">@yield('page-title', 'Dashboard')</h1>
+                                {{-- <small class="text-muted d-none d-md-block">@yield('page-subtitle', 'Painel de Controle')</small> --}}
                             </div>
                         </div>
                     </div>
 
                     <!-- Center Section - Search -->
-                    <div class="search-container d-none d-md-block flex-grow-1 mx-4">
-                        <div class="position-relative">
+                    <div class="navbar-center d-none d-md-flex">
+                        <div class="search-container">
                             <i class="mdi mdi-magnify search-icon"></i>
                             <input type="text" class="form-control search-input"
                                 placeholder="Buscar produtos, pedidos, clientes..." id="global-search">
-                            <!-- Search Results Dropdown -->
-                            <div class="dropdown-menu w-100 mt-1" id="search-results"
-                                style="display: none; max-height: 300px; overflow-y: auto;">
-                                <div class="p-3 text-center text-muted">
+                            <div class="search-results dropdown-menu" id="search-results">
+                                <div class="search-placeholder">
                                     <i class="mdi mdi-magnify"></i>
-                                    Digite para buscar...
+                                    <span>Digite para buscar...</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Right Section -->
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="navbar-right">
                         <!-- Quick Actions -->
-                        <div class="dropdown d-none d-md-block">
-                            <button class="btn btn-secondary dropdown-toggle" type="button"
+                        <div class="dropdown quick-actions-dropdown d-none d-md-block">
+                            <button class="btn btn-primary quick-actions-btn" type="button"
                                 data-bs-toggle="dropdown">
                                 <i class="mdi mdi-lightning-bolt me-1"></i>
                                 Ações Rápidas
@@ -1182,19 +1504,19 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('pos.index') ?? '#' }}">
+                                    <a class="dropdown-item" href="{{ route('pos.index') }}">
                                         <i class="mdi mdi-point-of-sale text-success me-2"></i>
                                         Abrir PDV
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('tables.index') ?? '#' }}">
+                                    <a class="dropdown-item" href="{{ route('tables.index') }}">
                                         <i class="mdi mdi-plus-circle text-primary me-2"></i>
                                         Novo Pedido
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('products.create') ?? '#' }}">
+                                    <a class="dropdown-item" href="{{ route('products.create') }}">
                                         <i class="mdi mdi-food-variant text-warning me-2"></i>
                                         Adicionar Produto
                                     </a>
@@ -1203,7 +1525,7 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('reports.index') ?? '#' }}">
+                                    <a class="dropdown-item" href="{{ route('reports.index') }}">
                                         <i class="mdi mdi-chart-line text-info me-2"></i>
                                         Relatórios
                                     </a>
@@ -1212,36 +1534,31 @@
                         </div>
 
                         <!-- Notifications -->
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary position-relative" type="button"
+                        <div class="dropdown notifications-dropdown">
+                            <button class="btn btn-warning notifications-btn" type="button"
                                 data-bs-toggle="dropdown" id="notifications-dropdown">
                                 <i class="mdi mdi-bell-outline"></i>
-                                <span
-                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                    id="notifications-badge">
+                                <span class="notifications-badge badge bg-danger" id="notifications-badge">
                                     0
                                 </span>
                             </button>
-                            <div class="dropdown-menu dropdown-menu-end"
-                                style="min-width: 380px; max-height: 500px; overflow-y: auto;">
-                                <div class="dropdown-header d-flex justify-content-between align-items-center">
+                            <div class="dropdown-menu dropdown-menu-end notifications-menu">
+                                <div class="notifications-header">
                                     <span>Notificações</span>
-                                    <button class="btn btn-link btn-sm p-0" id="mark-all-read">
+                                    <button class="btn-mark-read" id="mark-all-read">
                                         <small>Marcar todas como lidas</small>
                                     </button>
                                 </div>
                                 <div class="dropdown-divider"></div>
-
                                 <div id="notifications-list">
-                                    <div class="text-center py-4">
+                                    <div class="notifications-loading">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="visually-hidden">Carregando...</span>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="dropdown-divider"></div>
-                                <div class="text-center p-2">
+                                <div class="notifications-footer">
                                     <a href="{{ route('notifications.index') }}"
                                         class="btn btn-sm btn-primary w-100">
                                         Ver Todas as Notificações
@@ -1249,31 +1566,41 @@
                                 </div>
                             </div>
                         </div>
+
                         <!-- User Profile -->
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
-                                type="button" data-bs-toggle="dropdown">
-                                <div class="user-avatar me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                                    {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
+                        <div class="dropdown user-dropdown">
+                            <button class="btn btn-warning user-btn d-flex align-items-center rounded-pill px-2 py-1"
+                                type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="gap: 6px;">
+
+                                <!-- Avatar -->
+                                <div class="user-avatar text-white fw-bold" style="margin: 0">
+                                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
                                 </div>
-                                <span class="d-none d-lg-inline">{{ auth()->user()->name ?? 'Administrador' }}</span>
+
+                                <!-- Setinha -->
+                                <i class="mdi mdi-chevron-down text-light" style="font-size: 1.2rem;"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
+
+                            <ul class="dropdown-menu dropdown-menu-end user-menu">
                                 <li>
-                                    <div class="dropdown-header text-center">
-                                        <div class="user-avatar mx-auto mb-2" style="width: 48px; height: 48px;">
+                                    <div class="user-header">
+                                        <div class="user-avatar-large">
                                             {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
                                         </div>
-                                        <div class="fw-semibold">{{ auth()->user()->name ?? 'Administrador' }}</div>
-                                        <div class="text-muted small">
-                                            {{ auth()->user()->email ?? 'admin@zalalabeachbar.com' }}</div>
+                                        <div class="user-info">
+                                            <div class="fw-semibold">{{ auth()->user()->name ?? 'Administrador' }}
+                                            </div>
+                                            <div class="text-muted small">
+                                                {{ auth()->user()->email ?? 'admin@zalalabeachbar.com' }}</div>
+                                        </div>
                                     </div>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('profile.edit') ?? '#' }}">
+                                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
                                         <i class="mdi mdi-account-edit text-primary me-2"></i>
                                         Editar Perfil
                                     </a>
@@ -1294,7 +1621,7 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <form method="POST" action="{{ route('logout') ?? '#' }}" class="mb-0">
+                                    <form method="POST" action="{{ route('logout') }}" class="mb-0">
                                         @csrf
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="mdi mdi-logout me-2"></i>
@@ -1312,9 +1639,14 @@
         <!-- Mobile Search -->
         <div class="container-fluid d-md-none py-3">
             <div class="search-container">
-                <div class="position-relative">
-                    <i class="mdi mdi-magnify search-icon"></i>
-                    <input type="text" class="form-control search-input" placeholder="Buscar...">
+                <i class="mdi mdi-magnify search-icon"></i>
+                <input type="text" class="form-control search-input"
+                    placeholder="Buscar produtos, pedidos, clientes..." id="global-search">
+                <div class="search-results dropdown-menu" id="search-results">
+                    <div class="search-placeholder">
+                        <i class="mdi mdi-magnify"></i>
+                        <span>Digite para buscar...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1361,31 +1693,65 @@
             <!-- Content Area -->
             @yield('content')
         </div>
-
-        <!-- Footer -->
+        <!-- Footer Compacto -->
         <footer class="main-footer">
             <div class="container-fluid">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <p class="mb-0 text-muted">
-                            © {{ date('Y') }} <strong>ZALALA BEACH BAR</strong> - Sistema de Gestão
-                        </p>
+                <div class="footer-content">
+                    <!-- Informações Principais -->
+                    <div class="footer-main">
+                        <div class="footer-brand">
+                            <img src="{{ asset('assets/images/logo-zalala.png') }}" alt="ZALALA Logo"
+                                class="footer-logo">
+                            <div class="footer-info">
+                                <strong class="footer-title">ZALALA BEACH BAR</strong>
+                                <span class="footer-subtitle">Sistema de Gestão</span>
+                            </div>
+                        </div>
+
+                        <!-- Contatos Rápidos -->
+                        <div class="footer-contacts">
+                            <div class="contact-item">
+                                <a href="https://wa.me/258847240296" target="_blank" class="contact-link"
+                                    data-bs-toggle="tooltip" title="Suporte WhatsApp">
+                                    <i class="mdi mdi-whatsapp"></i>
+                                    <span>Suporte</span>
+                                </a>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-text" data-bs-toggle="tooltip" title="Telefone Principal">
+                                    <i class="mdi mdi-phone"></i>
+                                    <span>84 688 5214</span>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6 text-md-end">
-                        <small class="text-muted">
-                            Versão 2.0 |
-                            <a href="#" class="text-primary text-decoration-none">Suporte</a> |
-                            <a href="#" class="text-primary text-decoration-none">Documentação</a>
-                        </small>
+
+                    <!-- Informações Legais -->
+                    <div class="footer-bottom">
+                        <div class="footer-legal">
+                            <span class="copyright">
+                                © {{ date('Y') }} ZALALA BEACH BAR •
+                                <span class="developer">Desenvolvido por Filipe dos Santos</span>
+                            </span>
+                            <span class="footer-stats">
+                                <i class="mdi mdi-circle text-success" style="font-size: 6px;"></i>
+                                Online • v2.0 || <small class="tech-info">
+                                    Laravel {{ app()->version() }} | PHP {{ phpversion() }} |
+                                    <span
+                                        id="load-time">{{ round((microtime(true) - LARAVEL_START) * 1000, 2) }}ms</span>
+                                </small>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </footer>
     </div>
-
+    @include('partials.footerjs')
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('assets/pos/printRecibo.js') }}"></script>
+    <!-- JS -->
+    <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script>
         // ===== SIDEBAR MANAGEMENT =====
         class SidebarManager {
@@ -1678,10 +2044,10 @@
                         <small class="text-muted">${this.formatTime(notification.created_at)}</small>
                     </div>
                     ${!notification.is_read ? `
-                                    <button class="btn btn-sm btn-link p-0 mark-as-read" title="Marcar como lida">
-                                        <i class="mdi mdi-check-circle text-muted"></i>
-                                    </button>
-                                ` : ''}
+                                                                                                            <button class="btn btn-sm btn-link p-0 mark-as-read" title="Marcar como lida">
+                                                                                                                <i class="mdi mdi-check-circle text-muted"></i>
+                                                                                                            </button>
+                                                                                                        ` : ''}
                 </div>
             </div>
         `).join('');

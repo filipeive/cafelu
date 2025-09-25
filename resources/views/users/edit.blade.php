@@ -2,7 +2,7 @@
 
 @section('title', 'Editar Usuário')
 @section('page-title', 'Editar Usuário')
-@section('title-icon', 'fa-user-edit')
+@section('title-icon', 'mdi-user-edit')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('users.index') }}">Usuários</a></li>
@@ -14,7 +14,7 @@
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white d-flex align-items-center">
-                <i class="fas fa-user-edit text-primary me-2 fs-5"></i>
+                <i class="mdi mdi-user-edit text-primary me-2 fs-5"></i>
                 <h5 class="mb-0">Editar Usuário: {{ $user->name }}</h5>
             </div>
             <div class="card-body">
@@ -33,9 +33,9 @@
                                          class="rounded-circle" 
                                          width="120" 
                                          height="120"
-                                         style="object-fit: cover; border: 3px solid #f8f9fa;">
+                                         style="object-fit: cover; border: 3px solid #f8f9mdi;">
                                     <label for="photo" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 cursor-pointer">
-                                        <i class="fas fa-camera"></i>
+                                        <i class="mdi mdi-camera"></i>
                                     </label>
                                 </div>
                                 <div>
@@ -44,7 +44,7 @@
                                     @if($user->photo_path)
                                         <div class="mt-2">
                                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePhoto()">
-                                                <i class="fas fa-trash me-1"></i>Remover Foto
+                                                <i class="mdi mdi-trash me-1"></i>Remover Foto
                                             </button>
                                         </div>
                                     @endif
@@ -78,7 +78,7 @@
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password" name="password">
                                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
-                                    <i class="fas fa-eye" id="toggle-password"></i>
+                                    <i class="mdi mdi-eye" id="toggle-password"></i>
                                 </button>
                             </div>
                             <small class="text-muted">Deixe em branco para manter a senha atual</small>
@@ -93,7 +93,7 @@
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
                                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password_confirmation')">
-                                    <i class="fas fa-eye" id="toggle-password_confirmation"></i>
+                                    <i class="mdi mdi-eye" id="toggle-password_confirmation"></i>
                                 </button>
                             </div>
                             @error('password_confirmation')
@@ -107,8 +107,8 @@
                             <select class="form-select" id="role_id" name="role_id" required>
                                 <option value="">Selecione uma função</option>
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->id }}" {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
-                                        {{ ucfirst($role->name) }}
+                                    <option value="{{ $role }}" {{ old('role', $user->role) == $role ? 'selected' : '' }}>
+                                        {{ ucfirst($role) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -130,10 +130,10 @@
 
                     <div class="d-flex gap-3 mt-4">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Atualizar Usuário
+                            <i class="mdi mdi-save me-2"></i>Atualizar Usuário
                         </button>
                         <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times me-2"></i>Cancelar
+                            <i class="mdi mdi-times me-2"></i>Cancelar
                         </a>
                     </div>
                 </form>
@@ -144,13 +144,13 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white">
-                <h6 class="mb-0"><i class="fas fa-info-circle text-primary me-2"></i>Informações do Usuário</h6>
+                <h6 class="mb-0"><i class="mdi mdi-info-circle text-primary me-2"></i>Informações do Usuário</h6>
             </div>
             <div class="card-body">
                 <div class="text-center mb-4">
                     <img src="{{ $user->avatar_url }}" class="rounded-circle mb-3" width="80" height="80">
                     <h6 class="fw-bold">{{ $user->name }}</h6>
-                    <span class="badge bg-{{ $user->role?->name === 'admin' ? 'danger' : ($user->role?->name === 'manager' ? 'primary' : 'success') }}">
+                    <span class="badge bg-{{ $user->role === 'admin' ? 'danger' : ($user->role === 'manager' ? 'primary' : 'success') }}">
                         {{ $user->role_display }}
                     </span>
                 </div>
@@ -175,7 +175,7 @@
                 <hr>
                 
                 <div class="alert alert-warning small">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="mdi mdi-exclamation-triangle me-2"></i>
                     Alterações na função podem afetar as permissões do usuário
                 </div>
             </div>
@@ -184,19 +184,19 @@
 </div>
 
 <!-- Modal de Confirmação de Remoção de Foto -->
-<div class="modal fade" id="removePhotoModal" tabindex="-1">
+<div class="modal mdide" id="removePhotoModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-trash me-2"></i>Remover Foto de Perfil
+                    <i class="mdi mdi-trash me-2"></i>Remover Foto de Perfil
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p>Tem certeza que deseja remover a foto de perfil atual?</p>
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="mdi mdi-info-circle me-2"></i>
                     Uma imagem padrão será usada como substituta
                 </div>
             </div>
@@ -230,10 +230,10 @@ function togglePassword(fieldId) {
     
     if (field.type === 'password') {
         field.type = 'text';
-        toggleIcon.className = 'fas fa-eye-slash';
+        toggleIcon.className = 'mdi mdi-eye-slash';
     } else {
         field.type = 'password';
-        toggleIcon.className = 'fas fa-eye';
+        toggleIcon.className = 'mdi mdi-eye';
     }
 }
 

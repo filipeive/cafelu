@@ -118,7 +118,7 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('orders.kitchen') }}">
+                                        <a class="dropdown-item" href="{{ route('kitchen.dashboard') }}">
                                             <i class="mdi mdi-chef-hat text-warning me-2"></i>
                                             Visão Cozinha
                                         </a>

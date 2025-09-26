@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Table;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Category;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\HasPermissions;
+use App\Services\NotificationService;
 
 class KitchenController extends Controller
 {
@@ -118,10 +120,11 @@ class KitchenController extends Controller
         }
 
         $orders = $query->paginate(20);
+        $tables = Table::all();
 
         $this->logActivity('kitchen_history', null, 'Acessou histórico da cozinha');
 
-        return view('kitchen.history', compact('orders'));
+        return view('kitchen.history', compact('orders','tables'));
     }
 
     /**
@@ -192,7 +195,9 @@ class KitchenController extends Controller
 
         $item->save();
 
-        $this->logActivity('kitchen_update_item', $item, 
+        $this->logActivity(
+            'kitchen_update_item',
+            $item,
             "Alterou status do item '{$item->product->name}' de '{$oldStatus}' para '{$request->status}'",
             [
                 'order_id' => $item->order_id,
@@ -205,17 +210,27 @@ class KitchenController extends Controller
         // Verificar se todos os itens do pedido estão prontos
         $this->checkOrderCompletion($item->order);
 
-        return response()->json([
-            'success' => true,
-            'message' => "Status atualizado para '{$request->status}'",
-            'item' => [
-                'id' => $item->id,
-                'status' => $item->status,
-                'started_at' => $item->started_at,
-                'finished_at' => $item->finished_at
-            ]
-        ]);
+        // --- Resposta condicional ---
+        if ($request->expectsJson()) {
+            // Para AJAX ou fetch()
+            return response()->json([
+                'success' => true,
+                'message' => "Status atualizado para '{$request->status}'",
+                'item' => [
+                    'id' => $item->id,
+                    'status' => $item->status,
+                    'started_at' => $item->started_at,
+                    'finished_at' => $item->finished_at
+                ]
+            ]);
+        }
+
+        // Para request normal (via formulário / browser)
+        return redirect()
+            ->back()
+            ->with('success', "Status atualizado para '{$request->status}'");
     }
+
 
     /**
      * Iniciar preparo de todos os itens de um pedido
@@ -248,38 +263,47 @@ class KitchenController extends Controller
         ]);
     }
 
-    /**
-     * Finalizar todos os itens de um pedido
-     */
-    public function finishAllItems(Order $order)
+   public function finishAllItems(Order $order)
     {
         if ($order->status !== 'active') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Este pedido não está ativo'
-            ], 400);
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Este pedido não está ativo'
+                ], 400);
+            }
+
+            return redirect()->back()->with('error', 'Este pedido não está ativo');
         }
 
         $updatedItems = OrderItem::where('order_id', $order->id)
-                                ->whereIn('status', ['pending', 'preparing'])
-                                ->update([
-                                    'status' => 'ready',
-                                    'finished_at' => now()
-                                ]);
+            ->whereIn('status', ['pending', 'preparing'])
+            ->update([
+                'status' => 'ready',
+                'finished_at' => now()
+            ]);
 
         $this->logActivity('kitchen_finish_all', $order, 
             "Finalizou todos os itens do pedido #{$order->id}",
             ['items_updated' => $updatedItems]
         );
 
-        // Verificar se o pedido pode ser marcado como completo
+        // dispara notificação para o garçom
+        NotificationService::notifyWaiterOrderReady($order);
+
         $this->checkOrderCompletion($order);
 
-        return response()->json([
-            'success' => true,
-            'message' => "Todos os itens foram finalizados ({$updatedItems} itens)",
-            'items_updated' => $updatedItems
-        ]);
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Todos os itens foram finalizados ({$updatedItems} itens)",
+                'items_updated' => $updatedItems
+            ]);
+        }
+
+        return redirect()
+            ->route('kitchen.order.show', $order)
+            ->with('success', "Todos os itens foram finalizados ({$updatedItems} itens)");
     }
 
     /**

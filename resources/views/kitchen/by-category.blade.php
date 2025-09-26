@@ -277,8 +277,7 @@
         <div class="category-header">
             <h4 class="category-title">
                 <span>
-                    <i class="mdi mdi-{{ $this->getCategoryIcon($category['category']) }} me-2"></i>
-                    {{ $category['category'] }}
+                   <i class="mdi mdi-{{ getCategoryIcon($category['category']) }} me-2"></i>
                 </span>
                 <span class="badge bg-light text-dark">{{ $category['items']->count() }} itens</span>
             </h4>

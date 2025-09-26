@@ -205,7 +205,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     
-    // ===== PRODUTOS =====
+    /* // ===== PRODUTOS =====
     Route::prefix('products')->name('products.')->group(function () {
         // Visualizar produtos
         Route::middleware(['permission:view_products'])->group(function () {
@@ -244,8 +244,34 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware(['permission:delete_products'])->group(function () {
             Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
         });
-    });
+    }); */
+    // ===== PRODUTOS - Permissões ajustadas =====
+    Route::prefix('products')->name('products.')->group(function () {
+        // Relatório e exportação - view_products permission
+      
+        // Criar produtos - create_products permission
+            Route::get('/create', [ProductController::class, 'create'])->name('create');
+            Route::post('/', [ProductController::class, 'store'])->name('store');
 
+        // Editar produtos - edit_products permission
+            Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+            Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+            Route::post('/{product}/adjust-stock', [ProductController::class, 'adjustStock'])->name('adjust-stock');
+            Route::post('/{product}/duplicate', [ProductController::class, 'duplicate'])->name('duplicate');
+            Route::post('/bulk-toggle', [ProductController::class, 'bulkToggle'])->name('bulk-toggle');
+            Route::middleware('permission:view_products')->group(function () {
+            Route::get('/report', [ProductController::class, 'report'])->name('report');
+            Route::get('/export/{format}', [ProductController::class, 'exportProducts'])->name('export');
+            Route::get('/', [ProductController::class, 'index'])->name('index');
+            Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+            Route::get('/search', [ProductController::class, 'search'])->name('search');
+        });
+
+        // Deletar produtos - delete_products permission
+        Route::middleware('permission:delete_products')->group(function () {
+            Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+        });
+    });
     // ===== CATEGORIAS =====
     Route::prefix('categories')->name('categories.')->middleware(['permission:manage_categories'])->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
@@ -397,7 +423,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{user}/temporary-passwords', [UserController::class, 'temporaryPasswords'])->name('temporary-passwords');
         Route::post('/{user}/invalidate-temporary-passwords', [UserController::class, 'invalidateTemporaryPasswords'])->name('invalidate-temporary-passwords');
     });
-    
+
     // ===== MENU DIGITAL =====
     Route::middleware(['permission:view_products'])->group(function () {
         Route::get('menu', [DashboardController::class, 'menu'])->name('menu.index');

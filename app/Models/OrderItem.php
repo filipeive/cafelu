@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -8,10 +9,8 @@ class OrderItem extends Model
 {
     use HasFactory;
 
-    // Defina a tabela associada ao modelo
     protected $table = 'order_items';
 
-    // Defina os campos que podem ser atribuídos em massa
     protected $fillable = [
         'order_id',
         'product_id',
@@ -19,10 +18,20 @@ class OrderItem extends Model
         'unit_price',
         'total_price',
         'notes',
-        'status'
+        'status',
+        'started_at',
+        'finished_at',
+        'estimated_prep_time',
     ];
 
-    // Defina os relacionamentos (se houver)
+    protected $casts = [
+        'started_at' => 'datetime',
+        'finished_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    // Relacionamentos
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -33,7 +42,7 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
-    // Define os possíveis status do item
+    // Status disponíveis
     public static function statuses()
     {
         return [
@@ -41,7 +50,7 @@ class OrderItem extends Model
             'preparing' => 'Preparando',
             'ready' => 'Pronto',
             'delivered' => 'Entregue',
-            'cancelled' => 'Cancelado'
+            'cancelled' => 'Cancelado',
         ];
     }
 }

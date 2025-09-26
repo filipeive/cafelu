@@ -124,23 +124,24 @@
         /* Sidebar Brand */
         .sidebar-brand {
             background: rgba(0, 0, 0, 0.15);
-            padding: 2rem 1.5rem;
+            padding: 1rem;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             position: sticky;
-            flex-shrink: 0;
+            flex-shrink: 1;
+            height: 150px;
         }
 
         .sidebar-brand::before {
             content: '';
-            position: absolute;
+            position: sticky;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
-            background-size: 20px 20px;
+            background:linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #ffd900 100%);
             opacity: 0.3;
+            border-bottom-color: solid 1px orange;
         }
 
         .brand-logo {
@@ -1034,22 +1035,7 @@
                 <h1 class="brand-title">ZALALA BEACH BAR</h1>
                 <div class="brand-subtitle">Restaurante • Bar • Gestão</div>
             </div>
-            {{-- <div class="business-info">
-                <div class="info-item">
-                    <i class="mdi mdi-map-marker"></i>
-                    <span>ER470, Bairro Zalala, Quelimane</span>
-                </div>
-                <div class="info-item">
-                    <i class="mdi mdi-phone"></i>
-                    <span>846885214</span>
-                </div>
-                <div class="info-item">
-                    <i class="mdi mdi-card-account-details"></i>
-                    <span>NUIT: 110735901</span>
-                </div>
-            </div> --}}
         </div>
-        <hr>
         <!-- Navigation Sections -->
         <div class="sidebar-nav">
             <!-- Dashboard -->

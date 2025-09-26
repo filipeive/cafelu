@@ -11,31 +11,31 @@
 
 @push('styles')
     <style>
-    .stats-card {
-        transition: all 0.3s ease;
-        border-left: 4px solid;
-        padding: 0.8rem 1rem; /* Compacta */
-        min-height: 100px; /* Mantém altura mínima */
-    }
-    .stats-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    }
+        .stats-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+            padding: 0.8rem 1rem; /* Compacta */
+            min-height: 100px; /* Mantém altura mínima */
+        }
+        .stats-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        }
 
-    .stat-label {
-        font-size: 0.85rem; /* Menor */
-        margin-bottom: 0.2rem;
-    }
-    .stat-value {
-        font-size: 1.4rem; /* Menor que antes */
-        font-weight: bold;
-    }
-    .stats-card small {
-        font-size: 0.75rem;
-    }
-    .stats-card i {
-        font-size: 1.8rem; /* Ícones menores */
-    }
+        .stat-label {
+            font-size: 0.85rem; /* Menor */
+            margin-bottom: 0.2rem;
+        }
+        .stat-value {
+            font-size: 1.4rem; /* Menor que antes */
+            font-weight: bold;
+        }
+        .stats-card small {
+            font-size: 0.75rem;
+        }
+        .stats-card i {
+            font-size: 1.8rem; /* Ícones menores */
+        }
 
         .loading-spinner {
             width: 40px;

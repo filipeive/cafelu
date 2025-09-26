@@ -67,7 +67,7 @@ class NotificationService
             ]
         ]);
     }
-
+    
     public static function paymentDueNotification($debt)
     {
         return self::createNotification([
@@ -81,6 +81,23 @@ class NotificationService
                 'debt_amount' => $debt->amount,
                 'client_name' => $debt->client->name,
                 'due_date' => $debt->due_date
+            ]
+        ]);
+    }
+
+    public static function notifyWaiterOrderReady($order)
+    {
+        return self::createNotification([
+            'title'   => 'Pedido Pronto',
+            'message' => "O pedido #{$order->id} está pronto para entrega.",
+            'type'    => 'success',
+            'priority'=> 'high',
+            'related_model' => 'Order',
+            'related_id'    => $order->id,
+            'metadata'      => [
+                'table'     => $order->table ? $order->table->number : 'Balcão',
+                'waiter'    => $order->user->name ?? 'Sistema',
+                'total'     => $order->total_amount
             ]
         ]);
     }

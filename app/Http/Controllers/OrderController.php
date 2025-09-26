@@ -22,7 +22,6 @@ class OrderController extends Controller
     {
         $search = request('search');
         
-        // ✅ ADICIONE busca se necessário
         $orders = Order::with('table')
             ->when($search, function($query, $search) {
                 return $query->where('customer_name', 'like', "%{$search}%")

@@ -248,7 +248,8 @@ Route::middleware(['auth'])->group(function () {
     // ===== PRODUTOS - Permissões ajustadas =====
     Route::prefix('products')->name('products.')->group(function () {
         // Relatório e exportação - view_products permission
-      
+            Route::get('/search', [ProductController::class, 'search'])->name('search');
+            Route::get('products/api/list', [ProductController::class, 'apiList'])->name('api.list');
         // Criar produtos - create_products permission
             Route::get('/create', [ProductController::class, 'create'])->name('create');
             Route::post('/', [ProductController::class, 'store'])->name('store');
@@ -264,7 +265,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/export/{format}', [ProductController::class, 'exportProducts'])->name('export');
             Route::get('/', [ProductController::class, 'index'])->name('index');
             Route::get('/{product}', [ProductController::class, 'show'])->name('show');
-            Route::get('/search', [ProductController::class, 'search'])->name('search');
         });
 
         // Deletar produtos - delete_products permission

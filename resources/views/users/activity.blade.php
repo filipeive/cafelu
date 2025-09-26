@@ -125,7 +125,7 @@
                                 Mostrando {{ $activities->firstItem() }} a {{ $activities->lastItem() }} 
                                 de {{ $activities->total() }} atividades
                             </div>
-                            {{ $activities->links() }}
+                            {{ $activities->links('pagination:bootstrap-5') }}
                         </div>
                     </div>
                 @else

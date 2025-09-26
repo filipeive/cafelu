@@ -184,18 +184,22 @@ class DashboardController extends Controller
 
     private function getTopProductsThisMonth()
     {
-        return Product::select('products.*')
-            ->join('sale_items', 'products.id', '=', 'sale_items.product_id')
+        return Product::join('sale_items', 'products.id', '=', 'sale_items.product_id')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->whereMonth('sales.sale_date', Carbon::now()->month)
             ->whereYear('sales.sale_date', Carbon::now()->year)
             ->groupBy('products.id', 'products.name', 'products.selling_price')
-            ->selectRaw('products.*, SUM(sale_items.quantity) as total_sold, SUM(sale_items.total_price) as total_revenue')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.selling_price',
+                DB::raw('SUM(sale_items.quantity) as total_sold'),
+                DB::raw('SUM(sale_items.total_price) as total_revenue')
+            )
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
     }
-
     private function getRecentOrders()
     {
         return Order::with(['table', 'user'])

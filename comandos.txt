@@ -1,0 +1,147 @@
+# ======================================================
+# COMANDOS ÚTEIS - ZALALA BEACH BAR SYSTEM
+# ======================================================
+
+# ==========================================
+# 1. PERMISSÕES DE PASTA DO PROJETO
+# ==========================================
+sudo chown -R $USER:$USER /var/www/html/zalala-beach-bar
+sudo chmod -R 775 /var/www/html/zalala-beach-bar/storage /var/www/html/zalala-beach-bar/bootstrap/cache
+
+# ==========================================
+# 2. ATUALIZAÇÃO DO SISTEMA
+# ==========================================
+sudo apt update && sudo apt upgrade -y
+
+# ==========================================
+# 3. INSTALAR DEPENDÊNCIAS DO PHP
+# ==========================================
+sudo apt install php php-cli php-mbstring php-bcmath php-xml php-curl php-mysql unzip curl git -y
+
+# ==========================================
+# 4. INSTALAR MYSQL/MARIADB
+# ==========================================
+sudo apt install mariadb-server mariadb-client -y
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
+
+# Inicializar segurança do MySQL/MariaDB
+sudo mysql_secure_installation
+
+# ==========================================
+# 5. INSTALAR NGINX
+# ==========================================
+sudo apt install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+
+# Testar configuração do nginx
+sudo nginx -t
+sudo systemctl reload nginx
+
+# ==========================================
+# 6. INSTALAR COMPOSER
+# ==========================================
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+php -r "unlink('composer-setup.php');"
+composer -V
+
+# ==========================================
+# 7. INSTALAR GIT E CONFIGURAR IDENTIDADE
+# ==========================================
+sudo apt install git -y
+
+git config --global user.name "zalalabb2025"
+git config --global user.email "filipedomingos198@gmail.com"
+
+# ==========================================
+# 8. INSTALAR VISUAL STUDIO CODE
+# ==========================================
+sudo apt install wget gpg apt-transport-https software-properties-common -y
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/packages.microsoft.gpg] \
+https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+sudo apt update
+sudo apt install code -y
+
+# ==========================================
+# 9. SCRIPT DE INICIALIZAÇÃO AUTOMÁTICA
+# ==========================================
+nano /var/www/html/zalala-beach-bar/startup.sh
+
+# Conteúdo:
+#!/bin/bash
+# Script de Inicialização Automática - Zalala Beach Bar
+
+sleep 10
+
+while ! systemctl is-active --quiet nginx; do
+    echo "Aguardando Nginx iniciar..."
+    sleep 2
+done
+
+while ! systemctl is-active --quiet mariadb; do
+    echo "Aguardando MariaDB iniciar..."
+    sleep 2
+done
+
+while ! systemctl is-active --quiet php8.3-fpm; do
+    echo "Aguardando PHP-FPM iniciar..."
+    sleep 2
+done
+
+sleep 5
+
+flatpak run org.chromium.Chromium \
+    --kiosk \
+    --incognito \
+    --disable-infobars \
+    --disable-features=TranslateUI \
+    --disable-session-crashed-bubble \
+    --disable-component-extensions-with-background-pages \
+    --disable-web-security \
+    http://localhost &
+
+echo "✅ Sistema iniciado com sucesso!"
+
+chmod +x /var/www/html/zalala-beach-bar/startup.sh
+
+# ==========================================
+# 10. EXECUTAR SCRIPT NO BOOT (CRONTAB)
+# ==========================================
+crontab -e
+
+# Adicionar:
+@reboot /var/www/html/zalala-beach-bar/startup.sh
+
+# ==========================================
+# 11. CRIAR ATALHO NO SISTEMA (DESKTOP ENTRY)
+# ==========================================
+nano ~/.local/share/applications/zalala-beach-bar.desktop
+
+# Conteúdo do arquivo:
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Zalala Beach Bar
+Comment=Sistema de Gestão do Restaurante Zalala Beach Bar
+Exec=/home/zalalabb/start-zalala.sh
+Icon=/home/zalalabb/.local/share/icons/zalala-beach-bar.svg
+Terminal=false
+Categories=Office;Business;
+StartupNotify=true
+Name[pt]=Zalala Beach Bar
+
+# Tornar executável:
+chmod +x ~/.local/share/applications/zalala-beach-bar.desktop
+
+# Para mover o ícone:
+mkdir -p ~/.local/share/icons/
+cp /var/www/html/zalala-beach-bar/public/logo.svg ~/.local/share/icons/zalala-beach-bar.svg
+
+# ==========================================
+# FIM DO ARQUIVO
+# ==========================================

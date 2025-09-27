@@ -284,6 +284,6 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE.md](L
 *Sistema de Gestão Completo*  
   
 Desenvolvido com ❤️ em Moçambique  
-© 2024 - Filipe dos Santos
+© 2025 - Filipe dos Santos
 
 </div>

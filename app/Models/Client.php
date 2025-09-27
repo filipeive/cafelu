@@ -7,12 +7,15 @@ class Client extends Model
 {
 
     protected $table = 'clients';
-    public $timestamps = false; // Disable timestamps if not needed
-
     protected $fillable = [
         'name',
         'email',
         'phone',
         'address',
     ];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
 }

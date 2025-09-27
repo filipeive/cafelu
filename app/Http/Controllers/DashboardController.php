@@ -1,8 +1,5 @@
 <?php
 
-// ===================================================
-// app/Http/Controllers/DashboardController.php
-// ===================================================
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -20,21 +17,18 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-             // Métricas principais
+            // --- métricas vendas
             $totalSalesToday = Sale::whereDate('sale_date', Carbon::today())->sum('total_amount');
             $yesterdaySales = Sale::whereDate('sale_date', Carbon::yesterday())->sum('total_amount');
             $salesChange = $yesterdaySales > 0 ? (($totalSalesToday - $yesterdaySales) / $yesterdaySales * 100) : 0;
             $isPositive = $salesChange >= 0;
-            
+
             $totalSalesThisMonth = Sale::whereMonth('sale_date', Carbon::now()->month)
-                                    ->whereYear('sale_date', Carbon::now()->year)
-                                    ->sum('total_amount');
-            // Pedidos
+                ->whereYear('sale_date', Carbon::now()->year)
+                ->sum('total_amount');
+
+            // --- pedidos
             $openOrders = Order::whereIn('status', ['active', 'pending', 'preparing'])->count();
-            $completedOrdersToday = Order::whereDate('created_at', Carbon::today())
-                                        ->whereIn('status', ['completed', 'paid'])
-                                        ->count();
-                        // Pedidos
             $completedOrdersToday = Order::whereDate('created_at', Carbon::today())
                 ->whereIn('status', ['completed', 'paid'])
                 ->count();
@@ -46,60 +40,56 @@ class DashboardController extends Controller
             $ordersChange = $yesterdayOrders > 0 ? (($completedOrdersToday - $yesterdayOrders) / $yesterdayOrders * 100) : 0;
             $isOrdersPositive = $ordersChange >= 0;
 
-            // Produtos
+            // --- produtos
             $lowStockProducts = Product::with('category')
-                                      ->whereColumn('stock_quantity', '<=', 'min_stock_level')
-                                      ->where('is_active', true)
-                                      ->whereNull('deleted_at')
-                                      ->get();
-            
+                ->whereColumn('stock_quantity', '<=', 'min_stock_level')
+                ->where('is_active', true)
+                ->whereNull('deleted_at')
+                ->get();
+
             $outOfStockProducts = Product::where('stock_quantity', 0)
-                                        ->where('is_active', true)
-                                        ->whereNull('deleted_at')
-                                        ->count();
-            
+                ->where('is_active', true)
+                ->whereNull('deleted_at')
+                ->count();
+
             $totalProducts = Product::where('is_active', true)->whereNull('deleted_at')->count();
-            
-            // Mesas
-            $tables = Table::with(['orders' => function($query) {
-                $query->whereIn('status', ['active', 'completed'])
-                      ->latest();
+
+            // --- mesas
+            $tables = Table::with(['orders' => function ($query) {
+                $query->whereIn('status', ['active', 'completed'])->latest();
             }])->orderBy('number')->get();
-            
-            $occupiedTables = $tables->filter(function($table) {
-                return $table->orders->whereIn('status', ['active', 'completed'])->isNotEmpty();
-            })->count();
-            
+
+            $occupiedTables = $tables->filter(fn($t) => $t->orders->whereIn('status', ['active', 'completed'])->isNotEmpty())->count();
             $availableTables = $tables->count() - $occupiedTables;
-            
-            // Dados para gráficos
+
+            // --- gráficos
             $hourlySalesData = $this->getHourlySalesData();
             $dailySalesData = $this->getDailySalesData();
             $topProducts = $this->getTopProductsThisMonth();
             $recentOrders = $this->getRecentOrders();
-            
+
             return view('dashboard.index', compact(
-            'totalSalesToday',
-            'yesterdaySales',
-            'salesChange',
-            'isPositive',
-            'totalSalesThisMonth',
-            'openOrders',
-            'completedOrdersToday',     // <-- Já existia
-            'yesterdayOrders',          // <-- Adicione esta linha
-            'ordersChange',             // <-- Adicione esta linha
-            'isOrdersPositive',         // <-- Adicione esta linha
-            'lowStockProducts',
-            'outOfStockProducts',
-            'totalProducts',
-            'tables',
-            'occupiedTables',
-            'availableTables',
-            'hourlySalesData',
-            'dailySalesData',
-            'topProducts',
-            'recentOrders'
-        ));
+                'totalSalesToday',
+                'yesterdaySales',
+                'salesChange',
+                'isPositive',
+                'totalSalesThisMonth',
+                'openOrders',
+                'completedOrdersToday',
+                'yesterdayOrders',
+                'ordersChange',
+                'isOrdersPositive',
+                'lowStockProducts',
+                'outOfStockProducts',
+                'totalProducts',
+                'tables',
+                'occupiedTables',
+                'availableTables',
+                'hourlySalesData',
+                'dailySalesData',
+                'topProducts',
+                'recentOrders'
+            ));
         } catch (\Exception $e) {
             \Log::error('Dashboard error: ' . $e->getMessage());
             return view('dashboard.index')->with('error', 'Erro ao carregar dashboard: ' . $e->getMessage());
@@ -109,15 +99,15 @@ class DashboardController extends Controller
     public function menu()
     {
         try {
-            $categories = Category::with(['products' => function($query) {
+            $categories = Category::with(['products' => function ($query) {
                 $query->where('is_active', true)
-                      ->whereNull('deleted_at')
-                      ->orderBy('name');
+                    ->whereNull('deleted_at')
+                    ->orderBy('name');
             }])
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get();
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get();
 
             return view('dashboard.menu', compact('categories'));
         } catch (\Exception $e) {
@@ -131,10 +121,10 @@ class DashboardController extends Controller
         try {
             $category = Category::findOrFail($categoryId);
             $products = Product::where('category_id', $categoryId)
-                              ->where('is_active', true)
-                              ->whereNull('deleted_at')
-                              ->orderBy('name')
-                              ->get();
+                ->where('is_active', true)
+                ->whereNull('deleted_at')
+                ->orderBy('name')
+                ->get();
 
             return view('dashboard.menu_category', compact('category', 'products'));
         } catch (\Exception $e) {
@@ -142,6 +132,8 @@ class DashboardController extends Controller
             return redirect()->route('dashboard.menu')->with('error', 'Categoria não encontrada');
         }
     }
+
+    // === helpers ===
 
     private function getHourlySalesData()
     {
@@ -152,12 +144,11 @@ class DashboardController extends Controller
             $startTime = $today->copy()->addHours($hour);
             $endTime = $today->copy()->addHours($hour + 1);
 
-            $totalAmount = Sale::whereBetween('sale_date', [$startTime, $endTime])
-                              ->sum('total_amount');
+            $totalAmount = Sale::whereBetween('sale_date', [$startTime, $endTime])->sum('total_amount');
 
             $data[] = [
                 'hour' => sprintf('%02d:00', $hour),
-                'value' => (float) $totalAmount
+                'value' => (float)$totalAmount
             ];
         }
 
@@ -175,7 +166,7 @@ class DashboardController extends Controller
 
             $data[] = [
                 'date' => $date->format('d/m'),
-                'value' => (float) $totalAmount
+                'value' => (float)$totalAmount
             ];
         }
 
@@ -200,6 +191,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
     }
+
     private function getRecentOrders()
     {
         return Order::with(['table', 'user'])

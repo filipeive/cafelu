@@ -39,10 +39,18 @@ Auth::routes();
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    
-    // Dashboard - Todos os usuários autenticados
-    Route::get('dashboard/', [DashboardController::class, 'index'])->name('dashboard');
-    //Route::get('/dashboard', [DashboardController::class, 'menu'])->name('dashboard.menu');
+        // Dashboard principal
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Cardápio
+        Route::get('/dashboard/menu', [DashboardController::class, 'menu'])->name('dashboard.menu');
+        Route::get('/dashboard/menu/{categoryId}', [DashboardController::class, 'menuCategory'])->name('dashboard.menuCategory');
+        
+        //update-system
+        Route::middleware(['auth', 'role:admin'])->group(function () {
+        Route::post('/system/update', [\App\Http\Controllers\SystemController::class, 'update'])
+            ->name('system.update');
+    });
 
     // ===== PERFIL DO USUÁRIO =====
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -204,48 +212,6 @@ Route::middleware(['auth'])->group(function () {
     | GESTÃO DE PRODUTOS E ESTOQUE
     |--------------------------------------------------------------------------
     */
-    
-    /* // ===== PRODUTOS =====
-    Route::prefix('products')->name('products.')->group(function () {
-        // Visualizar produtos
-        Route::middleware(['permission:view_products'])->group(function () {
-            Route::get('/', [ProductController::class, 'index'])->name('index');
-            Route::get('/{product}', [ProductController::class, 'show'])->name('show');
-            Route::get('/search', [ProductController::class, 'search'])->name('search');
-            Route::get('products/api/list', [ProductController::class, 'apiList'])->name('api.list');
-        });
-
-        // Criar produtos
-        Route::middleware(['permission:create_products'])->group(function () {
-            Route::get('/create', [ProductController::class, 'create'])->name('create');
-            Route::post('/', [ProductController::class, 'store'])->name('store');
-            Route::post('/{product}/duplicate', [ProductController::class, 'duplicate'])->name('duplicate');
-        });
-
-        // Editar produtos
-        Route::middleware(['permission:edit_products'])->group(function () {
-            Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
-            Route::put('/{product}', [ProductController::class, 'update'])->name('update');
-            Route::post('/bulk-toggle', [ProductController::class, 'bulkToggle'])->name('bulk-toggle');
-        });
-
-        // Gestão de estoque
-        Route::middleware(['permission:manage_stock'])->group(function () {
-            Route::post('/{product}/adjust-stock', [ProductController::class, 'adjustStock'])->name('adjust-stock');
-        });
-
-        // Relatórios de produtos
-        Route::middleware(['permission:view_reports'])->group(function () {
-            Route::get('/report', [ProductController::class, 'report'])->name('report');
-            Route::get('/export/{format}', [ProductController::class, 'exportProducts'])->name('export');
-        });
-
-        // Deletar produtos
-        Route::middleware(['permission:delete_products'])->group(function () {
-            Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
-        });
-    }); */
-    // ===== PRODUTOS - Permissões ajustadas =====
     Route::prefix('products')->name('products.')->group(function () {
         // Relatório e exportação - view_products permission
             Route::get('/search', [ProductController::class, 'search'])->name('search');
@@ -272,27 +238,36 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
         });
     });
+
     // ===== CATEGORIAS =====
-    Route::prefix('categories')->name('categories.')->middleware(['permission:manage_categories'])->group(function () {
-        Route::get('/', [CategoryController::class, 'index'])->name('index');
-        Route::get('/create', [CategoryController::class, 'create'])->name('create');
-        Route::post('/', [CategoryController::class, 'store'])->name('store');
-        Route::get('/{id}', [CategoryController::class, 'show'])->name('show');
-        Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
-        Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
-        Route::patch('/{id}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggle-status');
-    });
+    Route::prefix('categories')
+        ->name('categories.')
+        ->middleware(['permission:manage_categories'])
+        ->group(function () {
+            
+            Route::get('/', [CategoryController::class, 'index'])->name('index');
+            Route::get('/create', [CategoryController::class, 'create'])->name('create');
+            Route::post('/', [CategoryController::class, 'store'])->name('store');
+            
+            // Model Binding automático
+            Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+            Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
+            Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+            Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+            
+            Route::patch('/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggle-status');
+        });
+
 
     // ===== MOVIMENTAÇÕES DE ESTOQUE =====
     Route::prefix('stock-movements')->name('stock-movements.')->group(function () {
+        Route::middleware(['permission:create_stock_movements'])->group(function () {
+            Route::post('/', [StockMovementController::class, 'store'])->name('store');
+            Route::get('/create', [StockMovementController::class, 'create'])->name('create');
+        });
         Route::middleware(['permission:view_stock_movements'])->group(function () {
             Route::get('/', [StockMovementController::class, 'index'])->name('index');
             Route::get('/{stockMovement}', [StockMovementController::class, 'show'])->name('show');
-        });
-
-        Route::middleware(['permission:create_stock_movements'])->group(function () {
-            Route::get('/create', [StockMovementController::class, 'create'])->name('create');
-            Route::post('/', [StockMovementController::class, 'store'])->name('store');
         });
 
         Route::middleware(['permission:edit_stock_movements'])->group(function () {
@@ -350,14 +325,14 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('client')->name('client.')->group(function () {
         Route::middleware(['permission:view_clients'])->group(function () {
             Route::get('/', [ClientController::class, 'index'])->name('index');
-            Route::get('/{client}/show', [ClientController::class, 'show'])->name('show');
+            Route::get('/{client}', [ClientController::class, 'show'])->name('show');
             Route::get('/{client}/orders', [ClientController::class, 'orders'])->name('orders');
             Route::get('/search', [ClientController::class, 'search'])->name('search');
         });
 
         Route::middleware(['permission:create_clients'])->group(function () {
             Route::get('/create', [ClientController::class, 'create'])->name('create');
-            Route::post('/store', [ClientController::class, 'store'])->name('store');
+            Route::post('/', [ClientController::class, 'store'])->name('store');
         });
 
         Route::middleware(['permission:edit_clients'])->group(function () {
@@ -450,4 +425,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stream', [NotificationController::class, 'stream'])->name('stream');
         Route::get('/check-new', [NotificationController::class, 'checkNew'])->name('checkNew');
     });
+});
+
+Route::fallback(function () {
+    return response()->view('errors.fallback', [], 404);
 });

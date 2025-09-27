@@ -42,7 +42,7 @@ class PermissionCacheService
             Cache::forget($cacheKey);
         } else {
             // Limpar todas as variações de role
-            $roles = ['admin', 'manager', 'cashier', 'waiter', 'cook'];
+            $roles = ['admin', 'manager', 'cashier', 'waiter', 'cooker', 'staff'];
             foreach ($roles as $roleItem) {
                 $cacheKey = self::CACHE_PREFIX . "user:{$userId}:role:{$roleItem}";
                 Cache::forget($cacheKey);

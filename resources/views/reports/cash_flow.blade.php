@@ -2,7 +2,7 @@
 
 @section('title', 'Fluxo de Caixa')
 @section('page-title', 'Fluxo de Caixa')
-@section('title-icon', 'fa-money-bill-wave')
+@section('title-icon', 'mdi-money-bill-wave')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -13,17 +13,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-money-bill-wave me-2"></i>
+                <i class="mdi mdi-money-bill-wave me-2"></i>
                 Fluxo de Caixa
             </h2>
             <p class="text-muted mb-0">Entradas, saídas e projeções financeiras</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>
+                <i class="mdi mdi-filter me-2"></i>
                 Período de Análise
             </h5>
         </div>
@@ -50,7 +50,7 @@
                     <div class="col-md-4">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Atualizar
+                            <i class="mdi mdi-search me-1"></i> Atualizar
                         </button>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
                             <small class="text-muted">Receitas do período</small>
                         </div>
                         <div class="text-success">
-                            <i class="fas fa-arrow-up fa-2x"></i>
+                            <i class="mdi mdi-arrow-up mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                             <small class="text-muted">Despesas do período</small>
                         </div>
                         <div class="text-danger">
-                            <i class="fas fa-arrow-down fa-2x"></i>
+                            <i class="mdi mdi-arrow-down mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                             </small>
                         </div>
                         <div class="{{ $netCashFlow >= 0 ? 'text-info' : 'text-warning' }}">
-                            <i class="fas fa-balance-scale fa-2x"></i>
+                            <i class="mdi mdi-balance-scale mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-arrow-up text-success me-2"></i>
+                        <i class="mdi mdi-arrow-up text-success me-2"></i>
                         Entradas por Método de Pagamento
                     </h5>
                 </div>
@@ -177,7 +177,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-arrow-down text-danger me-2"></i>
+                        <i class="mdi mdi-arrow-down text-danger me-2"></i>
                         Saídas por Categoria de Despesa
                     </h5>
                 </div>
@@ -219,7 +219,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-chart-line me-2"></i>
+                <i class="mdi mdi-chart-line me-2"></i>
                 Fluxo de Caixa Diário
             </h5>
         </div>
@@ -232,7 +232,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-table me-2"></i>
+                <i class="mdi mdi-table me-2"></i>
                 Detalhamento Diário
             </h5>
         </div>
@@ -299,7 +299,7 @@
     <div class="card">
         <div class="card-header bg-warning text-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-crystal-ball me-2"></i>
+                <i class="mdi mdi-crystal-ball me-2"></i>
                 Projeções dos Próximos 7 Dias
                 <small class="d-block opacity-75">Baseado na média do período atual</small>
             </h5>

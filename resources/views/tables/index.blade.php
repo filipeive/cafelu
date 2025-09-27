@@ -11,63 +11,42 @@
         </a>
     </li>
     <li class="breadcrumb-item active" aria-current="page">
-        <i class="mdi mdi-table-furniture"></i> Mesas
+        <i class="mdi mdi-table-furniture"></i> Gestão de Mesas
     </li>
 @endsection
 
 @section('content')
     <div class="container-fluid">
-        <!-- Header Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                                        <i class="mdi mdi-table-furniture text-primary fs-2"></i>
-                                    </div>
-                                    <div>
-                                        <h2 class="mb-1">Gestão de Mesas</h2>
-                                        <p class="text-muted mb-0">
-                                            Visualize, organize e gerencie as mesas do ZALALA BEACH BAR
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-md-end">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mergeTables">
-                                    <i class="mdi mdi-link me-1"></i> Unir Mesas
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Status Legend -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body py-3">
-                        <div class="d-flex flex-wrap gap-4 justify-content-center">
-                            <div class="d-flex align-items-center">
-                                <div class="legend-color bg-success me-2"></div>
-                                <span class="small">Mesa Livre</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="legend-color bg-danger me-2"></div>
-                                <span class="small">Mesa Ocupada</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="legend-color bg-info me-2"></div>
-                                <span class="small">Mesa Agrupada</span>
-                            </div>
-                        </div>
+            <div class="card">
+                <div class="card-body py-3">
+                <div class="d-flex flex-wrap gap-4 justify-content-center align-items-center">
+                    <div class="d-flex align-items-center">
+                    <div class="legend-color bg-success me-2"></div>
+                    <span class="small"><i class="mdi mdi-lock-open me-1"></i>Mesa Livre</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                    <div class="legend-color bg-danger me-2"></div>
+                    <span class="small"><i class="mdi mdi-lock me-1"></i>Mesa Ocupada</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                    <div class="legend-color bg-info me-2"></div>
+                    <span class="small"><i class="mdi mdi-link-variant me-1"></i>Mesa Agrupada</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                    <button type="button"
+                        class="btn btn-success btn-sm d-flex align-items-center px-3 py-1 fw-bold shadow"
+                        data-bs-toggle="modal" data-bs-target="#mergeTables"
+                        style="border-radius: 8px;">
+                        <i class="mdi mdi-link fs-5 me-2"></i>
+                        Unir Mesas
+                    </button>
                     </div>
                 </div>
+                </div>
+            </div>
             </div>
         </div>
 

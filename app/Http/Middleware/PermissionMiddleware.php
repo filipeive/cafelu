@@ -1,14 +1,12 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseInterface;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use App\Models\UserActivity;
-use App\Models\User;
 
 class PermissionMiddleware
 {
@@ -38,6 +36,7 @@ class PermissionMiddleware
             // Funcionários
             'view_employees', 'create_employees', 'edit_employees', 'delete_employees',
         ],
+
         'manager' => [
             // Produtos (sem deletar)
             'view_products', 'create_products', 'edit_products', 'manage_stock',
@@ -58,36 +57,48 @@ class PermissionMiddleware
             // Categorias
             'manage_categories',
         ],
+
         'cashier' => [
             // Produtos (apenas visualizar)
             'view_products',
-            // Vendas (operações básicas)
+            // Vendas
             'view_sales', 'create_sales',
-            // Pedidos (básico)
+            // Pedidos
             'view_orders', 'create_orders', 'edit_orders',
-            // Clientes (básico)
+            // Clientes
             'view_clients', 'create_clients',
-            // Relatórios (próprias vendas)
+            // Relatórios (básico)
             'view_reports',
         ],
+
         'waiter' => [
-            // Produtos (apenas visualizar)
+            // Produtos
             'view_products',
-            // Pedidos (operações principais)
+            // Pedidos
             'view_orders', 'create_orders', 'edit_orders',
-            // Clientes (básico)
+            // Clientes
             'view_clients', 'create_clients',
             // Mesas
             'manage_tables',
         ],
-        'cook' => [
-            // Produtos (visualizar para cozinha)
+
+        'cooker' => [
+            // Produtos
             'view_products',
             // Pedidos (cozinha)
             'view_orders', 'manage_kitchen',
-            // Estoque (visualizar)
+            // Estoque
             'view_stock_movements',
-        ]
+        ],
+
+        'staff' => [
+            // Produtos
+            'view_products',
+            // Pedidos (básico)
+            'view_orders', 'create_orders',
+            // Clientes
+            'view_clients',
+        ],
     ];
 
     /**
@@ -102,24 +113,23 @@ class PermissionMiddleware
         $user = Auth::user();
         $userRole = $user->role;
 
-        // Log da verificação de permissão
+        // Registrar log de verificação
         $this->logPermissionCheck($request, $user, $permissions);
 
-        // Obter permissões da role do usuário
+        // Obter permissões da role
         $userPermissions = self::ROLE_PERMISSIONS[$userRole] ?? [];
 
         // Verificar se tem pelo menos uma das permissões necessárias
-        $hasPermission = !empty(array_intersect($permissions, $userPermissions));
+        $hasPermission = empty($permissions) || !empty(array_intersect($permissions, $userPermissions));
 
         if (!$hasPermission) {
-            // Log da negação de acesso
             $this->logAccessDenied($request, $user, $permissions);
-            
+
             if ($request->ajax()) {
                 return response()->json([
                     'error' => 'Permissões insuficientes.',
                     'required_permissions' => $permissions,
-                    'user_permissions' => $userPermissions
+                    'user_permissions' => $userPermissions,
                 ], 403);
             }
 
@@ -129,45 +139,43 @@ class PermissionMiddleware
         return $next($request);
     }
 
-    private function logPermissionCheck($request, $user, $permissions)
+    private function logPermissionCheck($request, $user, $permissions): void
     {
         UserActivity::create([
             'user_id' => $user->id,
             'action' => 'permission_check',
             'model_type' => 'permission',
-            'model_id' => null,
-            'description' => "Verificação de permissões: " . implode(', ', $permissions) . " para rota: {$request->route()->getName()}",
+            'description' => "Verificação: " . implode(', ', $permissions) . " na rota: {$request->route()->getName()}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
     }
 
-    private function logAccessDenied($request, $user, $permissions)
+    private function logAccessDenied($request, $user, $permissions): void
     {
         UserActivity::create([
             'user_id' => $user->id,
             'action' => 'access_denied',
             'model_type' => 'permission',
-            'model_id' => null,
-            'description' => "Acesso negado. Permissões necessárias: " . implode(', ', $permissions) . " para rota: {$request->route()->getName()}",
+            'description' => "Negado. Necessário: " . implode(', ', $permissions) . " na rota: {$request->route()->getName()}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
     }
 
     /**
-     * Verificar se usuário tem permissão específica
+     * Verificar permissão específica
      */
     public static function hasPermission($user, string $permission): bool
     {
         if (!$user) return false;
-        
+
         $userPermissions = self::ROLE_PERMISSIONS[$user->role] ?? [];
         return in_array($permission, $userPermissions);
     }
 
     /**
-     * Obter todas as permissões de uma role
+     * Obter permissões de uma role
      */
     public static function getRolePermissions(string $role): array
     {
@@ -175,7 +183,7 @@ class PermissionMiddleware
     }
 
     /**
-     * Verificar se usuário tem acesso a um módulo
+     * Verificar acesso a módulo
      */
     public static function canAccessModule($user, string $module): bool
     {
@@ -189,7 +197,9 @@ class PermissionMiddleware
             'stock' => ['view_stock_movements'],
             'clients' => ['view_clients'],
             'employees' => ['view_employees'],
+            'kitchen' => ['manage_kitchen'], // Permissão específica para cozinha
         ];
+
 
         if (!isset($modulePermissions[$module])) return false;
 

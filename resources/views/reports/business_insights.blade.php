@@ -2,7 +2,7 @@
 
 @section('title', 'Insights do Negócio')
 @section('page-title', 'Business Intelligence')
-@section('title-icon', 'fa-lightbulb')
+@section('title-icon', 'mdi-lightbulb')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -13,17 +13,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-lightbulb me-2"></i>
+                <i class="mdi mdi-lightbulb me-2"></i>
                 Business Intelligence
             </h2>
             <p class="text-muted mb-0">Alertas automáticos, insights e recomendações para o seu negócio</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>
+                <i class="mdi mdi-filter me-2"></i>
                 Período de Análise
             </h5>
         </div>
@@ -50,7 +50,7 @@
                     <div class="col-md-4">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Atualizar Análise
+                            <i class="mdi mdi-search me-1"></i> Atualizar Análise
                         </button>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
             <div class="card border-warning">
                 <div class="card-header bg-warning text-dark">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="mdi mdi-exclamation-triangle me-2"></i>
                         Alertas que Requerem Atenção ({{ count($alerts) }})
                     </h5>
                 </div>
@@ -75,7 +75,7 @@
                             <div class="col-lg-6">
                                 <div class="alert alert-{{ $alert['type'] }} d-flex align-items-start">
                                     <div class="me-3">
-                                        <i class="fas fa-{{ $alert['type'] == 'danger' ? 'times-circle' : 'exclamation-triangle' }} fa-lg"></i>
+                                        <i class="mdi mdi-{{ $alert['type'] == 'danger' ? 'times-circle' : 'exclamation-triangle' }} mdi-lg"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <h6 class="alert-heading mb-1">{{ $alert['title'] }}</h6>
@@ -99,7 +99,7 @@
             <div class="card border-success">
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line me-2"></i>
+                        <i class="mdi mdi-chart-line me-2"></i>
                         Insights Positivos ({{ count($insights) }})
                     </h5>
                 </div>
@@ -109,7 +109,7 @@
                             <div class="col-lg-6">
                                 <div class="alert alert-{{ $insight['type'] }} d-flex align-items-start">
                                     <div class="me-3">
-                                        <i class="fas fa-{{ $insight['type'] == 'success' ? 'check-circle' : 'info-circle' }} fa-lg"></i>
+                                        <i class="mdi mdi-{{ $insight['type'] == 'success' ? 'check-circle' : 'info-circle' }} mdi-lg"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <h6 class="alert-heading mb-1">{{ $insight['title'] }}</h6>
@@ -130,7 +130,7 @@
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-tachometer-alt me-2"></i>
+                <i class="mdi mdi-tachometer-alt me-2"></i>
                 Painel de Controle - KPIs Principais
             </h5>
         </div>
@@ -139,7 +139,7 @@
                 <div class="col-lg-3 col-md-6">
                     <div class="text-center">
                         <div class="mb-2">
-                            <i class="fas fa-percentage fa-2x {{ $metrics['grossMargin'] >= 30 ? 'text-success' : ($metrics['grossMargin'] >= 15 ? 'text-warning' : 'text-danger') }}"></i>
+                            <i class="mdi mdi-percentage mdi-2x {{ $metrics['grossMargin'] >= 30 ? 'text-success' : ($metrics['grossMargin'] >= 15 ? 'text-warning' : 'text-danger') }}"></i>
                         </div>
                         <h3 class="mb-1 {{ $metrics['grossMargin'] >= 30 ? 'text-success' : ($metrics['grossMargin'] >= 15 ? 'text-warning' : 'text-danger') }}">
                             {{ number_format($metrics['grossMargin'], 1) }}%
@@ -153,7 +153,7 @@
                 <div class="col-lg-3 col-md-6">
                     <div class="text-center">
                         <div class="mb-2">
-                            <i class="fas fa-chart-line fa-2x {{ $metrics['netMargin'] >= 15 ? 'text-success' : ($metrics['netMargin'] >= 5 ? 'text-warning' : 'text-danger') }}"></i>
+                            <i class="mdi mdi-chart-line mdi-2x {{ $metrics['netMargin'] >= 15 ? 'text-success' : ($metrics['netMargin'] >= 5 ? 'text-warning' : 'text-danger') }}"></i>
                         </div>
                         <h3 class="mb-1 {{ $metrics['netMargin'] >= 15 ? 'text-success' : ($metrics['netMargin'] >= 5 ? 'text-warning' : 'text-danger') }}">
                             {{ number_format($metrics['netMargin'], 1) }}%
@@ -167,7 +167,7 @@
                 <div class="col-lg-3 col-md-6">
                     <div class="text-center">
                         <div class="mb-2">
-                            <i class="fas fa-{{ $metrics['revenueGrowth'] >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger' }} fa-2x"></i>
+                            <i class="mdi mdi-{{ $metrics['revenueGrowth'] >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger' }} mdi-2x"></i>
                         </div>
                         <h3 class="mb-1 {{ $metrics['revenueGrowth'] >= 0 ? 'text-success' : 'text-danger' }}">
                             {{ $metrics['revenueGrowth'] >= 0 ? '+' : '' }}{{ number_format($metrics['revenueGrowth'], 1) }}%
@@ -181,7 +181,7 @@
                 <div class="col-lg-3 col-md-6">
                     <div class="text-center">
                         <div class="mb-2">
-                            <i class="fas fa-money-bill-wave fa-2x {{ $metrics['averageTicket'] >= 200 ? 'text-success' : ($metrics['averageTicket'] >= 100 ? 'text-warning' : 'text-danger') }}"></i>
+                            <i class="mdi mdi-money-bill-wave mdi-2x {{ $metrics['averageTicket'] >= 200 ? 'text-success' : ($metrics['averageTicket'] >= 100 ? 'text-warning' : 'text-danger') }}"></i>
                         </div>
                         <h3 class="mb-1 {{ $metrics['averageTicket'] >= 200 ? 'text-success' : ($metrics['averageTicket'] >= 100 ? 'text-warning' : 'text-danger') }}">
                             {{ number_format($metrics['averageTicket'], 0) }} MT
@@ -201,7 +201,7 @@
     <div class="card mb-4">
         <div class="card-header bg-info text-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-clipboard-list me-2"></i>
+                <i class="mdi mdi-clipboard-list me-2"></i>
                 Recomendações Estratégicas ({{ count($recommendations) }})
             </h5>
         </div>
@@ -237,7 +237,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-area me-2"></i>
+                        <i class="mdi mdi-chart-area me-2"></i>
                         Análise de Performance Financeira
                     </h5>
                 </div>
@@ -250,7 +250,7 @@
             <div class="card h-100">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-thermometer-half me-2"></i>
+                        <i class="mdi mdi-thermometer-half me-2"></i>
                         Saúde do Negócio
                     </h5>
                 </div>
@@ -297,27 +297,27 @@
                     <div class="small">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Margem Bruta ≥ 20%</span>
-                            <i class="fas fa-{{ $metrics['grossMargin'] >= 20 ? 'check text-success' : 'times text-danger' }}"></i>
+                            <i class="mdi mdi-{{ $metrics['grossMargin'] >= 20 ? 'check text-success' : 'times text-danger' }}"></i>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Margem Líquida ≥ 5%</span>
-                            <i class="fas fa-{{ $metrics['netMargin'] >= 5 ? 'check text-success' : 'times text-danger' }}"></i>
+                            <i class="mdi mdi-{{ $metrics['netMargin'] >= 5 ? 'check text-success' : 'times text-danger' }}"></i>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Crescimento Positivo</span>
-                            <i class="fas fa-{{ $metrics['revenueGrowth'] >= 0 ? 'check text-success' : 'times text-danger' }}"></i>
+                            <i class="mdi mdi-{{ $metrics['revenueGrowth'] >= 0 ? 'check text-success' : 'times text-danger' }}"></i>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Ticket Médio ≥ 100 MT</span>
-                            <i class="fas fa-{{ $metrics['averageTicket'] >= 100 ? 'check text-success' : 'times text-danger' }}"></i>
+                            <i class="mdi mdi-{{ $metrics['averageTicket'] >= 100 ? 'check text-success' : 'times text-danger' }}"></i>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>Lucro Positivo</span>
-                            <i class="fas fa-{{ $metrics['netProfit'] > 0 ? 'check text-success' : 'times text-danger' }}"></i>
+                            <i class="mdi mdi-{{ $metrics['netProfit'] > 0 ? 'check text-success' : 'times text-danger' }}"></i>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span>Sem Alertas Críticos</span>
-                            <i class="fas fa-{{ count($alerts) == 0 ? 'check text-success' : 'times text-danger' }}"></i>
+                            <i class="mdi mdi-{{ count($alerts) == 0 ? 'check text-success' : 'times text-danger' }}"></i>
                         </div>
                     </div>
                 </div>
@@ -329,7 +329,7 @@
     <div class="card">
         <div class="card-header bg-dark text-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-clipboard-check me-2"></i>
+                <i class="mdi mdi-clipboard-check me-2"></i>
                 Resumo Executivo do Período
             </h5>
             <small>{{ \Carbon\Carbon::parse($dateFrom)->format('d/m/Y') }} até {{ \Carbon\Carbon::parse($dateTo)->format('d/m/Y') }}</small>
@@ -341,31 +341,31 @@
                     <ul class="list-unstyled">
                         @if($metrics['netProfit'] > 0)
                             <li class="mb-2">
-                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <i class="mdi mdi-check-circle text-success me-2"></i>
                                 O negócio gerou um lucro líquido de <strong>{{ number_format($metrics['netProfit'], 2, ',', '.') }} MT</strong>
                             </li>
                         @else
                             <li class="mb-2">
-                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                <i class="mdi mdi-exclamation-triangle text-warning me-2"></i>
                                 O negócio teve um prejuízo de <strong>{{ number_format(abs($metrics['netProfit']), 2, ',', '.') }} MT</strong>
                             </li>
                         @endif
                         
                         <li class="mb-2">
-                            <i class="fas fa-chart-line text-info me-2"></i>
+                            <i class="mdi mdi-chart-line text-info me-2"></i>
                             Margem bruta de <strong>{{ number_format($metrics['grossMargin'], 1) }}%</strong> 
                             {{ $metrics['grossMargin'] >= 30 ? '(excelente)' : ($metrics['grossMargin'] >= 15 ? '(adequada)' : '(baixa)') }}
                         </li>
                         
                         <li class="mb-2">
-                            <i class="fas fa-shopping-cart text-primary me-2"></i>
+                            <i class="mdi mdi-shopping-cart text-primary me-2"></i>
                             Ticket médio de <strong>{{ number_format($metrics['averageTicket'], 2, ',', '.') }} MT</strong> 
                             com <strong>{{ $metrics['totalSales'] }}</strong> vendas realizadas
                         </li>
                         
                         @if($metrics['revenueGrowth'] != 0)
                             <li class="mb-2">
-                                <i class="fas fa-{{ $metrics['revenueGrowth'] >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger' }} me-2"></i>
+                                <i class="mdi mdi-{{ $metrics['revenueGrowth'] >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger' }} me-2"></i>
                                 {{ $metrics['revenueGrowth'] >= 0 ? 'Crescimento' : 'Declínio' }} de 
                                 <strong>{{ number_format(abs($metrics['revenueGrowth']), 1) }}%</strong> 
                                 em relação ao período anterior

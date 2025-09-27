@@ -229,10 +229,9 @@ class OrderController extends Controller
             $request->validate([
                 'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh,outros',
                 'notes' => 'nullable|string',
-                'amount_paid' => 'required|numeric|min:0', // Alterado para permitir qualquer valor positivo
+                'amount_paid' => 'required|numeric|min:0',
             ]);
 
-            // Verificar se o valor pago é suficiente
             if ($request->amount_paid < $order->total_amount) {
                 throw new \Exception('O valor pago não pode ser menor que o total do pedido.');
             }
@@ -242,87 +241,66 @@ class OrderController extends Controller
             }
 
             $sale = Sale::create([
-                'order_id' => $order->id,
-                'user_id' => auth()->id(),
-                'customer_name' => $order->customer_name,
-                'total_amount' => $order->total_amount,
+                'order_id'       => $order->id,
+                'user_id'        => auth()->id(),
+                'customer_name'  => $order->customer_name,
+                'total_amount'   => $order->total_amount,
                 'payment_method' => $request->payment_method,
-                'amount_paid' => $request->amount_paid,
-                'change_amount' => $request->amount_paid - $order->total_amount,
-                'notes' => $request->notes ?? $order->notes,
-                'status' => 'completed',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'amount_paid'    => $request->amount_paid,
+                'change_amount'  => $request->amount_paid - $order->total_amount,
+                'notes'          => $request->notes ?? $order->notes,
+                'status'         => 'completed',
             ]);
 
             foreach ($order->items as $item) {
                 SaleItem::create([
-                    'sale_id' => $sale->id,
+                    'sale_id'    => $sale->id,
                     'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
+                    'quantity'   => $item->quantity,
                     'unit_price' => $item->unit_price,
-                    'notes' => $item->notes ?? null
+                    'notes'      => $item->notes ?? null
                 ]);
 
-                $product = $item->product; 
+                $product = $item->product;
                 if ($product) {
-                    $product->stock_quantity -= $item->quantity;
-                    $product->save();
+                    // Atualizar stock
+                    $product->decrement('stock_quantity', $item->quantity);
+
+                    // Registrar movimento
+                    \App\Models\StockMovement::create([
+                        'product_id'    => $product->id,
+                        'user_id'       => auth()->id(),
+                        'movement_type' => 'out',
+                        'quantity'      => $item->quantity,
+                        'reason'        => 'Venda do pedido #' . $order->id,
+                        'reference_id'  => $sale->id,
+                        'movement_date' => now(),
+                    ]);
                 }
             }
 
             $order->update([
-                'status' => 'paid',
+                'status'         => 'paid',
                 'payment_method' => $request->payment_method,
-                'notes' => $request->notes,
-                'paid_at' => now()
+                'notes'          => $request->notes,
+                'paid_at'        => now()
             ]);
 
             if ($order->table) {
-                if ($order->table->group_id) {
-                    $groupedTables = Table::where('group_id', $order->table->group_id)->get();
-                    foreach ($groupedTables as $table) {
-                        $table->update([
-                            'status' => 'free',
-                            'group_id' => null,
-                            'is_main' => false,
-                            'merged_capacity' => null
-                        ]);
-                    }
-                } else {
-                    $order->table->update(['status' => 'free']);
-                }
+                $order->table->update(['status' => 'free']);
             }
 
             DB::commit();
 
-            // Resposta para AJAX
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Pagamento registrado e venda finalizada com sucesso!'
-                ]);
-            }
-           
             return redirect()->route('orders.index')
                 ->with('success', 'Pagamento registrado e venda finalizada com sucesso!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            // Resposta para AJAX
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Erro ao processar pagamento: ' . $e->getMessage()
-                ], 500);
-            }
-
             return redirect()->back()
                 ->with('error', 'Erro ao processar pagamento: ' . $e->getMessage());
         }
     }
-
     /**
      * Cancelar pedido
      */

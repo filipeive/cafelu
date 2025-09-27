@@ -2,7 +2,7 @@
 
 @section('title', 'Relatório de Comparação')
 @section('page-title', 'Análise Comparativa Especializada')
-@section('title-icon', 'fa-chart-bar')
+@section('title-icon', 'mdi-chart-bar')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -13,17 +13,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-info fw-bold">
-                <i class="fas fa-chart-bar me-2"></i>
+                <i class="mdi mdi-chart-bar me-2"></i>
                 Análise Comparativa de Períodos
             </h2>
             <p class="text-muted mb-0">Análise de tendências, crescimento e previsões de performance</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-cogs me-2"></i>
+                <i class="mdi mdi-cogs me-2"></i>
                 Configuração da Análise
             </h5>
         </div>
@@ -67,7 +67,7 @@
                 </div>
                 <div class="text-center mt-3">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-sync me-1"></i> Atualizar Análise
+                        <i class="mdi mdi-sync me-1"></i> Atualizar Análise
                     </button>
                 </div>
             </form>
@@ -80,7 +80,7 @@
         <div class="card mb-4">
             <div class="card-header bg-gradient-info text-white">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-line me-2"></i>
+                    <i class="mdi mdi-chart-line me-2"></i>
                     Análise de Tendências e Insights
                 </h5>
             </div>
@@ -91,12 +91,12 @@
                             <div class="mb-2">
                                 @php
                                     $revenueIcon = match($trends['revenue_trend']) {
-                                        'ascending' => 'fas fa-arrow-up text-success',
-                                        'descending' => 'fas fa-arrow-down text-danger',
-                                        default => 'fas fa-minus text-warning'
+                                        'ascending' => 'mdi mdi-arrow-up text-success',
+                                        'descending' => 'mdi mdi-arrow-down text-danger',
+                                        default => 'mdi mdi-minus text-warning'
                                     };
                                 @endphp
-                                <i class="{{ $revenueIcon }} fa-2x"></i>
+                                <i class="{{ $revenueIcon }} mdi-2x"></i>
                             </div>
                             <h6 class="text-muted">Tendência de Receita</h6>
                             <h5 class="{{ str_contains($revenueIcon, 'success') ? 'text-success' : (str_contains($revenueIcon, 'danger') ? 'text-danger' : 'text-warning') }}">
@@ -109,12 +109,12 @@
                             <div class="mb-2">
                                 @php
                                     $profitIcon = match($trends['profit_trend']) {
-                                        'ascending' => 'fas fa-arrow-up text-success',
-                                        'descending' => 'fas fa-arrow-down text-danger',
-                                        default => 'fas fa-minus text-warning'
+                                        'ascending' => 'mdi mdi-arrow-up text-success',
+                                        'descending' => 'mdi mdi-arrow-down text-danger',
+                                        default => 'mdi mdi-minus text-warning'
                                     };
                                 @endphp
-                                <i class="{{ $profitIcon }} fa-2x"></i>
+                                <i class="{{ $profitIcon }} mdi-2x"></i>
                             </div>
                             <h6 class="text-muted">Tendência de Lucro</h6>
                             <h5 class="{{ str_contains($profitIcon, 'success') ? 'text-success' : (str_contains($profitIcon, 'danger') ? 'text-danger' : 'text-warning') }}">
@@ -125,7 +125,7 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="text-center">
                             <div class="mb-2">
-                                <i class="fas fa-trophy text-warning fa-2x"></i>
+                                <i class="mdi mdi-trophy text-warning mdi-2x"></i>
                             </div>
                             <h6 class="text-muted">Melhor Período</h6>
                             <h5 class="text-warning">{{ $trends['best_period']['period'] ?? 'N/A' }}</h5>
@@ -137,7 +137,7 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="text-center">
                             <div class="mb-2">
-                                <i class="fas fa-percentage text-info fa-2x"></i>
+                                <i class="mdi mdi-percentage text-info mdi-2x"></i>
                             </div>
                             <h6 class="text-muted">Taxa de Crescimento</h6>
                             <h5 class="text-info">
@@ -154,7 +154,7 @@
         <div class="card mb-4">
             <div class="card-header bg-white">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-area me-2"></i>
+                    <i class="mdi mdi-chart-area me-2"></i>
                     Evolução Comparativa - {{ ucfirst($type) }}
                 </h5>
             </div>
@@ -167,7 +167,7 @@
         <div class="card mb-4">
             <div class="card-header bg-white">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-table me-2"></i>
+                    <i class="mdi mdi-table me-2"></i>
                     Dados Comparativos Detalhados
                 </h5>
             </div>
@@ -209,7 +209,7 @@
                                     <td class="text-center">
                                         @if($index > 0)
                                             <span class="text-{{ $growth >= 0 ? 'success' : 'danger' }}">
-                                                <i class="fas fa-arrow-{{ $growth >= 0 ? 'up' : 'down' }}"></i>
+                                                <i class="mdi mdi-arrow-{{ $growth >= 0 ? 'up' : 'down' }}"></i>
                                                 {{ $growth >= 0 ? '+' : '' }}{{ number_format($growth, 1) }}%
                                             </span>
                                         @else
@@ -255,7 +255,7 @@
         <div class="card mb-4">
             <div class="card-header bg-warning text-dark">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-crystal-ball me-2"></i>
+                    <i class="mdi mdi-crystal-ball me-2"></i>
                     Previsões Baseadas em Tendência
                     <small class="d-block mt-1">Projeções automáticas baseadas no histórico atual</small>
                 </h5>
@@ -278,7 +278,7 @@
                     @endforeach
                 </div>
                 <div class="alert alert-info mt-3">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="mdi mdi-info-circle me-2"></i>
                     <strong>Nota:</strong> As previsões são baseadas na tendência linear dos dados históricos e servem como referência. 
                     Fatores externos não são considerados no cálculo.
                 </div>
@@ -292,7 +292,7 @@
                 <div class="card">
                     <div class="card-header bg-primary text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-calculator me-2"></i>
+                            <i class="mdi mdi-calculator me-2"></i>
                             Análise Estatística
                         </h5>
                     </div>
@@ -330,7 +330,7 @@
                 <div class="card">
                     <div class="card-header bg-success text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>
+                            <i class="mdi mdi-lightbulb me-2"></i>
                             Recomendações Estratégicas
                         </h5>
                     </div>
@@ -338,28 +338,28 @@
                         <div class="list-group list-group-flush">
                             @if(isset($trends['revenue_trend']) && $trends['revenue_trend'] == 'descending')
                                 <div class="list-group-item border-0 px-0">
-                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    <i class="mdi mdi-exclamation-triangle text-warning me-2"></i>
                                     <strong>Receita em Declínio:</strong> Revisar estratégias de vendas e marketing
                                 </div>
                             @endif
                             
                             @if($comparisons->avg('margin') < 15)
                                 <div class="list-group-item border-0 px-0">
-                                    <i class="fas fa-chart-line text-info me-2"></i>
+                                    <i class="mdi mdi-chart-line text-info me-2"></i>
                                     <strong>Margem Baixa:</strong> Analisar precificação e custos operacionais
                                 </div>
                             @endif
                             
                             @if($comparisons->where('profit', '<', 0)->count() > 0)
                                 <div class="list-group-item border-0 px-0">
-                                    <i class="fas fa-times-circle text-danger me-2"></i>
+                                    <i class="mdi mdi-times-circle text-danger me-2"></i>
                                     <strong>Períodos Deficitários:</strong> Investigar causas dos prejuízos
                                 </div>
                             @endif
                             
                             @if(isset($trends['growth_rate']) && $trends['growth_rate'] > 20)
                                 <div class="list-group-item border-0 px-0">
-                                    <i class="fas fa-rocket text-success me-2"></i>
+                                    <i class="mdi mdi-rocket text-success me-2"></i>
                                     <strong>Crescimento Acelerado:</strong> Considerar expansão de capacidade
                                 </div>
                             @endif
@@ -370,12 +370,12 @@
                                 @endphp
                                 @if($consistency < 5)
                                     <div class="list-group-item border-0 px-0">
-                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <i class="mdi mdi-check-circle text-success me-2"></i>
                                         <strong>Performance Consistente:</strong> Manter estratégias atuais
                                     </div>
                                 @else
                                     <div class="list-group-item border-0 px-0">
-                                        <i class="fas fa-chart-line text-warning me-2"></i>
+                                        <i class="mdi mdi-chart-line text-warning me-2"></i>
                                         <strong>Performance Inconsistente:</strong> Padronizar processos
                                     </div>
                                 @endif
@@ -390,7 +390,7 @@
         <!-- Estado Vazio -->
         <div class="card">
             <div class="card-body text-center py-5">
-                <i class="fas fa-chart-bar fa-4x text-muted mb-4"></i>
+                <i class="mdi mdi-chart-bar mdi-4x text-muted mb-4"></i>
                 <h4 class="text-muted">Nenhum Dado Disponível</h4>
                 <p class="text-muted">Configure os filtros para gerar análises comparativas.</p>
                 <p class="small text-muted">

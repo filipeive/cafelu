@@ -2,7 +2,7 @@
 
 @section('title', 'Vendas por Produto')
 @section('page-title', 'Vendas por Produto')
-@section('title-icon', 'fa-box')
+@section('title-icon', 'mdi-box')
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
     <li class="breadcrumb-item active">Vendas por Produto</li>
@@ -13,13 +13,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-box me-2"></i>
+                <i class="mdi mdi-box me-2"></i>
                 Relatório de Vendas por Produto
             </h2>
             <p class="text-muted mb-0">Análise detalhada de desempenho por produto</p>
         </div>
         <a href="{{ route('reports.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i> Voltar
+            <i class="mdi mdi-arrow-left me-2"></i> Voltar
         </a>
     </div>
 
@@ -27,7 +27,7 @@
     <div class="card mb-4 fade-in">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="fas fa-filter me-2 text-primary"></i>
+                <i class="mdi mdi-filter me-2 text-primary"></i>
                 Filtros de Período
             </h5>
         </div>
@@ -45,13 +45,13 @@
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Filtrar
+                            <i class="mdi mdi-search me-1"></i> Filtrar
                         </button>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="button" class="btn btn-success w-100" onclick="exportReport()">
-                            <i class="fas fa-file-pdf me-1"></i> Exportar
+                            <i class="mdi mdi-file-pdf me-1"></i> Exportar
                         </button>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                             <small class="text-muted">diferentes no período</small>
                         </div>
                         <div class="text-primary">
-                            <i class="fas fa-box fa-2x"></i>
+                            <i class="mdi mdi-box mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                             <small class="text-muted">unidades</small>
                         </div>
                         <div class="text-success">
-                            <i class="fas fa-shopping-cart fa-2x"></i>
+                            <i class="mdi mdi-shopping-cart mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -103,7 +103,7 @@
                             <small class="text-muted">em vendas</small>
                         </div>
                         <div class="text-warning">
-                            <i class="fas fa-dollar-sign fa-2x"></i>
+                            <i class="mdi mdi-dollar-sign mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                             <small class="text-muted">por produto</small>
                         </div>
                         <div class="text-danger">
-                            <i class="fas fa-chart-line fa-2x"></i>
+                            <i class="mdi mdi-chart-line mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
     <div class="card fade-in mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="fas fa-chart-bar me-2 text-success"></i>
+                <i class="mdi mdi-chart-bar me-2 text-success"></i>
                 Top 10 Produtos por Receita
             </h5>
         </div>
@@ -145,7 +145,7 @@
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0 d-flex align-items-center">
-                    <i class="fas fa-table me-2 text-primary"></i>
+                    <i class="mdi mdi-table me-2 text-primary"></i>
                     Detalhes por Produto
                 </h5>
                 <span class="badge bg-primary">Total: {{ $sales->count() }}</span>
@@ -185,7 +185,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="text-center py-5 text-muted">
-                                    <i class="fas fa-box fa-2x mb-3 opacity-50"></i>
+                                    <i class="mdi mdi-box mdi-2x mb-3 opacity-50"></i>
                                     <p>Nenhum produto vendido no período.</p>
                                 </td>
                             </tr>

@@ -88,11 +88,12 @@ class PermissionHelper
         if (!auth()->check()) return 0;
 
         $levels = [
-            'cook' => 1,
+            'cooker' => 1,
             'waiter' => 2,
             'cashier' => 3,
             'manager' => 4,
-            'admin' => 5
+            'admin' => 5,
+            'staff' => 0
         ];
 
         return $levels[auth()->user()->role] ?? 0;

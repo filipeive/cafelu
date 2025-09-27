@@ -2,7 +2,7 @@
 
 @section('title', 'Relatório de Lucro e Prejuízo')
 @section('page-title', 'Lucro e Prejuízo')
-@section('title-icon', 'fa-chart-line')
+@section('title-icon', 'mdi-chart-line')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -14,17 +14,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-chart-line me-2"></i>
+                <i class="mdi mdi-chart-line me-2"></i>
                 Demonstração de Resultado (DRE)
             </h2>
             <p class="text-muted mb-0">Análise detalhada de receitas, custos e lucros</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -33,7 +33,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>
+                <i class="mdi mdi-filter me-2"></i>
                 Período de Análise
             </h5>
         </div>
@@ -53,7 +53,7 @@
                     <div class="col-md-4">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Atualizar Relatório
+                            <i class="mdi mdi-search me-1"></i> Atualizar Relatório
                         </button>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-calculator me-2"></i>
+                        <i class="mdi mdi-calculator me-2"></i>
                         Demonstração do Resultado do Exercício
                     </h5>
                     <small>Período: {{ \Carbon\Carbon::parse($dateFrom)->format('d/m/Y') }} até {{ \Carbon\Carbon::parse($dateTo)->format('d/m/Y') }}</small>
@@ -79,7 +79,7 @@
                                 <!-- RECEITAS -->
                                 <tr class="table-success">
                                     <th colspan="2" class="fs-6">
-                                        <i class="fas fa-plus-circle me-2"></i>
+                                        <i class="mdi mdi-plus-circle me-2"></i>
                                         RECEITAS OPERACIONAIS
                                     </th>
                                 </tr>
@@ -99,7 +99,7 @@
                                 <!-- CUSTOS DOS PRODUTOS VENDIDOS -->
                                 <tr class="table-warning">
                                     <th colspan="2" class="fs-6 pt-3">
-                                        <i class="fas fa-minus-circle me-2"></i>
+                                        <i class="mdi mdi-minus-circle me-2"></i>
                                         CUSTOS DOS PRODUTOS VENDIDOS
                                     </th>
                                 </tr>
@@ -119,7 +119,7 @@
                                 <!-- LUCRO BRUTO -->
                                 <tr class="table-info">
                                     <th class="fs-5 pt-3">
-                                        <i class="fas fa-equals me-2"></i>
+                                        <i class="mdi mdi-equals me-2"></i>
                                         LUCRO BRUTO
                                     </th>
                                     <th class="text-end {{ $grossProfit >= 0 ? 'text-success' : 'text-danger' }} fs-4 pt-3">
@@ -133,7 +133,7 @@
                                 <!-- DESPESAS OPERACIONAIS -->
                                 <tr class="table-danger">
                                     <th colspan="2" class="fs-6 pt-3">
-                                        <i class="fas fa-minus-circle me-2"></i>
+                                        <i class="mdi mdi-minus-circle me-2"></i>
                                         DESPESAS OPERACIONAIS
                                     </th>
                                 </tr>
@@ -155,7 +155,7 @@
                                 <!-- RESULTADO FINAL -->
                                 <tr class="table-{{ $operatingProfit >= 0 ? 'success' : 'danger' }}">
                                     <th class="fs-4 pt-4">
-                                        <i class="fas fa-trophy me-2"></i>
+                                        <i class="mdi mdi-trophy me-2"></i>
                                         LUCRO/PREJUÍZO OPERACIONAL
                                     </th>
                                     <th class="text-end {{ $operatingProfit >= 0 ? 'text-success' : 'text-danger' }} fs-3 pt-4">
@@ -178,7 +178,7 @@
             <div class="card mb-4">
                 <div class="card-header bg-white">
                     <h6 class="card-title mb-0">
-                        <i class="fas fa-tachometer-alt me-2"></i>
+                        <i class="mdi mdi-tachometer-alt me-2"></i>
                         Indicadores-Chave
                     </h6>
                 </div>
@@ -216,34 +216,34 @@
                         <div class="small">
                             @if($grossMargin >= 30)
                                 <div class="alert alert-success py-2 mb-2">
-                                    <i class="fas fa-check-circle me-1"></i>
+                                    <i class="mdi mdi-check-circle me-1"></i>
                                     Margem bruta excelente (≥30%)
                                 </div>
                             @elseif($grossMargin >= 15)
                                 <div class="alert alert-warning py-2 mb-2">
-                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <i class="mdi mdi-exclamation-triangle me-1"></i>
                                     Margem bruta moderada (15-30%)
                                 </div>
                             @else
                                 <div class="alert alert-danger py-2 mb-2">
-                                    <i class="fas fa-times-circle me-1"></i>
+                                    <i class="mdi mdi-times-circle me-1"></i>
                                     Margem bruta baixa (&lt;15%)
                                 </div>
                             @endif
 
                             @if($operatingMargin >= 10)
                                 <div class="alert alert-success py-2 mb-2">
-                                    <i class="fas fa-check-circle me-1"></i>
+                                    <i class="mdi mdi-check-circle me-1"></i>
                                     Margem operacional saudável (≥10%)
                                 </div>
                             @elseif($operatingMargin >= 5)
                                 <div class="alert alert-warning py-2 mb-2">
-                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <i class="mdi mdi-exclamation-triangle me-1"></i>
                                     Margem operacional aceitável (5-10%)
                                 </div>
                             @else
                                 <div class="alert alert-danger py-2 mb-2">
-                                    <i class="fas fa-times-circle me-1"></i>
+                                    <i class="mdi mdi-times-circle me-1"></i>
                                     Margem operacional preocupante (&lt;5%)
                                 </div>
                             @endif
@@ -256,7 +256,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h6 class="card-title mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>
+                        <i class="mdi mdi-chart-pie me-2"></i>
                         Composição das Receitas
                     </h6>
                 </div>
@@ -271,7 +271,7 @@
     <div class="card mt-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-chart-bar me-2"></i>
+                <i class="mdi mdi-chart-bar me-2"></i>
                 Rentabilidade por Produto
             </h5>
         </div>
@@ -326,7 +326,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center py-4 text-muted">
-                                    <i class="fas fa-box-open fa-2x mb-3 opacity-50"></i>
+                                    <i class="mdi mdi-box-open mdi-2x mb-3 opacity-50"></i>
                                     <p>Nenhuma venda registrada no período.</p>
                                 </td>
                             </tr>

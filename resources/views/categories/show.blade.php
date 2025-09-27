@@ -14,22 +14,20 @@
     </li>
 @endsection
 
-@section('styles')
+@push('styles')
 <style>
 .category-detail-card {
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    background: var(--bs-card-bg);
+    background: #fff;
     overflow: hidden;
 }
-
 .category-header {
-    background: linear-gradient(135deg, var(--primary-color), #6366f1);
+    background: linear-gradient(135deg, #0891b2, #6366f1);
     color: white;
     padding: 2rem;
     position: relative;
 }
-
 .category-header::after {
     content: '';
     position: absolute;
@@ -41,12 +39,10 @@
     background-size: 300% 100%;
     animation: wave 2s ease infinite;
 }
-
 @keyframes wave {
     0% { background-position: 0% 50%; }
     100% { background-position: 300% 50%; }
 }
-
 .category-icon {
     width: 60px;
     height: 60px;
@@ -57,113 +53,111 @@
     background: rgba(255, 255, 255, 0.2);
     margin-bottom: 1rem;
 }
-
 .category-title {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 700;
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
-
 .category-meta {
     opacity: 0.9;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    margin-top: 0.5rem;
 }
-
-/* Product List */
-.product-item {
-    border-radius: 12px;
-    padding: 1rem;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.product-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: rgba(79, 70, 229, 0.2);
-}
-
-.product-name {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.product-price {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-.product-status {
-    font-size: 0.85rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 50px;
-}
-
-/* Empty State */
-.empty-product {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: rgba(0, 0, 0, 0.6);
-}
-
-.empty-product i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-/* Action Buttons */
 .action-buttons {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
 }
-
+.product-list-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #0891b2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.product-item {
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: #f8fafc;
+    margin-bottom: 1rem;
+}
+.product-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(8,145,178,0.08);
+    border-color: #0891b2;
+}
+.product-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #374151;
+}
+.product-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0891b2;
+}
+.product-status {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    background: #10b981;
+    color: #fff;
+    margin-left: 0.5rem;
+}
+.product-status.inactive {
+    background: #ef4444;
+}
+.empty-product {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+}
+.empty-product i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
 @media (max-width: 768px) {
-    .category-header {
-        padding: 1.5rem;
-    }
-    
-    .category-title {
-        font-size: 1.5rem;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-    }
-    
-    .action-buttons .btn {
-        width: 100%;
-    }
+    .category-header { padding: 1.2rem; }
+    .category-title { font-size: 1.3rem; }
+    .action-buttons { flex-direction: column; }
+    .action-buttons .btn { width: 100%; }
+    .product-list-title { font-size: 1rem; }
 }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div class="row g-4">
-    <!-- Header Card -->
     <div class="col-12">
         <div class="category-detail-card">
             <div class="category-header">
                 <div class="category-icon">
-                    <i class="mdi mdi-folder-outline mdi-24px"></i>
+                    <i class="mdi mdi-folder-outline mdi-36px"></i>
                 </div>
-                <h1 class="category-title">{{ $category->name }}</h1>
-                <p class="category-meta">
+                <h1 class="category-title">
+                    {{ $category->name }}
+                </h1>
+                <div class="category-meta">
                     Criada em {{ \Carbon\Carbon::parse($category->created_at)->format('d/m/Y \à\s H:i') }}
                     • ID: {{ $category->id }}
-                </p>
+                </div>
             </div>
-            
-            <div class="card-body">
+            <div class="card-body" style="padding: 2rem;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
                     <div>
-                        <h4 class="mb-0">
-                            <i class="mdi mdi-food-variant me-2 text-primary"></i>
+                        <div class="product-list-title">
+                            <i class="mdi mdi-food-variant text-primary"></i>
                             Produtos nesta Categoria ({{ $category->products->count() }})
-                        </h4>
-                        <p class="text-muted mb-0">Lista de todos os produtos associados a esta categoria</p>
+                        </div>
+                        <p class="text-muted mb-0">Lista de todos os produtos associados a esta categoria.</p>
                     </div>
                     <div class="action-buttons">
                         <a href="{{ route('products.create') }}?category_id={{ $category->id }}" class="btn btn-primary">
@@ -177,8 +171,6 @@
                         </a>
                     </div>
                 </div>
-
-                <!-- Products List -->
                 @if($category->products->count() > 0)
                     <div class="row g-3">
                         @foreach($category->products as $product)
@@ -186,13 +178,13 @@
                             <div class="product-item">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div class="product-name">{{ $product->name }}</div>
-                                    <span class="product-status bg-{{ $product->is_active ? 'success' : 'danger' }} text-white">
+                                    <span class="product-status {{ $product->is_active ? '' : 'inactive' }}">
                                         {{ $product->is_active ? 'Ativo' : 'Inativo' }}
                                     </span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="product-price">MZN {{ number_format($product->price, 2, ',', '.') }}</div>
-                                    <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="mdi mdi-eye"></i> Ver
                                     </a>
                                 </div>
@@ -219,7 +211,6 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializa tooltips se necessário
     if (typeof bootstrap !== 'undefined') {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function(tooltipTriggerEl) {

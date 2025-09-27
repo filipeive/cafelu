@@ -2,7 +2,7 @@
 
 @section('title', 'Relatório de Despesas')
 @section('page-title', 'Relatório Especializado de Despesas')
-@section('title-icon', 'fa-receipt')
+@section('title-icon', 'mdi-receipt')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -13,17 +13,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-danger fw-bold">
-                <i class="fas fa-receipt me-2"></i>
+                <i class="mdi mdi-receipt me-2"></i>
                 Análise Completa de Despesas
             </h2>
             <p class="text-muted mb-0">Controle detalhado de gastos operacionais e análise de eficiência</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>
+                <i class="mdi mdi-filter me-2"></i>
                 Filtros Avançados
             </h5>
         </div>
@@ -72,10 +72,10 @@
                 </div>
                 <div class="text-center mt-3">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i> Aplicar Filtros
+                        <i class="mdi mdi-search me-1"></i> Aplicar Filtros
                     </button>
                     <a href="{{ route('reports.expenses-specialized') }}" class="btn btn-outline-secondary ms-2">
-                        <i class="fas fa-times me-1"></i> Limpar
+                        <i class="mdi mdi-times me-1"></i> Limpar
                     </a>
                 </div>
             </form>
@@ -87,7 +87,7 @@
         <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
             <div class="card stats-card danger h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-receipt fa-2x text-danger mb-2"></i>
+                    <i class="mdi mdi-receipt mdi-2x text-danger mb-2"></i>
                     <h3 class="mb-1 text-danger">{{ $expenseCount }}</h3>
                     <p class="text-muted mb-0 small">Total Despesas</p>
                 </div>
@@ -96,7 +96,7 @@
         <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
             <div class="card stats-card warning h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-money-bill-wave fa-2x text-warning mb-2"></i>
+                    <i class="mdi mdi-money-bill-wave mdi-2x text-warning mb-2"></i>
                     <h4 class="mb-1 text-warning">{{ number_format($totalExpenses, 0) }} MT</h4>
                     <p class="text-muted mb-0 small">Valor Total</p>
                 </div>
@@ -105,7 +105,7 @@
         <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
             <div class="card stats-card info h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-calculator fa-2x text-info mb-2"></i>
+                    <i class="mdi mdi-calculator mdi-2x text-info mb-2"></i>
                     <h4 class="mb-1 text-info">{{ number_format($averageExpense, 0) }} MT</h4>
                     <p class="text-muted mb-0 small">Despesa Média</p>
                 </div>
@@ -114,7 +114,7 @@
         <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
             <div class="card stats-card {{ $expenseGrowth <= 0 ? 'success' : ($expenseGrowth <= 10 ? 'warning' : 'danger') }} h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-chart-line fa-2x {{ $expenseGrowth <= 0 ? 'text-success' : ($expenseGrowth <= 10 ? 'text-warning' : 'text-danger') }} mb-2"></i>
+                    <i class="mdi mdi-chart-line mdi-2x {{ $expenseGrowth <= 0 ? 'text-success' : ($expenseGrowth <= 10 ? 'text-warning' : 'text-danger') }} mb-2"></i>
                     <h4 class="mb-1 {{ $expenseGrowth <= 0 ? 'text-success' : ($expenseGrowth <= 10 ? 'text-warning' : 'text-danger') }}">
                         {{ $expenseGrowth >= 0 ? '+' : '' }}{{ number_format($expenseGrowth, 1) }}%
                     </h4>
@@ -127,17 +127,17 @@
     <!-- Alertas de Controle -->
     @if($expenseGrowth > 15)
     <div class="alert alert-danger" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="mdi mdi-exclamation-triangle me-2"></i>
         <strong>Atenção:</strong> As despesas cresceram {{ number_format($expenseGrowth, 1) }}% em relação ao período anterior. Revise os gastos urgentemente.
     </div>
     @elseif($expenseGrowth > 10)
     <div class="alert alert-warning" role="alert">
-        <i class="fas fa-info-circle me-2"></i>
+        <i class="mdi mdi-info-circle me-2"></i>
         <strong>Aviso:</strong> Crescimento de {{ number_format($expenseGrowth, 1) }}% nas despesas. Monitore os gastos de perto.
     </div>
     @elseif($expenseGrowth < -5)
     <div class="alert alert-success" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="mdi mdi-check-circle me-2"></i>
         <strong>Parabéns:</strong> Redução de {{ number_format(abs($expenseGrowth), 1) }}% nas despesas. Controle eficiente de custos!
     </div>
     @endif
@@ -148,7 +148,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-area me-2"></i>
+                        <i class="mdi mdi-chart-area me-2"></i>
                                                 Evolução Diária das Despesas
                     </h5>
                 </div>
@@ -161,7 +161,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>
+                        <i class="mdi mdi-chart-pie me-2"></i>
                         Despesas por Categoria
                     </h5>
                 </div>
@@ -176,7 +176,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-tags me-2"></i>
+                <i class="mdi mdi-tags me-2"></i>
                 Análise por Categoria de Despesa
             </h5>
         </div>
@@ -229,7 +229,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-users me-2"></i>
+                <i class="mdi mdi-users me-2"></i>
                 Despesas por Usuário
             </h5>
         </div>
@@ -273,7 +273,7 @@
     <div class="card mb-4">
         <div class="card-header bg-warning text-dark">
             <h5 class="card-title mb-0">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+                <i class="mdi mdi-exclamation-triangle me-2"></i>
                 Top 10 Maiores Despesas do Período
             </h5>
         </div>
@@ -329,15 +329,15 @@
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-table me-2"></i>
+                    <i class="mdi mdi-table me-2"></i>
                     Despesas Detalhadas ({{ $expenses->count() }} despesas)
                 </h5>
                 <div class="btn-group btn-group-sm" role="group">
                     <button type="button" class="btn btn-outline-primary" onclick="exportToExcel()">
-                        <i class="fas fa-file-excel me-1"></i> Excel
+                        <i class="mdi mdi-file-excel me-1"></i> Excel
                     </button>
                     <button type="button" class="btn btn-outline-danger" onclick="exportToPDF()">
-                        <i class="fas fa-file-pdf me-1"></i> PDF
+                        <i class="mdi mdi-file-pdf me-1"></i> PDF
                     </button>
                 </div>
             </div>
@@ -400,7 +400,7 @@
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center py-5 text-muted">
-                                    <i class="fas fa-receipt fa-3x mb-3 opacity-50"></i>
+                                    <i class="mdi mdi-receipt mdi-3x mb-3 opacity-50"></i>
                                     <h5>Nenhuma despesa encontrada</h5>
                                     <p>Tente ajustar os filtros ou o período de busca.</p>
                                 </td>

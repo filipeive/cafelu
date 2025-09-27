@@ -80,7 +80,7 @@ class Notification extends Model
         ]);
     }
 
-    public function getRelatedModelAttribute()
+    public function getRelatedEntityAttribute()
     {
         if ($this->related_model && $this->related_id) {
             $modelClass = "App\\Models\\" . $this->related_model;
@@ -90,4 +90,5 @@ class Notification extends Model
         }
         return null;
     }
+
 }

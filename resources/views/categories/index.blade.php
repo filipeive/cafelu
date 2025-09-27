@@ -9,25 +9,21 @@
     </li>
 @endsection
 
-@section('styles')
+@push('styles')
 <style>
-/* =============== CATEGORIES PAGE STYLES =============== */
 .category-card {
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     padding: 20px;
-    overflow: hidden;
-    background: var(--bs-card-bg);
+    background: #fff;
     height: 100%;
 }
-
 .category-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
-
 .category-header {
     padding: 1.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -37,29 +33,25 @@
     flex-wrap: wrap;
     gap: 1rem;
 }
-
 .category-title {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 600;
 }
-
 .category-actions {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
 }
-
 .category-table {
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    background: #fff;
 }
-
 .category-table .table {
     margin-bottom: 0;
 }
-
 .category-table .table thead th {
     font-weight: 600;
     text-transform: uppercase;
@@ -69,13 +61,10 @@
     border-bottom: 2px solid rgba(0, 0, 0, 0.05);
     padding: 1rem 1.5rem;
 }
-
 .category-table .table td {
     vertical-align: middle;
     padding: 1.25rem 1.5rem;
 }
-
-/* Product Badge */
 .product-badge {
     padding: 0.5rem 1rem;
     border-radius: 50px;
@@ -87,8 +76,6 @@
     min-width: 100px;
     justify-content: center;
 }
-
-/* Action Buttons */
 .action-btn {
     width: 36px;
     height: 36px;
@@ -100,12 +87,9 @@
     transition: all 0.2s ease;
     font-size: 0.9rem;
 }
-
 .action-btn:hover {
     transform: translateY(-2px);
 }
-
-/* Category Icon */
 .category-icon {
     width: 40px;
     height: 40px;
@@ -115,135 +99,82 @@
     justify-content: center;
     font-size: 1.25rem;
     margin-right: 1rem;
+    background: #f8fafc;
 }
-
-/* Empty State */
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    color: rgba(0, 0, 0, 0.6);
+    color: #6b7280;
 }
-
 .empty-state i {
     font-size: 3rem;
     margin-bottom: 1rem;
     opacity: 0.5;
 }
-
 .empty-state h4 {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
-    color: rgba(0, 0, 0, 0.8);
+    color: #374151;
 }
-
 .empty-state p {
     margin-bottom: 2rem;
-    color: rgba(0, 0, 0, 0.6);
+    color: #6b7280;
 }
-
-/* Modal Styles */
 .modal-content {
     border-radius: 16px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
-
 .modal-header {
     border-bottom: none;
     padding: 1.5rem 1.5rem 1rem;
 }
-
 .modal-title {
     font-weight: 600;
     font-size: 1.25rem;
 }
-
 .modal-body {
     padding: 1.5rem;
 }
-
 .modal-footer {
     border-top: none;
     padding: 1rem 1.5rem 1.5rem;
 }
-
-/* Responsive */
 @media (max-width: 768px) {
-    .category-header {
-        padding: 1rem;
-    }
-    
+    .category-header { padding: 1rem; }
     .category-table .table td,
-    .category-table .table th {
-        padding: 1rem;
-    }
-    
-    .action-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 0.8rem;
-    }
-}
-
-/* Animation */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-in {
-    animation: fadeInUp 0.6s ease forwards;
-}
-
-/* Beach Theme Accents */
-.beach-accent {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
-    background-size: 300% 100%;
-    animation: wave 2s ease infinite;
-}
-
-@keyframes wave {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 300% 50%; }
+    .category-table .table th { padding: 1rem; }
+    .action-btn { width: 32px; height: 32px; font-size: 0.8rem; }
 }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div class="row g-4">
     <!-- Header Section -->
     <div class="col-12">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="mb-0">
-                    <i class="mdi mdi-format-list-bulleted me-2"></i>
-                    Categorias
-                </h2>
-                <p class="text-muted mb-0">Gerencie as categorias do seu cardápio</p>
+        <div class="card category-card mb-4">
+            <div class="category-header">
+                <div>
+                    <h2 class="category-title">
+                        <i class="mdi mdi-format-list-bulleted me-2"></i>
+                        Categorias
+                    </h2>
+                    <p class="text-muted mb-0">Gerencie as categorias do seu cardápio</p>
+                </div>
+                <button type="button" 
+                        class="btn btn-primary d-flex align-items-center"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#createCategoryModal">
+                    <i class="mdi mdi-plus me-2"></i>
+                    <span>Nova Categoria</span>
+                </button>
             </div>
-            <button type="button" 
-                    class="btn btn-primary d-flex align-items-center"
-                    data-bs-toggle="modal" 
-                    data-bs-target="#createCategoryModal">
-                <i class="mdi mdi-plus me-2"></i>
-                <span>Nova Categoria</span>
-            </button>
         </div>
     </div>
 
     <!-- Categories Table -->
     <div class="col-12">
-        <div class="category-table">
+        <div class="category-table animate-in">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
@@ -260,7 +191,7 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="category-icon bg-primary bg-opacity-10 text-primary">
+                                        <div class="category-icon text-primary">
                                             <i class="mdi mdi-folder-outline"></i>
                                         </div>
                                         <div>
@@ -281,9 +212,8 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="{{ route('categories.show', $category) }}" class="action-btn btn btn-outline-primary">
-                                        <i class="mdi mdi-eye"></i> 
-                                         Ver detalhes 
+                                        <a href="{{ route('categories.show', $category) }}" class="action-btn btn btn-outline-primary" title="Ver detalhes">
+                                            <i class="mdi mdi-eye"></i>
                                         </a>
                                         <button type="button" 
                                                 class="action-btn btn btn-outline-warning"
@@ -292,7 +222,6 @@
                                                 title="Editar">
                                             <i class="mdi mdi-pencil"></i>
                                         </button>
-                                        
                                         <button type="button" 
                                                 class="action-btn btn btn-outline-danger"
                                                 onclick="confirmDelete({{ $category->id }})"
@@ -435,8 +364,6 @@ function confirmDelete(categoryId) {
         }
     });
 }
-
-// Inicializa tooltips
 document.addEventListener('DOMContentLoaded', function() {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {

@@ -2,7 +2,7 @@
 
 @section('title', 'Vendas Diárias')
 @section('page-title', 'Vendas Diárias')
-@section('title-icon', 'fa-calendar-day')
+@section('title-icon', 'mdi-calendar-day')
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
     <li class="breadcrumb-item active">Vendas Diárias</li>
@@ -13,13 +13,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-calendar-day me-2"></i>
+                <i class="mdi mdi-calendar-day me-2"></i>
                 Relatório de Vendas Diárias
             </h2>
             <p class="text-muted mb-0">Visualize o desempenho de vendas por dia</p>
         </div>
         <a href="{{ route('reports.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i> Voltar
+            <i class="mdi mdi-arrow-left me-2"></i> Voltar
         </a>
     </div>
 
@@ -27,7 +27,7 @@
     <div class="card mb-4 fade-in">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="fas fa-filter me-2 text-primary"></i>
+                <i class="mdi mdi-filter me-2 text-primary"></i>
                 Filtros de Período
             </h5>
         </div>
@@ -45,13 +45,13 @@
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Filtrar
+                            <i class="mdi mdi-search me-1"></i> Filtrar
                         </button>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="button" class="btn btn-success w-100" onclick="exportData()">
-                            <i class="fas fa-file-excel me-1"></i> Exportar
+                            <i class="mdi mdi-file-excel me-1"></i> Exportar
                         </button>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                             <small class="text-muted">no período selecionado</small>
                         </div>
                         <div class="text-primary">
-                            <i class="fas fa-calendar-day fa-2x"></i>
+                            <i class="mdi mdi-calendar-day mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                             <small class="text-muted">receita bruta</small>
                         </div>
                         <div class="text-success">
-                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                            <i class="mdi mdi-money-bill-wave mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -105,7 +105,7 @@
                             <small class="text-muted">por dia útil</small>
                         </div>
                         <div class="text-warning">
-                            <i class="fas fa-chart-line fa-2x"></i>
+                            <i class="mdi mdi-chart-line mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                             <small class="text-muted">pico de vendas</small>
                         </div>
                         <div class="text-danger">
-                            <i class="fas fa-trophy fa-2x"></i>
+                            <i class="mdi mdi-trophy mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -136,7 +136,7 @@
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0 d-flex align-items-center">
-                    <i class="fas fa-table me-2 text-primary"></i>
+                    <i class="mdi mdi-table me-2 text-primary"></i>
                     Vendas por Dia
                 </h5>
                 <span class="badge bg-primary">Total: {{ $sales->count() }}</span>
@@ -164,14 +164,14 @@
                                 <td class="text-center">
                                     <a href="{{ route('reports.index', ['date_from' => $sale->date, 'date_to' => $sale->date, 'report_type' => 'sales']) }}"
                                        class="btn btn-outline-info btn-sm" title="Ver Detalhes">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="mdi mdi-eye"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="4" class="text-center py-5 text-muted">
-                                    <i class="fas fa-calendar-day fa-2x mb-3 opacity-50"></i>
+                                    <i class="mdi mdi-calendar-day mdi-2x mb-3 opacity-50"></i>
                                     <p>Nenhuma venda registrada no período.</p>
                                 </td>
                             </tr>
@@ -186,7 +186,7 @@
     <div class="card mt-4 fade-in">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="fas fa-chart-area me-2 text-success"></i>
+                <i class="mdi mdi-chart-area me-2 text-success"></i>
                 Evolução das Vendas Diárias
             </h5>
         </div>

@@ -2,7 +2,7 @@
 
 @section('title', 'Produtos com Stock Baixo')
 @section('page-title', 'Stock Baixo')
-@section('title-icon', 'fa-exclamation-triangle')
+@section('title-icon', 'mdi-exclamation-triangle')
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
     <li class="breadcrumb-item active">Stock Baixo</li>
@@ -13,25 +13,25 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-warning fw-bold">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+                <i class="mdi mdi-exclamation-triangle me-2"></i>
                 Produtos com Stock Baixo
             </h2>
             <p class="text-muted mb-0">Lista de produtos com estoque insuficiente ou esgotado</p>
         </div>
         <a href="{{ route('reports.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i> Voltar
+            <i class="mdi mdi-arrow-left me-2"></i> Voltar
         </a>
     </div>
 
     <!-- Alertas -->
     @if($products->count() > 0)
         <div class="alert alert-warning fade-in mb-4">
-            <i class="fas fa-exclamation-triangle me-2"></i>
+            <i class="mdi mdi-exclamation-triangle me-2"></i>
             <strong>Atenção!</strong> Foram encontrados <strong>{{ $products->count() }}</strong> produtos com stock baixo ou esgotado.
         </div>
     @else
         <div class="alert alert-success fade-in mb-4">
-            <i class="fas fa-check-circle me-2"></i>
+            <i class="mdi mdi-check-circle me-2"></i>
             <strong>Parabéns!</strong> Todos os produtos estão com stock adequado.
         </div>
     @endif
@@ -48,7 +48,7 @@
                             <small class="text-muted">sem estoque</small>
                         </div>
                         <div class="text-danger">
-                            <i class="fas fa-times-circle fa-2x"></i>
+                            <i class="mdi mdi-times-circle mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -64,7 +64,7 @@
                             <small class="text-muted">estoque insuficiente</small>
                         </div>
                         <div class="text-warning">
-                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <i class="mdi mdi-exclamation-triangle mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                             <small class="text-muted">em alerta</small>
                         </div>
                         <div class="text-primary">
-                            <i class="fas fa-box fa-2x"></i>
+                            <i class="mdi mdi-box mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                             <small class="text-muted">em produtos críticos</small>
                         </div>
                         <div class="text-success">
-                            <i class="fas fa-dollar-sign fa-2x"></i>
+                            <i class="mdi mdi-dollar-sign mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -112,11 +112,11 @@
             <div class="card-header bg-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0 d-flex align-items-center">
-                        <i class="fas fa-boxes me-2 text-warning"></i>
+                        <i class="mdi mdi-boxes me-2 text-warning"></i>
                         Produtos com Stock Baixo
                     </h5>
                     <button type="button" class="btn btn-success btn-sm" onclick="exportReport()">
-                        <i class="fas fa-file-pdf me-1"></i> Exportar
+                        <i class="mdi mdi-file-pdf me-1"></i> Exportar
                     </button>
                 </div>
             </div>
@@ -178,11 +178,11 @@
                                         <div class="btn-group btn-group-sm">
                                             <a href="{{ route('products.show', $product) }}" 
                                                class="btn btn-outline-info" title="Ver Detalhes">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="mdi mdi-eye"></i>
                                             </a>
                                             <a href="{{ route('products.edit', $product) }}" 
                                                class="btn btn-outline-warning" title="Editar Produto">
-                                                <i class="fas fa-edit"></i>
+                                                <i class="mdi mdi-edit"></i>
                                             </a>
                                         </div>
                                     </td>
@@ -201,7 +201,7 @@
                 <div class="card fade-in">
                     <div class="card-header bg-white">
                         <h5 class="card-title mb-0 d-flex align-items-center">
-                            <i class="fas fa-chart-pie me-2 text-danger"></i>
+                            <i class="mdi mdi-chart-pie me-2 text-danger"></i>
                             Distribuição por Status
                         </h5>
                     </div>
@@ -216,7 +216,7 @@
                 <div class="card fade-in">
                     <div class="card-header bg-white">
                         <h5 class="card-title mb-0 d-flex align-items-center">
-                            <i class="fas fa-chart-bar me-2 text-warning"></i>
+                            <i class="mdi mdi-chart-bar me-2 text-warning"></i>
                             Top 10 Produtos Críticos
                         </h5>
                     </div>

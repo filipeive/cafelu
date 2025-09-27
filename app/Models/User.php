@@ -213,4 +213,17 @@ class User extends Authenticatable
     {
         return $query->byRole('staff');
     }
+
+    // ===== LISTA DE FUNÇÕES =====
+    public static function rolesList(): array
+    {
+        return [
+            'admin'   => 'Administrador',
+            'manager' => 'Gerente',
+            'cashier' => 'Caixa',
+            'waiter'  => 'Garçom',
+            'cooker'  => 'Cozinheiro', // Alterado de 'cook' para 'cooker'
+            'staff'   => 'Funcionário',
+        ];
+    }
 }

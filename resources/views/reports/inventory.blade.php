@@ -2,7 +2,7 @@
 
 @section('title', 'Relatório de Inventário')
 @section('page-title', 'Inventário')
-@section('title-icon', 'fa-warehouse')
+@section('title-icon', 'mdi-warehouse')
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
     <li class="breadcrumb-item active">Inventário</li>
@@ -13,13 +13,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-warehouse me-2"></i>
+                <i class="mdi mdi-warehouse me-2"></i>
                 Relatório de Inventário
             </h2>
             <p class="text-muted mb-0">Visão geral completa do estoque de produtos</p>
         </div>
         <a href="{{ route('reports.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i> Voltar
+            <i class="mdi mdi-arrow-left me-2"></i> Voltar
         </a>
     </div>
 
@@ -35,7 +35,7 @@
                             <small class="text-muted">registrados no sistema</small>
                         </div>
                         <div class="text-primary">
-                            <i class="fas fa-boxes fa-2x"></i>
+                            <i class="mdi mdi-boxes mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                             <small class="text-muted">produtos disponíveis</small>
                         </div>
                         <div class="text-success">
-                            <i class="fas fa-check-circle fa-2x"></i>
+                            <i class="mdi mdi-check-circle mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                             <small class="text-muted">estoque insuficiente</small>
                         </div>
                         <div class="text-warning">
-                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <i class="mdi mdi-exclamation-triangle mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                             <small class="text-muted">sem estoque</small>
                         </div>
                         <div class="text-danger">
-                            <i class="fas fa-times-circle fa-2x"></i>
+                            <i class="mdi mdi-times-circle mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
     <div class="card mb-4 fade-in">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="fas fa-filter me-2 text-primary"></i>
+                <i class="mdi mdi-filter me-2 text-primary"></i>
                 Filtros de Inventário
             </h5>
         </div>
@@ -127,19 +127,19 @@
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Filtrar
+                            <i class="mdi mdi-search me-1"></i> Filtrar
                         </button>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="button" class="btn btn-success w-100" onclick="exportInventory()">
-                            <i class="fas fa-file-excel me-1"></i> Exportar
+                            <i class="mdi mdi-file-excel me-1"></i> Exportar
                         </button>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <button type="button" class="btn btn-info w-100" onclick="printInventory()">
-                            <i class="fas fa-print me-1"></i> Imprimir
+                            <i class="mdi mdi-print me-1"></i> Imprimir
                         </button>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0 d-flex align-items-center">
-                    <i class="fas fa-warehouse me-2 text-primary"></i>
+                    <i class="mdi mdi-warehouse me-2 text-primary"></i>
                     Inventário de Produtos
                 </h5>
                 <span class="badge bg-primary">Total: {{ $products->count() }}</span>
@@ -236,7 +236,7 @@
         <div class="card mt-4 fade-in">
             <div class="card-header bg-warning text-white">
                 <h5 class="card-title mb-0 d-flex align-items-center">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="mdi mdi-exclamation-triangle me-2"></i>
                     Produtos com Stock Baixo
                 </h5>
             </div>

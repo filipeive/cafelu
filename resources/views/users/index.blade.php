@@ -12,82 +12,86 @@
 <!-- Header com Estatísticas -->
 <div class="row mb-4">
     <div class="col-lg-8">
-        <div class="row">
-            <div class="col-md-2 mb-3">
-                <div class="card border-0 shadow-sm bg-primary text-white">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <div class="card bg-primary text-white border-0 shadow h-100">
                     <div class="card-body text-center py-3">
-                        <i class="mdi mdi-user mdi-2x mb-2"></i>
-                        <h4 class="mb-0">{{ $stats['total'] }}</h4>
+                        <span class="d-inline-block mb-2">
+                            <i class="mdi mdi-account mdi-24px"></i>
+                        </span>
+                        <h4 class="mb-0 fw-bold">{{ $stats['total'] }}</h4>
                         <small>Total</small>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-2 mb-3">
-                <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="col-md-2">
+                <div class="card bg-success text-white border-0 shadow h-100">
                     <div class="card-body text-center py-3">
-                        <i class="mdi mdi-user-check mdi-2x mb-2"></i>
-                        <h4 class="mb-0">{{ $stats['active'] }}</h4>
+                        <span class="d-inline-block mb-2">
+                            <i class="mdi mdi-account-check mdi-24px"></i>
+                        </span>
+                        <h4 class="mb-0 fw-bold">{{ $stats['active'] }}</h4>
                         <small>Ativos</small>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-2 mb-3">
-                <div class="card border-0 shadow-sm bg-info text-white">
+            <div class="col-md-2">
+                <div class="card bg-info text-white border-0 shadow h-100">
                     <div class="card-body text-center py-3">
-                        <i class="mdi mdi-user-shield mdi-2x mb-2"></i>
-                        <h4 class="mb-0">{{ $stats['admin'] }}</h4>
+                        <span class="d-inline-block mb-2">
+                            <i class="mdi mdi-account-shield mdi-24px"></i>
+                        </span>
+                        <h4 class="mb-0 fw-bold">{{ $stats['admin'] }}</h4>
                         <small>Admins</small>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-2 mb-3">
-                <div class="card border-0 shadow-sm bg-warning text-white">
+            <div class="col-md-2">
+                <div class="card bg-warning text-white border-0 shadow h-100">
                     <div class="card-body text-center py-3">
-                        <i class="mdi mdi-user-tie mdi-2x mb-2"></i>
-                        <h4 class="mb-0">{{ $stats['manager'] }}</h4>
+                        <span class="d-inline-block mb-2">
+                            <i class="mdi mdi-account-tie mdi-24px"></i>
+                        </span>
+                        <h4 class="mb-0 fw-bold">{{ $stats['manager'] }}</h4>
                         <small>Gerentes</small>
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-2 mb-3">
-                <div class="card border-0 shadow-sm bg-secondary text-white">
+            <div class="col-md-2">
+                <div class="card bg-secondary text-white border-0 shadow h-100">
                     <div class="card-body text-center py-3">
-                        <i class="mdi mdi-users mdi-2x mb-2"></i>
-                        <h4 class="mb-0">{{ $stats['waiter'] }}</h4>
+                        <span class="d-inline-block mb-2">
+                            <i class="mdi mdi-account-group mdi-24px"></i>
+                        </span>
+                        <h4 class="mb-0 fw-bold">{{ $stats['waiter'] }}</h4>
                         <small>Garçom</small>
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-2 mb-3">
-                <div class="card border-0 shadow-sm bg-orange text-white">
+            <div class="col-md-2">
+                <div class="card bg-orange text-white border-0 shadow h-100">
                     <div class="card-body text-center py-3">
-                        <i class="mdi mdi-key mdi-2x mb-2"></i>
-                        <h4 class="mb-0">{{ $stats['with_temp_password'] }}</h4>
+                        <span class="d-inline-block mb-2">
+                            <i class="mdi mdi-key mdi-24px"></i>
+                        </span>
+                        <h4 class="mb-0 fw-bold">{{ $stats['with_temp_password'] }}</h4>
                         <small>Senha Temp</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <h6 class="text-primary mb-3">
-                    <i class="mdi mdi-plus-circle me-2"></i>
+        <div class="card border-0 shadow h-100">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                <h6 class="text-primary mb-3 fw-semibold">
+                    <i class="mdi mdi-plus-circle-outline me-2"></i>
                     Ações Rápidas
                 </h6>
-                <div class="d-grid gap-2">
-                    <a href="{{ route('users.create') }}" class="btn btn-primary">
-                        <i class="mdi mdi-user-plus me-2"></i>
-                        Novo Usuário
-                    </a>
-                </div>
+                <a href="{{ route('users.create') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="mdi mdi-account-plus-outline me-2"></i>
+                    Novo Usuário
+                </a>
             </div>
         </div>
     </div>
@@ -98,39 +102,36 @@
     <div class="card-body">
         <form method="GET" action="{{ route('users.index') }}" class="row g-3 align-items-end">
             <div class="col-md-4">
-                <label for="search" class="form-label">Pesquisar</label>
+                <label for="search" class="form-label fw-semibold">Pesquisar</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="search" name="search" 
                            value="{{ request('search') }}" placeholder="Nome, email...">
                     <button class="btn btn-outline-secondary" type="submit">
-                        <i class="mdi mdi-search"></i>
+                        <i class="mdi mdi-magnify"></i>
                     </button>
                 </div>
             </div>
-            
             <div class="col-md-2">
-                <label for="role" class="form-label">Função</label>
+                <label for="role" class="form-label fw-semibold">Função</label>
                 <select class="form-select" id="role" name="role">
                     <option value="">Todas</option>
-                    @foreach(App\Models\user::all() as $role)
-                        <option value="{{ $role->name }}" {{ request('role') == $role->name ? 'selected' : '' }}>
-                            {{ ucfirst($role->name) }}
+                    @foreach(App\Models\User::rolesList() as $roleKey => $roleLabel)
+                        <option value="{{ $roleKey }}" {{ request('role') == $roleKey ? 'selected' : '' }}>
+                            {{ $roleLabel }}
                         </option>
                     @endforeach
                 </select>
             </div>
-            
             <div class="col-md-2">
-                <label for="status" class="form-label">Status</label>
+                <label for="status" class="form-label fw-semibold">Status</label>
                 <select class="form-select" id="status" name="status">
                     <option value="">Todos</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Ativos</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inativos</option>
                 </select>
             </div>
-            
             <div class="col-md-2">
-                <label for="sort" class="form-label">Ordenar por</label>
+                <label for="sort" class="form-label fw-semibold">Ordenar por</label>
                 <select class="form-select" id="sort" name="sort">
                     <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Nome</option>
                     <option value="email" {{ request('sort') == 'email' ? 'selected' : '' }}>Email</option>
@@ -138,15 +139,14 @@
                     <option value="last_login_at" {{ request('sort') == 'last_login_at' ? 'selected' : '' }}>Último Login</option>
                 </select>
             </div>
-            
             <div class="col-md-2">
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary">
-                        <i class="mdi mdi-filter me-1"></i> Filtrar
+                        <i class="mdi mdi-filter-variant me-1"></i> Filtrar
                     </button>
                     @if(request()->hasAny(['search', 'role', 'status', 'sort']))
                         <a href="{{ route('users.index') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="mdi mdi-times me-1"></i> Limpar
+                            <i class="mdi mdi-close me-1"></i> Limpar
                         </a>
                     @endif
                 </div>
@@ -158,37 +158,36 @@
 <!-- Lista de Usuários -->
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">
-            <i class="mdi mdi-list me-2"></i>
+        <h6 class="mb-0 fw-semibold">
+            <i class="mdi mdi-format-list-bulleted me-2"></i>
             Lista de Usuários
             @if(request()->hasAny(['search', 'role', 'status']))
                 <span class="badge bg-primary ms-2">{{ $users->total() }} encontrados</span>
             @endif
         </h6>
     </div>
-    
     <div class="card-body p-0">
         @if($users->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Foto</th>
+                            <th class="text-center">Foto</th>
                             <th>Usuário</th>
                             <th>Função</th>
                             <th>Status</th>
                             <th>Senha Temp</th>
                             <th>Cadastro</th>
                             <th>Último Login</th>
-                            <th width="120">Ações</th>
+                            <th class="text-center" width="120">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($users as $user)
                         <tr>
-                            <td>
+                            <td class="text-center">
                                 <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}"
-                                     class="rounded-circle" width="40" height="40"
+                                     class="rounded-circle border border-2" width="40" height="40"
                                      style="object-fit: cover;">
                             </td>
                             <td>
@@ -206,17 +205,20 @@
                                         default => 'bg-secondary'
                                     };
                                 @endphp
-                                <span class="badge {{ $badgeClass }}">{{ $user->role_display }}</span>
+                                <span class="badge {{ $badgeClass }} text-white px-2 py-1">
+                                    <i class="mdi mdi-account-badge me-1"></i>
+                                    {{ $user->role_display }}
+                                </span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $user->is_active ? 'success' : 'danger' }}">
-                                    <i class="mdi mdi-{{ $user->is_active ? 'check' : 'times' }} me-1"></i>
+                                <span class="badge bg-{{ $user->is_active ? 'success' : 'danger' }} text-white px-2 py-1">
+                                    <i class="mdi mdi-{{ $user->is_active ? 'check' : 'close' }} me-1"></i>
                                     {{ $user->status_display }}
                                 </span>
                             </td>
                             <td>
                                 @if($user->hasActiveTemporaryPassword())
-                                    <span class="badge bg-warning" title="Senha temporária ativa">
+                                    <span class="badge bg-warning text-dark px-2 py-1" title="Senha temporária ativa">
                                         <i class="mdi mdi-key me-1"></i>
                                         Ativa
                                     </span>
@@ -226,19 +228,23 @@
                             </td>
                             <td>
                                 <small class="text-muted">
+                                    <i class="mdi mdi-calendar me-1"></i>
                                     {{ $user->created_at->format('d/m/Y') }}<br>
+                                    <i class="mdi mdi-clock-outline me-1"></i>
                                     {{ $user->created_at->diffForHumans() }}
                                 </small>
                             </td>
                             <td>
                                 <small class="text-muted">
+                                    <i class="mdi mdi-login-variant me-1"></i>
                                     {{ $user->last_login_formatted }}<br>
                                     @if($user->last_login_at)
+                                        <i class="mdi mdi-clock-outline me-1"></i>
                                         {{ $user->last_login_at->diffForHumans() }}
                                     @endif
                                 </small>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <div class="btn-group" role="group">
                                     <a href="{{ route('users.show', $user) }}" 
                                        class="btn btn-sm btn-outline-primary" title="Ver">
@@ -247,57 +253,54 @@
                                     @if(auth()->user()->canEdit($user))
                                         <a href="{{ route('users.edit', $user) }}" 
                                            class="btn btn-sm btn-outline-secondary" title="Editar">
-                                            <i class="mdi mdi-edit"></i>
+                                            <i class="mdi mdi-pencil"></i>
                                         </a>
                                     @endif
-                                    
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                                                type="button" data-bs-toggle="dropdown">
-                                            <i class="mdi mdi-ellipsis-v"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            @if(auth()->user()->canEdit($user))
-                                                <li>
-                                                    <button class="dropdown-item reset-password" 
-                                                            data-user-id="{{ $user->id }}" 
-                                                            data-user-name="{{ $user->name }}">
-                                                        <i class="mdi mdi-key text-warning me-1"></i>
-                                                        Resetar Senha
-                                                    </button>
-                                                </li>
-                                            @endif
-                                            @if(auth()->user()->canEdit($user) && $user->id !== auth()->id())
-                                                <li>
-                                                    <button class="dropdown-item toggle-status" 
-                                                            data-user-id="{{ $user->id }}">
-                                                        <i class="mdi mdi-{{ $user->is_active ? 'ban text-warning' : 'check text-success' }} me-1"></i>
-                                                        {{ $user->is_active ? 'Desativar' : 'Ativar' }}
-                                                    </button>
-                                                </li>
-                                            @endif
-                                            @if($user->hasActiveTemporaryPassword() && auth()->user()->canEdit($user))
-                                                <li>
-                                                    <button class="dropdown-item invalidate-temp" 
-                                                            data-user-id="{{ $user->id }}" 
-                                                            data-user-name="{{ $user->name }}">
-                                                        <i class="mdi mdi-ban text-danger me-1"></i>
-                                                        Invalidar Senha Temp
-                                                    </button>
-                                                </li>
-                                            @endif
-                                            @if(auth()->user()->canDelete($user))
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <button class="dropdown-item text-danger delete-user" 
-                                                            data-user-id="{{ $user->id }}" 
-                                                            data-user-name="{{ $user->name }}">
-                                                        <i class="mdi mdi-trash me-1"></i> Excluir
-                                                    </button>
-                                                </li>
-                                            @endif
-                                        </ul>
-                                    </div>
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="mdi mdi-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        @if(auth()->user()->canEdit($user))
+                                            <li>
+                                                <button class="dropdown-item reset-password" 
+                                                        data-user-id="{{ $user->id }}" 
+                                                        data-user-name="{{ $user->name }}">
+                                                    <i class="mdi mdi-key text-warning me-1"></i>
+                                                    Resetar Senha
+                                                </button>
+                                            </li>
+                                        @endif
+                                        @if(auth()->user()->canEdit($user) && $user->id !== auth()->id())
+                                            <li>
+                                                <button class="dropdown-item toggle-status" 
+                                                        data-user-id="{{ $user->id }}">
+                                                    <i class="mdi mdi-{{ $user->is_active ? 'block-helper text-warning' : 'check text-success' }} me-1"></i>
+                                                    {{ $user->is_active ? 'Desativar' : 'Ativar' }}
+                                                </button>
+                                            </li>
+                                        @endif
+                                        @if($user->hasActiveTemporaryPassword() && auth()->user()->canEdit($user))
+                                            <li>
+                                                <button class="dropdown-item invalidate-temp" 
+                                                        data-user-id="{{ $user->id }}" 
+                                                        data-user-name="{{ $user->name }}">
+                                                    <i class="mdi mdi-cancel text-danger me-1"></i>
+                                                    Invalidar Senha Temp
+                                                </button>
+                                            </li>
+                                        @endif
+                                        @if(auth()->user()->canDelete($user) && $user->id !== auth()->id())
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <button class="dropdown-item text-danger delete-user" 
+                                                        data-user-id="{{ $user->id }}" 
+                                                        data-user-name="{{ $user->name }}">
+                                                    <i class="mdi mdi-trash-can-outline me-1"></i> Excluir
+                                                </button>
+                                            </li>
+                                        @endif
+                                    </ul>
                                 </div>
                             </td>
                         </tr>

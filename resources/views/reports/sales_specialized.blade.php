@@ -2,7 +2,7 @@
 
 @section('title', 'Relatório de Vendas')
 @section('page-title', 'Relatório Especializado de Vendas')
-@section('title-icon', 'fa-shopping-cart')
+@section('title-icon', 'mdi-shopping-cart')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -13,17 +13,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-shopping-cart me-2"></i>
+                <i class="mdi mdi-shopping-cart me-2"></i>
                 Análise Completa de Vendas
             </h2>
             <p class="text-muted mb-0">Análise detalhada de performance de vendas, vendedores e produtos</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>
+                <i class="mdi mdi-filter me-2"></i>
                 Filtros Avançados
             </h5>
         </div>
@@ -65,10 +65,10 @@
                 </div>
                 <div class="text-center mt-3">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i> Aplicar Filtros
+                        <i class="mdi mdi-search me-1"></i> Aplicar Filtros
                     </button>
                     <a href="{{ route('reports.sales-specialized') }}" class="btn btn-outline-secondary ms-2">
-                        <i class="fas fa-times me-1"></i> Limpar
+                        <i class="mdi mdi-times me-1"></i> Limpar
                     </a>
                 </div>
             </form>
@@ -80,7 +80,7 @@
         <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
             <div class="card stats-card primary h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-shopping-cart fa-2x text-primary mb-2"></i>
+                    <i class="mdi mdi-shopping-cart mdi-2x text-primary mb-2"></i>
                     <h3 class="mb-1 text-primary">{{ $totalSales }}</h3>
                     <p class="text-muted mb-0 small">Total Vendas</p>
                 </div>
@@ -89,7 +89,7 @@
         <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
             <div class="card stats-card success h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                    <i class="mdi mdi-dollar-sign mdi-2x text-success mb-2"></i>
                     <h4 class="mb-1 text-success">{{ number_format($totalRevenue, 0) }} MT</h4>
                     <p class="text-muted mb-0 small">Receita Total</p>
                 </div>
@@ -98,7 +98,7 @@
         <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
             <div class="card stats-card warning h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-coins fa-2x text-warning mb-2"></i>
+                    <i class="mdi mdi-coins mdi-2x text-warning mb-2"></i>
                     <h4 class="mb-1 text-warning">{{ number_format($totalCost, 0) }} MT</h4>
                     <p class="text-muted mb-0 small">Custo Total</p>
                 </div>
@@ -107,7 +107,7 @@
         <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
             <div class="card stats-card {{ $totalProfit >= 0 ? 'info' : 'danger' }} h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-chart-line fa-2x {{ $totalProfit >= 0 ? 'text-info' : 'text-danger' }} mb-2"></i>
+                    <i class="mdi mdi-chart-line mdi-2x {{ $totalProfit >= 0 ? 'text-info' : 'text-danger' }} mb-2"></i>
                     <h4 class="mb-1 {{ $totalProfit >= 0 ? 'text-info' : 'text-danger' }}">{{ number_format($totalProfit, 0) }} MT</h4>
                     <p class="text-muted mb-0 small">Lucro Total</p>
                 </div>
@@ -116,7 +116,7 @@
         <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
             <div class="card stats-card secondary h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-ticket-alt fa-2x text-secondary mb-2"></i>
+                    <i class="mdi mdi-ticket-alt mdi-2x text-secondary mb-2"></i>
                     <h4 class="mb-1 text-secondary">{{ number_format($averageTicket, 0) }} MT</h4>
                     <p class="text-muted mb-0 small">Ticket Médio</p>
                 </div>
@@ -125,7 +125,7 @@
         <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
             <div class="card stats-card {{ $averageMargin >= 20 ? 'success' : ($averageMargin >= 10 ? 'warning' : 'danger') }} h-100">
                 <div class="card-body text-center">
-                    <i class="fas fa-percentage fa-2x {{ $averageMargin >= 20 ? 'text-success' : ($averageMargin >= 10 ? 'text-warning' : 'text-danger') }} mb-2"></i>
+                    <i class="mdi mdi-percentage mdi-2x {{ $averageMargin >= 20 ? 'text-success' : ($averageMargin >= 10 ? 'text-warning' : 'text-danger') }} mb-2"></i>
                     <h4 class="mb-1 {{ $averageMargin >= 20 ? 'text-success' : ($averageMargin >= 10 ? 'text-warning' : 'text-danger') }}">{{ number_format($averageMargin, 1) }}%</h4>
                     <p class="text-muted mb-0 small">Margem Média</p>
                 </div>
@@ -139,7 +139,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line me-2"></i>
+                        <i class="mdi mdi-chart-line me-2"></i>
                         Evolução Diária das Vendas
                     </h5>
                 </div>
@@ -152,7 +152,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>
+                        <i class="mdi mdi-chart-pie me-2"></i>
                         Vendas por Método
                     </h5>
                 </div>
@@ -169,7 +169,7 @@
             <div class="card">
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-user-tie me-2"></i>
+                        <i class="mdi mdi-user-tie me-2"></i>
                         Top Vendedores
                     </h5>
                 </div>
@@ -207,7 +207,7 @@
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-box me-2"></i>
+                        <i class="mdi mdi-box me-2"></i>
                         Top Produtos Vendidos
                     </h5>
                 </div>
@@ -245,7 +245,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-credit-card me-2"></i>
+                <i class="mdi mdi-credit-card me-2"></i>
                 Análise por Método de Pagamento
             </h5>
         </div>
@@ -313,15 +313,15 @@
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-table me-2"></i>
+                    <i class="mdi mdi-table me-2"></i>
                     Vendas Detalhadas ({{ $sales->count() }} vendas)
                 </h5>
                 <div class="btn-group btn-group-sm" role="group">
                     <button type="button" class="btn btn-outline-primary" onclick="exportToExcel()">
-                        <i class="fas fa-file-excel me-1"></i> Excel
+                        <i class="mdi mdi-file-excel me-1"></i> Excel
                     </button>
                     <button type="button" class="btn btn-outline-danger" onclick="exportToPDF()">
-                        <i class="fas fa-file-pdf me-1"></i> PDF
+                        <i class="mdi mdi-file-pdf me-1"></i> PDF
                     </button>
                 </div>
             </div>
@@ -385,10 +385,10 @@
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
                                         <button class="btn btn-outline-info btn-sm" onclick="viewSaleDetails({{ $sale->id }})" title="Ver Detalhes">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="mdi mdi-eye"></i>
                                         </button>
                                         <button class="btn btn-outline-secondary btn-sm" onclick="printSale({{ $sale->id }})" title="Imprimir">
-                                            <i class="fas fa-print"></i>
+                                            <i class="mdi mdi-print"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -396,7 +396,7 @@
                         @empty
                             <tr>
                                 <td colspan="11" class="text-center py-5 text-muted">
-                                    <i class="fas fa-shopping-cart fa-3x mb-3 opacity-50"></i>
+                                    <i class="mdi mdi-shopping-cart mdi-3x mb-3 opacity-50"></i>
                                     <h5>Nenhuma venda encontrada</h5>
                                     <p>Tente ajustar os filtros ou o período de busca.</p>
                                 </td>

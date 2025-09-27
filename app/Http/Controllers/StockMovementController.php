@@ -86,7 +86,34 @@ class StockMovementController extends Controller
             return back()->with('error', 'Erro ao registrar movimento: ' . $e->getMessage());
         }
     }
+    
+    public function edit(StockMovement $stockMovement)
+    {
+        $products = Product::all();
+        return view('stock_movements.edit', compact('stockMovement', 'products'));
+    }
+    public function update(Request $request, StockMovement $stockMovement)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'movement_type' => 'required|in:in,out,adjustment',
+            'quantity' => 'required|integer|min:1',
+            'reason' => 'nullable|string|max:255',
+            'movement_date' => 'required|date',
+        ]);
 
+        $stockMovement->update([
+            'product_id' => $request->product_id,
+            'user_id' => auth()->id(),
+            'movement_type' => $request->movement_type,
+            'quantity' => $request->quantity,
+            'reason' => $request->reason,
+            'movement_date' => $request->movement_date,
+        ]);
+
+        return redirect()->route('stock_movements.index')
+            ->with('success', 'Movimento atualizado com sucesso.');
+    }
     public function show(StockMovement $stockMovement)
     {
         $stockMovement->load(['product', 'user']);
@@ -118,4 +145,17 @@ class StockMovementController extends Controller
             return back()->with('error', 'Erro ao excluir movimento: ' . $e->getMessage());
         }
     }
+    public static function recordMovement($product_id, $quantity, $type, $reason = null, $reference_id = null)
+    {
+        return StockMovement::create([
+            'product_id'   => $product_id,
+            'user_id'      => auth()->id(),
+            'movement_type'=> $type, // 'in' ou 'out'
+            'quantity'     => $quantity,
+            'reason'       => $reason,
+            'reference_id' => $reference_id,
+            'movement_date'=> now(),
+        ]);
+    }
+
 }

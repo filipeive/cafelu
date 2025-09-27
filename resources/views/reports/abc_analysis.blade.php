@@ -2,7 +2,7 @@
 
 @section('title', 'Análise ABC')
 @section('page-title', 'Análise ABC de Produtos')
-@section('title-icon', 'fa-chart-pie')
+@section('title-icon', 'mdi-chart-pie')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -13,17 +13,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-chart-pie me-2"></i>
+                <i class="mdi mdi-chart-pie me-2"></i>
                 Análise ABC de Produtos
             </h2>
             <p class="text-muted mb-0">Classificação de produtos por importância de receita (80/15/5)</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>
+                <i class="mdi mdi-filter me-2"></i>
                 Período de Análise
             </h5>
         </div>
@@ -50,7 +50,7 @@
                     <div class="col-md-4">
                         <label class="form-label">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Atualizar
+                            <i class="mdi mdi-search me-1"></i> Atualizar
                         </button>
                     </div>
                 </div>
@@ -64,7 +64,7 @@
             <div class="card border-success h-100">
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-star me-2"></i>
+                        <i class="mdi mdi-star me-2"></i>
                         Classe A - Premium
                     </h5>
                     <small>80% da receita (produtos mais importantes)</small>
@@ -91,7 +91,7 @@
             <div class="card border-warning h-100">
                 <div class="card-header bg-warning text-dark">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-medal me-2"></i>
+                        <i class="mdi mdi-medal me-2"></i>
                         Classe B - Intermédio
                     </h5>
                     <small>15% da receita (importância moderada)</small>
@@ -118,7 +118,7 @@
             <div class="card border-info h-100">
                 <div class="card-header bg-info text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-cube me-2"></i>
+                        <i class="mdi mdi-cube me-2"></i>
                         Classe C - Básico
                     </h5>
                     <small>5% da receita (menor impacto)</small>
@@ -147,7 +147,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-chart-area me-2"></i>
+                <i class="mdi mdi-chart-area me-2"></i>
                 Gráfico de Pareto - Receita Acumulada
             </h5>
         </div>
@@ -161,7 +161,7 @@
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-table me-2"></i>
+                    <i class="mdi mdi-table me-2"></i>
                     Produtos por Classificação ABC
                 </h5>
                 <div class="btn-group btn-group-sm" role="group">

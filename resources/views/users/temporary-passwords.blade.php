@@ -18,7 +18,7 @@
                 <div class="card-body text-center">
                     <img src="{{ $user->avatar_url }}" class="rounded-circle mb-3" width="100" height="100">
                     <h5 class="fw-bold mb-1">{{ $user->name }}</h5>
-                    <span class="badge bg-{{ $user->role?->name === 'admin' ? 'danger' : ($user->role?->name === 'manager' ? 'primary' : 'success') }} mb-3">
+                    <span class="badge bg-{{ $user->role === 'admin' ? 'danger' : ($user->role === 'manager' ? 'primary' : 'success') }} mb-3">
                         {{ $user->role_display }}
                     </span>
                     <p class="text-muted small">{{ $user->email }}</p>

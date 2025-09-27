@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\UserActivity;
 use App\Models\TemporaryPassword;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -41,43 +41,43 @@ class UserController extends Controller
         }
 
         $users = $query->paginate(15)->withQueryString();
-        /* 'admin' => 'Administrador',
-            'manager' => 'Gerente',
-            'cashier' => 'Caixa',
-            'waiter' => 'Garçom',
-            'cook' => 'Cozinheiro', */
+
         $stats = [
-            'total' => User::count(),
-            'active' => User::where('is_active', true)->count(),
-            'admin' => User::where('role', 'admin')->count(),
-            'manager' => User::where('role', 'manager')->count(),
-            'cashier' => User::where('role', 'cashier')->count(),
-            'waiter' => User::where('role', 'waiter')->count(),
-            'cook' => User::where('role', 'cook')->count(),
+            'total'    => User::count(),
+            'active'   => User::where('is_active', true)->count(),
             'with_temp_password' => User::whereHas('activeTemporaryPasswords')->count(),
         ];
 
-        return view('users.index', compact('users', 'stats'));
+        // gera estatísticas por função dinamicamente
+        foreach (array_keys(User::rolesList()) as $roleKey) {
+            $stats[$roleKey] = User::where('role', $roleKey)->count();
+        }
+
+        return view('users.index', [
+            'users' => $users,
+            'stats' => $stats,
+            'roles' => User::rolesList(),
+        ]);
     }
 
     public function create()
     {
-        $roles = ['admin', 'manager', 'staff']; // Usando array simples
-        return view('users.create', compact('roles'));
+        return view('users.create', [
+            'roles' => User::rolesList(),
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,manager,staff',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'role'     => 'required|in:' . implode(',', array_keys(User::rolesList())),
+            'photo'    => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $data = $request->except('photo', 'password_confirmation');
-
+        $data = $request->except(['photo', 'password_confirmation']);
         if ($request->hasFile('photo')) {
             $data['photo_path'] = $request->file('photo')->store('user-photos', 'public');
         }
@@ -89,30 +89,36 @@ class UserController extends Controller
 
         $this->logActivity('create', "Criou novo usuário: {$user->name}", $user);
 
-        session()->flash('success', 'Usuário criado com sucesso!');
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', 'Usuário criado com sucesso!');
     }
 
     public function show(User $user)
     {
-        $user->load(['activities' => fn($q) => $q->latest()->limit(5), 
-                     'temporaryPasswords' => fn($q) => $q->latest()->limit(3)]);
+        $user->load([
+            'activities' => fn($q) => $q->latest()->limit(5),
+            'temporaryPasswords' => fn($q) => $q->latest()->limit(3),
+        ]);
 
         return view('users.show', compact('user'));
     }
 
     public function edit(User $user)
     {
-        $roles = ['admin', 'manager', 'staff'];
-        return view('users.edit', compact('user', 'roles'));
+        return view('users.edit', [
+            'user'  => $user,
+            'roles' => User::rolesList(),
+        ]);
     }
 
     public function update(Request $request, User $user)
     {
+        // Valores válidos baseados no ENUM do banco + ajuste para 'cooker'
+        $validRoles = ['admin', 'manager', 'waiter', 'cooker', 'cashier', 'staff'];
+        
         $rules = [
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users')->ignore($user->id)],
-            'role' => 'required|in:admin,manager,staff',
+            'name'  => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'role'  => 'required|in:' . implode(',', $validRoles),
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
 
@@ -123,8 +129,14 @@ class UserController extends Controller
         $request->validate($rules);
 
         $oldName = $user->name;
-        $data = $request->except('photo', 'password_confirmation');
 
+        $data = $request->except(['photo', 'password', 'password_confirmation']);
+        
+        // Ajustar o valor 'cook' para 'cooker' se necessário (para compatibilidade com o ENUM)
+        if ($data['role'] === 'cook') {
+            $data['role'] = 'cooker';
+        }
+        
         if ($request->hasFile('photo')) {
             if ($user->photo_path) {
                 Storage::disk('public')->delete($user->photo_path);
@@ -140,12 +152,14 @@ class UserController extends Controller
             ]);
         }
 
+        // Garantir que is_active está sendo enviado corretamente
+        $data['is_active'] = $request->has('is_active');
+
         $user->update($data);
 
         $this->logActivity('update', "Atualizou usuário de '{$oldName}' para '{$user->name}'", $user);
 
-        session()->flash('success', 'Usuário atualizado com sucesso!');
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', 'Usuário atualizado com sucesso!');
     }
 
     public function destroy(User $user)
@@ -160,8 +174,7 @@ class UserController extends Controller
 
         $this->logActivity('delete', "Excluiu usuário: {$userName}", $user);
 
-        session()->flash('success', 'Usuário excluído com sucesso!');
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', 'Usuário excluído com sucesso!');
     }
 
     public function toggleStatus(User $user)
@@ -178,8 +191,7 @@ class UserController extends Controller
 
         $this->logActivity('status_change', "Alterou status do usuário '{$user->name}' para " . (!$currentStatus ? 'ativo' : 'inativo'), $user);
 
-        session()->flash('success', "Usuário {$user->name} " . (!$currentStatus ? 'ativado' : 'desativado') . " com sucesso!");
-        return redirect()->back();
+        return redirect()->back()->with('success', "Usuário {$user->name} " . (!$currentStatus ? 'ativado' : 'desativado') . " com sucesso!");
     }
 
     public function activity(User $user)
@@ -191,13 +203,12 @@ class UserController extends Controller
     public function resetPassword(User $user)
     {
         $temporaryPassword = $this->generateSecurePassword();
-        $tempPassword = TemporaryPassword::createForUser($user, $temporaryPassword, 24);
+        TemporaryPassword::createForUser($user, $temporaryPassword, 24);
         $user->update(['password' => Hash::make($temporaryPassword)]);
 
         $this->logActivity('password_reset', "Resetou senha do usuário: {$user->name} (Expira em 24h)", $user);
 
-        session()->flash('success', "Senha temporária gerada para {$user->name} (expira em 24h).");
-        return redirect()->back();
+        return redirect()->back()->with('success', "Senha temporária gerada para {$user->name} (expira em 24h).");
     }
 
     public function temporaryPasswords(User $user)
@@ -216,8 +227,7 @@ class UserController extends Controller
 
         $this->logActivity('password_invalidate', "Invalidou {$count} senha(s) temporária(s) do usuário: {$user->name}", $user);
 
-        session()->flash('success', "Invalidadas {$count} senha(s) temporária(s) com sucesso!");
-        return redirect()->back();
+        return redirect()->back()->with('success', "Invalidadas {$count} senha(s) temporária(s) com sucesso!");
     }
 
     private function generateSecurePassword(int $length = 12): string

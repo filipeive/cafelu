@@ -2,7 +2,7 @@
 
 @section('title', 'Comparativo de Períodos')
 @section('page-title', 'Comparativo de Períodos')
-@section('title-icon', 'fa-chart-bar')
+@section('title-icon', 'mdi-chart-bar')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
@@ -13,17 +13,17 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-chart-bar me-2"></i>
+                <i class="mdi mdi-chart-bar me-2"></i>
                 Análise Comparativa de Períodos
             </h2>
             <p class="text-muted mb-0">Compare o desempenho entre diferentes períodos</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
+                <i class="mdi mdi-arrow-left me-1"></i> Voltar
             </a>
             <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
+                <i class="mdi mdi-print me-1"></i> Imprimir
             </button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>
+                <i class="mdi mdi-filter me-2"></i>
                 Definir Períodos para Comparação
             </h5>
         </div>
@@ -42,7 +42,7 @@
                     <div class="col-lg-6">
                         <div class="border rounded p-3 bg-light">
                             <h6 class="text-primary mb-3">
-                                <i class="fas fa-calendar me-2"></i>
+                                <i class="mdi mdi-calendar me-2"></i>
                                 Período Atual
                             </h6>
                             <div class="row g-2">
@@ -60,7 +60,7 @@
                     <div class="col-lg-6">
                         <div class="border rounded p-3 bg-light">
                             <h6 class="text-secondary mb-3">
-                                <i class="fas fa-calendar me-2"></i>
+                                <i class="mdi mdi-calendar me-2"></i>
                                 Período de Comparação
                             </h6>
                             <div class="row g-2">
@@ -78,7 +78,7 @@
                 </div>
                 <div class="text-center mt-3">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-sync me-1"></i> Atualizar Comparação
+                        <i class="mdi mdi-sync me-1"></i> Atualizar Comparação
                     </button>
                 </div>
             </form>
@@ -91,7 +91,7 @@
             <div class="card">
                 <div class="card-header bg-gradient-primary text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-trophy me-2"></i>
+                        <i class="mdi mdi-trophy me-2"></i>
                         Resumo Comparativo
                     </h5>
                     <div class="row text-center mt-2">
@@ -123,7 +123,7 @@
                                         <!-- Comparação -->
                                         <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
                                             <span class="text-{{ $comparison['trend'] == 'up' ? 'success' : ($comparison['trend'] == 'down' ? 'danger' : 'muted') }}">
-                                                <i class="fas fa-arrow-{{ $comparison['trend'] == 'up' ? 'up' : ($comparison['trend'] == 'down' ? 'down' : 'right') }}"></i>
+                                                <i class="mdi mdi-arrow-{{ $comparison['trend'] == 'up' ? 'up' : ($comparison['trend'] == 'down' ? 'down' : 'right') }}"></i>
                                                 {{ $comparison['variation_percent'] >= 0 ? '+' : '' }}{{ number_format($comparison['variation_percent'], 1) }}%
                                             </span>
                                         </div>
@@ -164,7 +164,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line me-2"></i>
+                        <i class="mdi mdi-chart-line me-2"></i>
                         Comparação de Métricas Principais
                     </h5>
                 </div>
@@ -177,7 +177,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>
+                        <i class="mdi mdi-chart-pie me-2"></i>
                         Variação Percentual
                     </h5>
                 </div>
@@ -192,7 +192,7 @@
     <div class="card mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-table me-2"></i>
+                <i class="mdi mdi-table me-2"></i>
                 Comparação Detalhada
             </h5>
         </div>
@@ -243,7 +243,7 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <i class="fas fa-2x fa-arrow-{{ $comparison['trend'] == 'up' ? 'up text-success' : ($comparison['trend'] == 'down' ? 'down text-danger' : 'right text-muted') }}"></i>
+                                    <i class="mdi mdi-2x mdi-arrow-{{ $comparison['trend'] == 'up' ? 'up text-success' : ($comparison['trend'] == 'down' ? 'down text-danger' : 'right text-muted') }}"></i>
                                 </td>
                                 <td class="text-center">
                                     @php
@@ -280,7 +280,7 @@
             <div class="card">
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-trophy me-2"></i>
+                        <i class="mdi mdi-trophy me-2"></i>
                         Top Produtos - Período Atual
                     </h5>
                 </div>
@@ -318,7 +318,7 @@
             <div class="card">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-history me-2"></i>
+                        <i class="mdi mdi-history me-2"></i>
                         Top Produtos - Período Anterior
                     </h5>
                 </div>

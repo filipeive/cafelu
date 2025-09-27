@@ -2,7 +2,7 @@
 
 @section('title', 'Vendas Mensais')
 @section('page-title', 'Vendas Mensais')
-@section('title-icon', 'fa-calendar-alt')
+@section('title-icon', 'mdi-calendar-alt')
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Relatórios</a></li>
     <li class="breadcrumb-item active">Vendas Mensais</li>
@@ -13,13 +13,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="h3 mb-1 text-primary fw-bold">
-                <i class="fas fa-calendar-alt me-2"></i>
+                <i class="mdi mdi-calendar-alt me-2"></i>
                 Relatório de Vendas Mensais
             </h2>
             <p class="text-muted mb-0">Análise do desempenho de vendas por mês</p>
         </div>
         <a href="{{ route('reports.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i> Voltar
+            <i class="mdi mdi-arrow-left me-2"></i> Voltar
         </a>
     </div>
 
@@ -35,7 +35,7 @@
                             <small class="text-muted">no histórico</small>
                         </div>
                         <div class="text-primary">
-                            <i class="fas fa-calendar-alt fa-2x"></i>
+                            <i class="mdi mdi-calendar-alt mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                             <small class="text-muted">vendas brutas</small>
                         </div>
                         <div class="text-success">
-                            <i class="fas fa-dollar-sign fa-2x"></i>
+                            <i class="mdi mdi-dollar-sign mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                             <small class="text-muted">por mês</small>
                         </div>
                         <div class="text-warning">
-                            <i class="fas fa-chart-line fa-2x"></i>
+                            <i class="mdi mdi-chart-line mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                             </small>
                         </div>
                         <div class="text-danger">
-                            <i class="fas fa-trophy fa-2x"></i>
+                            <i class="mdi mdi-trophy mdi-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
     <div class="card fade-in mb-4">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center">
-                <i class="fas fa-chart-line me-2 text-success"></i>
+                <i class="mdi mdi-chart-line me-2 text-success"></i>
                 Evolução das Vendas Mensais
             </h5>
         </div>
@@ -112,7 +112,7 @@
             <div class="card fade-in">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0 d-flex align-items-center">
-                        <i class="fas fa-table me-2 text-primary"></i>
+                        <i class="mdi mdi-table me-2 text-primary"></i>
                         Detalhes Mensais
                     </h5>
                 </div>
@@ -139,11 +139,11 @@
                                         <td class="text-center">
                                             @if($variation > 0)
                                                 <span class="badge bg-success">
-                                                    <i class="fas fa-arrow-up me-1"></i> {{ number_format($variation, 1) }}%
+                                                    <i class="mdi mdi-arrow-up me-1"></i> {{ number_format($variation, 1) }}%
                                                 </span>
                                             @elseif($variation < 0)
                                                 <span class="badge bg-danger">
-                                                    <i class="fas fa-arrow-down me-1"></i> {{ number_format(abs($variation), 1) }}%
+                                                    <i class="mdi mdi-arrow-down me-1"></i> {{ number_format(abs($variation), 1) }}%
                                                 </span>
                                             @else
                                                 <span class="badge bg-secondary">0%</span>
@@ -168,14 +168,14 @@
             <div class="card fade-in h-100">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0 d-flex align-items-center">
-                        <i class="fas fa-calculator me-2 text-info"></i>
+                        <i class="mdi mdi-calculator me-2 text-info"></i>
                         Análise Estatística
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-start mb-3">
                         <div class="text-info me-3">
-                            <i class="fas fa-chart-bar fa-lg"></i>
+                            <i class="mdi mdi-chart-bar mdi-lg"></i>
                         </div>
                         <div>
                             <h6 class="mb-1">Média Mensal</h6>
@@ -185,7 +185,7 @@
 
                     <div class="d-flex align-items-start mb-3">
                         <div class="text-success me-3">
-                            <i class="fas fa-trophy fa-lg"></i>
+                            <i class="mdi mdi-trophy mdi-lg"></i>
                         </div>
                         <div>
                             <h6 class="mb-1">Melhor Mês</h6>
@@ -198,7 +198,7 @@
 
                     <div class="d-flex align-items-start">
                         <div class="text-warning me-3">
-                            <i class="fas fa-chart-line fa-lg"></i>
+                            <i class="mdi mdi-chart-line mdi-lg"></i>
                         </div>
                         <div>
                             <h6 class="mb-1">Pior Mês</h6>

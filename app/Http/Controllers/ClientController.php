@@ -31,7 +31,7 @@ class ClientController extends Controller
 
             Client::create($validated);
 
-            return redirect()->route('clients.index')->with('success', 'Client created successfully.');
+            return redirect()->route('client.index')->with('success', 'Client created successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
@@ -56,7 +56,7 @@ class ClientController extends Controller
             $client = Client::findOrFail($id);
             $client->update($validated);
 
-            return redirect()->route('clients.index')->with('success', 'Client updated successfully.');
+            return redirect()->route('client.index')->with('success', 'Client updated successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }

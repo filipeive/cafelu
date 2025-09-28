@@ -7,7 +7,7 @@
 @section('breadcrumbs')
     <li class="breadcrumb-item active" aria-current="page">POS - Sistema de Vendas</li>
 @endsection
-@include('partials.poscss')
+
 @section('content')
     <div class="pos-wrapper container-wrapper">
         <div class="row g-4">
@@ -164,5 +164,3 @@
         </div>
     </div>
 @endsection
-@include('partials.posjs')
-@include('partials.printrecibo')

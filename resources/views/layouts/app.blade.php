@@ -14,7 +14,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- FontAwesome - usar CDN -->
-    <!-- Substituir: -->
     <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
     <!-- Por: -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -27,6 +26,9 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/select2/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/jquery-toast-plugin/jquery.toast.min.css') }}">
+
+    {{--custom --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/pos.css') }}">
     <style>
         :root {
             /* Cores do tema praia/beach */
@@ -1784,11 +1786,8 @@
             </div>
         </footer>
     </div>
-    {{--  @include('partials.footerjs') --}}
-    @include('partials.printrecibo')
-    @include('partials.posjs')
     <!-- JS -->
-    <!-- <script src="{{-- asset('bootstrap/js/bootstrap.bundle.min.js') --}}"></script> -->
+    <script src="{{ asset('assets/js/pos.js') }}"></script>
     <!-- Bootstrap JS - CDN -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 

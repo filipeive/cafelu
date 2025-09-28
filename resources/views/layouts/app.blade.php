@@ -10,12 +10,17 @@
 
     <title>ZALALA BEACH BAR - @yield('title', 'Sistema de Gestão')</title>
 
-    <!-- Bootstrap CSS -->
-    {{--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
-    <!-- CSS -->
-    <link href="{{ asset('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-    <!-- Fontes -->
-    <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+	<!-- Por: -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- FontAwesome - usar CDN -->
+	<!-- Substituir: -->
+	<link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
+	<!-- Por: -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+	<!-- MDI - manter local (já está correto): -->	
+	<link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">	
     <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
 
       <!-- CSS Plugins -->
@@ -1771,8 +1776,9 @@
     <!-- Bootstrap JS -->
     <script src="{{ asset('assets/pos/printRecibo.js') }}"></script>
     <!-- JS -->
-    <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    
+    <!-- <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script> -->
+    <!-- Bootstrap JS - CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ===== SIDEBAR MANAGEMENT =====
         class SidebarManager {

@@ -8,7 +8,7 @@
 
 
 @section('breadcrumbs')
-    <li class="breadcrumb-item active">Vendas</li>
+    <li class="breadcrumb-item active"> <i class="mdi mdi mdi-cart"></i>Vendas</li>
 @endsection
 
 @section('content')
@@ -450,17 +450,6 @@
     </div>
 
     @push('scripts')
-        <script src="{{ asset('assets/jquery-3.7.1.min.js') }}"></script>
-        <script src="{{ asset('assets/jquery.dataTables.min.js') }}"></script>
-        <script src="{{ asset('assets/dataTables.bootstrap5.min.js') }}"></script>
-        <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-        <script src="{{ asset('assets/sweetalert2@10.js') }}"></script>
-        <script src="{{ asset('assets/chart.js') }}"></script>
-        <!-- Added PDF Export Libraries -->
-        <script src="{{ asset('assets/jspdf.umd.min.js') }}"></script>
-        <script src="{{ asset('assets/jspdf.plugin.autotable.min.js') }}"></script>
-        <script src="{{ asset('assets/xlsx.full.min.js') }}"></script>
-
         <script>
             // Global variables
             let saleItems = [];

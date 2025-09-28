@@ -396,6 +396,7 @@ function processSale() {
     fetch("/pos/checkout", {
         method: "POST",
         headers: {
+            'X-CSRF-TOKEN': window.csrfToken,
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": document
                 .querySelector('meta[name="csrf-token"]')

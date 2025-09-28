@@ -2237,6 +2237,16 @@
         // Expose functions globally
         window.toggleTheme = toggleTheme;
         window.showToast = showToast;
+
+         // Configurar AJAX para incluir CSRF token
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // Ou se usar fetch:
+        window.csrfToken = '{{ csrf_token() }}';
     </script>
 
     @stack('scripts')

@@ -148,17 +148,16 @@
                             </div>
                         </div>
                     </div>
-                    <div class="action-buttons" style="padding: 10px">
-                        <button id="btnFinalizeOrder" class="btn-finalize" onclick="processSale()">
+                    <div class="btn-group m-2" style="padding: 5px; margin: 10px;">
+                        <button id="btnFinalizeOrder" class="btn btn-finalize" onclick="processSale()">
                             <i class="mdi mdi-check-circle-outline"></i>
                             Finalizar Pedido
                         </button>
-                        <button class="btn-preview" onclick="previewReceipt()">
+                        <button class="btn bg-warning btn-finalize" onclick="previewReceipt()">
                             <i class="mdi mdi-printer"></i>
-                            Pré-visualizar Recibo
+                            preview Recibo
                         </button>
                     </div>
-
                 </div>
             </div>
         </div>

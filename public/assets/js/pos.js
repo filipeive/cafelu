@@ -393,18 +393,15 @@ function processSale() {
     };
 
     // Send to backend
-    fetch("/pos/checkout", {
+    fetch("{{ url('pos/checkout') }}", {
         method: "POST",
         headers: {
-            'X-CSRF-TOKEN': window.csrfToken,
             "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content"),
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
         },
         body: JSON.stringify(saleData),
     })
-        .then((response) => response.json())
+            .then((response) => response.json())
         .then((data) => {
             if (data.success) {
                 showToast("Venda concluída com sucesso!", "success");

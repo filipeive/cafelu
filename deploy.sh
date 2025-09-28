@@ -46,11 +46,6 @@ sudo tar -czf "$BACKUP_PATH/backup-$(date +%Y%m%d-%H%M%S).tar.gz" \
     --exclude='node_modules' \
     --exclude='storage/logs/*' \
     --exclude='.git' \
-    .
-
-# 3. Entrar em modo de manutenção
-log "Ativando modo de manutenção..."
-sudo php artisan down --message="Deploy em andamento..." --retry=60
 
 # 4. Atualizar código do repositório
 log "Atualizando código do repositório..."

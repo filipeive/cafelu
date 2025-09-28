@@ -10,20 +10,20 @@
 
     <title>ZALALA BEACH BAR - @yield('title', 'Sistema de Gestão')</title>
 
-	<!-- Por: -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Por: -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-	<!-- FontAwesome - usar CDN -->
-	<!-- Substituir: -->
-	<link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
-	<!-- Por: -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FontAwesome - usar CDN -->
+    <!-- Substituir: -->
+    <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
+    <!-- Por: -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-	<!-- MDI - manter local (já está correto): -->	
-	<link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">	
+    <!-- MDI - manter local (já está correto): -->
+    <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
 
-      <!-- CSS Plugins -->
+    <!-- CSS Plugins -->
     <link rel="stylesheet" href="{{ asset('assets/vendors/select2/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/jquery-toast-plugin/jquery.toast.min.css') }}">
@@ -89,7 +89,7 @@
                 radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
             z-index: -1;
         }*/
-        .body::before{
+        .body::before {
             content: '';
             position: absolute;
             top: 0;
@@ -105,6 +105,7 @@
             filter: brightness(0.9);
             pointer-events: none;
         }
+
         /* ===== SIDEBAR STYLES ===== */
         .sidebar {
             position: fixed;
@@ -157,7 +158,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background:linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #ffd900 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #ffd900 100%);
             opacity: 0.3;
             border-bottom-color: solid 1px orange;
         }
@@ -716,37 +717,39 @@
             font-weight: 600;
             color: var(--dark-color);
         }
+
         /*pagina de erros*/
         .error-page {
-    min-height: 70vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.error-icon {
-    opacity: 0.9;
-}
+        .error-icon {
+            opacity: 0.9;
+        }
 
-.error-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
-}
+        .error-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
 
-@media (max-width: 768px) {
-    .error-card .card-body {
-        padding: 2rem 1.5rem;
-    }
-    
-    .display-4 {
-        font-size: 3rem;
-    }
-    
-    .display-1 {
-        font-size: 4rem;
-    }
-}
+        @media (max-width: 768px) {
+            .error-card .card-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .display-4 {
+                font-size: 3rem;
+            }
+
+            .display-1 {
+                font-size: 4rem;
+            }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .navbar-content {
@@ -1067,420 +1070,420 @@
 </head>
 
 <body>
-    {{--@include('partials.footer') --}}
+    {{-- @include('partials.footer') --}}
     <!-- Sidebar Overlay (Mobile) -->
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <!-- Sidebar -->
-<nav class="sidebar" id="sidebar">
-    <!-- Brand Section -->
-    <div class="sidebar-brand">
-        <div class="brand-logo text-center">
-            <div class="logo-icon mb-2">
-                <img src="{{ asset('assets/images/logo-zalala.png') }}" alt="ZALALA Logo"
-                    style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+    <nav class="sidebar" id="sidebar">
+        <!-- Brand Section -->
+        <div class="sidebar-brand">
+            <div class="brand-logo text-center">
+                <div class="logo-icon mb-2">
+                    <img src="{{ asset('assets/images/logo-zalala.png') }}" alt="ZALALA Logo"
+                        style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                </div>
+                <h1 class="brand-title">ZALALA BEACH BAR</h1>
+                <div class="brand-subtitle">Restaurante • Bar • Gestão</div>
             </div>
-            <h1 class="brand-title">ZALALA BEACH BAR</h1>
-            <div class="brand-subtitle">Restaurante • Bar • Gestão</div>
-        </div>
-    </div>
-    
-    <!-- Navigation Sections -->
-    <div class="sidebar-nav">
-        <!-- Dashboard -->
-        <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="mdi mdi-menu"></i>
-                <span>Navegação</span>
-            </div>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
-                        href="{{ route('dashboard') }}">
-                        <i class="mdi mdi-view-dashboard text-warning"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-            </ul>
         </div>
 
-        <!-- OPERACIONAL -->
-        @canany(['view_products', 'create_sales', 'view_orders', 'manage_tables', 'manage_kitchen'])
-        <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="mdi mdi-store"></i>
-                <span>Operacional</span>
+        <!-- Navigation Sections -->
+        <div class="sidebar-nav">
+            <!-- Dashboard -->
+            <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="mdi mdi-menu"></i>
+                    <span>Navegação</span>
+                </div>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+                            href="{{ route('dashboard') }}">
+                            <i class="mdi mdi-view-dashboard text-warning"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <ul class="nav nav-pills flex-column">
-                @canall(['view_products', 'create_sales'])
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}"
-                        href="{{ route('pos.index') }}">
-                        <i class="mdi mdi-point-of-sale"></i>
-                        <span>PDV (Ponto de Venda)</span>
-                        <span class="badge bg-success ms-auto">Live</span>
-                    </a>
-                </li>
-                @endcanall
 
-                @can('view_orders')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}"
-                        href="{{ route('orders.index') }}">
-                        <i class="mdi mdi-receipt"></i>
-                        <span>Pedidos</span>
-                        @php
-                            $pendingOrdersCount = \App\Models\Order::whereIn('status', [
-                                'active',
-                                'pending',
-                            ])->count();
-                        @endphp
-                        @if ($pendingOrdersCount > 0)
-                            <span class="badge ms-auto" style="background: var(--warning-color);">
-                                {{ $pendingOrdersCount }}
-                            </span>
-                        @endif
-                    </a>
-                </li>
-                @endcan
+            <!-- OPERACIONAL -->
+            @canany(['view_products', 'create_sales', 'view_orders', 'manage_tables', 'manage_kitchen'])
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <i class="mdi mdi-store"></i>
+                        <span>Operacional</span>
+                    </div>
+                    <ul class="nav nav-pills flex-column">
+                        @canall(['view_products', 'create_sales'])
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}"
+                                href="{{ route('pos.index') }}">
+                                <i class="mdi mdi-point-of-sale"></i>
+                                <span>PDV (Ponto de Venda)</span>
+                                <span class="badge bg-success ms-auto">Live</span>
+                            </a>
+                        </li>
+                        @endcanall
 
-                @can('manage_kitchen')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('kitchen.*') ? 'active' : '' }}"
-                        href="{{ route('kitchen.dashboard') }}">
-                        <i class="mdi mdi-chef-hat"></i>
-                        <span>Cozinha</span>
-                        @php
-                            $kitchenOrders = \App\Models\Order::where('status', 'active')->count();
-                            $pendingItems = \App\Models\OrderItem::whereHas('order', function ($q) {
-                                $q->where('status', 'active');
-                            })
-                                ->where('status', 'pending')
-                                ->count();
-                        @endphp
-                        @if ($kitchenOrders > 0)
-                            <span class="badge ms-auto"
-                                style="background: {{ $pendingItems > 0 ? 'var(--warning-color)' : 'var(--success-color)' }};"
-                                title="Pedidos ativos: {{ $kitchenOrders }} | Itens pendentes: {{ $pendingItems }}">
-                                {{ $kitchenOrders }}
-                            </span>
-                        @endif
-                    </a>
-                </li>
-                @endcan
-
-                @canany(['view_orders', 'manage_tables'])
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('tables.*') ? 'active' : '' }}"
-                        href="{{ route('tables.index') }}">
-                        <i class="mdi mdi-table-chair"></i>
-                        <span>Mesas</span>
-                        @php
-                            $occupiedTables = \App\Models\Table::whereHas('orders', function ($query) {
-                                $query->whereIn('status', ['active', 'completed']);
-                            })->count();
-                            $totalTables = \App\Models\Table::count();
-                            $availableTables = $totalTables - $occupiedTables;
-                        @endphp
-                        <span class="badge ms-auto"
-                            title="Livre: {{ $availableTables }} | Ocupada: {{ $occupiedTables }}"
-                            style="background: {{ $availableTables > 0 ? 'var(--success-color)' : 'var(--danger-color)' }};">
-                            {{ $availableTables }}
-                        </span>
-                    </a>
-                </li>
-                @endcanany
-            </ul>
-        </div>
-        @endcanany
-
-        <!-- MENU & PRODUTOS -->
-        @canany(['view_products', 'manage_categories', 'view_stock_movements'])
-        <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="mdi mdi-food-variant"></i>
-                <span>Menu & Produtos</span>
-            </div>
-            <ul class="nav nav-pills flex-column">
-                @can('view_products')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
-                        href="{{ route('products.index') }}">
-                        <i class="mdi mdi-food"></i>
-                        <span>Produtos</span>
-                        @php
-                            $lowStockCount = \App\Models\Product::whereColumn(
-                                'stock_quantity',
-                                '<=',
-                                'min_stock_level',
-                            )->count();
-                        @endphp
-                        @if ($lowStockCount > 0)
-                            <span class="badge bg-warning ms-auto" title="Produtos com estoque baixo">
-                                {{ $lowStockCount }}
-                            </span>
-                        @endif
-                    </a>
-                </li>
-                @endcan
-
-                @can('manage_categories')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
-                        href="{{ route('categories.index') }}">
-                        <i class="mdi mdi-format-list-bulleted"></i>
-                        <span>Categorias</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('view_products')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('menu.*') ? 'active' : '' }}"
-                        href="{{ route('menu.index') }}">
-                        <i class="mdi mdi-book-open-variant"></i>
-                        <span>Cardápio Digital</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('view_stock_movements')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('stock-movements.*') ? 'active' : '' }}"
-                        href="{{ route('stock-movements.index') }}">
-                        <i class="mdi mdi-swap-vertical"></i>
-                        <span>Movimentos de Stock</span>
-                    </a>
-                </li>
-                @endcan
-            </ul>
-        </div>
-        @endcanany
-
-        <!-- VENDAS & FINANCEIRO -->
-        @canany(['view_sales', 'view_reports', 'view_expenses', 'financial_reports'])
-        <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="mdi mdi-cash-multiple"></i>
-                <span>Vendas & Financeiro</span>
-            </div>
-            <ul class="nav nav-pills flex-column">
-                @can('view_sales')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}"
-                        href="{{ route('sales.index') }}">
-                        <i class="mdi mdi-currency-usd"></i>
-                        <span>Vendas</span>
-                        @php
-                            $todaySalesCount = \App\Models\Sale::whereDate('created_at', today())->count();
-                        @endphp
-                        @if ($todaySalesCount > 0)
-                            <span class="badge bg-success ms-auto" title="Vendas hoje">
-                                {{ $todaySalesCount }}
-                            </span>
-                        @endif
-                    </a>
-                </li>
-                @endcan
-
-                @can('view_expenses')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}"
-                        href="{{ route('expenses.index') }}">
-                        <i class="mdi mdi-cash-remove"></i>
-                        <span>Despesas</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('view_reports')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
-                        href="{{ route('reports.index') }}">
-                        <i class="mdi mdi-chart-line"></i>
-                        <span>Relatórios</span>
-                        @can('financial_reports')
-                            <span class="badge bg-info ms-auto" title="Relatórios Financeiros">Pro</span>
+                        @can('view_orders')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}"
+                                    href="{{ route('orders.index') }}">
+                                    <i class="mdi mdi-receipt"></i>
+                                    <span>Pedidos</span>
+                                    @php
+                                        $pendingOrdersCount = \App\Models\Order::whereIn('status', [
+                                            'active',
+                                            'pending',
+                                        ])->count();
+                                    @endphp
+                                    @if ($pendingOrdersCount > 0)
+                                        <span class="badge ms-auto" style="background: var(--warning-color);">
+                                            {{ $pendingOrdersCount }}
+                                        </span>
+                                    @endif
+                                </a>
+                            </li>
                         @endcan
-                    </a>
-                </li>
-                @endcan
 
-                @can('financial_reports')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('reports.cash-flow') ? 'active' : '' }}"
-                        href="{{ route('reports.cash-flow') }}">
-                        <i class="mdi mdi-bank"></i>
-                        <span>Fluxo de Caixa</span>
-                    </a>
-                </li>
-                @endcan
-            </ul>
-        </div>
-        @endcanany
+                        @can('manage_kitchen')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('kitchen.*') ? 'active' : '' }}"
+                                    href="{{ route('kitchen.dashboard') }}">
+                                    <i class="mdi mdi-chef-hat"></i>
+                                    <span>Cozinha</span>
+                                    @php
+                                        $kitchenOrders = \App\Models\Order::where('status', 'active')->count();
+                                        $pendingItems = \App\Models\OrderItem::whereHas('order', function ($q) {
+                                            $q->where('status', 'active');
+                                        })
+                                            ->where('status', 'pending')
+                                            ->count();
+                                    @endphp
+                                    @if ($kitchenOrders > 0)
+                                        <span class="badge ms-auto"
+                                            style="background: {{ $pendingItems > 0 ? 'var(--warning-color)' : 'var(--success-color)' }};"
+                                            title="Pedidos ativos: {{ $kitchenOrders }} | Itens pendentes: {{ $pendingItems }}">
+                                            {{ $kitchenOrders }}
+                                        </span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endcan
 
-        <!-- RELACIONAMENTO -->
-        @can('view_clients')
-        <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="mdi mdi-account-group"></i>
-                <span>Relacionamento</span>
-            </div>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}"
-                        href="{{ route('client.index') }}">
-                        <i class="mdi mdi-account-heart"></i>
-                        <span>Clientes</span>
-                        @php
-                            $totalClients = \App\Models\Client::count();
-                        @endphp
-                        @if ($totalClients > 0)
-                            <span class="badge bg-primary ms-auto">
-                                {{ $totalClients }}
-                            </span>
-                        @endif
-                    </a>
-                </li>
-            </ul>
-        </div>
-        @endcan
+                        @canany(['view_orders', 'manage_tables'])
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('tables.*') ? 'active' : '' }}"
+                                    href="{{ route('tables.index') }}">
+                                    <i class="mdi mdi-table-chair"></i>
+                                    <span>Mesas</span>
+                                    @php
+                                        $occupiedTables = \App\Models\Table::whereHas('orders', function ($query) {
+                                            $query->whereIn('status', ['active', 'completed']);
+                                        })->count();
+                                        $totalTables = \App\Models\Table::count();
+                                        $availableTables = $totalTables - $occupiedTables;
+                                    @endphp
+                                    <span class="badge ms-auto"
+                                        title="Livre: {{ $availableTables }} | Ocupada: {{ $occupiedTables }}"
+                                        style="background: {{ $availableTables > 0 ? 'var(--success-color)' : 'var(--danger-color)' }};">
+                                        {{ $availableTables }}
+                                    </span>
+                                </a>
+                            </li>
+                        @endcanany
+                    </ul>
+                </div>
+            @endcanany
 
-        <!-- GESTÃO DE PESSOAS -->
-        @canany(['view_employees', 'view_users'])
-        <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="mdi mdi-shield-account"></i>
-                <span>Gestão de Pessoas</span>
-            </div>
-            <ul class="nav nav-pills flex-column">
-                @can('view_employees')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}"
-                        href="{{ route('employees.index') }}">
-                        <i class="mdi mdi-account-tie"></i>
-                        <span>Funcionários</span>
-                        @php
-                            $totalEmployees = \App\Models\Employee::count();
-                        @endphp
-                        <span class="badge bg-secondary ms-auto">
-                            {{ $totalEmployees }}
-                        </span>
-                    </a>
-                </li>
-                @endcan
+            <!-- MENU & PRODUTOS -->
+            @canany(['view_products', 'manage_categories', 'view_stock_movements'])
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <i class="mdi mdi-food-variant"></i>
+                        <span>Menu & Produtos</span>
+                    </div>
+                    <ul class="nav nav-pills flex-column">
+                        @can('view_products')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                                    href="{{ route('products.index') }}">
+                                    <i class="mdi mdi-food"></i>
+                                    <span>Produtos</span>
+                                    @php
+                                        $lowStockCount = \App\Models\Product::whereColumn(
+                                            'stock_quantity',
+                                            '<=',
+                                            'min_stock_level',
+                                        )->count();
+                                    @endphp
+                                    @if ($lowStockCount > 0)
+                                        <span class="badge bg-warning ms-auto" title="Produtos com estoque baixo">
+                                            {{ $lowStockCount }}
+                                        </span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endcan
 
-                @role('admin')
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
-                        href="{{ route('users.index') }}">
-                        <i class="mdi mdi-account-key"></i>
-                        <span>Usuários do Sistema</span>
-                        @php
-                            $totalUsers = \App\Models\User::count();
-                        @endphp
-                        <span class="badge bg-danger ms-auto">
-                            {{ $totalUsers }}
-                        </span>
-                    </a>
-                </li>
-                @endrole
-            </ul>
-        </div>
-        @endcanany
+                        @can('manage_categories')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
+                                    href="{{ route('categories.index') }}">
+                                    <i class="mdi mdi-format-list-bulleted"></i>
+                                    <span>Categorias</span>
+                                </a>
+                            </li>
+                        @endcan
 
-        <!-- SISTEMA -->
-        @role('admin')
-        <div class="nav-section">
-            <div class="nav-section-title">
-                <i class="mdi mdi-cog-outline"></i>
-                <span>Sistema</span>
-            </div>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="#"
-                        onclick="showToast('Funcionalidade em desenvolvimento', 'info')">
-                        <i class="mdi mdi-cog"></i>
-                        <span>Configurações</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"
-                        onclick="showToast('Funcionalidade em desenvolvimento', 'success')">
-                        <i class="mdi mdi-backup-restore"></i>
-                        <span>Backup & Restore</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"
-                        onclick="showToast('Funcionalidade em desenvolvimento', 'info')">
-                        <i class="mdi mdi-file-document-outline"></i>
-                        <span>Logs de Auditoria</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        @endrole
+                        @can('view_products')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('menu.*') ? 'active' : '' }}"
+                                    href="{{ route('menu.index') }}">
+                                    <i class="mdi mdi-book-open-variant"></i>
+                                    <span>Cardápio Digital</span>
+                                </a>
+                            </li>
+                        @endcan
 
-        <!-- User Profile Section -->
-        <div class="nav-section user-profile-section">
-            <div class="user-profile-card">
-                @php
-                    $roleInfo = [
-                        'admin' => [
-                            'icon' => 'mdi-shield-crown',
-                            'color' => 'var(--danger-color)',
-                            'name' => 'Administrador',
-                        ],
-                        'manager' => [
-                            'icon' => 'mdi-account-star',
-                            'color' => 'var(--warning-color)',
-                            'name' => 'Gerente',
-                        ],
-                        'cashier' => [
-                            'icon' => 'mdi-cash-register',
-                            'color' => 'var(--success-color)',
-                            'name' => 'Caixa',
-                        ],
-                        'waiter' => [
-                            'icon' => 'mdi-account-tie',
-                            'color' => 'var(--info-color)',
-                            'name' => 'Garçom',
-                        ],
-                        'cooker' => [
-                            'icon' => 'mdi-chef-hat',
-                            'color' => 'var(--secondary-color)',
-                            'name' => 'Cozinheiro',
-                        ],
-                    ];
-                    $currentRole = $roleInfo[auth()->user()->role] ?? $roleInfo['admin'];
-                @endphp
+                        @can('view_stock_movements')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('stock-movements.*') ? 'active' : '' }}"
+                                    href="{{ route('stock-movements.index') }}">
+                                    <i class="mdi mdi-swap-vertical"></i>
+                                    <span>Movimentos de Stock</span>
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </div>
+            @endcanany
 
-                <div class="user-avatar">
-                    <div class="avatar-circle">
-                        <i class="mdi mdi-account-circle"></i>
-                        <div class="status-dot"></div>
+            <!-- VENDAS & FINANCEIRO -->
+            @canany(['view_sales', 'view_reports', 'view_expenses', 'financial_reports'])
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <i class="mdi mdi-cash-multiple"></i>
+                        <span>Vendas & Financeiro</span>
+                    </div>
+                    <ul class="nav nav-pills flex-column">
+                        @can('view_sales')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}"
+                                    href="{{ route('sales.index') }}">
+                                    <i class="mdi mdi-currency-usd"></i>
+                                    <span>Vendas</span>
+                                    @php
+                                        $todaySalesCount = \App\Models\Sale::whereDate('created_at', today())->count();
+                                    @endphp
+                                    @if ($todaySalesCount > 0)
+                                        <span class="badge bg-success ms-auto" title="Vendas hoje">
+                                            {{ $todaySalesCount }}
+                                        </span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('view_expenses')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}"
+                                    href="{{ route('expenses.index') }}">
+                                    <i class="mdi mdi-cash-remove"></i>
+                                    <span>Despesas</span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('view_reports')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+                                    href="{{ route('reports.index') }}">
+                                    <i class="mdi mdi-chart-line"></i>
+                                    <span>Relatórios</span>
+                                    @can('financial_reports')
+                                        <span class="badge bg-info ms-auto" title="Relatórios Financeiros">Pro</span>
+                                    @endcan
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('financial_reports')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('reports.cash-flow') ? 'active' : '' }}"
+                                    href="{{ route('reports.cash-flow') }}">
+                                    <i class="mdi mdi-bank"></i>
+                                    <span>Fluxo de Caixa</span>
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </div>
+            @endcanany
+
+            <!-- RELACIONAMENTO -->
+            @can('view_clients')
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <i class="mdi mdi-account-group"></i>
+                        <span>Relacionamento</span>
+                    </div>
+                    <ul class="nav nav-pills flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}"
+                                href="{{ route('client.index') }}">
+                                <i class="mdi mdi-account-heart"></i>
+                                <span>Clientes</span>
+                                @php
+                                    $totalClients = \App\Models\Client::count();
+                                @endphp
+                                @if ($totalClients > 0)
+                                    <span class="badge bg-primary ms-auto">
+                                        {{ $totalClients }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            @endcan
+
+            <!-- GESTÃO DE PESSOAS -->
+            @canany(['view_employees', 'view_users'])
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <i class="mdi mdi-shield-account"></i>
+                        <span>Gestão de Pessoas</span>
+                    </div>
+                    <ul class="nav nav-pills flex-column">
+                        @can('view_employees')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}"
+                                    href="{{ route('employees.index') }}">
+                                    <i class="mdi mdi-account-tie"></i>
+                                    <span>Funcionários</span>
+                                    @php
+                                        $totalEmployees = \App\Models\Employee::count();
+                                    @endphp
+                                    <span class="badge bg-secondary ms-auto">
+                                        {{ $totalEmployees }}
+                                    </span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @role('admin')
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
+                                    href="{{ route('users.index') }}">
+                                    <i class="mdi mdi-account-key"></i>
+                                    <span>Usuários do Sistema</span>
+                                    @php
+                                        $totalUsers = \App\Models\User::count();
+                                    @endphp
+                                    <span class="badge bg-danger ms-auto">
+                                        {{ $totalUsers }}
+                                    </span>
+                                </a>
+                            </li>
+                        @endrole
+                    </ul>
+                </div>
+            @endcanany
+
+            <!-- SISTEMA -->
+            @role('admin')
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <i class="mdi mdi-cog-outline"></i>
+                        <span>Sistema</span>
+                    </div>
+                    <ul class="nav nav-pills flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"
+                                onclick="showToast('Funcionalidade em desenvolvimento', 'info')">
+                                <i class="mdi mdi-cog"></i>
+                                <span>Configurações</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"
+                                onclick="showToast('Funcionalidade em desenvolvimento', 'success')">
+                                <i class="mdi mdi-backup-restore"></i>
+                                <span>Backup & Restore</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"
+                                onclick="showToast('Funcionalidade em desenvolvimento', 'info')">
+                                <i class="mdi mdi-file-document-outline"></i>
+                                <span>Logs de Auditoria</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            @endrole
+
+            <!-- User Profile Section -->
+            <div class="nav-section user-profile-section">
+                <div class="user-profile-card">
+                    @php
+                        $roleInfo = [
+                            'admin' => [
+                                'icon' => 'mdi-shield-crown',
+                                'color' => 'var(--danger-color)',
+                                'name' => 'Administrador',
+                            ],
+                            'manager' => [
+                                'icon' => 'mdi-account-star',
+                                'color' => 'var(--warning-color)',
+                                'name' => 'Gerente',
+                            ],
+                            'cashier' => [
+                                'icon' => 'mdi-cash-register',
+                                'color' => 'var(--success-color)',
+                                'name' => 'Caixa',
+                            ],
+                            'waiter' => [
+                                'icon' => 'mdi-account-tie',
+                                'color' => 'var(--info-color)',
+                                'name' => 'Garçom',
+                            ],
+                            'cooker' => [
+                                'icon' => 'mdi-chef-hat',
+                                'color' => 'var(--secondary-color)',
+                                'name' => 'Cozinheiro',
+                            ],
+                        ];
+                        $currentRole = $roleInfo[auth()->user()->role] ?? $roleInfo['admin'];
+                    @endphp
+
+                    <div class="user-avatar">
+                        <div class="avatar-circle">
+                            <i class="mdi mdi-account-circle"></i>
+                            <div class="status-dot"></div>
+                        </div>
+                    </div>
+
+                    <div class="user-info">
+                        <div class="user-name">{{ auth()->user()->name }}</div>
+                        <div class="user-role">{{ $currentRole['name'] }}</div>
+                    </div>
+
+                    <div class="user-actions">
+                        <form method="POST" action="{{ route('logout') }}" class="w-100">
+                            @csrf
+                            <button type="submit" class="btn-logout">
+                                <i class="mdi mdi-logout-variant"></i>
+                                Sair
+                            </button>
+                        </form>
                     </div>
                 </div>
-
-                <div class="user-info">
-                    <div class="user-name">{{ auth()->user()->name }}</div>
-                    <div class="user-role">{{ $currentRole['name'] }}</div>
-                </div>
-
-                <div class="user-actions">
-                    <form method="POST" action="{{ route('logout') }}" class="w-100">
-                        @csrf
-                        <button type="submit" class="btn-logout">
-                            <i class="mdi mdi-logout-variant"></i>
-                            Sair
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
 
     <!-- Main Content -->
@@ -1574,7 +1577,8 @@
                                 data-bs-toggle="dropdown" id="notifications-dropdown">
                                 <i class="mdi mdi-bell-outline"></i>
                             </button>
-                            <span class="notifications-badge badge bg-danger" id="notifications-badge" style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%);">
+                            <span class="notifications-badge badge bg-danger" id="notifications-badge"
+                                style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%);">
                                 0
                             </span>
                             <div class="dropdown-menu dropdown-menu-end notifications-menu">
@@ -1728,24 +1732,31 @@
             @yield('content')
         </div>
         <!-- Footer Compacto Melhorado -->
-        <footer class="main-footer mt-5" style="background: var(--beach-gradient); color: white; box-shadow: var(--shadow-lg); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;margin-top: 1% !important; position: relative;">
+        <footer class="main-footer mt-5"
+            style="background: var(--beach-gradient); color: white; box-shadow: var(--shadow-lg); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;margin-top: 1% !important; position: relative;">
             <div class="container-fluid py-4">
                 <div class="row align-items-center">
                     <!-- Logo & Info -->
                     <div class="col-md-4 d-flex align-items-center mb-3 mb-md-0">
                         <img src="{{ asset('assets/images/logo-zalala.png') }}" alt="ZALALA Logo"
-                            class="footer-logo me-3" style="width: 48px; height: 48px; border-radius: 50%; box-shadow: var(--shadow-md); background: rgba(255,255,255,0.15);">
+                            class="footer-logo me-3"
+                            style="width: 48px; height: 48px; border-radius: 50%; box-shadow: var(--shadow-md); background: rgba(255,255,255,0.15);">
                         <div>
-                            <div class="fw-bold" style="font-size: 1.2rem; letter-spacing: 1px;">ZALALA BEACH BAR</div>
-                            <div class="footer-subtitle" style="font-size: 0.9rem; color: rgba(255,255,255,0.85);">Sistema de Gestão</div>
+                            <div class="fw-bold" style="font-size: 1.2rem; letter-spacing: 1px;">ZALALA BEACH BAR
+                            </div>
+                            <div class="footer-subtitle" style="font-size: 0.9rem; color: rgba(255,255,255,0.85);">
+                                Sistema de Gestão</div>
                         </div>
                     </div>
                     <!-- Contatos Rápidos -->
                     <div class="col-md-4 d-flex justify-content-center mb-3 mb-md-0">
-                        <a href="https://wa.me/258847240296" target="_blank" class="btn btn-success btn-sm rounded-pill me-2 d-flex align-items-center" style="gap: 6px;" data-bs-toggle="tooltip" title="Suporte WhatsApp">
+                        <a href="https://wa.me/258847240296" target="_blank"
+                            class="btn btn-success btn-sm rounded-pill me-2 d-flex align-items-center"
+                            style="gap: 6px;" data-bs-toggle="tooltip" title="Suporte WhatsApp">
                             <i class="mdi mdi-whatsapp"></i> Suporte
                         </a>
-                        <span class="btn btn-outline-light btn-sm rounded-pill d-flex align-items-center" style="gap: 6px;" data-bs-toggle="tooltip" title="Telefone Principal">
+                        <span class="btn btn-outline-light btn-sm rounded-pill d-flex align-items-center"
+                            style="gap: 6px;" data-bs-toggle="tooltip" title="Telefone Principal">
                             <i class="mdi mdi-phone"></i> 84 688 5214
                         </span>
                     </div>
@@ -1759,7 +1770,8 @@
                             </span>
                         </div>
                         <div class="footer-stats" style="font-size: 0.85rem; color: rgba(255,255,255,0.8);">
-                            <i class="mdi mdi-circle text-success" style="font-size: 8px; vertical-align: middle;"></i>
+                            <i class="mdi mdi-circle text-success"
+                                style="font-size: 8px; vertical-align: middle;"></i>
                             Online • v2.0
                             <span class="mx-2">|</span>
                             <small class="tech-info">
@@ -1772,12 +1784,32 @@
             </div>
         </footer>
     </div>
-   {{--  @include('partials.footerjs') --}}
-    <!-- Bootstrap JS -->
-    <script src="{{ asset('assets/pos/printRecibo.js') }}"></script>
+    {{--  @include('partials.footerjs') --}}
+    @include('partials.printrecibo')
+    @include('partials.posjs')
     <!-- JS -->
-    <!-- <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script> -->
+    <!-- <script src="{{-- asset('bootstrap/js/bootstrap.bundle.min.js') --}}"></script> -->
     <!-- Bootstrap JS - CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- XLSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Bootstrap JS (já deve estar via CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ===== SIDEBAR MANAGEMENT =====
@@ -2071,10 +2103,10 @@
                         <small class="text-muted">${this.formatTime(notification.created_at)}</small>
                     </div>
                     ${!notification.is_read ? `
-                                                                                                            <button class="btn btn-sm btn-link p-0 mark-as-read" title="Marcar como lida">
-                                                                                                                <i class="mdi mdi-check-circle text-muted"></i>
-                                                                                                            </button>
-                                                                                                        ` : ''}
+                                                                                                                    <button class="btn btn-sm btn-link p-0 mark-as-read" title="Marcar como lida">
+                                                                                                                        <i class="mdi mdi-check-circle text-muted"></i>
+                                                                                                                    </button>
+                                                                                                                ` : ''}
                 </div>
             </div>
         `).join('');

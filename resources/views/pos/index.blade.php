@@ -7,7 +7,7 @@
 @section('breadcrumbs')
     <li class="breadcrumb-item active" aria-current="page">POS - Sistema de Vendas</li>
 @endsection
-
+@include('partials.poscss')
 @section('content')
     <div class="pos-wrapper container-wrapper">
         <div class="row g-4">
@@ -164,54 +164,5 @@
         </div>
     </div>
 @endsection
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/pos/pos.css') }}">
-    <style>
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            /* Espaçamento entre os botões */
-            flex-wrap: wrap;
-            /* Quebra de linha em telas pequenas */
-        }
-
-        .action-buttons button {
-            flex: 1;
-            /* Faz os botões ocuparem o mesmo tamanho */
-            min-width: 150px;
-            /* Largura mínima para cada botão */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            /* Espaço entre ícone e texto */
-            padding: 0.6rem 1.2rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-finalize {
-            background-color: #28a745;
-            color: #fff;
-        }
-
-        .btn-finalize:hover {
-            background-color: #218838;
-        }
-
-        .btn-preview {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .btn-preview:hover {
-            background-color: #0069d9;
-        }
-    </style>
-@endpush
-@push('scripts')
-    <script src="{{ asset('assets/pos/pos.js') }}"></script>
-@endpush
+@include('partials.posjs')
+@include('partials.printrecibo')

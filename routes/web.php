@@ -27,7 +27,7 @@ use App\Http\Controllers\NotificationController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');

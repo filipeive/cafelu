@@ -1453,8 +1453,22 @@
                                 'name' => 'Cozinheiro',
                             ],
                         ];
-                        $currentRole = $roleInfo[auth()->user()->role] ?? $roleInfo['admin'];
+
+                        $currentRole = $roleInfo['admin'];
+
+                        if (auth()->check()) {
+                            $userRole = auth()->user()->role;
+                            $currentRole = $roleInfo[$userRole] ?? $roleInfo['admin'];
+                        }
                     @endphp
+
+                    @if (auth()->check())
+                        <div class="user-info">
+                            <div class="user-name">{{ auth()->user()->name }}</div>
+                            <div class="user-role">{{ $currentRole['name'] }}</div>
+                        </div>
+                    @endif
+
 
                     <div class="user-avatar">
                         <div class="avatar-circle">
@@ -1463,10 +1477,12 @@
                         </div>
                     </div>
 
-                    <div class="user-info">
-                        <div class="user-name">{{ auth()->user()->name }}</div>
-                        <div class="user-role">{{ auth()->user()->role }}</div>
-                    </div>
+                    @if(auth()->check())
+                        <div class="user-info">
+                            <div class="user-name">{{ auth()->user()->name }}</div>
+                            <div class="user-role">{{ $currentRole['name'] }}</div>
+                        </div>
+                    @endif
 
                     <div class="user-actions">
                         <form method="POST" action="{{ route('logout') }}" class="w-100">
@@ -1701,31 +1717,6 @@
                     @yield('breadcrumbs')
                 </ol>
             </nav>
-
-            {{-- <!-- Alerts -->
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show fade-in" role="alert">
-                    <i class="mdi mdi-check-circle me-2"></i>
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show fade-in" role="alert">
-                    <i class="mdi mdi-alert-circle me-2"></i>
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @if (session('warning'))
-                <div class="alert alert-warning alert-dismissible fade show fade-in" role="alert">
-                    <i class="mdi mdi-alert-triangle me-2"></i>
-                    {{ session('warning') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif --}}
             <!-- Content Area -->
             @yield('content')
         </div>
@@ -2132,17 +2123,17 @@
                     </div>
             <div class="flex-shrink-0 d-flex gap-1 align-items-center">
                 ${!notification.is_read ? `
-                        <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
+                            <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
+                                    <i class="mdi mdi-check-circle"></i>
+                                </button>
+                            </form>
+                        ` : `
+                            <span class="text-success" title="Lida">
                                 <i class="mdi mdi-check-circle"></i>
-                            </button>
-                        </form>
-                    ` : `
-                        <span class="text-success" title="Lida">
-                            <i class="mdi mdi-check-circle"></i>
-                        </span>
-                    `}
+                            </span>
+                        `}
                 <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
                     <i class="mdi mdi-arrow-right"></i>
                 </a>

@@ -25,7 +25,7 @@
                     
                     <h1 class="display-4 fw-bold text-warning mb-3">419</h1>
                     <h3 class="mb-3">Sessão Expirada</h3>
-                    
+
                     <p class="text-muted mb-4">
                         Sua sessão expirou por inatividade ou por um problema de segurança. 
                         Por favor, faça login novamente para continuar.

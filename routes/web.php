@@ -95,6 +95,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['permission:edit_orders'])->group(function () {
         Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+        Route::put('/orders/{orderItem}/update-quantity', [OrderController::class, 'updateItemQuantity'])->name('orders.update-item-quantity');
         Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
         Route::post('/orders/items/{orderItem}/remove', [OrderController::class, 'removeItem'])->name('orders.remove-item');
         Route::post('/orders/items/{orderItem}/update-status', [OrderController::class, 'updateItemStatus'])->name('orders.update-item-status');

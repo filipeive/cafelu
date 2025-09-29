@@ -11,6 +11,7 @@ use App\Models\Client;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -173,47 +174,54 @@ class OrderController extends Controller
      */
     public function complete(Order $order)
     {
-        if ($order->status !== 'active') {
-            $message = 'Apenas pedidos ativos podem ser finalizados.';
-
+        // Verificar se o pedido tem itens
+        if ($order->items->count() === 0) {
+            $message = 'Este pedido não pode ser finalizado pois não possui itens.';
             if (request()->wantsJson() || request()->ajax()) {
                 return response()->json([
                     'success' => false,
                     'message' => $message
                 ], 400);
             }
+            return redirect()->back()->with('error', $message);
+        }
 
+        if ($order->status !== 'active') {
+            $message = 'Apenas pedidos ativos podem ser finalizados.';
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 400);
+            }
             return redirect()->back()->with('error', $message);
         }
 
         try {
             $order->status = 'completed';
             $order->save();
-
+            
             $message = 'Pedido finalizado com sucesso';
-
             if (request()->wantsJson() || request()->ajax()) {
                 return response()->json([
                     'success' => true,
                     'message' => $message
                 ]);
             }
-             // Criar notificação
+            
+            // Criar notificação
             \App\Services\NotificationService::orderCompletedNotification($order);
             
             return redirect()->route('orders.edit', $order->id)
-                ->with('success', 'Pedido finalizada com sucesso! Registe o Pagamento para Confirmar a Venda');
-
+                ->with('success', 'Pedido finalizado com sucesso! Registe o Pagamento para Confirmar a Venda');
         } catch (\Exception $e) {
             $message = 'Erro ao finalizar pedido: ' . $e->getMessage();
-
             if (request()->wantsJson() || request()->ajax()) {
                 return response()->json([
                     'success' => false,
                     'message' => $message
                 ], 500);
             }
-
             return redirect()->back()->with('error', $message);
         }
     }
@@ -223,6 +231,12 @@ class OrderController extends Controller
      */
     public function pay(Request $request, Order $order)
     {
+        // Verificar se o pedido tem itens
+        if ($order->items->count() === 0) {
+            $message = 'Este pedido não pode ser pago pois não possui itens.';           
+            return redirect()->back()->with('error', $message);
+        }
+        
         try {
             DB::beginTransaction();
 
@@ -306,54 +320,70 @@ class OrderController extends Controller
      */
     public function cancel(Order $order)
     {
-        $request = request();
-
-        if ($order->status === 'canceled' || $order->status === 'paid') {
-            $message = 'Este pedido não pode ser cancelado.';
-
-            if (request()->wantsJson() || request()->ajax()) {
-                return response()->json(['success' => false, 'message' => $message], 400);
-            }
-
-            return redirect()->back()->with('error', $message);
+        // Verificar se pedido pode ser cancelado
+        if ($order->status === 'canceled') {
+            return redirect()->back()->with('error', 'Este pedido já está cancelado.');
+        }
+        
+        if ($order->status === 'paid') {
+            return redirect()->back()->with('error', 'Não é possível cancelar um pedido já pago.');
         }
 
         try {
-            $request->validate([
-                'notes' => 'nullable|string',
+            $request = request();
+            
+            $validated = $request->validate([
+                'notes' => 'required|string|min:3',
+            ], [
+                'notes.required' => 'O motivo do cancelamento é obrigatório.',
+                'notes.min' => 'O motivo deve ter pelo menos 3 caracteres.'
             ]);
 
-            if ($order->status === 'paid') {
-                return redirect()->back()->with('error', 'Não é possível cancelar um pedido já pago.');
-            }
+            DB::beginTransaction();
 
-            $order->notes = $request->notes;
+            // Atualizar pedido
+            $order->notes = ($order->notes ? $order->notes . "\n\n" : '') . 
+                        "CANCELADO: " . $validated['notes'];
             $order->status = 'canceled';
             $order->save();
 
+            // Liberar mesa se houver
             if ($order->table) {
                 $order->table->status = 'free';
                 $order->table->save();
             }
 
-            $message = 'Pedido cancelado com sucesso';
+            DB::commit();
 
-            if (request()->wantsJson() || request()->ajax()) {
-                return response()->json(['success' => true, 'message' => $message]);
-            }
+            Log::info('Pedido cancelado', [
+                'order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'reason' => $validated['notes']
+            ]);
 
-            return redirect()->route('tables.index')->with('success', $message);
+            return redirect()
+                ->route('orders.index')
+                ->with('success', 'Pedido #' . $order->id . ' cancelado com sucesso.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            
+            $errors = collect($e->errors())->flatten()->implode(' ');
+            return redirect()->back()->with('error', 'Erro de validação: ' . $errors);
+            
         } catch (\Exception $e) {
-            $message = 'Erro ao cancelar pedido: ' . $e->getMessage();
-
-            if (request()->wantsJson() || request()->ajax()) {
-                return response()->json(['success' => false, 'message' => $message], 500);
-            }
-
-            return redirect()->back()->with('error', $message);
+            DB::rollBack();
+            
+            Log::error('Erro ao cancelar pedido', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return redirect()
+                ->back()
+                ->with('error', 'Erro ao cancelar pedido: ' . $e->getMessage());
         }
     }
-
     /**
      * Atualizar informações do pedido
      */
@@ -375,7 +405,33 @@ class OrderController extends Controller
             return redirect()->back()->with('error', 'Erro ao atualizar informações: ' . $e->getMessage());
         }
     }
+    /**
+     * Atualizar quantidade do item do pedido
+     */
+    public function updateItemQuantity(Request $request, OrderItem $orderItem)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
 
+        $order = $orderItem->order;
+
+        if ($order->status === 'paid' || $order->status === 'canceled') {
+            return redirect()->back()->with('error', 'Não é possível modificar um pedido pago ou cancelado.');
+        }
+
+        $orderItem->quantity = $request->quantity;
+        $orderItem->total_price = $orderItem->unit_price * $request->quantity;
+        $orderItem->save();
+
+        $this->updateOrderTotal($order);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Quantidade atualizada']);
+        }
+
+        return redirect()->back()->with('success', 'Quantidade atualizada com sucesso.');
+    }
     /**
      * Retornar dados do pedido em JSON (para impressão, API, etc)
      */

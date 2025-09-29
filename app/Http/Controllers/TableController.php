@@ -58,6 +58,8 @@ class TableController extends Controller
                 'user_id' => auth()->id(),
                 'status' => 'active'
             ]);
+             // Criar notificação
+            \App\Services\NotificationService::newOrderNotification($order);
 
             DB::commit();
 

@@ -81,7 +81,7 @@
                         </span>
                     </div>
 
-                    @if ($user->photo_path)
+                    @if ($user->photo_profile_path)
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Foto de Perfil:</span>
                             <span class="text-success"><i class="mdi mdi-check"></i> Sim</span>

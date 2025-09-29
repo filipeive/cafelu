@@ -10,6 +10,15 @@
 
 @section('content')
     <div class="pos-wrapper container-wrapper">
+        <!-- Adicionar formulário hidden -->
+        <form id="checkoutForm" action="{{ route('pos.completeCheckout') }}" method="POST" style="display: none;">
+            @csrf
+            <input type="hidden" name="items" id="formItems">
+            <input type="hidden" name="cashPayment" id="formCash">
+            <input type="hidden" name="cardPayment" id="formCard">
+            <input type="hidden" name="mpesaPayment" id="formMpesa">
+            <input type="hidden" name="emolaPayment" id="formEmola">
+        </form>
         <div class="row g-4">
             <!-- Products Area -->
             <div class="col-lg-8">
@@ -17,22 +26,18 @@
                     <div class="d-flex gap-3 align-items-center">
                         <div class="search-input-wrapper">
                             <span class="material-icons">search</span>
-                            <input type="text" class="form-control search-input" 
-                                   placeholder="Pesquisar produtos... (F3)" 
-                                   id="searchInput" 
-                                   onkeyup="filterProducts()" 
-                                   autocomplete="off"
-                                   value="{{ $searchTerm ?? '' }}">
+                            <input type="text" class="form-control search-input" placeholder="Pesquisar produtos... (F3)"
+                                id="searchInput" onkeyup="filterProducts()" autocomplete="off"
+                                value="{{ $searchTerm ?? '' }}">
                         </div>
-                        <select id="categorySelect" class="form-select search-input" 
-                                style="width: auto; min-width: 200px;" 
-                                onchange="filterProducts()">
+                        <select id="categorySelect" class="form-select search-input" style="width: auto; min-width: 200px;"
+                            onchange="filterProducts()">
                             <option value="">Todas as Categorias</option>
                             @foreach ($categories as $category)
-                            <option value="{{ $category['id'] }}" 
-                                    {{ ($categoryFilter == $category['id']) ? 'selected' : '' }}>
-                                {{ htmlspecialchars($category['name']) }}
-                            </option>
+                                <option value="{{ $category['id'] }}"
+                                    {{ $categoryFilter == $category['id'] ? 'selected' : '' }}>
+                                    {{ htmlspecialchars($category['name']) }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -163,3 +168,36 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Processar mensagens de sessão como toast
+            @if (session('success'))
+                showToast('{{ session('success') }}', 'success');
+
+                @if (session('change') && session('change') > 0)
+                    setTimeout(() => {
+                        showToast('Troco: MZN {{ number_format(session('change'), 2) }}', 'info');
+                    }, 1000);
+                @endif
+            @endif
+
+            @if (session('error'))
+                showToast('{{ session('error') }}', 'error');
+            @endif
+
+        });
+    </script>
+    @if (session('printReceipt') && session('saleId'))
+        <script>
+            setTimeout(() => {
+                window.open(
+                    '{{ route('pos.receipt', ['saleId' => session('saleId')]) }}',
+                    'Recibo',
+                    'width=400,height=700,scrollbars=yes,resizable=yes'
+                );
+            }, 500);
+        </script>
+    @endif
+@endpush

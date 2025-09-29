@@ -79,7 +79,7 @@ class UserController extends Controller
 
         $data = $request->except(['photo', 'password_confirmation']);
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('user-photos', 'public');
+            $data['photo_profile_path'] = $request->file('photo')->store('user-photos', 'public');
         }
 
         $data['password'] = Hash::make($request->password);
@@ -138,10 +138,10 @@ class UserController extends Controller
         }
         
         if ($request->hasFile('photo')) {
-            if ($user->photo_path) {
-                Storage::disk('public')->delete($user->photo_path);
+            if ($user->photo_profile_path) {
+                Storage::disk('public')->delete($user->photo_profile_path);
             }
-            $data['photo_path'] = $request->file('photo')->store('user-photos', 'public');
+            $data['photo_profile_path'] = $request->file('photo')->store('user-photos', 'public');
         }
 
         if ($request->filled('password')) {
@@ -166,8 +166,8 @@ class UserController extends Controller
     {
         $userName = $user->name;
 
-        if ($user->photo_path) {
-            Storage::disk('public')->delete($user->photo_path);
+        if ($user->photo_profile_path) {
+            Storage::disk('public')->delete($user->photo_profile_path);
         }
 
         $user->delete();

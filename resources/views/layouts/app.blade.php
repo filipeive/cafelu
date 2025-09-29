@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/jquery-toast-plugin/jquery.toast.min.css') }}">
 
-    {{--custom --}}
+    {{-- custom --}}
     <link rel="stylesheet" href="{{ asset('assets/css/pos.css') }}">
     <style>
         :root {
@@ -607,12 +607,6 @@
             text-align: center;
         }
 
-        .notifications-menu {
-            min-width: 380px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
         .notifications-header {
             display: flex;
             justify-content: space-between;
@@ -775,8 +769,9 @@
             }
 
             .notifications-menu {
-                min-width: 300px;
+                min-width: 450px !important;
                 max-width: 90vw;
+                overflow: auto;
             }
 
             .navbar-right {
@@ -1470,7 +1465,7 @@
 
                     <div class="user-info">
                         <div class="user-name">{{ auth()->user()->name }}</div>
-                        <div class="user-role">{{ $currentRole['name'] }}</div>
+                        <div class="user-role">{{ auth()->user()->role }}</div>
                     </div>
 
                     <div class="user-actions">
@@ -1583,7 +1578,8 @@
                                 style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%);">
                                 0
                             </span>
-                            <div class="dropdown-menu dropdown-menu-end notifications-menu">
+                            <div class="dropdown-menu dropdown-menu-end notifications-menu"
+                                style="width: 450px !important;">
                                 <div class="notifications-header">
                                     <span>Notificações</span>
                                     <button class="btn-mark-read" id="mark-all-read">
@@ -1706,7 +1702,7 @@
                 </ol>
             </nav>
 
-            <!-- Alerts -->
+            {{-- <!-- Alerts -->
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show fade-in" role="alert">
                     <i class="mdi mdi-check-circle me-2"></i>
@@ -1729,7 +1725,7 @@
                     {{ session('warning') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+            @endif --}}
             <!-- Content Area -->
             @yield('content')
         </div>
@@ -1905,10 +1901,8 @@
             showToast(`Tema ${newTheme === 'dark' ? 'escuro' : 'claro'} ativado`, 'info');
         }
 
-        // ===== TOAST NOTIFICATIONS =====
+        // ===== TOAST NOTIFICATION =====
         function showToast(message, type = 'success') {
-            const toastContainer = document.getElementById('toast-container') || createToastContainer();
-
             const iconMap = {
                 success: 'mdi-check-circle',
                 error: 'mdi-alert-circle',
@@ -1923,25 +1917,30 @@
                 info: 'text-bg-info'
             };
 
-            const toastId = 'toast-' + Date.now();
             const toastHtml = `
-                <div class="toast ${colorMap[type] || 'text-bg-primary'}" role="alert" id="${toastId}">
-                    <div class="toast-body d-flex align-items-center">
-                        <i class="${iconMap[type] || 'mdi-information'} me-2"></i>
-                        <span class="flex-grow-1">${message}</span>
-                        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast"></button>
-                    </div>
+        <div class="toast ${colorMap[type]} border-0" role="alert" data-bs-delay="4000">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="mdi ${iconMap[type]} me-2"></i>
+                    ${message}
                 </div>
-            `;
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
 
             toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-
-            const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement, {
-                autohide: true,
-                delay: 4000
-            });
-
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement);
             toast.show();
 
             toastElement.addEventListener('hidden.bs.toast', () => {
@@ -1949,15 +1948,30 @@
             });
         }
 
-        function createToastContainer() {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'position-fixed top-0 end-0 p-3';
-            container.style.zIndex = '9999';
-            document.body.appendChild(container);
-            return container;
-        }
+        // Auto-show toasts from session
+        document.addEventListener('DOMContentLoaded', function() {
+            @if (session('success'))
+                showToast('{{ session('success') }}', 'success');
+            @endif
 
+            @if (session('error'))
+                showToast('{{ session('error') }}', 'error');
+            @endif
+
+            @if (session('warning'))
+                showToast('{{ session('warning') }}', 'warning');
+            @endif
+
+            @if (session('info'))
+                showToast('{{ session('info') }}', 'info');
+            @endif
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    showToast('{{ $error }}', 'error');
+                @endforeach
+            @endif
+        });
         // ===== PROFESSIONAL SEARCH MANAGER =====
         class ProfessionalSearch {
             constructor() {
@@ -2051,15 +2065,30 @@
             }
 
             setupEventListeners() {
+                // Marcar todas como lidas - usar formulário
                 this.markAllBtn?.addEventListener('click', (e) => {
                     e.preventDefault();
-                    this.markAllAsRead();
+                    this.submitMarkAllForm();
                 });
 
-                // Atualizar notificações quando o dropdown for aberto
                 this.dropdown?.addEventListener('show.bs.dropdown', () => {
                     this.loadNotifications();
                 });
+            }
+
+            submitMarkAllForm() {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route('notifications.markAllAsRead') }}';
+
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value = '{{ csrf_token() }}';
+                form.appendChild(csrf);
+
+                document.body.appendChild(form);
+                form.submit();
             }
 
             async loadNotifications() {
@@ -2088,8 +2117,8 @@
                 }
 
                 this.list.innerHTML = notifications.map(notification => `
-            <div class="px-3 py-2 border-bottom notification-item ${notification.is_read ? '' : 'bg-light'}" style="cursor: pointer;" 
-                 data-notification-id="${notification.id}">
+            <div class="px-3 py-2 border-bottom notification-item ${notification.is_read ? '' : 'bg-light'}"
+                data-notification-id="${notification.id}" style="cursor: default;">
                 <div class="d-flex">
                     <div class="flex-shrink-0 me-3">
                         <div class="rounded-circle p-2 ${this.getNotificationColor(notification.type)}">
@@ -2101,32 +2130,26 @@
                         <p class="mb-1 small text-muted">${this.escapeHtml(notification.message)}</p>
                         <small class="text-muted">${this.formatTime(notification.created_at)}</small>
                     </div>
-                    ${!notification.is_read ? `
-                                                                                                                    <button class="btn btn-sm btn-link p-0 mark-as-read" title="Marcar como lida">
-                                                                                                                        <i class="mdi mdi-check-circle text-muted"></i>
-                                                                                                                    </button>
-                                                                                                                ` : ''}
-                </div>
+            <div class="flex-shrink-0 d-flex gap-1 align-items-center">
+                ${!notification.is_read ? `
+                        <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
+                                <i class="mdi mdi-check-circle"></i>
+                            </button>
+                        </form>
+                    ` : `
+                        <span class="text-success" title="Lida">
+                            <i class="mdi mdi-check-circle"></i>
+                        </span>
+                    `}
+                <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
+                    <i class="mdi mdi-arrow-right"></i>
+                </a>
             </div>
-        `).join('');
-
-                // Adicionar event listeners para os botões de marcar como lida
-                this.list.querySelectorAll('.mark-as-read').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const item = btn.closest('.notification-item');
-                        this.markAsRead(item.dataset.notificationId);
-                    });
-                });
-
-                // Adicionar event listeners para clicar nas notificações
-                this.list.querySelectorAll('.notification-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        this.markAsRead(item.dataset.notificationId);
-                        // Redirecionar para a página relevante se houver related_model
-                        // Implementar conforme necessário
-                    });
-                });
+        </div>
+    </div>
+`).join('');
             }
 
             updateBadge(count) {
@@ -2138,42 +2161,6 @@
                     } else {
                         this.badge.style.display = 'none';
                     }
-                }
-            }
-
-            async markAsRead(notificationId) {
-                try {
-                    const response = await fetch(`/notifications/${notificationId}/read`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        this.loadNotifications(); // Recarregar a lista
-                    }
-                } catch (error) {
-                    console.error('Erro ao marcar notificação como lida:', error);
-                }
-            }
-
-            async markAllAsRead() {
-                try {
-                    const response = await fetch('{{ route('notifications.markAllAsRead') }}', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        this.loadNotifications();
-                    }
-                } catch (error) {
-                    console.error('Erro ao marcar todas como lidas:', error);
                 }
             }
 
@@ -2223,30 +2210,15 @@
             }
 
             startPolling() {
-                // Atualizar a contagem a cada 30 segundos
                 setInterval(() => {
                     this.loadNotifications();
                 }, 30000);
             }
         }
 
-        // Inicializar o gerenciador de notificações
         document.addEventListener('DOMContentLoaded', function() {
             new NotificationManager();
         });
-        // Expose functions globally
-        window.toggleTheme = toggleTheme;
-        window.showToast = showToast;
-
-         // Configurar AJAX para incluir CSRF token
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        // Ou se usar fetch:
-        window.csrfToken = '{{ csrf_token() }}';
     </script>
 
     @stack('scripts')

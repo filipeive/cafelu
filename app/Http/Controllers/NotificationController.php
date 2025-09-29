@@ -1,6 +1,4 @@
 <?php
-// app/Http/Controllers/NotificationController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
@@ -12,7 +10,6 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $notifications = NotificationService::getUserNotifications(auth()->id(), 20);
-        
         return view('notifications.index', compact('notifications'));
     }
 
@@ -20,34 +17,31 @@ class NotificationController extends Controller
     {
         $notification = Notification::findOrFail($id);
         
-        // Verificar se o usuário tem permissão para ver esta notificação
         if ($notification->user_id && $notification->user_id !== auth()->id()) {
             abort(403);
         }
-
+        
         $notification->markAsRead();
-
-        return response()->json(['success' => true]);
+        
+        return redirect()->back()->with('success', 'Notificação marcada como lida');
     }
 
     public function markAllAsRead()
     {
         NotificationService::markAllAsRead(auth()->id());
-
-        return response()->json(['success' => true]);
+        
+        return redirect()->back()->with('success', 'Todas as notificações foram marcadas como lidas');
     }
 
     public function getUnreadCount()
     {
         $count = NotificationService::getUnreadCount(auth()->id());
-
         return response()->json(['count' => $count]);
     }
 
     public function getNotifications()
     {
         $notifications = NotificationService::getUserNotifications(auth()->id(), 10);
-
         return response()->json([
             'notifications' => $notifications,
             'unread_count' => NotificationService::getUnreadCount(auth()->id())

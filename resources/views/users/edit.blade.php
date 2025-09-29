@@ -72,7 +72,7 @@
                                 <div>
                                     <input type="file" class="form-control" id="photo" name="photo" accept="image/*" style="display: none;">
                                     <small class="text-muted">JPG, PNG ou GIF (máx. 2MB)</small>
-                                    @if($user->photo_path)
+                                    @if($user->photo_profile_path)
                                         <div class="mt-2">
                                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePhoto()">
                                                 <i class="mdi mdi-trash-can-outline me-1"></i>Remover Foto

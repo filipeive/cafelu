@@ -45,7 +45,7 @@ class NotificationService
             'related_id' => $order->id,
             'metadata' => [
                 'table_number' => $order->table->number,
-                'total_amount' => $order->total,
+                'total_amount' => $order->total_amount,
                 'order_id' => $order->id
             ]
         ]);
@@ -98,6 +98,22 @@ class NotificationService
                 'table'     => $order->table ? $order->table->number : 'Balcão',
                 'waiter'    => $order->user->name ?? 'Sistema',
                 'total'     => $order->total_amount
+            ]
+        ]);
+    }
+    //novo pedido
+    public static function newOrderNotification($order){
+        return self::createNotification([
+            'title' => 'Novo Pedido',
+            'message' => "Novo pedido #{$order->id} para a Mesa {$order->table->number}, Total: " . number_format($order->total, 2) . " MZN",
+            'type' => 'info',
+            'priority' => 'medium',
+            'related_model' => 'Order',
+            'related_id' => $order->id,
+            'metadata' => [
+                'table_number' => $order->table->number,
+                'total_amount' => $order->total,
+                'order_id' => $order->id
             ]
         ]);
     }

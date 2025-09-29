@@ -51,10 +51,16 @@ function removeFromCart(productId) {
 }
 
 function showNotification(title, message, type) {
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
-        <i class="mdi mdi-${type === 'success' ? 'check-circle' : type === 'info' ? 'information' : 'alert-circle'}"></i>
+        <i class="mdi mdi-${
+            type === "success"
+                ? "check-circle"
+                : type === "info"
+                ? "information"
+                : "alert-circle"
+        }"></i>
         <div>
             <h6 class="mb-1">${title}</h6>
             <p class="mb-0">${message}</p>
@@ -62,9 +68,9 @@ function showNotification(title, message, type) {
     `;
 
     document.body.appendChild(notification);
-    setTimeout(() => notification.classList.add('show'), 100);
+    setTimeout(() => notification.classList.add("show"), 100);
     setTimeout(() => {
-        notification.classList.remove('show');
+        notification.classList.remove("show");
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
@@ -364,119 +370,70 @@ function processSale() {
             '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
     }
 
-    // CORREÇÃO: Salvar dados da venda ANTES de enviar para o backend
-    const cashAmount = parseFloat(document.getElementById("cashAmount")?.value || 0);
-    const cardAmount = parseFloat(document.getElementById("cardAmount")?.value || 0);
-    const mpesaAmount = parseFloat(document.getElementById("mpesaAmount")?.value || 0);
-    const emolaAmount = parseFloat(document.getElementById("emolaAmount")?.value || 0);
+    // Salvar dados da última venda
+    const cashAmount = parseFloat(
+        document.getElementById("cashAmount")?.value || 0
+    );
+    const cardAmount = parseFloat(
+        document.getElementById("cardAmount")?.value || 0
+    );
+    const mpesaAmount = parseFloat(
+        document.getElementById("mpesaAmount")?.value || 0
+    );
+    const emolaAmount = parseFloat(
+        document.getElementById("emolaAmount")?.value || 0
+    );
 
     lastSaleData = {
-        items: [...cart], // Cópia dos itens do carrinho
+        items: [...cart],
         cashPayment: cashAmount,
         cardPayment: cardAmount,
         mpesaPayment: mpesaAmount,
         emolaPayment: emolaAmount,
         total: currentTotal,
-        timestamp: new Date()
+        timestamp: new Date(),
     };
 
-    const saleData = {
-        items: cart.map((item) => ({
-            product_id: item.id,
-            quantity: item.quantity,
-            unit_price: item.price,
-        })),
-        cashPayment: cashAmount,
-        cardPayment: cardAmount,
-        mpesaPayment: mpesaAmount,
-        emolaPayment: emolaAmount,
-    };
+    // NOVO: Usar formulário tradicional em vez de fetch
+    const items = cart.map((item) => ({
+        product_id: item.id,
+        quantity: item.quantity,
+        unit_price: item.price,
+    }));
 
-    // Send to backend
-    fetch("{{ url('pos/checkout') }}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
-        },
-        body: JSON.stringify(saleData),
-    })
-            .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                showToast("Venda concluída com sucesso!", "success");
+    document.getElementById("formItems").value = JSON.stringify(items);
+    document.getElementById("formCash").value = cashAmount;
+    document.getElementById("formCard").value = cardAmount;
+    document.getElementById("formMpesa").value = mpesaAmount;
+    document.getElementById("formEmola").value = emolaAmount;
 
-                if (data.change > 0) {
-                    showToast(
-                        `Troco: MZN ${formatCurrency(data.change)}`,
-                        "info"
-                    );
-                    // Atualizar dados da venda com o troco calculado pelo backend
-                    lastSaleData.change = data.change;
-                }
-
-                // CORREÇÃO: Imprimir o recibo ANTES de resetar a venda
-                setTimeout(() => {
-                    printFinalReceipt();
-                    // Resetar apenas DEPOIS da impressão
-                    setTimeout(() => {
-                        resetSaleAfterSuccess();
-                    }, 1000);
-                }, 500);
-
-            } else {
-                showToast(data.message || "Erro ao processar venda", "error");
-                // Limpar dados da última venda se houve erro
-                lastSaleData = null;
-            }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            showToast("Erro de conexão. Tente novamente.", "error");
-            // Limpar dados da última venda se houve erro
-            lastSaleData = null;
-        })
-        .finally(() => {
-            if (finalizeBtn) {
-                finalizeBtn.disabled = false;
-                finalizeBtn.innerHTML =
-                    '<i class="mdi mdi-check-circle-outline"></i> Finalizar Pedido';
-            }
-        });
-}
-
-function resetSaleAfterSuccess() {
-    cart = [];
-    selectedPaymentMethod = null;
-    currentTotal = 0;
-
-    updateCartDisplay();
-    updateCartTotal();
-    clearPaymentInputs();
-    clearChangeAmount();
-
-    const cartHeader = document.querySelector(".cart-header");
-    if (cartHeader) {
-        cartHeader.classList.add("slide-up");
-        setTimeout(() => cartHeader.classList.remove("slide-up"), 500);
-    }
+    // Submit do formulário
+    document.getElementById("checkoutForm").submit();
 }
 
 // ===== FUNÇÕES DE RECIBO CORRIGIDAS =====
 function generateReceiptContent(isPreview = false) {
-    const date = new Date().toLocaleString('pt-BR');
-    
+    const date = new Date().toLocaleString("pt-BR");
+
     // CORREÇÃO: Usar lastSaleData se disponível, senão usar cart atual
     let receiptData;
     if (lastSaleData && lastSaleData.items.length > 0) {
         receiptData = lastSaleData;
     } else if (cart.length > 0) {
         // Fallback para cart atual (para preview)
-        const cashAmount = parseFloat(document.getElementById('cashAmount')?.value || 0);
-        const cardAmount = parseFloat(document.getElementById('cardAmount')?.value || 0);
-        const mpesaAmount = parseFloat(document.getElementById('mpesaAmount')?.value || 0);
-        const emolaAmount = parseFloat(document.getElementById('emolaAmount')?.value || 0);
-        
+        const cashAmount = parseFloat(
+            document.getElementById("cashAmount")?.value || 0
+        );
+        const cardAmount = parseFloat(
+            document.getElementById("cardAmount")?.value || 0
+        );
+        const mpesaAmount = parseFloat(
+            document.getElementById("mpesaAmount")?.value || 0
+        );
+        const emolaAmount = parseFloat(
+            document.getElementById("emolaAmount")?.value || 0
+        );
+
         receiptData = {
             items: cart,
             cashPayment: cashAmount,
@@ -484,16 +441,19 @@ function generateReceiptContent(isPreview = false) {
             mpesaPayment: mpesaAmount,
             emolaPayment: emolaAmount,
             total: currentTotal,
-            change: calculateChange()
+            change: calculateChange(),
         };
     } else {
-        console.error('Nenhum dado disponível para gerar recibo');
+        console.error("Nenhum dado disponível para gerar recibo");
         return null;
     }
-    
+
     const total = receiptData.total;
-    const totalPaid = receiptData.cashPayment + receiptData.cardPayment + 
-                     receiptData.mpesaPayment + receiptData.emolaPayment;
+    const totalPaid =
+        receiptData.cashPayment +
+        receiptData.cardPayment +
+        receiptData.mpesaPayment +
+        receiptData.emolaPayment;
     const change = receiptData.change || Math.max(0, totalPaid - total);
 
     let content = `
@@ -501,7 +461,9 @@ function generateReceiptContent(isPreview = false) {
         <html lang="pt-BR">
         <head>
             <meta charset="UTF-8">
-            <title>${isPreview ? "Pré-visualização do Recibo" : "Recibo"}</title>
+            <title>${
+                isPreview ? "Pré-visualização do Recibo" : "Recibo"
+            }</title>
             <style>
                 body {
                     font-family: 'Arial', sans-serif;
@@ -629,7 +591,11 @@ function generateReceiptContent(isPreview = false) {
                         NUIT: 110735901<br>
                         <small>Data: ${date}</small>
                     </div>
-                    ${isPreview ? '<div class="preview-badge">PRÉ-VISUALIZAÇÃO</div>' : ''}
+                    ${
+                        isPreview
+                            ? '<div class="preview-badge">PRÉ-VISUALIZAÇÃO</div>'
+                            : ""
+                    }
                 </div>
                 
                 <div class="divider"></div>
@@ -645,14 +611,24 @@ function generateReceiptContent(isPreview = false) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${receiptData.items.map(item => `
+                            ${receiptData.items
+                                .map(
+                                    (item) => `
                                 <tr>
                                     <td>${escapeHtml(item.name)}</td>
-                                    <td style="text-align: center;">${item.quantity}</td>
-                                    <td style="text-align: right;">MZN ${formatCurrency(item.price)}</td>
-                                    <td style="text-align: right;">MZN ${formatCurrency(item.price * item.quantity)}</td>
+                                    <td style="text-align: center;">${
+                                        item.quantity
+                                    }</td>
+                                    <td style="text-align: right;">MZN ${formatCurrency(
+                                        item.price
+                                    )}</td>
+                                    <td style="text-align: right;">MZN ${formatCurrency(
+                                        item.price * item.quantity
+                                    )}</td>
                                 </tr>
-                            `).join('')}
+                            `
+                                )
+                                .join("")}
                         </tbody>
                     </table>
                 </div>
@@ -662,7 +638,9 @@ function generateReceiptContent(isPreview = false) {
                 <div class="totals">
                     <div class="item">
                         <strong>TOTAL GERAL:</strong>
-                        <span><strong>MZN ${formatCurrency(total)}</strong></span>
+                        <span><strong>MZN ${formatCurrency(
+                            total
+                        )}</strong></span>
                     </div>
                 </div>
                 
@@ -670,12 +648,44 @@ function generateReceiptContent(isPreview = false) {
                 
                 <div class="payment-methods">
                     <div class="item"><strong>FORMAS DE PAGAMENTO:</strong></div>
-                    ${receiptData.cashPayment > 0 ? `<div class="item">• Dinheiro: <span>MZN ${formatCurrency(receiptData.cashPayment)}</span></div>` : ''}
-                    ${receiptData.cardPayment > 0 ? `<div class="item">• Cartão: <span>MZN ${formatCurrency(receiptData.cardPayment)}</span></div>` : ''}
-                    ${receiptData.mpesaPayment > 0 ? `<div class="item">• M-Pesa: <span>MZN ${formatCurrency(receiptData.mpesaPayment)}</span></div>` : ''}
-                    ${receiptData.emolaPayment > 0 ? `<div class="item">• E-mola: <span>MZN ${formatCurrency(receiptData.emolaPayment)}</span></div>` : ''}
-                    <div class="item"><strong>Total Pago:</strong><span><strong>MZN ${formatCurrency(totalPaid)}</strong></span></div>
-                    ${change > 0 ? `<div class="item" style="color: #059669;"><strong>Troco:</strong><span><strong>MZN ${formatCurrency(change)}</strong></span></div>` : ''}
+                    ${
+                        receiptData.cashPayment > 0
+                            ? `<div class="item">• Dinheiro: <span>MZN ${formatCurrency(
+                                  receiptData.cashPayment
+                              )}</span></div>`
+                            : ""
+                    }
+                    ${
+                        receiptData.cardPayment > 0
+                            ? `<div class="item">• Cartão: <span>MZN ${formatCurrency(
+                                  receiptData.cardPayment
+                              )}</span></div>`
+                            : ""
+                    }
+                    ${
+                        receiptData.mpesaPayment > 0
+                            ? `<div class="item">• M-Pesa: <span>MZN ${formatCurrency(
+                                  receiptData.mpesaPayment
+                              )}</span></div>`
+                            : ""
+                    }
+                    ${
+                        receiptData.emolaPayment > 0
+                            ? `<div class="item">• E-mola: <span>MZN ${formatCurrency(
+                                  receiptData.emolaPayment
+                              )}</span></div>`
+                            : ""
+                    }
+                    <div class="item"><strong>Total Pago:</strong><span><strong>MZN ${formatCurrency(
+                        totalPaid
+                    )}</strong></span></div>
+                    ${
+                        change > 0
+                            ? `<div class="item" style="color: #059669;"><strong>Troco:</strong><span><strong>MZN ${formatCurrency(
+                                  change
+                              )}</strong></span></div>`
+                            : ""
+                    }
                 </div>
                 
                 <div class="divider"></div>
@@ -683,12 +693,16 @@ function generateReceiptContent(isPreview = false) {
                 <div class="footer">
                     <p><strong>Obrigado pela preferência!</strong></p>
                     <p>Volte sempre!</p>
-                    ${isPreview ? 
-                        '<p style="color: red; font-weight: bold; margin-top: 10px;">⚠️ ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO ⚠️</p>' : 
-                        '<p style="margin-top: 10px;"><small>Este documento não serve como fatura</small></p>'}
+                    ${
+                        isPreview
+                            ? '<p style="color: red; font-weight: bold; margin-top: 10px;">⚠️ ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO ⚠️</p>'
+                            : '<p style="margin-top: 10px;"><small>Este documento não serve como fatura</small></p>'
+                    }
                 </div>
                 
-                ${isPreview ? `
+                ${
+                    isPreview
+                        ? `
                     <div class="preview-buttons no-print">
                         <button onclick="window.print()" class="btn btn-primary">
                             🖨️ Imprimir Pré-visualização
@@ -697,17 +711,23 @@ function generateReceiptContent(isPreview = false) {
                             ❌ Fechar
                         </button>
                     </div>
-                ` : ''}
+                `
+                        : ""
+                }
             </div>
             
             <script>
-                ${!isPreview ? `
+                ${
+                    !isPreview
+                        ? `
                     window.onload = function() { 
                         setTimeout(() => {
                             window.print(); 
                         }, 500);
                     };
-                ` : ''}
+                `
+                        : ""
+                }
                 
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape') {
@@ -724,47 +744,70 @@ function generateReceiptContent(isPreview = false) {
 // Função corrigida para pré-visualização
 function previewReceipt() {
     if (cart.length === 0) {
-        showToast('Adicione itens ao carrinho antes de pré-visualizar o recibo.', 'warning');
+        showToast(
+            "Adicione itens ao carrinho antes de pré-visualizar o recibo.",
+            "warning"
+        );
         return;
     }
 
-    const cashAmount = parseFloat(document.getElementById('cashAmount')?.value || 0);
-    const cardAmount = parseFloat(document.getElementById('cardAmount')?.value || 0);
-    const mpesaAmount = parseFloat(document.getElementById('mpesaAmount')?.value || 0);
-    const emolaAmount = parseFloat(document.getElementById('emolaAmount')?.value || 0);
-    
+    const cashAmount = parseFloat(
+        document.getElementById("cashAmount")?.value || 0
+    );
+    const cardAmount = parseFloat(
+        document.getElementById("cardAmount")?.value || 0
+    );
+    const mpesaAmount = parseFloat(
+        document.getElementById("mpesaAmount")?.value || 0
+    );
+    const emolaAmount = parseFloat(
+        document.getElementById("emolaAmount")?.value || 0
+    );
+
     const totalPaid = cashAmount + cardAmount + mpesaAmount + emolaAmount;
-    
+
     if (totalPaid === 0) {
-        showToast('Insira pelo menos um valor de pagamento para pré-visualizar o recibo.', 'warning');
+        showToast(
+            "Insira pelo menos um valor de pagamento para pré-visualizar o recibo.",
+            "warning"
+        );
         return;
     }
 
     try {
         const receiptContent = generateReceiptContent(true);
-        
+
         if (!receiptContent) {
-            showToast('Erro ao gerar dados para o recibo', 'error');
+            showToast("Erro ao gerar dados para o recibo", "error");
             return;
         }
-        
-        const previewWindow = window.open('', 'receiptPreview', 'width=400,height=700,scrollbars=yes,resizable=yes');
-        
+
+        const previewWindow = window.open(
+            "",
+            "receiptPreview",
+            "width=400,height=700,scrollbars=yes,resizable=yes"
+        );
+
         if (!previewWindow) {
-            showToast('Erro: Pop-up bloqueado. Permita pop-ups para este site.', 'error');
+            showToast(
+                "Erro: Pop-up bloqueado. Permita pop-ups para este site.",
+                "error"
+            );
             return;
         }
-        
+
         previewWindow.document.open();
         previewWindow.document.write(receiptContent);
         previewWindow.document.close();
-        
+
         previewWindow.focus();
-        showToast('Pré-visualização do recibo aberta', 'success');
-        
+        showToast("Pré-visualização do recibo aberta", "success");
     } catch (error) {
-        console.error('Erro ao gerar pré-visualização:', error);
-        showToast('Erro ao gerar pré-visualização do recibo. Verifique o console para detalhes.', 'error');
+        console.error("Erro ao gerar pré-visualização:", error);
+        showToast(
+            "Erro ao gerar pré-visualização do recibo. Verifique o console para detalhes.",
+            "error"
+        );
     }
 }
 
@@ -776,57 +819,69 @@ function canGenerateReceipt() {
 // Função corrigida para imprimir recibo final
 function printFinalReceipt() {
     if (!canGenerateReceipt()) {
-        showToast('Nenhum item para imprimir', 'warning');
-        console.log('DEBUG: canGenerateReceipt falhou');
-        console.log('DEBUG: lastSaleData:', lastSaleData);
-        console.log('DEBUG: cart:', cart);
+        showToast("Nenhum item para imprimir", "warning");
+        console.log("DEBUG: canGenerateReceipt falhou");
+        console.log("DEBUG: lastSaleData:", lastSaleData);
+        console.log("DEBUG: cart:", cart);
         return;
     }
 
     try {
         const receiptContent = generateReceiptContent(false);
-        
+
         if (!receiptContent) {
-            showToast('Erro ao gerar dados para o recibo', 'error');
-            console.log('DEBUG: generateReceiptContent retornou null');
+            showToast("Erro ao gerar dados para o recibo", "error");
+            console.log("DEBUG: generateReceiptContent retornou null");
             return;
         }
-        
-        const printWindow = window.open('', 'receiptPrint', 'width=400,height=600,scrollbars=yes');
-        
+
+        const printWindow = window.open(
+            "",
+            "receiptPrint",
+            "width=400,height=600,scrollbars=yes"
+        );
+
         if (!printWindow) {
-            showToast('Erro: Pop-up bloqueado. Permita pop-ups para este site.', 'error');
+            showToast(
+                "Erro: Pop-up bloqueado. Permita pop-ups para este site.",
+                "error"
+            );
             return;
         }
-        
+
         printWindow.document.open();
         printWindow.document.write(receiptContent);
         printWindow.document.close();
-        
+
         printWindow.focus();
-        console.log('DEBUG: Recibo enviado para impressão com sucesso');
-        
+        console.log("DEBUG: Recibo enviado para impressão com sucesso");
     } catch (error) {
-        console.error('Erro ao imprimir recibo:', error);
-        showToast('Erro ao imprimir recibo', 'error');
+        console.error("Erro ao imprimir recibo:", error);
+        showToast("Erro ao imprimir recibo", "error");
     }
 }
 
 // Função para abrir recibo do backend
 function openBackendReceipt(saleId) {
     try {
-        const receiptWindow = window.open(`/pos/receipt/${saleId}`, 'backendReceipt', 'width=400,height=600,scrollbars=yes');
-        
+        const receiptWindow = window.open(
+            `/pos/receipt/${saleId}`,
+            "backendReceipt",
+            "width=400,height=600,scrollbars=yes"
+        );
+
         if (!receiptWindow) {
-            showToast('Erro: Pop-up bloqueado. Permita pop-ups para este site.', 'error');
+            showToast(
+                "Erro: Pop-up bloqueado. Permita pop-ups para este site.",
+                "error"
+            );
             return;
         }
-        
+
         receiptWindow.focus();
-        
     } catch (error) {
-        console.error('Erro ao abrir recibo do backend:', error);
-        showToast('Erro ao abrir recibo', 'error');
+        console.error("Erro ao abrir recibo do backend:", error);
+        showToast("Erro ao abrir recibo", "error");
     }
 }
 
@@ -1177,12 +1232,12 @@ function showToast(message, type = "success") {
 
 // Função para debug - ajuda a identificar problemas
 function debugPOSState() {
-    console.log('=== DEBUG POS STATE ===');
-    console.log('Cart:', cart);
-    console.log('LastSaleData:', lastSaleData);
-    console.log('CurrentTotal:', currentTotal);
-    console.log('CanGenerateReceipt:', canGenerateReceipt());
-    console.log('=====================');
+    console.log("=== DEBUG POS STATE ===");
+    console.log("Cart:", cart);
+    console.log("LastSaleData:", lastSaleData);
+    console.log("CurrentTotal:", currentTotal);
+    console.log("CanGenerateReceipt:", canGenerateReceipt());
+    console.log("=====================");
 }
 
 // ===== INITIALIZATION =====
@@ -1241,14 +1296,14 @@ window.POSSystem = {
     canGenerateReceipt,
     generateReceiptContent,
     previewReceipt,
-    
+
     // Produtos
     filterProducts,
-    
+
     // Debug
     debugPOSState,
-    
+
     // Acesso aos dados
     getLastSaleData: () => lastSaleData,
-    getCurrentCart: () => cart
+    getCurrentCart: () => cart,
 };

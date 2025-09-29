@@ -78,7 +78,7 @@
         </div>
 
         <!-- Orders Management Card -->
-        <div class="card" style="padding: 20px !important">
+        <div class="card">
             <div class="card-header bg-white">
                 <div class="row align-items-center">
                     <div class="col-md-6">
@@ -152,7 +152,7 @@
                                     <th style="width: 100px;" class="text-end">Total</th>
                                     <th style="width: 120px;" class="text-center">Status</th>
                                     <th style="width: 120px;" class="text-center">Pagamento</th>
-                                    <th style="width: 150px;" class="text-center">Ações</th>
+                                    <th style="width: 200px;" class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -257,18 +257,17 @@
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
-
                                         <!-- Actions -->
                                         <td class="text-center">
                                             <div class="btn-group actions-group" role="group">
-                                                <!-- View Order -->
+                                                <!-- Ver Detalhes -->
                                                 <a href="{{ route('orders.show', $order) }}"
                                                     class="btn btn-sm btn-outline-primary action-btn view-btn"
                                                     data-bs-toggle="tooltip" title="Ver Detalhes">
                                                     <i class="mdi mdi-eye"></i>
                                                 </a>
 
-                                                <!-- Edit Order -->
+                                                <!-- Editar Pedido -->
                                                 @if ($order->status !== 'paid' && $order->status !== 'canceled')
                                                     <a href="{{ route('orders.edit', $order) }}"
                                                         class="btn btn-sm btn-outline-secondary action-btn edit-btn"
@@ -277,70 +276,51 @@
                                                     </a>
                                                 @endif
 
-                                                <!-- Complete Order -->
+                                                <!-- Finalizar Pedido -->
                                                 @if ($order->status === 'active')
-                                                    <button onclick="completeOrder({{ $order->id }})"
-                                                        class="btn btn-sm btn-outline-warning action-btn complete-btn"
-                                                        data-bs-toggle="tooltip" title="Finalizar Pedido">
-                                                        <i class="mdi mdi-check-circle"></i>
-                                                    </button>
+                                                    <form action="{{ route('orders.complete', $order) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-outline-warning action-btn complete-btn"
+                                                            data-bs-toggle="tooltip" title="Finalizar Pedido"
+                                                            onclick="return confirm('Deseja finalizar este pedido?')">
+                                                            <i class="mdi mdi-check-circle"></i>
+                                                        </button>
+                                                    </form>
                                                 @endif
 
-                                                <!-- Pay Order -->
+                                                <!-- Registrar Pagamento -->
                                                 @if ($order->status === 'completed')
-                                                    <button onclick="openPaymentModal({{ $order->id }})"
+                                                    <button type="button"
                                                         class="btn btn-sm btn-outline-success action-btn pay-btn"
-                                                        data-bs-toggle="tooltip" title="Registrar Pagamento">
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#paymentModal{{ $order->id }}"
+                                                        title="Registrar Pagamento">
                                                         <i class="mdi mdi-cash-multiple"></i>
                                                     </button>
                                                 @endif
-                                                @if ($order->status === 'paid')
-                                                    <!-- Print Receipt -->
-                                                    <button onclick="printRecibo({{ $order->id }})"
+
+                                                <!-- Imprimir Recibo -->
+                                                @if ($order->status === 'paid' || $order->status === 'completed')
+                                                    <a href="{{ route('orders.print', $order) }}" target="_blank"
                                                         class="btn btn-sm btn-outline-info action-btn print-btn"
-                                                        data-bs-toggle="tooltip" title="Imprimir Recibo">
+                                                        data-bs-toggle="tooltip"
+                                                        title="Imprimir {{ $order->status === 'paid' ? 'Recibo' : 'Conta' }}">
                                                         <i class="mdi mdi-printer"></i>
-                                                    </button>
+                                                    </a>
                                                 @endif
-                                                @if ($order->status === 'completed')
-                                                    <!-- Print Receipt -->
-                                                    <button onclick="printRecibo({{ $order->id }})"
-                                                        class="btn btn-sm btn-outline-info action-btn print-btn"
-                                                        data-bs-toggle="tooltip" title="Imprimir Conta">
-                                                        <i class="mdi mdi-printer"></i>
-                                                    </button>
-                                                @endif
-                                                <!-- More Actions Dropdown -->
-                                                <div class="btn-group" role="group">
+
+                                                <!-- Cancelar Pedido -->
+                                                @if ($order->status !== 'canceled' && $order->status !== 'paid')
                                                     <button type="button"
-                                                        class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split more-actions-btn"
-                                                        data-bs-toggle="dropdown">
-                                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                                        class="btn btn-sm btn-outline-danger action-btn cancel-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#cancelOrderModal{{ $order->id }}"
+                                                        title="Cancelar Pedido">
+                                                        <i class="mdi mdi-cancel"></i>
                                                     </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end custom-dropdown"
-                                                        style="z-index: 1040;">
-                                                        @if ($order->status !== 'canceled' && $order->status !== 'paid')
-                                                            <li>
-                                                                <a class="dropdown-item text-danger cancel-item"
-                                                                    href="#"
-                                                                    onclick="cancelOrder({{ $order->id }})">
-                                                                    <i class="mdi mdi-cancel me-2"></i>
-                                                                    Cancelar Pedido
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <hr class="dropdown-divider">
-                                                            </li>
-                                                        @endif
-                                                        <li>
-                                                            <a class="dropdown-item history-item"
-                                                                href="{{ route('orders.show', $order) }}">
-                                                                <i class="mdi mdi-information-outline me-2"></i>
-                                                                Ver Histórico
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -390,154 +370,136 @@
         </div>
     </div>
 
-    <!-- Quick Payment Modal -->
-    <div class="modal fade" id="quickPaymentModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="quickPaymentForm" method="POST">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="mdi mdi-cash-multiple text-success me-2"></i>
-                            Registrar Pagamento
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Método de Pagamento</label>
-                            <select name="payment_method" class="form-select" required>
-                                <option value="">Selecione um método</option>
-                                <option value="cash">Dinheiro</option>
-                                <option value="card">Cartão</option>
-                                <option value="mpesa">M-Pesa</option>
-                                <option value="emola">E-Mola</option>
-                                <option value="mkesh">M-Kesh</option>
-                                <option value="outros">Outros</option>
-                            </select>
+    <!-- Payment Modals (um para cada pedido completed) -->
+    @foreach ($orders->where('status', 'completed') as $order)
+        <div class="modal fade" id="paymentModal{{ $order->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="{{ route('orders.pay', $order) }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="mdi mdi-cash-multiple text-success me-2"></i>
+                                Registrar Pagamento - Pedido #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Valor Recebido</label>
-                            <div class="input-group">
-                                <span class="input-group-text">MT</span>
-                                <input type="number" name="amount_paid" class="form-control" step="0.01" required>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Método de Pagamento</label>
+                                <select name="payment_method" class="form-select" required>
+                                    <option value="">Selecione um método</option>
+                                    <option value="cash">Dinheiro</option>
+                                    <option value="card">Cartão</option>
+                                    <option value="mpesa">M-Pesa</option>
+                                    <option value="emola">E-Mola</option>
+                                    <option value="mkesh">M-Kesh</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Valor Recebido</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">MT</span>
+                                    <input type="number" name="amount_paid" class="form-control" step="0.01"
+                                        min="{{ $order->total_amount }}" value="{{ $order->total_amount }}" required>
+                                </div>
+                                <small class="text-muted">Mínimo: {{ number_format($order->total_amount, 2, ',', '.') }}
+                                    MT</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Observações</label>
+                                <textarea name="notes" class="form-control" rows="2" placeholder="Observações do pagamento (opcional)"></textarea>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>Total do Pedido:</strong>
+                                    <span class="fw-bold">{{ number_format($order->total_amount, 2, ',', '.') }} MT</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Observações</label>
-                            <textarea name="notes" class="form-control" rows="2"></textarea>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="mdi mdi-close me-1"></i>
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="mdi mdi-check-circle me-1"></i>
+                                Confirmar Pagamento
+                            </button>
                         </div>
-                        <div class="alert alert-info">
-                            <strong>Total do Pedido:</strong>
-                            <span id="modalOrderTotal">-</span>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary"
-                            data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="mdi mdi-check-circle me-1"></i>
-                            Confirmar Pagamento
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    @endforeach
+
+    <!-- Cancel Order Modals (um para cada pedido ativo) -->
+    @foreach ($orders->whereNotIn('status', ['canceled', 'paid']) as $order)
+        <div class="modal fade" id="cancelOrderModal{{ $order->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="{{ route('orders.cancel', $order) }}" method="POST">
+                        @csrf
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">
+                                <i class="mdi mdi-cancel me-2"></i>
+                                Cancelar Pedido #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <i class="mdi mdi-alert me-2"></i>
+                                <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    Cliente: <span
+                                        class="text-primary">{{ $order->customer_name ?: 'Não identificado' }}</span>
+                                </label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    Total: <span
+                                        class="text-success">{{ number_format($order->total_amount, 2, ',', '.') }}
+                                        MT</span>
+                                </label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    Motivo do Cancelamento <span class="text-danger">*</span>
+                                </label>
+                                <textarea name="notes" class="form-control" rows="4" required minlength="3"
+                                    placeholder="Descreva o motivo do cancelamento..."></textarea>
+                                <small class="text-muted">Mínimo 3 caracteres</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="mdi mdi-close me-1"></i>
+                                Fechar
+                            </button>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="mdi mdi-cancel me-1"></i>
+                                Confirmar Cancelamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
 @endsection
 
 @push('styles')
     <style>
-        /* Stats Cards Customization */
-        .stats-card {
-            border-radius: 10px;
-            /* um pouco menor */
-            padding: 1rem;
-            /* antes 1.5rem */
-            box-shadow: var(--shadow-soft);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            background: white;
-            border-left: 3px solid transparent;
-            /* mais fino */
-            min-height: 110px;
-            /* mantém compacto */
-        }
-
-        .stats-card.primary {
-            border-left-color: var(--primary-color);
-        }
-
-        .stats-card.secondary {
-            border-left-color: var(--secondary-color);
-        }
-
-        .stats-card.success {
-            border-left-color: var(--success-color);
-        }
-
-        .stats-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        /* Ícone menor */
-        .stats-card .stats-icon {
-            width: 38px;
-            /* antes 50px */
-            height: 38px;
-            /* antes 50px */
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            /* antes 1.3rem */
-            margin-bottom: 0.5rem;
-            /* antes 1rem */
-            color: white;
-        }
-
-        /* Gradientes */
-        .stats-card.primary .stats-icon {
-            background: var(--primary-gradient);
-        }
-
-        .stats-card.secondary .stats-icon {
-            background: var(--secondary-gradient);
-        }
-
-        .stats-card.success .stats-icon {
-            background: linear-gradient(135deg, var(--success-color), #34d399);
-        }
-
-        /* Números e labels menores */
-        .stats-number {
-            font-size: 1.3rem;
-            /* antes 1.8rem */
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 0.25rem;
-        }
-
-        .stats-label {
-            color: #6b7280;
-            font-size: 0.8rem;
-            /* antes 0.875rem */
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .stats-trend {
-            display: flex;
-            align-items: center;
-            gap: 0.2rem;
-            font-size: 0.75rem;
-            /* trend mais discreto */
-        }
-
-
         /* Order Row Styles */
         .order-row {
             transition: all 0.2s ease;
@@ -560,9 +522,7 @@
         /* Tabela de Pedidos */
         .custom-orders-table {
             font-size: 0.95rem;
-            border-radius: 0.5rem;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .custom-orders-table thead th {
@@ -580,11 +540,11 @@
         }
 
         .order-id-badge {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white !important;
+            color: var(--primary-color) !important;
             padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
+            border-radius: var(--border-radius);
             font-size: 0.875rem;
+            font-weight: 600;
         }
 
         /* Cliente e Notas */
@@ -602,7 +562,7 @@
         .notes-badge {
             background: #f8f9fa;
             padding: 0.125rem 0.5rem;
-            border-radius: 0.25rem;
+            border-radius: var(--border-radius);
             border-left: 3px solid #6c757d;
         }
 
@@ -610,7 +570,7 @@
         .table-badge {
             font-size: 0.875rem;
             padding: 0.5rem 0.75rem;
-            border-radius: 0.5rem;
+            border-radius: var(--border-radius);
         }
 
         .group-link {
@@ -634,63 +594,52 @@
         .payment-pending {
             font-size: 0.8rem;
             padding: 0.5rem 0.75rem;
-            border-radius: 1rem;
+            border-radius: var(--border-radius-lg);
             font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease;
         }
 
         .status-badge:hover,
         .payment-badge:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         /* Ações */
         .actions-group {
             gap: 0.25rem;
+            flex-wrap: nowrap;
         }
 
         .action-btn {
-            border-radius: 0.375rem !important;
+            border-radius: var(--border-radius) !important;
             padding: 0.375rem 0.5rem;
             font-size: 0.875rem;
-            transition: all 0.2s ease;
+            transition: var(--transition);
             border-width: 1.5px;
         }
 
         .action-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .more-actions-btn {
-            border-left: none !important;
+        .dropdown-menu {
+            border-radius: var(--border-radius-lg);
+            min-width: 200px;
         }
 
-        .custom-dropdown {
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            min-width: 180px;
-        }
-
-        .custom-dropdown .dropdown-item {
+        .dropdown-item {
             padding: 0.75rem 1rem;
-            transition: background-color 0.2s ease;
+            transition: var(--transition);
         }
 
-        .custom-dropdown .dropdown-item:hover {
+        .dropdown-item:hover {
             background-color: rgba(0, 123, 255, 0.1);
-            color: #007bff;
+            color: var(--primary-color);
         }
 
-        .cancel-item {
-            color: #dc3545 !important;
-        }
-
-        .cancel-item:hover {
+        .dropdown-item.text-danger:hover {
             background-color: rgba(220, 53, 69, 0.1) !important;
-            color: #dc3545 !important;
+            color: var(--danger-color) !important;
         }
 
         /* Paginação */
@@ -708,7 +657,7 @@
         /* Estado Vazio */
         .empty-state-container {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 0.5rem;
+            border-radius: var(--border-radius-lg);
             margin: 1rem;
         }
 
@@ -728,75 +677,109 @@
         }
 
         .empty-action-btn {
-            border-radius: 0.5rem;
+            border-radius: var(--border-radius-lg);
             padding: 0.75rem 1.5rem;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: var(--transition);
         }
 
         .empty-action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .custom-orders-table {
-                font-size: 0.85rem;
-            }
-
-            .actions-group {
-                flex-wrap: wrap;
-                gap: 0.125rem;
-            }
-
-            .action-btn {
-                padding: 0.25rem 0.375rem;
-                font-size: 0.75rem;
-            }
-
-            .empty-state-container {
-                margin: 0.5rem;
-            }
+        /* Modal Improvements */
+        .modal-content {
+            border-radius: var(--border-radius-lg);
+            border: none;
         }
 
-        .table-info .badge {
-            font-size: 0.75rem;
+        .modal-header {
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: 1.5rem;
         }
 
-        .order-time .fw-semibold {
-            font-size: 0.875rem;
+        .modal-body {
+            padding: 1.5rem;
         }
 
-        .order-total {
-            text-align: right;
+        .modal-footer {
+            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+            padding: 1.5rem;
         }
 
-        .order-total .fw-bold {
-            font-size: 1rem;
+        /* Form Controls */
+        .form-control,
+        .form-select {
+            border-radius: var(--border-radius);
+            border: 1px solid #dee2e6;
+            transition: var(--transition);
         }
 
-        .payment-info .badge {
-            font-size: 0.7rem;
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(8, 145, 178, 0.25);
         }
 
-        /* Button Group Styles */
-        .btn-group .btn-sm {
-            padding: 0.25rem 0.5rem;
+        .input-group-text {
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Button Hover Effects */
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-success:hover {
+            background: #0ea770;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-outline-primary:hover {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
+            transform: translateY(-2px);
         }
 
-        /* Empty State */
-        .empty-state {
-            padding: 3rem 2rem;
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
         }
 
-        .empty-state i {
-            opacity: 0.5;
+        .btn-outline-success:hover {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-warning:hover {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-info:hover {
+            background-color: var(--info-color);
+            border-color: var(--info-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            transform: translateY(-2px);
         }
 
         /* Responsive adjustments */
@@ -809,16 +792,157 @@
                 font-size: 0.875rem;
             }
 
-            .btn-group {
+            .actions-group {
                 flex-direction: column;
+                gap: 0.25rem;
             }
 
-            .btn-group .btn {
+            .action-btn {
+                width: 100%;
                 margin-bottom: 0.25rem;
+            }
+
+            .dropdown {
+                width: 100%;
+            }
+
+            .dropdown-toggle {
+                width: 100%;
+            }
+
+            .empty-state-container {
+                margin: 0.5rem;
+            }
+
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+
+            .custom-orders-table th:nth-child(3),
+            .custom-orders-table td:nth-child(3) {
+                display: none;
+                /* Hide Mesa column on mobile */
+            }
+
+            .custom-orders-table th:nth-child(4),
+            .custom-orders-table td:nth-child(4) {
+                font-size: 0.8rem;
+                /* Smaller date on mobile */
             }
         }
 
-        /* Status Badge Colors */
+        @media (max-width: 576px) {
+            .stats-card .stats-content h3 {
+                font-size: 1.1rem;
+            }
+
+            .stats-card .stats-label {
+                font-size: 0.75rem;
+            }
+
+            .card-header h5 {
+                font-size: 1rem;
+            }
+
+            .order-id-badge {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .customer-name {
+                font-size: 0.9rem;
+            }
+
+            .total-amount {
+                font-size: 1rem;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .action-btn {
+                padding: 0.25rem 0.4rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+
+            .sidebar,
+            .top-navbar,
+            .btn,
+            .dropdown,
+            .pagination-footer {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #000 !important;
+            }
+
+            .table {
+                font-size: 0.8rem !important;
+            }
+
+            .badge {
+                border: 1px solid #000 !important;
+                color: #000 !important;
+            }
+        }
+
+        /* Loading states */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn.loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            font-size: 0.8rem;
+        }
+
+        .tooltip-inner {
+            background-color: var(--dark-color);
+            border-radius: var(--border-radius);
+            padding: 0.5rem 0.75rem;
+        }
+
+        /* Status badge colors using CSS variables */
         .badge.bg-success {
             background-color: var(--success-color) !important;
         }
@@ -838,6 +962,39 @@
         .badge.bg-secondary {
             background-color: #6c757d !important;
         }
+
+        /* Alert improvements */
+        .alert {
+            border-radius: var(--border-radius-lg);
+            border: none;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+            border-left: 4px solid var(--info-color);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+            border-left: 4px solid var(--danger-color);
+        }
+
+        /* Smooth transitions for all interactive elements */
+        *,
+        *::before,
+        *::after {
+            transition: var(--transition);
+        }
     </style>
 @endpush
 
@@ -845,275 +1002,164 @@
     <script>
         // Initialize tooltips
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Bootstrap tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover'
+                });
+            });
+
+            // Auto focus on search input with Ctrl+K
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const searchInput = document.querySelector('input[name="search"]');
+                    if (searchInput) {
+                        searchInput.focus();
+                        searchInput.select();
+                    }
+                }
+
+                // Escape to clear search
+                if (e.key === 'Escape') {
+                    const searchInput = document.querySelector('input[name="search"]');
+                    if (searchInput && searchInput === document.activeElement) {
+                        searchInput.value = '';
+                    }
+                }
             });
         });
 
-        // Complete Order Function
-        async function completeOrder(orderId) {
-            try {
-                if (!confirm('Deseja marcar este pedido como finalizado?')) {
-                    return;
-                }
+        // Form submission with loading state
+        function addLoadingState(form) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
 
-                const response = await fetch(`/orders/${orderId}/complete`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content'),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (error) {
-                showToast(error.message || 'Erro ao finalizar pedido', 'error');
+                // Fallback to restore button after 10 seconds
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 10000);
             }
         }
 
-        // Cancel Order Function
-        async function cancelOrder(orderId) {
-            try {
-                const reason = prompt('Por favor, informe o motivo do cancelamento:');
-
-                if (!reason || reason.trim() === '') {
-                    showToast('O motivo do cancelamento é obrigatório!', 'warning');
-                    return;
-                }
-
-                if (!confirm('Confirma o cancelamento deste pedido?')) {
-                    return;
-                }
-
-                const response = await fetch(`/orders/${orderId}/cancel`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content'),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        notes: reason
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (error) {
-                showToast(error.message || 'Erro ao cancelar pedido', 'error');
-            }
-        }
-
-        // Open Payment Modal
-        function openPaymentModal(orderId) {
-            // Fetch order data first
-            fetch(`/orders/data/${orderId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('modalOrderTotal').textContent =
-                        `${data.total_amount.toLocaleString('pt-MZ')} MT`;
-
-                    const form = document.getElementById('quickPaymentForm');
-                    form.action = `/orders/${orderId}/pay`;
-
-                    // Set default amount
-                    form.querySelector('[name="amount_paid"]').value = data.total_amount;
-
-                    const modal = new bootstrap.Modal(document.getElementById('quickPaymentModal'));
-                    modal.show();
-                })
-                .catch(error => {
-                    console.error('Error fetching order data:', error);
-                    showToast('Erro ao carregar dados do pedido', 'error');
-                });
-        }
-
-        // Handle payment form submission
-        document.getElementById('quickPaymentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            try {
-                const formData = new FormData(this);
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content'),
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('quickPaymentModal')).hide();
-
-                    showToast('Pagamento registrado com sucesso!', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (error) {
-                showToast(error.message || 'Erro ao processar pagamento', 'error');
-            }
+        // Add loading state to all forms on submit
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                addLoadingState(this);
+            });
         });
 
-        // Auto refresh every 30 seconds for active orders
+        // Payment amount validation
+        document.querySelectorAll('input[name="amount_paid"]').forEach(function(input) {
+            input.addEventListener('input', function() {
+                const minAmount = parseFloat(this.min);
+                const currentAmount = parseFloat(this.value);
+
+                if (currentAmount < minAmount) {
+                    this.setCustomValidity(`O valor mínimo é ${minAmount.toFixed(2)} MT`);
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        });
+
+        // Confirmation for critical actions
+        document.querySelectorAll('form[action*="complete"]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Tem certeza que deseja finalizar este pedido?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+        // Auto refresh for real-time updates (optional)
         let autoRefreshInterval;
 
         function startAutoRefresh() {
-            // Only auto-refresh if there are active orders
+            // Only refresh if there are active orders and user is not interacting
             const hasActiveOrders = document.querySelectorAll('.order-row').length > 0;
 
             if (hasActiveOrders) {
                 autoRefreshInterval = setInterval(() => {
-                    // Check if user is not interacting with modals
+                    // Check if no modals are open and user is not typing
                     const openModals = document.querySelectorAll('.modal.show');
-                    if (openModals.length === 0) {
-                        // Subtle refresh - just update the data without full page reload
-                        updateOrderStatuses();
+                    const activeInput = document.activeElement;
+                    const isTyping = activeInput && (activeInput.tagName === 'INPUT' || activeInput.tagName ===
+                        'TEXTAREA');
+
+                    if (openModals.length === 0 && !isTyping) {
+                        // Silent refresh of order statuses
+                        fetch(window.location.href + '?ajax=1', {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }).then(response => {
+                            if (response.ok && response.headers.get('content-type').includes(
+                                    'application/json')) {
+                                // Handle partial updates here if your backend supports it
+                                console.log('Orders status checked');
+                            }
+                        }).catch(() => {
+                            // Silently fail
+                        });
                     }
                 }, 30000); // 30 seconds
             }
         }
 
-        function stopAutoRefresh() {
+        // Start auto refresh when page loads
+        document.addEventListener('DOMContentLoaded', startAutoRefresh);
+
+        // Stop auto refresh when user navigates away
+        window.addEventListener('beforeunload', () => {
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
             }
-        }
+        });
 
-        // Update order statuses via AJAX
-        async function updateOrderStatuses() {
-            try {
-                const response = await fetch(window.location.href + '?ajax=1', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    // You can implement a partial update here
-                    // For now, we'll just show a subtle indicator
-                    showStatusUpdateIndicator();
-                }
-            } catch (error) {
-                console.error('Error updating order statuses:', error);
+        // Print function for receipts
+        function printOrder(orderId) {
+            const printWindow = window.open(`/orders/print/${orderId}`, '_blank', 'width=800,height=600');
+            if (printWindow) {
+                printWindow.focus();
+            } else {
+                showToast('Por favor, permita pop-ups para imprimir', 'warning');
             }
         }
 
-        /* function showStatusUpdateIndicator() {
-            // Create a subtle notification
-            const indicator = document.createElement('div');
-            indicator.className = 'position-fixed top-0 end-0 m-3 alert alert-info alert-dismissible fade show';
-            indicator.innerHTML = `
-            <i class="mdi mdi-refresh me-2"></i>
-            Status atualizado
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-            indicator.style.zIndex = '9999';
-            document.body.appendChild(indicator);
-
-            // Auto dismiss after 3 seconds
-            setTimeout(() => {
-                const alert = bootstrap.Alert.getInstance(indicator);
-                if (alert) alert.close();
-            }, 1000);
-        } */
-
-        // Initialize auto refresh when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            startAutoRefresh();
-        });
-
-        // Stop refresh when user leaves page
-        window.addEventListener('beforeunload', function() {
-            stopAutoRefresh();
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + K for search focus
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                const searchInput = document.querySelector('input[name="search"]');
-                if (searchInput) {
-                    searchInput.focus();
-                    searchInput.select();
-                }
-            }
-
-            // Ctrl/Cmd + N for new order
-            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-                e.preventDefault();
-                window.location.href = '{{ route('pos.index') }}';
-            }
-
-            // R for refresh
-            if (e.key === 'r' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-                const activeElement = document.activeElement;
-                // Only if not focused on input
-                if (!activeElement || !activeElement.matches('input, textarea, select')) {
-                    e.preventDefault();
-                    window.location.reload();
-                }
-            }
-        });
-
-        // Print function integration
-        if (typeof printRecibo !== 'function') {
-            window.printRecibo = function(orderId) {
-                const printWindow = window.open(`/orders/print/${orderId}`, '_blank', 'width=800,height=600');
-                if (printWindow) {
-                    printWindow.focus();
-                } else {
-                    showToast('Por favor, permita pop-ups para imprimir o recibo', 'warning');
-                }
+        // Enhanced search with debounce (if you want to add real-time search later)
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
             };
         }
 
-        // Enhanced search functionality
-        const searchInput = document.querySelector('input[name="search"]');
-        if (searchInput) {
-            // Add search suggestions/autocomplete here if needed
-            searchInput.addEventListener('input', function(e) {
-                if (e.target.value.length > 2) {
-                    // You can implement real-time search suggestions here
+        // Table row click handler for better UX
+        document.querySelectorAll('.order-row').forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                // Don't trigger if clicking on buttons or links
+                if (e.target.closest('.btn, .dropdown, a')) {
+                    return;
                 }
+
+                const orderId = this.dataset.orderId;
+                window.location.href = `/orders/${orderId}`;
             });
 
-            // Clear search on Escape
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    this.value = '';
-                    this.form.submit();
-                }
-            });
-        }
+            // Add pointer cursor
+            row.style.cursor = 'pointer';
+        });
     </script>
 @endpush

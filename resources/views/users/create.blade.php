@@ -94,11 +94,11 @@
 
                         <!-- Função -->
                         <div class="col-md-6">
-                            <label for="role_id" class="form-label fw-semibold">Função *</label>
-                            <select class="form-select" id="role_id" name="role_id" required>
+                            <label for="role" class="form-label fw-semibold">Função *</label>
+                            <select class="form-select" id="role" name="role" required>
                                 <option value="">Selecione uma função</option>
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                    <option value="{{ $role }}" {{ old('role) == $role->id ? 'selected' : '' }}>
                                         {{ ucfirst($role->name) }}
                                     </option>
                                 @endforeach

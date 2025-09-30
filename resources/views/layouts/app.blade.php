@@ -1477,7 +1477,7 @@
                         </div>
                     </div>
 
-                    @if (auth()->check())
+                    @if(auth()->check())
                         <div class="user-info">
                             <div class="user-name">{{ auth()->user()->name }}</div>
                             <div class="user-role">{{ $currentRole['name'] }}</div>
@@ -2082,29 +2082,17 @@
                 form.submit();
             }
 
-            async function loadNotifications() {
+            async loadNotifications() {
                 try {
-                    const response = await fetch('{{ route('notifications.api') }}', {
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest",
-                            "Accept": "application/json"
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error("Erro HTTP: " + response.status);
-                    }
-
+                    const response = await fetch('{{ route('notifications.list') }}');
                     const data = await response.json();
 
-                    updateNotificationsList(data.notifications);
-                    updateBadge(data.unread_count);
-
+                    this.updateNotificationsList(data.notifications);
+                    this.updateBadge(data.unread_count);
                 } catch (error) {
-                    console.error("Erro ao carregar notificações:", error);
+                    console.error('Erro ao carregar notificações:', error);
                 }
             }
-
 
             updateNotificationsList(notifications) {
                 if (!this.list) return;
@@ -2135,17 +2123,17 @@
                     </div>
             <div class="flex-shrink-0 d-flex gap-1 align-items-center">
                 ${!notification.is_read ? `
-                                <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
-                                        <i class="mdi mdi-check-circle"></i>
-                                    </button>
-                                </form>
-                            ` : `
-                                <span class="text-success" title="Lida">
+                            <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
                                     <i class="mdi mdi-check-circle"></i>
-                                </span>
-                            `}
+                                </button>
+                            </form>
+                        ` : `
+                            <span class="text-success" title="Lida">
+                                <i class="mdi mdi-check-circle"></i>
+                            </span>
+                        `}
                 <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
                     <i class="mdi mdi-arrow-right"></i>
                 </a>

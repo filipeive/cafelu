@@ -414,11 +414,6 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/search', [SearchController::class, 'index'])->name('search.index');
     Route::get('/search/api', [SearchController::class, 'api'])->name('search.api');
-    Route::prefix('api')->middleware('auth')->group(function () {
-   
-    Route::get('/notifications', [NotificationController::class, 'getNotifications'])
-         ->name('notifications.api');
-     });
 
     // ===== NOTIFICAÇÕES =====
     Route::prefix('notifications')->name('notifications.')->group(function () {
@@ -427,6 +422,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
         Route::get('/api/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unreadCount');
+        Route::get('/api/list', [NotificationController::class, 'getNotifications'])->name('list');
         Route::get('/stream', [NotificationController::class, 'stream'])->name('stream');
         Route::get('/check-new', [NotificationController::class, 'checkNew'])->name('checkNew');
     });

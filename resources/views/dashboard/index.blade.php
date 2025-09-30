@@ -3,529 +3,413 @@
 @section('title', 'Dashboard')
 @section('title-icon', 'mdi-view-dashboard')
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Visão geral das operações')
+@section('page-subtitle', 'Visão Geral do Sistema')
 
 @section('breadcrumbs')
-    <li class="breadcrumb-item active d-flex align-items-center">
-        <i class="mdi mdi-view-dashboard-outline me-1"></i> Dashboard
-    </li>
+    <li class="breadcrumb-item active">Dashboard</li>
 @endsection
 
 @push('styles')
-<style>
-    /* ========== DASHBOARD ENHANCED STYLES ========== */
-    
-    /* Dashboard Header */
-    .dashboard-welcome {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .dashboard-welcome::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--beach-gradient);
-    }
-
-    .welcome-text {
-        font-size: 2.2rem;
-        font-weight: 800;
-        background: var(--beach-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-    }
-
-    .welcome-subtitle {
-        color: #6b7280;
-        font-size: 1.1rem;
-        font-weight: 500;
-        margin-bottom: 0;
-    }
-
-    .current-time {
-        background: rgba(8, 145, 178, 0.1);
-        padding: 0.75rem 1.25rem;
-        border-radius: 50px;
-        font-weight: 600;
-        color: var(--primary-color);
-        border: 2px solid rgba(8, 145, 178, 0.2);
-        backdrop-filter: blur(10px);
-        font-size: 0.95rem;
-    }
-
-    /* Enhanced Stats Cards - REDUZIDOS */
-    .enhanced-stats-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: var(--border-radius-lg);
-        padding: 1.5rem;  /* Reduzido de 2rem */
-        box-shadow: var(--shadow-soft);
-        transition: var(--transition);
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        height: 100%;
-    }
-
-    .enhanced-stats-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        transition: transform 0.4s ease;
-        transform: scaleX(0);
-        transform-origin: left;
-    }
-
-    .enhanced-stats-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-xl);
-    }
-
-    .enhanced-stats-card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .enhanced-stats-card.revenue::before {
-        background: var(--primary-gradient);
-    }
-
-    .enhanced-stats-card.orders::before {
-        background: var(--secondary-gradient);
-    }
-
-    .enhanced-stats-card.tables::before {
-        background: linear-gradient(135deg, var(--success-color), #34d399);
-    }
-
-    .enhanced-stats-card.alerts::before {
-        background: linear-gradient(135deg, var(--danger-color), #f87171);
-    }
-
-    .enhanced-stats-icon {
-        width: 56px;  /* Reduzido de 64px */
-        height: 56px;  /* Reduzido de 64px */
-        border-radius: var(--border-radius);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.6rem;  /* Reduzido de 1.8rem */
-        margin-bottom: 1.2rem;  /* Reduzido de 1.5rem */
-        position: relative;
-    }
-
-    .enhanced-stats-card.revenue .enhanced-stats-icon {
-        background: rgba(8, 145, 178, 0.15);
-        color: var(--primary-color);
-        box-shadow: 0 8px 32px rgba(8, 145, 178, 0.3);
-    }
-
-    .enhanced-stats-card.orders .enhanced-stats-icon {
-        background: rgba(245, 158, 11, 0.15);
-        color: var(--secondary-color);
-        box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
-    }
-
-    .enhanced-stats-card.tables .enhanced-stats-icon {
-        background: rgba(16, 185, 129, 0.15);
-        color: var(--success-color);
-        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
-    }
-
-    .enhanced-stats-card.alerts .enhanced-stats-icon {
-        background: rgba(239, 68, 68, 0.15);
-        color: var(--danger-color);
-        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
-    }
-
-    .enhanced-stats-value {
-        font-size: 2.1rem;  /* Reduzido de 2.5rem */
-        font-weight: 800;
-        margin-bottom: 0.4rem;  /* Reduzido de 0.5rem */
-        line-height: 1;
-    }
-
-    .enhanced-stats-label {
-        color: #6b7280;
-        font-size: 0.95rem;  /* Reduzido de 1rem */
-        font-weight: 600;
-        margin-bottom: 0.8rem;  /* Reduzido de 1rem */
-    }
-
-    .enhanced-stats-trend {
-        display: flex;
-        align-items: center;
-        font-size: 0.9rem;
-        font-weight: 600;
-        padding: 0.5rem 0.75rem;
-        border-radius: 50px;
-        backdrop-filter: blur(10px);
-    }
-
-    .enhanced-stats-trend.positive {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success-color);
-        border: 1px solid rgba(16, 185, 129, 0.2);
-    }
-
-    .enhanced-stats-trend.negative {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger-color);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    .enhanced-stats-trend.neutral {
-        background: rgba(107, 114, 128, 0.1);
-        color: #6b7280;
-        border: 1px solid rgba(107, 114, 128, 0.2);
-    }
-
-    .enhanced-stats-trend i {
-        margin-right: 0.5rem;
-        font-size: 1rem;
-    }
-
-    /* Quick Actions Enhanced */
-    .quick-actions-enhanced {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-soft);
-        padding: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .quick-actions-enhanced::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: var(--sunset-gradient);
-    }
-
-    .action-btn-enhanced {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
-        border: 2px solid rgba(8, 145, 178, 0.1);
-        border-radius: var(--border-radius);
-        padding: 1.5rem;
-        text-decoration: none;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        backdrop-filter: blur(10px);
-        color: inherit;
-        height: 100%;
-    }
-
-    .action-btn-enhanced:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-lg);
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .action-btn-enhanced.primary:hover {
-        border-color: var(--primary-color);
-    }
-
-    .action-btn-enhanced.secondary:hover {
-        border-color: var(--secondary-color);
-    }
-
-    .action-btn-enhanced.success:hover {
-        border-color: var(--success-color);
-    }
-
-    .action-btn-enhanced.info:hover {
-        border-color: var(--info-color);
-    }
-
-    .action-icon-enhanced {
-        width: 52px;
-        height: 52px;
-        border-radius: var(--border-radius);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin-right: 1rem;
-        flex-shrink: 0;
-    }
-
-    .action-btn-enhanced.primary .action-icon-enhanced {
-        background: rgba(8, 145, 178, 0.15);
-        color: var(--primary-color);
-    }
-
-    .action-btn-enhanced.secondary .action-icon-enhanced {
-        background: rgba(245, 158, 11, 0.15);
-        color: var(--secondary-color);
-    }
-
-    .action-btn-enhanced.success .action-icon-enhanced {
-        background: rgba(16, 185, 129, 0.15);
-        color: var(--success-color);
-    }
-
-    .action-btn-enhanced.info .action-icon-enhanced {
-        background: rgba(59, 130, 246, 0.15);
-        color: var(--info-color);
-    }
-
-    .action-text-enhanced {
-        flex: 1;
-    }
-
-    .action-title-enhanced {
-        font-weight: 700;
-        color: var(--dark-color);
-        margin: 0 0 0.25rem 0;
-        font-size: 1rem;
-    }
-
-    .action-subtitle-enhanced {
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin: 0;
-        line-height: 1.3;
-    }
-
-    /* Recent Activity Enhanced */
-    .activity-card-enhanced {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-soft);
-        overflow: hidden;
-        position: relative;
-    }
-
-    .activity-card-enhanced::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: var(--beach-gradient);
-    }
-
-    .activity-header-enhanced {
-        padding: 1.5rem 2rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .activity-list-enhanced {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .activity-item-enhanced {
-        padding: 1.5rem 2rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-        transition: var(--transition);
-    }
-
-    .activity-item-enhanced:hover {
-        background: rgba(8, 145, 178, 0.03);
-    }
-
-    .activity-item-enhanced:last-child {
-        border-bottom: none;
-    }
-
-    .activity-icon-enhanced {
-        width: 48px;
-        height: 48px;
-        border-radius: var(--border-radius);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        flex-shrink: 0;
-    }
-
-    .activity-item-enhanced.order .activity-icon-enhanced {
-        background: rgba(245, 158, 11, 0.15);
-        color: var(--secondary-color);
-    }
-
-    .activity-item-enhanced.sale .activity-icon-enhanced {
-        background: rgba(16, 185, 129, 0.15);
-        color: var(--success-color);
-    }
-
-    .activity-item-enhanced.kitchen .activity-icon-enhanced {
-        background: rgba(59, 130, 246, 0.15);
-        color: var(--info-color);
-    }
-
-    .activity-content-enhanced {
-        flex: 1;
-    }
-
-    .activity-title-enhanced {
-        font-weight: 600;
-        color: var(--dark-color);
-        margin: 0 0 0.25rem 0;
-        font-size: 0.95rem;
-    }
-
-    .activity-subtitle-enhanced {
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin: 0;
-        line-height: 1.3;
-    }
-
-    .activity-meta-enhanced {
-        text-align: right;
-        flex-shrink: 0;
-    }
-
-    .activity-value-enhanced {
-        font-weight: 700;
-        color: var(--success-color);
-        font-size: 0.95rem;
-    }
-
-    .activity-time-enhanced {
-        font-size: 0.8rem;
-        color: #9ca3af;
-        font-weight: 500;
-        margin-top: 0.25rem;
-    }
-
-    /* Enhanced Status Badges */
-    .status-badge-enhanced {
-        padding: 0.4rem 1rem;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        backdrop-filter: blur(10px);
-    }
-
-    .status-badge-enhanced.success {
-        background: rgba(16, 185, 129, 0.15);
-        color: var(--success-color);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .status-badge-enhanced.warning {
-        background: rgba(245, 158, 11, 0.15);
-        color: var(--warning-color);
-        border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .status-badge-enhanced.danger {
-        background: rgba(239, 68, 68, 0.15);
-        color: var(--danger-color);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .status-badge-enhanced.primary {
-        background: rgba(8, 145, 178, 0.15);
-        color: var(--primary-color);
-        border: 1px solid rgba(8, 145, 178, 0.3);
-    }
-
-    .status-badge-enhanced.info {
-        background: rgba(59, 130, 246, 0.15);
-        color: var(--info-color);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
+    <style>
+        /* Dashboard Welcome - Simplificado */
         .dashboard-welcome {
-            padding: 1.5rem;
-            text-align: center;
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 8px 24px rgba(8, 145, 178, 0.3);
         }
 
         .welcome-text {
             font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
-        .enhanced-stats-value {
-            font-size: 1.8rem;
+        .welcome-subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
         }
 
-        .quick-actions-enhanced {
+        .current-time {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Metric Cards - Simplificados */
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+            height: 100%;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .metric-card.sales {
+            border-color: #0891b2;
+        }
+
+        .metric-card.orders {
+            border-color: #f59e0b;
+        }
+
+        .metric-card.products {
+            border-color: #10b981;
+        }
+
+        .metric-card.tables {
+            border-color: #8b5cf6;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .metric-icon.sales {
+            background: #0891b2;
+        }
+
+        .metric-icon.orders {
+            background: #f59e0b;
+        }
+
+        .metric-icon.products {
+            background: #10b981;
+        }
+
+        .metric-icon.tables {
+            background: #8b5cf6;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0.5rem 0;
+        }
+
+        .metric-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .metric-footer {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Quick Actions - Grid Melhorado */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid #f3f4f6;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-card:hover {
+            border-color: #0891b2;
+            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.15);
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .action-card.primary .action-icon {
+            background: #e0f2fe;
+            color: #0891b2;
+        }
+
+        .action-card.warning .action-icon {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .action-card.success .action-icon {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .action-card.info .action-icon {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .action-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-subtitle {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* Charts - Container melhorado */
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .chart-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            background: #fafafa;
+        }
+
+        .chart-body {
             padding: 1.5rem;
         }
 
-        .action-btn-enhanced {
+        .chart-container {
+            position: relative;
+            height: 280px;
+        }
+
+        /* Tables Section */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Table Status Grid */
+        .table-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table-card {
             padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid;
         }
 
-        .activity-header-enhanced {
-            padding: 1rem 1.5rem;
+        .table-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .activity-item-enhanced {
-            padding: 1rem 1.5rem;
+        .table-card.available {
+            background: #ecfdf5;
+            border-color: #10b981;
         }
-    }
 
-    /* Loading animations */
-    .fade-in-up {
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    .fade-in-delay-1 { animation-delay: 0.1s; }
-    .fade-in-delay-2 { animation-delay: 0.2s; }
-    .fade-in-delay-3 { animation-delay: 0.3s; }
-    .fade-in-delay-4 { animation-delay: 0.4s; }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
+        .table-card.occupied {
+            background: #fef3c7;
+            border-color: #f59e0b;
         }
-        to {
-            opacity: 1;
-            transform: translateY(0);
+
+        .table-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
         }
-    }
-</style>
+
+        /* Top Products */
+        .product-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+
+        .product-item:hover {
+            background: #f9fafb;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 1rem;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            color: white;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #fb923c, #f97316);
+            color: white;
+        }
+
+        .rank-other {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* Alerts */
+        .alert-card {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fbbf24;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* Trend Indicator */
+        .trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .trend.up {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .trend.down {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-welcome {
+                padding: 1.5rem;
+            }
+
+            .welcome-text {
+                font-size: 1.5rem;
+            }
+
+            .metric-value {
+                font-size: 1.5rem;
+            }
+
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 220px;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
-    <!-- Dashboard Welcome -->
-    <div class="dashboard-welcome fade-in-up">
+    <!-- Welcome Header -->
+    <div class="dashboard-welcome">
         <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1 class="welcome-text">Bem-vindo de volta, {{ auth()->user()->name }}!</h1>
-                <p class="welcome-subtitle">Aqui está o resumo das suas operações de hoje</p>
+            <div class="col-md-8">
+                <h1 class="welcome-text">Olá, {{ auth()->user()->name }}!</h1>
+                <p class="welcome-subtitle mb-0">Resumo das operações de hoje</p>
             </div>
-            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
                 <div class="current-time">
                     <i class="mdi mdi-clock-outline me-2"></i>
                     <span id="current-time">{{ date('H:i - d/m/Y') }}</span>
@@ -534,434 +418,396 @@
         </div>
     </div>
 
-    <!-- Enhanced Stats Cards - TAMANHO REDUZIDO -->
-    <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="enhanced-stats-card revenue fade-in-up fade-in-delay-1">
-                <div class="enhanced-stats-icon">
-                    <i class="mdi mdi-cash-multiple"></i>
+    <!-- KPIs Principais -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card sales">
+                <div class="metric-header">
+                    <div class="metric-icon sales">
+                        <i class="mdi mdi-cash-multiple"></i>
+                    </div>
                 </div>
-                <div class="enhanced-stats-value text-primary">
-                    MZN {{ number_format($totalSalesToday, 2, ',', '.') }}
-                </div>
-                <div class="enhanced-stats-label">Vendas Hoje</div>
-                <div class="enhanced-stats-trend {{ $isPositive ? 'positive' : 'negative' }}">
-                    <i class="mdi {{ $isPositive ? 'mdi-trending-up' : 'mdi-trending-down' }}"></i>
-                    {{ $isPositive ? '+' : '' }}{{ number_format($salesChange, 1, ',', '.') }}% vs ontem
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="enhanced-stats-card orders fade-in-up fade-in-delay-2">
-                <div class="enhanced-stats-icon">
-                    <i class="mdi mdi-receipt-text"></i>
-                </div>
-                <div class="enhanced-stats-value text-warning">
-                    {{ $completedOrdersToday }}
-                </div>
-                <div class="enhanced-stats-label">Pedidos Hoje</div>
-                <div class="enhanced-stats-trend {{ $isOrdersPositive ? 'positive' : 'negative' }}">
-                    <i class="mdi {{ $isOrdersPositive ? 'mdi-trending-up' : 'mdi-trending-down' }}"></i>
-                    {{ $isOrdersPositive ? '+' : '' }}{{ number_format($ordersChange, 1, ',', '.') }}% vs ontem
+                <div class="metric-label">Vendas Hoje</div>
+                <div class="metric-value">{{ number_format($totalSalesToday, 0) }}</div>
+                <div class="metric-footer">
+                    <small class="text-muted">Ontem: {{ number_format($yesterdaySales, 0) }}</small>
+                    <span class="trend {{ $isPositive ? 'up' : 'down' }}">
+                        <i class="mdi mdi-{{ $isPositive ? 'trending-up' : 'trending-down' }}"></i>
+                        {{ number_format(abs($salesChange), 1) }}%
+                    </span>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="enhanced-stats-card tables fade-in-up fade-in-delay-3">
-                <div class="enhanced-stats-icon">
-                    <i class="mdi mdi-table-chair"></i>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card orders">
+                <div class="metric-header">
+                    <div class="metric-icon orders">
+                        <i class="mdi mdi-calendar-month"></i>
+                    </div>
                 </div>
-                <div class="enhanced-stats-value text-success">
-                    {{ $occupiedTables }}/{{ $tables->count() }}
-                </div>
-                <div class="enhanced-stats-label">Mesas Ocupadas</div>
-                <div class="enhanced-stats-trend neutral">
-                    <i class="mdi mdi-information-outline"></i>
-                    {{ $availableTables }} mesas livres
+                <div class="metric-label">Vendas do Mês</div>
+                <div class="metric-value">{{ number_format($totalSalesThisMonth, 0) }}</div>
+                <div class="metric-footer">
+                    <small class="text-muted">{{ \Carbon\Carbon::now()->format('F Y') }}</small>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-6 col-md-6">
-            <div class="enhanced-stats-card alerts fade-in-up fade-in-delay-4">
-                <div class="enhanced-stats-icon">
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card products">
+                <div class="metric-header">
+                    <div class="metric-icon products">
+                        <i class="mdi mdi-receipt"></i>
+                    </div>
+                </div>
+                <div class="metric-label">Pedidos Hoje</div>
+                <div class="metric-value">{{ $openOrders }}</div>
+                <div class="metric-footer">
+                    <small class="text-muted">{{ $completedOrdersToday }} finalizados</small>
+                    @if ($ordersChange != 0)
+                        <span class="trend {{ $isOrdersPositive ? 'up' : 'down' }}">
+                            <i class="mdi mdi-{{ $isOrdersPositive ? 'trending-up' : 'trending-down' }}"></i>
+                            {{ number_format(abs($ordersChange), 1) }}%
+                        </span>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card tables">
+                <div class="metric-header">
+                    <div class="metric-icon tables">
+                        <i class="mdi mdi-package-variant"></i>
+                    </div>
+                </div>
+                <div class="metric-label">Produtos</div>
+                <div class="metric-value">{{ $totalProducts }}</div>
+                <div class="metric-footer">
+                    <small class="text-{{ $lowStockProducts->count() > 0 ? 'danger' : 'success' }}">
+                        <i class="mdi mdi-{{ $lowStockProducts->count() > 0 ? 'alert' : 'check' }}-circle"></i>
+                        {{ $lowStockProducts->count() }} estoque baixo
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-grid">
+        <a href="{{ route('pos.index') }}" class="action-card primary">
+            <div class="action-icon">
+                <i class="mdi mdi-point-of-sale"></i>
+            </div>
+            <div>
+                <div class="action-title">Abrir PDV</div>
+                <p class="action-subtitle">Nova venda rápida</p>
+            </div>
+        </a>
+
+        <a href="{{ route('tables.index') }}" class="action-card warning">
+            <div class="action-icon">
+                <i class="mdi mdi-plus-circle"></i>
+            </div>
+            <div>
+                <div class="action-title">Novo Pedido</div>
+                <p class="action-subtitle">Criar pedido mesa</p>
+            </div>
+        </a>
+
+        <a href="{{ route('products.create') }}" class="action-card success">
+            <div class="action-icon">
+                <i class="mdi mdi-food-variant"></i>
+            </div>
+            <div>
+                <div class="action-title">Add Produto</div>
+                <p class="action-subtitle">Cadastrar item</p>
+            </div>
+        </a>
+
+        <a href="{{ route('reports.index') }}" class="action-card info">
+            <div class="action-icon">
+                <i class="mdi mdi-chart-line"></i>
+            </div>
+            <div>
+                <div class="action-title">Relatórios</div>
+                <p class="action-subtitle">Ver análises</p>
+            </div>
+        </a>
+    </div>
+
+    <!-- Alerta Estoque Baixo -->
+    @if ($lowStockProducts->count() > 0)
+        <div class="alert-card mb-4">
+            <div class="alert-header">
+                <div class="alert-icon">
                     <i class="mdi mdi-alert-circle"></i>
                 </div>
-                <div class="enhanced-stats-value text-danger">
-                    {{ $lowStockProducts->count() }}
-                </div>
-                <div class="enhanced-stats-label">Produtos em Alerta</div>
-                <div class="enhanced-stats-trend negative">
-                    <i class="mdi mdi-alert"></i>
-                    Reabastecer urgente!
-                </div>
+                <h5 class="mb-0">{{ $lowStockProducts->count() }} produto(s) com estoque baixo</h5>
             </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions Enhanced -->
-    <div class="quick-actions-enhanced mb-4 fade-in-up fade-in-delay-2">
-        <h3 class="mb-3">
-            <i class="mdi mdi-lightning-bolt text-warning me-2"></i>
-            Ações Rápidas
-        </h3>
-        <div class="row g-3">
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('pos.index') }}" class="action-btn-enhanced primary">
-                    <div class="action-icon-enhanced">
-                        <i class="mdi mdi-point-of-sale"></i>
-                    </div>
-                    <div class="action-text-enhanced">
-                        <h6 class="action-title-enhanced">Abrir PDV</h6>
-                        <p class="action-subtitle-enhanced">Realizar nova venda direta</p>
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('tables.index') }}" class="action-btn-enhanced secondary">
-                    <div class="action-icon-enhanced">
-                        <i class="mdi mdi-plus-circle"></i>
-                    </div>
-                    <div class="action-text-enhanced">
-                        <h6 class="action-title-enhanced">Novo Pedido</h6>
-                        <p class="action-subtitle-enhanced">Criar pedido para mesa</p>
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('products.create') }}" class="action-btn-enhanced success">
-                    <div class="action-icon-enhanced">
-                        <i class="mdi mdi-food-variant"></i>
-                    </div>
-                    <div class="action-text-enhanced">
-                        <h6 class="action-title-enhanced">Adicionar Produto</h6>
-                        <p class="action-subtitle-enhanced">Cadastrar novo item</p>
-                    </div>
-                </a>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('reports.index') }}" class="action-btn-enhanced info">
-                    <div class="action-icon-enhanced">
-                        <i class="mdi mdi-chart-line"></i>
-                    </div>
-                    <div class="action-text-enhanced">
-                        <h6 class="action-title-enhanced">Ver Relatórios</h6>
-                        <p class="action-subtitle-enhanced">Análises detalhadas</p>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <div class="row">
-        <!-- Recent Orders Table Enhanced -->
-        <div class="col-lg-8 mb-4">
-            <div class="activity-card-enhanced fade-in-up fade-in-delay-3">
-                <div class="activity-header-enhanced">
-                    <h5 class="mb-0">
-                        <i class="mdi mdi-receipt text-primary me-2"></i>
-                        Pedidos Recentes
-                    </h5>
-                    <a href="{{ route('orders.index') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="mdi mdi-arrow-right"></i>
-                        Ver Todos
-                    </a>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Estoque</th>
+                            <th>Mínimo</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($lowStockProducts->take(5) as $product)
                             <tr>
-                                <th class="border-0">Pedido</th>
-                                <th class="border-0">Mesa</th>
-                                <th class="border-0">Cliente</th>
-                                <th class="border-0">Total</th>
-                                <th class="border-0">Status</th>
-                                <th class="border-0">Ação</th>
+                                <td><strong>{{ $product->name }}</strong></td>
+                                <td><span class="badge bg-danger">{{ $product->stock_quantity }}</span></td>
+                                <td>{{ $product->min_stock_level }}</td>
+                                <td>
+                                    <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-warning">
+                                        Ajustar
+                                    </a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentOrders as $order)
-                                <tr>
-                                    <td>
-                                        <strong class="text-primary order-id">
-                                            #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
-                                        </strong>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-light text-dark">
-                                            Mesa {{ $order->table->number ?? 'N/A' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {{ $order->client->name ?? 'Cliente não identificado' }}
-                                    </td>
-                                    <td>
-                                        <strong>MZN {{ number_format($order->total_amount, 2, ',', '.') }}</strong>
-                                    </td>
-                                    <td>
-                                        @php
-                                            $statusConfig = [
-                                                'completed' => ['class' => 'warning', 'text' => 'Finalizado', 'icon' => 'mdi-check'],
-                                                'active' => ['class' => 'primary', 'text' => 'Em Preparo', 'icon' => 'mdi-clock'],
-                                                'pending' => ['class' => 'info', 'text' => 'Pendente', 'icon' => 'mdi-clock-outline'],
-                                                'canceled' => ['class' => 'danger', 'text' => 'Cancelado', 'icon' => 'mdi-close'],
-                                                'paid' => ['class' => 'success', 'text' => 'Pago', 'icon' => 'mdi-check-all'],
-                                            ];
-                                            $config = $statusConfig[$order->status] ?? ['class' => 'secondary', 'text' => ucfirst($order->status), 'icon' => 'mdi-help'];
-                                        @endphp
-                                        <span class="status-badge-enhanced {{ $config['class'] }}">
-                                            <i class="{{ $config['icon'] }}"></i>
-                                            {{ $config['text'] }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('orders.show', $order->id) }}" 
-                                           class="btn btn-outline-primary btn-sm"
-                                           data-bs-toggle="tooltip"
-                                           title="Ver Detalhes">
-                                            <i class="mdi mdi-eye"></i>
-                                        </a>
-                                         <a href="{{ route('orders.edit', $order->id) }}" 
-                                           class="btn btn-outline-warning btn-sm"
-                                           data-bs-toggle="tooltip"
-                                           title="Editar Pedido">
-                                            <i class="mdi mdi-pen"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center py-4">
-                                        <i class="mdi mdi-receipt text-muted" style="font-size: 2rem;"></i>
-                                        <p class="mt-2 mb-0 text-muted">Nenhum pedido recente encontrado</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
+    <!-- Charts -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-chart-line text-primary"></i>
+                        Vendas por Hora - Hoje
+                    </h6>
+                </div>
+                <div class="chart-body">
+                    <div class="chart-container">
+                        <canvas id="hourlySalesChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Top Products -->
-        <div class="col-lg-4">
-            <div class="activity-card-enhanced fade-in-up fade-in-delay-4">
-                <div class="activity-header-enhanced">
-                    <h5 class="mb-0">
-                        <i class="mdi mdi-star text-warning me-2"></i>
-                        Top Produtos
-                    </h5>
-                    <a href="{{ route('reports.index') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="mdi mdi-chart-bar"></i>
-                        Relatórios
-                    </a>
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-chart-bar text-info"></i>
+                        Últimos 7 Dias
+                    </h6>
                 </div>
-                <div class="activity-list-enhanced">
+                <div class="chart-body">
+                    <div class="chart-container">
+                        <canvas id="dailySalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="row g-3">
+        <!-- Top 5 Produtos -->
+        <div class="col-lg-4">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-trophy text-warning"></i>
+                        Top 5 Produtos
+                    </h6>
+                </div>
+                <div class="chart-body p-0">
                     @forelse($topProducts as $index => $product)
-                        <div class="activity-item-enhanced">
-                            <div class="activity-icon-enhanced" style="
-                                background: {{ $index == 0 ? 'rgba(245, 158, 11, 0.15)' : ($index == 1 ? 'rgba(107, 114, 128, 0.15)' : 'rgba(194, 65, 12, 0.15)') }};
-                                color: {{ $index == 0 ? '#f59e0b' : ($index == 1 ? '#6b7280' : '#c2410c') }};
-                            ">
-                                <i class="mdi {{ $index == 0 ? 'mdi-crown' : ($index == 1 ? 'mdi-medal' : 'mdi-numeric-' . ($index + 1)) }}"></i>
+                        <div class="product-item">
+                            <div class="product-rank rank-{{ $index < 3 ? $index + 1 : 'other' }}">
+                                {{ $index + 1 }}
                             </div>
-                            <div class="activity-content-enhanced">
-                                <h6 class="activity-title-enhanced">{{ $product->name }}</h6>
-                                <p class="activity-subtitle-enhanced">
-                                    {{ number_format($product->total_sold) }} vendidos
-                                </p>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">{{ $product->name }}</div>
+                                <small class="text-muted">{{ $product->total_sold }} vendidos</small>
                             </div>
-                            <div class="activity-meta-enhanced">
-                                <div class="activity-value-enhanced">
-                                    MZN {{ number_format($product->total_revenue, 0, ',', '.') }}
-                                </div>
+                            <div class="text-end">
+                                <strong>{{ number_format($product->total_revenue, 0) }}</strong>
+                                <small class="d-block text-muted">MZN</small>
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-4">
-                            <i class="mdi mdi-food-variant text-muted" style="font-size: 2rem;"></i>
-                            <p class="mt-2 mb-0 text-muted">Nenhum produto vendido este mês</p>
+                        <div class="text-center py-5">
+                            <i class="mdi mdi-information-outline display-4 text-muted"></i>
+                            <p class="text-muted mt-2">Sem dados</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        <!-- Status das Mesas -->
+        <div class="col-lg-4">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="mdi mdi-table-chair text-success"></i>
+                            Mesas
+                        </h6>
+                        <div>
+                            <span class="badge bg-success">{{ $availableTables }}</span>
+                            <span class="badge bg-warning">{{ $occupiedTables }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div class="table-status-grid">
+                        @foreach ($tables as $table)
+                            @php
+                                $activeOrder = $table->orders->whereIn('status', ['active', 'completed'])->first();
+                                $hasActiveOrder = !is_null($activeOrder);
+                            @endphp
+
+                            <div class="table-card {{ $hasActiveOrder ? 'occupied' : 'available' }}"
+                                onclick="window.location.href='{{ $hasActiveOrder ? route('orders.edit', $activeOrder->id) : route('tables.create-order', $table->id) }}'">
+
+                                <div class="d-flex flex-column align-items-center">
+                                    <i
+                                        class="mdi mdi-table-chair {{ $hasActiveOrder ? 'text-warning' : 'text-success' }} fs-3"></i>
+                                    <div class="table-number">Mesa {{ $table->number }}</div>
+                                    <small class="text-muted">{{ $table->capacity }} lug</small>
+
+                                    @if ($hasActiveOrder)
+                                        <span class="badge bg-primary mt-1">
+                                            Pedido #{{ $activeOrder->id }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Pedidos Recentes -->
+        <div class="col-lg-4">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="mdi mdi-receipt text-info"></i>
+                            Pedidos Hoje
+                        </h6>
+                        <a href="{{ route('orders.index') }}" class="btn btn-sm btn-link">
+                            Ver todos
+                        </a>
+                    </div>
+                </div>
+                <div class="chart-body p-0" style="max-height: 400px; overflow-y: auto;">
+                    @forelse($recentOrders as $order)
+                        <div class="product-item">
+                            <div>
+                                <strong>#{{ $order->id }}</strong>
+                                <small class="d-block text-muted">Mesa {{ $order->table->number ?? '-' }}</small>
+                            </div>
+                            <div class="ms-auto text-end">
+                                <strong>{{ number_format($order->total_amount, 0) }}</strong>
+                                <small class="d-block">
+                                    @php
+                                        $badges = [
+                                            'pending' => 'secondary',
+                                            'active' => 'info',
+                                            'completed' => 'success',
+                                            'paid' => 'success',
+                                        ];
+                                    @endphp
+                                    <span class="badge bg-{{ $badges[$order->status] ?? 'secondary' }}">
+                                        {{ $order->status }}
+                                    </span>
+                                </small>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-5">
+                            <i class="mdi mdi-information-outline display-4 text-muted"></i>
+                            <p class="text-muted mt-2">Sem pedidos</p>
                         </div>
                     @endforelse
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Low Stock Alert -->
-    @if($lowStockProducts->count() > 0)
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="activity-card-enhanced fade-in-up fade-in-delay-4">
-                    <div class="activity-header-enhanced">
-                        <h5 class="mb-0">
-                            <i class="mdi mdi-alert-circle text-danger me-2"></i>
-                            Produtos com Estoque Baixo
-                        </h5>
-                        <a href="{{ route('products.index') }}?filter=low_stock" class="btn btn-outline-danger btn-sm">
-                            <i class="mdi mdi-package-variant"></i>
-                            Gerenciar Estoque
-                        </a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="border-0">Produto</th>
-                                    <th class="border-0">Categoria</th>
-                                    <th class="border-0">Estoque Atual</th>
-                                    <th class="border-0">Estoque Mínimo</th>
-                                    <th class="border-0">Status</th>
-                                    <th class="border-0">Ação</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($lowStockProducts->take(5) as $product)
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="activity-icon-enhanced me-2" style="width: 32px; height: 32px; background: rgba(239, 68, 68, 0.1); color: var(--danger-color);">
-                                                    <i class="mdi mdi-package-variant-closed" style="font-size: 1rem;"></i>
-                                                </div>
-                                                <strong>{{ $product->name }}</strong>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark">
-                                                {{ $product->category->name ?? 'N/A' }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $product->stock_quantity == 0 ? 'bg-danger' : 'bg-warning' }} text-white">
-                                                {{ $product->stock_quantity }} {{ $product->unit ?? 'un' }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $product->min_stock_level }} {{ $product->unit ?? 'un' }}</td>
-                                        <td>
-                                            @if($product->stock_quantity == 0)
-                                                <span class="status-badge-enhanced danger">
-                                                    <i class="mdi mdi-close-circle"></i>
-                                                    Esgotado
-                                                </span>
-                                            @else
-                                                <span class="status-badge-enhanced warning">
-                                                    <i class="mdi mdi-alert"></i>
-                                                    Baixo
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('products.edit', $product->id) }}" 
-                                               class="btn btn-outline-primary btn-sm"
-                                               data-bs-toggle="tooltip"
-                                               title="Editar Produto">
-                                                <i class="mdi mdi-pencil"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    @if($lowStockProducts->count() > 5)
-                        <div class="text-center p-3 border-top">
-                            <a href="{{ route('products.index') }}?filter=low_stock" class="btn btn-link">
-                                Ver todos os {{ $lowStockProducts->count() }} produtos com estoque baixo
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    @endif
 @endsection
 
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Atualizar relógio em tempo real
+    <script>
+        // Atualizar relógio
         function updateTime() {
             const now = new Date();
-            const timeString = now.toLocaleString('pt-PT', {
-                hour: '2-digit',
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-            const timeElement = document.getElementById('current-time');
-            if (timeElement) {
-                timeElement.textContent = timeString;
-            }
+            document.getElementById('current-time').textContent =
+                now.toLocaleString('pt-PT', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
         }
-
-        // Inicializar relógio
         updateTime();
-        setInterval(updateTime, 60000); // Atualizar a cada minuto
+        setInterval(updateTime, 60000);
 
-        // Inicializar tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        // Adicionar efeitos de hover suaves nos cards
-        const enhancedCards = document.querySelectorAll('.enhanced-stats-card, .action-btn-enhanced');
-        enhancedCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                if (!this.style.transform.includes('translateY')) {
-                    this.style.transform = 'translateY(-5px)';
+        // Gráficos
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    cornerRadius: 8
                 }
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (val) => val + ' MZN'
+                    }
+                }
+            }
+        };
+
+        // Vendas por Hora
+        new Chart(document.getElementById('hourlySalesChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($hourlySalesData->pluck('hour')),
+                datasets: [{
+                    data: @json($hourlySalesData->pluck('value')),
+                    backgroundColor: '#0891b2',
+                    borderRadius: 6
+                }]
+            },
+            options: chartConfig
         });
 
-        // Sistema de notificações toast
-        function showDashboardNotification(message, type = 'info') {
-            const toastContainer = document.getElementById('toast-container') || createToastContainer();
-            
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-bg-${type} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="mdi mdi-information me-2"></i>
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            
-            toastContainer.appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
-            });
-        }
-
-        function createToastContainer() {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'position-fixed top-0 end-0 p-3';
-            container.style.zIndex = '9999';
-            document.body.appendChild(container);
-            return container;
-        }
-
-        // Expor função globalmente
-        window.showDashboardNotification = showDashboardNotification;
-    });
-</script>
+        // Vendas 7 Dias
+        new Chart(document.getElementById('dailySalesChart'), {
+            type: 'line',
+            data: {
+                labels: @json($dailySalesData->pluck('date')),
+                datasets: [{
+                    data: @json($dailySalesData->pluck('value')),
+                    borderColor: '#0891b2',
+                    backgroundColor: 'rgba(8, 145, 178, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: chartConfig
+        });
+    </script>
 @endpush

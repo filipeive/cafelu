@@ -6,16 +6,15 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Illuminate\View\View;
 
-class ProfileController extends AppBaseController
-    {
-        /**
-         * Display the user's profile form.
-         */
+class ProfileController extends Controller
+{
+    /**
+     * Display the user's profile form.
+     */
     public function edit(Request $request): View
     {
         $user = $request->user();
@@ -44,14 +43,14 @@ class ProfileController extends AppBaseController
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:users,email,' . $user->id,
-            'role_id' => 'required|exists:roles,id',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role'     => 'required|in:' . implode(',', array_keys(User::rolesList())),
             'is_active' => 'boolean',
         ]);
 
         // Verificar se o usuário pode alterar a própria função
-        if (!$user->isAdmin() && $validated['role_id'] != $user->role_id) {
-            return $this->error('profile.edit', 'Você não tem permissão para alterar sua função.');
+        if (!$user->isAdmin() && $validated['role'] != $user->role) {
+            return redirect()->back()->with('error', 'Você não tem permissão para alterar sua função.');
         }
 
         $user->fill($validated);
@@ -62,7 +61,7 @@ class ProfileController extends AppBaseController
 
         $user->save();
 
-        return $this->success('profile.edit', 'Perfil atualizado com sucesso!');
+        return redirect()->back()->with('success', 'Perfil atualizado com sucesso!');
     }
 
     /**
@@ -76,17 +75,20 @@ class ProfileController extends AppBaseController
 
         $user = $request->user();
 
-        // Deletar foto antiga se existir
-        if ($user->photo_path) {
-            Storage::disk('public')->delete($user->photo_path);
+        // Deletar foto antiga se existir - CORRIGIDO
+        if ($user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
         }
 
         // Salvar nova foto
         $photoPath = $request->file('photo')->store('user-photos', 'public');
-        $user->update(['photo_path' => $photoPath]);
+        
+        // CORRIGIDO: Usar profile_photo_path
+        $user->update(['profile_photo_path' => $photoPath]);
 
-        return $this->success('profile.edit', 'Foto de perfil atualizada com sucesso!');
+        return redirect()->back()->with('success', 'Foto de perfil atualizada com sucesso!');
     }
+
 
     /**
      * Update the user's password.
@@ -102,7 +104,7 @@ class ProfileController extends AppBaseController
             'password' => Hash::make($validated['password']),
         ]);
 
-        return $this->success('profile.edit', 'Senha atualizada com sucesso!');
+        return redirect()->back()->with('success', 'Senha atualizada com sucesso!');
     }
 
     /**
@@ -116,14 +118,9 @@ class ProfileController extends AppBaseController
 
         $user = $request->user();
 
-        // Evitar exclusão de admin (opcional)
-        if ($user->hasRole('admin')) {
-            return $this->error('profile.edit', 'Não é possível excluir contas de administrador.');
-        }
-
-        // Deletar foto de perfil se existir
-        if ($user->photo_path) {
-            Storage::disk('public')->delete($user->photo_path);
+        // Deletar foto de perfil se existir - CORRIGIDO
+        if ($user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
         }
 
         $userName = $user->name;
@@ -134,13 +131,13 @@ class ProfileController extends AppBaseController
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return $this->success('/', "Conta de {$userName} excluída com sucesso!");
+        return redirect('/')->with('success', "Conta de {$userName} excluída com sucesso!");
     }
 
     /**
      * Show user statistics and dashboard
      */
-    public function stats()
+    public function stats(): View
     {
         $user = auth()->user();
 
@@ -208,17 +205,16 @@ class ProfileController extends AppBaseController
     /**
      * Show user profile with basic info
      */
-    public function show()
+    public function show(): View
     {
         $user = auth()->user();
-
         return view('profile.show', compact('user'));
     }
 
     /**
      * Performance metrics (last 6 months)
      */
-    public function performance()
+    public function performance(): View
     {
         $user = auth()->user();
 

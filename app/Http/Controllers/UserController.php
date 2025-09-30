@@ -69,28 +69,36 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        // Validação dos dados
         $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
+            'email'    => 'required|email|unique:users,email', // email único
             'role'     => 'required|in:' . implode(',', array_keys(User::rolesList())),
             'photo'    => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        // Preparar dados para criação
         $data = $request->except(['photo', 'password_confirmation']);
+        $data['username'] = $request->email; // email como username
+        $data['password'] = Hash::make($request->password);
+        $data['is_active'] = true;
+
+        // Upload da foto, se houver
         if ($request->hasFile('photo')) {
             $data['photo_profile_path'] = $request->file('photo')->store('user-photos', 'public');
         }
 
-        $data['password'] = Hash::make($request->password);
-        $data['is_active'] = true;
-
+        // Criar usuário
         $user = User::create($data);
 
+        // Log de atividade
         $this->logActivity('create', "Criou novo usuário: {$user->name}", $user);
 
         return redirect()->route('users.index')->with('success', 'Usuário criado com sucesso!');
     }
+
+
 
     public function show(User $user)
     {
@@ -114,7 +122,7 @@ class UserController extends Controller
     {
         // Valores válidos baseados no ENUM do banco + ajuste para 'cooker'
         $validRoles = ['admin', 'manager', 'waiter', 'cooker', 'cashier', 'staff'];
-        
+
         $rules = [
             'name'  => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
@@ -130,13 +138,16 @@ class UserController extends Controller
 
         $oldName = $user->name;
 
+        // Preparar dados para atualização
         $data = $request->except(['photo', 'password', 'password_confirmation']);
-        
-        // Ajustar o valor 'cook' para 'cooker' se necessário (para compatibilidade com o ENUM)
+        $data['username'] = $request->email; // garante que username está sempre definido
+
+        // Ajustar o valor 'cook' para 'cooker' se necessário (compatibilidade com ENUM)
         if ($data['role'] === 'cook') {
             $data['role'] = 'cooker';
         }
-        
+
+        // Upload da foto
         if ($request->hasFile('photo')) {
             if ($user->photo_profile_path) {
                 Storage::disk('public')->delete($user->photo_profile_path);
@@ -144,6 +155,7 @@ class UserController extends Controller
             $data['photo_profile_path'] = $request->file('photo')->store('user-photos', 'public');
         }
 
+        // Atualizar senha se fornecida
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
             $user->activeTemporaryPasswords()->update([
@@ -152,7 +164,7 @@ class UserController extends Controller
             ]);
         }
 
-        // Garantir que is_active está sendo enviado corretamente
+        // Status ativo
         $data['is_active'] = $request->has('is_active');
 
         $user->update($data);
@@ -161,6 +173,7 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'Usuário atualizado com sucesso!');
     }
+
 
     public function destroy(User $user)
     {

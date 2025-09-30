@@ -14,15 +14,16 @@
         <div class="col-lg-4 mb-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
-                    <div class="position-relative d-inline-block mb-3">
-                        <img src="{{ $user->avatar_url }}" class="rounded-circle border border-3 border-white shadow-sm"
-                            width="120" height="120" style="object-fit: cover;">
-                        @if ($user->is_active)
+                    <div class="position-relative d-inline-block mb-3" style="width: 120px; height: 120px; overflow: hidden;">
+                        <img src="{{ $user->avatar_url }}" alt="Foto de {{ $user->name }}"
+                            class="rounded-circle border border-3 border-white shadow-sm d-block"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                            @if ($user->is_active)
                             <span
                                 class="position-absolute bottom-0 end-0 p-2 bg-success border border-light rounded-circle">
                                 <span class="visually-hidden">Ativo</span>
                             </span>
-                        @else
+                            @else
                             <span class="position-absolute bottom-0 end-0 p-2 bg-danger border border-light rounded-circle">
                                 <span class="visually-hidden">Inativo</span>
                             </span>
@@ -33,10 +34,9 @@
 
                     <span
                         class="badge 
-                            bg-{{ $user->role === 'admin' ? 'danger' : ($user->role === 'manager' ? 'primary' : 'success') }} mb-3">
+                    bg-{{ $user->role === 'admin' ? 'danger' : ($user->role === 'manager' ? 'primary' : 'success') }} mb-3">
                         {{ $user->role_display ?? ucfirst($user->role) }}
                     </span>
-
 
                     <div class="d-grid gap-2 mb-4">
                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
@@ -98,20 +98,20 @@
                                 @enderror
                             </div>
 
-                            @if (auth()->user()->is_admin)
+                            @if (auth()->user()->isAdmin())
                                 <div class="col-md-6">
-                                    <label for="role_id" class="form-label fw-semibold">Função *</label>
-                                    <select class="form-select @error('role_id') is-invalid @enderror" id="role_id"
-                                        name="role_id" required>
+                                    <label for="role" class="form-label fw-semibold">Função *</label>
+                                    <select class="form-select @error('role') is-invalid @enderror" id="role"
+                                        name="role" required>
                                         <option value="">Selecione uma função</option>
-                                        @foreach ($roles as $role)
-                                            <option value="{{ $role->id }}"
-                                                {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
-                                                {{ ucfirst($role->name) }}
+                                        @foreach ($roles as $key => $label)
+                                            <option value="{{ $key }}"
+                                                {{ old('role', $user->role) == $key ? 'selected' : '' }}>
+                                                {{ $label }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('role_id')
+                                    @error('role')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -125,8 +125,10 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Status</label>
                                 <div class="form-check form-switch">
+                                    <!-- Sempre enviar 0 se não estiver marcado -->
+                                    <input type="hidden" name="is_active" value="0">
                                     <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
-                                        {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
+                                        value="1" {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_active">Ativo</label>
                                 </div>
                             </div>
@@ -266,9 +268,7 @@
                             <label for="photo" class="form-label fw-semibold">Selecionar nova foto</label>
                             <input type="file" class="form-control @error('photo') is-invalid @enderror"
                                 id="photo" name="photo" accept="image/*" required>
-                            <div class="form-text">
-                                JPG, PNG ou GIF (máx. 2MB)
-                            </div>
+                            <div class="form-text">JPG, PNG ou GIF (máx. 2MB)</div>
                             @error('photo')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -343,41 +343,34 @@
             }
         });
 
-        // Toggle de senha
+        // Toggle visibilidade da senha
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
-            const toggleIcon = document.getElementById('toggle-' + fieldId);
-
+            const icon = document.getElementById('toggle-' + fieldId);
             if (field.type === 'password') {
                 field.type = 'text';
-                toggleIcon.className = 'fas fa-eye-slash';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
                 field.type = 'password';
-                toggleIcon.className = 'fas fa-eye';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
 
         // Reset forms
         function resetForm() {
             document.getElementById('profileForm').reset();
-            FDSMULTSERVICES.Toast.show('Alterações canceladas!', 'info');
         }
 
         function resetPasswordForm() {
             document.getElementById('passwordForm').reset();
-            FDSMULTSERVICES.Toast.show('Alterações de senha canceladas!', 'info');
         }
 
-        // Show modal if there are deletion errors
-        @if ($errors->userDeletion->isNotEmpty())
+        // Abrir modal de delete se houver erro
+        @if ($errors->has('password'))
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
             deleteModal.show();
-        @endif
-
-        // Show modal if there are photo upload errors
-        @if ($errors->has('photo'))
-            const photoModal = new bootstrap.Modal(document.getElementById('uploadPhotoModal'));
-            photoModal.show();
         @endif
     </script>
 @endpush

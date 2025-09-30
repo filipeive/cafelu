@@ -135,9 +135,9 @@ class DashboardController extends Controller
 
     // === helpers ===
 
-    private function getHourlySalesData()
+   private function getHourlySalesData()
     {
-        $data = [];
+        $data = collect(); // inicia como Collection
         $today = Carbon::today();
 
         for ($hour = 0; $hour < 24; $hour++) {
@@ -146,28 +146,29 @@ class DashboardController extends Controller
 
             $totalAmount = Sale::whereBetween('sale_date', [$startTime, $endTime])->sum('total_amount');
 
-            $data[] = [
+            $data->push([
                 'hour' => sprintf('%02d:00', $hour),
                 'value' => (float)$totalAmount
-            ];
+            ]);
         }
 
         return $data;
     }
 
+
     private function getDailySalesData()
     {
-        $data = [];
+        $data = collect();
         $startDate = Carbon::now()->subDays(6);
 
         for ($i = 0; $i < 7; $i++) {
             $date = $startDate->copy()->addDays($i);
             $totalAmount = Sale::whereDate('sale_date', $date)->sum('total_amount');
 
-            $data[] = [
+            $data->push([
                 'date' => $date->format('d/m'),
                 'value' => (float)$totalAmount
-            ];
+            ]);
         }
 
         return $data;

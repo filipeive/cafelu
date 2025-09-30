@@ -16,12 +16,13 @@ class User extends Authenticatable
     use HasFactory;
 
     protected $fillable = [
+        'username',
         'name',
         'email',
         'password',
-        'role', // agora usamos a coluna role diretamente
+        'role', 
         'is_active',
-        'photo_path',
+        'profile_photo_path', 
         'last_login_at',
     ];
 
@@ -113,8 +114,8 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): string
     {
-        return $this->photo_path
-            ? Storage::url($this->photo_path)
+        return $this->profile_photo_path
+            ? Storage::url($this->profile_photo_path)
             : 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF&size=256';
     }
 

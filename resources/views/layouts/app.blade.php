@@ -1477,7 +1477,7 @@
                         </div>
                     </div>
 
-                    @if(auth()->check())
+                    @if (auth()->check())
                         <div class="user-info">
                             <div class="user-name">{{ auth()->user()->name }}</div>
                             <div class="user-role">{{ $currentRole['name'] }}</div>
@@ -1528,7 +1528,8 @@
                         <div class="search-container">
                             <i class="mdi mdi-magnify search-icon"></i>
                             <input type="text" class="form-control search-input"
-                                placeholder="Buscar produtos, pedidos, clientes..." id="global-search">
+                                placeholder="Buscar produtos, pedidos, clientes..."
+                                id="">
                             <div class="search-results dropdown-menu" id="search-results">
                                 <div class="search-placeholder">
                                     <i class="mdi mdi-magnify"></i>
@@ -1694,7 +1695,7 @@
             <div class="search-container">
                 <i class="mdi mdi-magnify search-icon"></i>
                 <input type="text" class="form-control search-input"
-                    placeholder="Buscar produtos, pedidos, clientes..." id="global-search">
+                    placeholder="Buscar produtos, pedidos, clientes...">
                 <div class="search-results dropdown-menu" id="search-results">
                     <div class="search-placeholder">
                         <i class="mdi mdi-magnify"></i>
@@ -1966,25 +1967,27 @@
         // ===== PROFESSIONAL SEARCH MANAGER =====
         class ProfessionalSearch {
             constructor() {
-                this.searchInput = document.querySelector('.search-input');
+                this.searchInputs = document.querySelectorAll('.search-input');
                 this.searchTimeout = null;
                 this.init();
             }
 
             init() {
-                if (!this.searchInput) return;
+                if (!this.searchInputs.length) return;
 
-                this.searchInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.performSearch(e.target.value);
-                    }
-                });
+                this.searchInputs.forEach((input) => {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.performSearch(e.target.value);
+                        }
+                    });
 
-                this.searchInput.addEventListener('input', (e) => {
-                    if (e.target.value.length > 2) {
-                        this.debounceSearch(e.target.value);
-                    }
+                    input.addEventListener('input', (e) => {
+                        if (e.target.value.length > 2) {
+                            this.debounceSearch(e.target.value);
+                        }
+                    });
                 });
             }
 
@@ -1998,7 +2001,6 @@
             performSearch(query) {
                 if (query.trim().length === 0) return;
 
-                // Para Laravel, adapte a rota conforme necessário
                 const searchUrl = window.location.origin + '/search?q=' + encodeURIComponent(query);
                 window.location.href = searchUrl;
             }
@@ -2123,17 +2125,17 @@
                     </div>
             <div class="flex-shrink-0 d-flex gap-1 align-items-center">
                 ${!notification.is_read ? `
-                            <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
+                                <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
+                                        <i class="mdi mdi-check-circle"></i>
+                                    </button>
+                                </form>
+                            ` : `
+                                <span class="text-success" title="Lida">
                                     <i class="mdi mdi-check-circle"></i>
-                                </button>
-                            </form>
-                        ` : `
-                            <span class="text-success" title="Lida">
-                                <i class="mdi mdi-check-circle"></i>
-                            </span>
-                        `}
+                                </span>
+                            `}
                 <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
                     <i class="mdi mdi-arrow-right"></i>
                 </a>

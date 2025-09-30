@@ -40,6 +40,17 @@ class DashboardController extends Controller
             $ordersChange = $yesterdayOrders > 0 ? (($completedOrdersToday - $yesterdayOrders) / $yesterdayOrders * 100) : 0;
             $isOrdersPositive = $ordersChange >= 0;
 
+            // --- despesas
+            $totalExpensesToday = 0;
+            $totalExpensesMonth = 0;
+            
+            if (class_exists('\App\Models\Expense')) {
+                $totalExpensesToday = \App\Models\Expense::whereDate('expense_date', Carbon::today())->sum('amount');
+                $totalExpensesMonth = \App\Models\Expense::whereMonth('expense_date', Carbon::now()->month)
+                    ->whereYear('expense_date', Carbon::now()->year)
+                    ->sum('amount');
+            }
+
             // --- produtos
             $lowStockProducts = Product::with('category')
                 ->whereColumn('stock_quantity', '<=', 'min_stock_level')
@@ -79,6 +90,8 @@ class DashboardController extends Controller
                 'yesterdayOrders',
                 'ordersChange',
                 'isOrdersPositive',
+                'totalExpensesToday',
+                'totalExpensesMonth',
                 'lowStockProducts',
                 'outOfStockProducts',
                 'totalProducts',
@@ -135,9 +148,9 @@ class DashboardController extends Controller
 
     // === helpers ===
 
-   private function getHourlySalesData()
+    private function getHourlySalesData()
     {
-        $data = collect(); // inicia como Collection
+        $data = collect();
         $today = Carbon::today();
 
         for ($hour = 0; $hour < 24; $hour++) {
@@ -154,7 +167,6 @@ class DashboardController extends Controller
 
         return $data;
     }
-
 
     private function getDailySalesData()
     {

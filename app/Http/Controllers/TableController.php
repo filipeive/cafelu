@@ -14,14 +14,31 @@ class TableController extends Controller
      * Exibe a visualização das mesas do restaurante
      */
     public function index()
-{
-    $tables = Table::with(['orders' => function($query) {
-        $query->whereIn('status', ['active', 'completed'])
-              ->latest();
-    }])->orderBy('number')->get();
+    {
+        $tables = Table::with(['orders' => function($query) {
+            $query->whereIn('status', ['active', 'completed'])
+                ->latest();
+        }])->orderBy('number')->get();
 
-    return view('tables.index', compact('tables'));
-}
+        return view('tables.index', compact('tables'));
+    }
+
+    
+    public function store(Request $request)
+    {
+        $request->validate([
+            'number'   => 'required|string|max:50|unique:tables,number',
+            'capacity' => 'required|integer|min:1',
+        ]);
+
+        Table::create([
+            'number'   => $request->number,
+            'capacity' => $request->capacity,
+            'status'   => 'free',
+        ]);
+
+        return redirect()->route('tables.index')->with('success', 'Mesa criada com sucesso!');
+    }
 
 
     /**
@@ -39,63 +56,59 @@ class TableController extends Controller
         return redirect()->route('tables.index')->with('success', 'Status da mesa atualizado com sucesso!');
     }
 
-    /**
+     /**
      * Iniciar um novo pedido para uma mesa
      */
-    public function createOrder(Table $table)
+    public function createOrder(Request $request, Table $table)
     {
-        if ($table->hasActiveOrder()) {
-            $activeOrder = $table->activeOrder();
-            return redirect()->route('orders.edit', $activeOrder->id)
-                ->with('info', 'Esta mesa já possui um pedido ativo.');
-        }
-
         try {
+            // Validar se a mesa está em grupo e não é a principal
+            if ($table->group_id && !$table->is_main) {
+                $mainTable = Table::where('group_id', $table->group_id)
+                    ->where('is_main', true)
+                    ->first();
+                
+                return redirect()->route('tables.index')
+                    ->with('warning', "Esta mesa está agrupada. Use a Mesa {$mainTable->number} (principal) para criar pedidos.");
+            }
+
+            // Verificar se já existe pedido ativo
+            if ($table->hasActiveOrder()) {
+                $activeOrder = $table->activeOrder();
+                return redirect()->route('orders.edit', $activeOrder->id)
+                    ->with('info', 'Esta mesa já possui um pedido ativo.');
+            }
+
             DB::beginTransaction();
 
             $order = Order::create([
                 'table_id' => $table->id,
                 'user_id' => auth()->id(),
-                'status' => 'active'
+                'status' => 'active',
+                'total_amount' => 0
             ]);
-             // Criar notificação
-            \App\Services\NotificationService::newOrderNotification($order);
+
+            // Atualizar status da mesa
+            $table->update(['status' => 'occupied']);
+
+            // Criar notificação se o serviço existir
+            if (class_exists('\App\Services\NotificationService')) {
+                \App\Services\NotificationService::newOrderNotification($order);
+            }
 
             DB::commit();
 
             return redirect()->route('orders.edit', $order->id)
                 ->with('success', 'Novo pedido criado com sucesso!');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+            \Log::error('Erro ao criar pedido: ' . $e->getMessage());
+            
+            return redirect()->route('tables.index')
                 ->with('error', 'Erro ao criar pedido: ' . $e->getMessage());
         }
-    }/* 
-    public function createOrder(Table $table)
-    {
-        // Verificar se a mesa já tem um pedido ativo
-        $activeOrder = Order::where('table_id', $table->id)
-            ->whereIn('status', ['active', 'completed'])
-            ->first();
-
-        if ($activeOrder) {
-            return redirect()->route('orders.edit', $activeOrder->id);
-        }
-
-        // Criar novo pedido
-        $order = new Order();
-        $order->table_id = $table->id;
-        $order->user_id = auth()->id();
-        $order->status = 'active';
-        $order->save();
-
-        // Atualizar status da mesa
-        $table->status = 'occupied';
-        $table->save();
-
-        return redirect()->route('orders.edit', $order->id);
     }
- */
     /**
      * Unir mesas (criar um grupo)
      */

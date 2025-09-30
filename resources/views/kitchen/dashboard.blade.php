@@ -70,20 +70,9 @@
         transition: all 0.3s ease;
     }
 
-    .item-card.pending {
-        border-left-color: #fbbf24;
-        background: #fffbeb;
-    }
-
-    .item-card.preparing {
-        border-left-color: #3b82f6;
-        background: #eff6ff;
-    }
-
-    .item-card.ready {
-        border-left-color: #10b981;
-        background: #ecfdf5;
-    }
+    .item-card.pending { border-left-color: #fbbf24; background: #fffbeb; }
+    .item-card.preparing { border-left-color: #3b82f6; background: #eff6ff; }
+    .item-card.ready { border-left-color: #10b981; background: #ecfdf5; }
 
     .status-badge {
         font-size: 0.75rem;
@@ -94,20 +83,9 @@
         letter-spacing: 0.5px;
     }
 
-    .status-pending {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    .status-preparing {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .status-ready {
-        background: #d1fae5;
-        color: #065f46;
-    }
+    .status-pending { background: #fef3c7; color: #d97706; }
+    .status-preparing { background: #dbeafe; color: #1d4ed8; }
+    .status-ready { background: #d1fae5; color: #065f46; }
 
     .quick-action-btn {
         border: none;
@@ -161,6 +139,30 @@
         color: #6b7280;
     }
 
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: translateY(-50%) rotate(360deg); }
+    }
+
     @keyframes pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.5; }
@@ -169,30 +171,6 @@
     @keyframes blink {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }
-    }
-
-    .category-filter {
-        background: white;
-        border-radius: 10px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    .filter-btn {
-        margin: 0.25rem;
-        border: 2px solid transparent;
-        border-radius: 20px;
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .filter-btn.active {
-        background: #3b82f6;
-        color: white;
-        border-color: #3b82f6;
     }
 </style>
 @endpush
@@ -254,6 +232,9 @@
             <a href="{{ route('kitchen.history') }}" class="btn btn-outline-info">
                 <i class="mdi mdi-history"></i> Histórico
             </a>
+            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                <i class="mdi mdi-cog"></i> Configurações
+            </button>
         </div>
         
         <div class="d-flex gap-2">
@@ -290,7 +271,6 @@
                 </div>
 
                 <div class="card-body">
-                    <!-- Itens do Pedido -->
                     @foreach($order->items as $item)
                     <div class="item-card {{ $item->status }}" data-item-id="{{ $item->id }}">
                         <div class="d-flex justify-content-between align-items-start">
@@ -401,137 +381,499 @@
         @endforelse
     </div>
 </div>
+
+<!-- Modal de Configurações -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="mdi mdi-cog me-2"></i>Configurações da Cozinha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Sons de Notificação</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="soundsEnabled" checked>
+                        <label class="form-check-label" for="soundsEnabled">
+                            Ativar sons
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="soundVolume" class="form-label">Volume</label>
+                    <input type="range" class="form-range" id="soundVolume" 
+                           min="0" max="1" step="0.1" value="0.5">
+                    <small class="text-muted">Volume: <span id="volumeValue">50%</span></small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="refreshInterval" class="form-label">Atualização Automática</label>
+                    <select class="form-select" id="refreshInterval">
+                        <option value="15000">15 segundos</option>
+                        <option value="30000" selected>30 segundos</option>
+                        <option value="60000">1 minuto</option>
+                        <option value="0">Desativado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveSettings()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Atualização automática a cada 30 segundos
-    let refreshInterval = setInterval(refreshOrders, 30000);
-    
-    // Botão de refresh manual
-    document.getElementById('refreshOrders')?.addEventListener('click', function() {
-        refreshOrders();
-        showToast('Pedidos atualizados!', 'info');
-    });
+/**
+ * Sistema de Notificações da Cozinha - Versão Inline
+ * TODO: Mover para arquivo separado public/assets/js/kitchen-notification-system.js
+ */
+class KitchenNotificationSystem {
+    constructor() {
+        this.sounds = {
+            success: '/assets/sounds/success.mp3',
+            warning: '/assets/sounds/warning.mp3',
+            error: '/assets/sounds/error.mp3',
+            newOrder: '/assets/sounds/new-order.mp3',
+            urgent: '/assets/sounds/urgent.mp3'
+        };
+        
+        this.updateInProgress = false;
+        this.retryAttempts = 0;
+        this.maxRetries = 3;
+        
+        this.loadPreferences();
+        this.init();
+    }
 
-    // Atualizar status de item
-    document.querySelectorAll('.update-status').forEach(button => {
-        button.addEventListener('click', function() {
-            const itemId = this.dataset.itemId;
-            const status = this.dataset.status;
-            updateItemStatus(itemId, status);
-        });
-    });
+    init() {
+        this.setupEventListeners();
+        this.checkForSounds();
+        this.startAutoRefresh();
+    }
 
-    // Iniciar todos os itens de um pedido
-    document.querySelectorAll('.start-all').forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.dataset.orderId;
-            startAllItems(orderId);
-        });
-    });
-
-    // Finalizar todos os itens de um pedido
-    document.querySelectorAll('.finish-all').forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.dataset.orderId;
-            finishAllItems(orderId);
-        });
-    });
-
-    // Finalizar todos os itens em preparo
-    document.getElementById('markAllReady')?.addEventListener('click', function() {
-        if (confirm('Marcar todos os itens em preparo como prontos?')) {
-            document.querySelectorAll('.finish-all').forEach(btn => btn.click());
+    loadPreferences() {
+        const prefs = localStorage.getItem('kitchen_preferences');
+        if (prefs) {
+            const parsed = JSON.parse(prefs);
+            this.soundsEnabled = parsed.soundsEnabled ?? true;
+            this.soundVolume = parsed.soundVolume ?? 0.5;
+            this.autoRefreshInterval = parsed.autoRefreshInterval ?? 30000;
+        } else {
+            this.soundsEnabled = true;
+            this.soundVolume = 0.5;
+            this.autoRefreshInterval = 30000;
         }
-    });
+    }
 
-    // Funções AJAX
-    function updateItemStatus(itemId, status) {
-        fetch(`/kitchen/items/${itemId}/status`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ status: status })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast(data.message, 'success');
-                refreshOrders();
-            } else {
-                showToast(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            showToast('Erro ao atualizar status', 'error');
+    savePreferences() {
+        localStorage.setItem('kitchen_preferences', JSON.stringify({
+            soundsEnabled: this.soundsEnabled,
+            soundVolume: this.soundVolume,
+            autoRefreshInterval: this.autoRefreshInterval
+        }));
+    }
+
+    setupEventListeners() {
+        document.querySelectorAll('.update-status').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const itemId = button.dataset.itemId;
+                const status = button.dataset.status;
+                this.updateItemStatus(itemId, status, button);
+            });
+        });
+
+        document.querySelectorAll('.start-all').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const orderId = button.dataset.orderId;
+                this.startAllItems(orderId, button);
+            });
+        });
+
+        document.querySelectorAll('.finish-all').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const orderId = button.dataset.orderId;
+                this.finishAllItems(orderId, button);
+            });
+        });
+
+        document.getElementById('refreshOrders')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.refreshOrders(true);
+        });
+
+        document.getElementById('markAllReady')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.markAllReady();
         });
     }
 
-    function startAllItems(orderId) {
-        fetch(`/kitchen/orders/${orderId}/start-all`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    async updateItemStatus(itemId, status, button = null) {
+        if (this.updateInProgress) {
+            this.showToast('Aguarde a operação anterior concluir', 'warning');
+            return;
+        }
+
+        if (button) {
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
+            button.dataset.originalHtml = originalHTML;
+        }
+
+        this.updateInProgress = true;
+
+        try {
+            const response = await fetch(`/kitchen/items/${itemId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ status })
+            });
+
+            // Verificar se a resposta é JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta inválida do servidor. Esperado JSON, recebido: ' + contentType);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast(data.message, 'success');
-                refreshOrders();
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                this.showToast(data.message || 'Status atualizado com sucesso', 'success');
+                this.playSound('success');
+                this.retryAttempts = 0; // Resetar contador de tentativas
+                
+                // Aguardar 500ms antes de recarregar para dar feedback visual
+                setTimeout(() => {
+                    this.refreshOrders(false);
+                }, 500);
             } else {
-                showToast(data.message, 'error');
+                throw new Error(data.message || 'Erro ao atualizar status');
             }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            showToast('Erro ao iniciar itens', 'error');
-        });
+
+        } catch (error) {
+            console.error('Erro ao atualizar status:', error);
+            this.handleError(error, () => this.updateItemStatus(itemId, status, button));
+        } finally {
+            this.updateInProgress = false;
+            
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml || 'Atualizar';
+            }
+        }
     }
 
-    function finishAllItems(orderId) {
-        fetch(`/kitchen/orders/${orderId}/finish-all`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    async startAllItems(orderId, button = null) {
+        if (this.updateInProgress) {
+            this.showToast('Aguarde a operação anterior concluir', 'warning');
+            return;
+        }
+
+        const confirmed = confirm('Iniciar preparo de todos os itens pendentes?');
+        if (!confirmed) return;
+
+        if (button) {
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Iniciando...';
+            button.dataset.originalHtml = originalHTML;
+        }
+
+        this.updateInProgress = true;
+
+        try {
+            const response = await fetch(`/kitchen/orders/${orderId}/start-all`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta inválida do servidor');
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast(data.message, 'success');
-                refreshOrders();
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                this.showToast(data.message || 'Itens iniciados com sucesso', 'success');
+                this.playSound('success');
+                this.retryAttempts = 0;
+                
+                setTimeout(() => {
+                    this.refreshOrders(false);
+                }, 500);
             } else {
-                showToast(data.message, 'error');
+                throw new Error(data.message || 'Erro ao iniciar itens');
             }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            showToast('Erro ao finalizar itens', 'error');
-        });
+
+        } catch (error) {
+            console.error('Erro ao iniciar itens:', error);
+            this.handleError(error, () => this.startAllItems(orderId, button));
+        } finally {
+            this.updateInProgress = false;
+            
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml || '<i class="mdi mdi-play"></i> Iniciar Todos';
+            }
+        }
     }
 
-    function refreshOrders() {
-        // Recarregar a página ou fazer chamada AJAX para atualizar apenas o conteúdo
-        window.location.reload();
+    async finishAllItems(orderId, button = null) {
+        if (this.updateInProgress) {
+            this.showToast('Aguarde a operação anterior concluir', 'warning');
+            return;
+        }
+
+        const confirmed = confirm('Finalizar todos os itens (pendentes e em preparo)?');
+        if (!confirmed) return;
+
+        if (button) {
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Finalizando...';
+            button.dataset.originalHtml = originalHTML;
+        }
+
+        this.updateInProgress = true;
+
+        try {
+            const response = await fetch(`/kitchen/orders/${orderId}/finish-all`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta inválida do servidor');
+            }
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                this.showToast(data.message || 'Itens finalizados com sucesso', 'success');
+                this.playSound('success');
+                this.retryAttempts = 0;
+                
+                setTimeout(() => {
+                    this.refreshOrders(false);
+                }, 500);
+            } else {
+                throw new Error(data.message || 'Erro ao finalizar itens');
+            }
+
+        } catch (error) {
+            console.error('Erro ao finalizar itens:', error);
+            this.handleError(error, () => this.finishAllItems(orderId, button));
+        } finally {
+            this.updateInProgress = false;
+            
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml || '<i class="mdi mdi-check-all"></i> Finalizar Todos';
+            }
+        }
     }
 
-    // Notificação de novos pedidos (pode ser implementado com WebSockets)
-    function checkForNewOrders() {
-        // Implementar verificação de novos pedidos
-        // Pode usar polling ou WebSockets
+    async markAllReady() {
+        const preparingCount = document.querySelectorAll('.item-card.preparing').length;
+        
+        if (preparingCount === 0) {
+            this.showToast('Nenhum item em preparo para finalizar', 'info');
+            return;
+        }
+
+        const confirmed = confirm(`Finalizar ${preparingCount} itens em preparo?`);
+        if (!confirmed) return;
+
+        const finishButtons = document.querySelectorAll('.finish-all');
+        
+        for (const button of finishButtons) {
+            const orderId = button.dataset.orderId;
+            await this.finishAllItems(orderId, null);
+        }
     }
 
-    // Som de notificação para novos pedidos
-    function playNotificationSound() {
-        const audio = new Audio('/assets/sounds/notification.mp3');
-        audio.play().catch(e => console.log('Não foi possível reproduzir o som'));
+    async refreshOrders(showMessage = true) {
+        try {
+            if (showMessage) {
+                this.showToast('Atualizando pedidos...', 'info');
+            }
+            window.location.reload();
+        } catch (error) {
+            console.error('Erro ao atualizar pedidos:', error);
+            this.showToast('Erro ao atualizar pedidos', 'error');
+        }
     }
+
+    handleError(error, retryCallback) {
+        this.retryAttempts++;
+
+        if (this.retryAttempts < this.maxRetries) {
+            this.showToast(
+                `Tentando novamente... (${this.retryAttempts}/${this.maxRetries})`,
+                'warning'
+            );
+            
+            setTimeout(() => {
+                if (retryCallback && typeof retryCallback === 'function') {
+                    retryCallback();
+                }
+            }, 1000 * this.retryAttempts);
+        } else {
+            // Resetar tudo após falha máxima
+            this.retryAttempts = 0;
+            this.updateInProgress = false;
+            
+            this.showToast(
+                'Não foi possível completar a operação. Verifique a conexão e tente novamente.',
+                'error'
+            );
+            this.playSound('error');
+            
+            // Recarregar página após 2 segundos para sincronizar
+            setTimeout(() => {
+                this.refreshOrders(false);
+            }, 2000);
+        }
+    }
+
+    showToast(message, type = 'success') {
+        if (typeof window.showToast === 'function') {
+            window.showToast(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+    }
+
+    playSound(soundType) {
+        if (!this.soundsEnabled) return;
+
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            const soundConfig = {
+                success: { frequency: 800, duration: 0.15 },
+                warning: { frequency: 600, duration: 0.2 },
+                error: { frequency: 400, duration: 0.3 },
+                newOrder: { frequency: 1000, duration: 0.1 },
+                urgent: { frequency: 500, duration: 0.5 }
+            };
+
+            const config = soundConfig[soundType] || soundConfig.success;
+
+            oscillator.frequency.value = config.frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(this.soundVolume * 0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + config.duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + config.duration);
+        } catch (error) {
+            console.warn('Erro ao reproduzir som:', error);
+        }
+    }
+
+    checkForSounds() {
+        this.soundsEnabled = true;
+    }
+
+    startAutoRefresh() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
+
+        if (this.autoRefreshInterval > 0) {
+            this.refreshInterval = setInterval(() => {
+                if (!this.updateInProgress) {
+                    this.refreshOrders(false);
+                }
+            }, this.autoRefreshInterval);
+        }
+    }
+
+    getCsrfToken() {
+        const token = document.querySelector('meta[name="csrf-token"]');
+        if (!token) {
+            throw new Error('Token de segurança não encontrado');
+        }
+        return token.content;
+    }
+}
+
+// Inicializar sistema
+document.addEventListener('DOMContentLoaded', function() {
+    window.kitchenSystem = new KitchenNotificationSystem();
+    console.log('Sistema da Cozinha inicializado');
+});
+
+// Função para salvar configurações
+function saveSettings() {
+    if (window.kitchenSystem) {
+        window.kitchenSystem.soundsEnabled = document.getElementById('soundsEnabled').checked;
+        window.kitchenSystem.soundVolume = parseFloat(document.getElementById('soundVolume').value);
+        window.kitchenSystem.autoRefreshInterval = parseInt(document.getElementById('refreshInterval').value);
+        window.kitchenSystem.savePreferences();
+        
+        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+        showToast('Configurações salvas com sucesso', 'success');
+        
+        // Reiniciar auto-refresh se necessário
+        if (window.kitchenSystem.autoRefreshInterval > 0) {
+            window.kitchenSystem.startAutoRefresh();
+        }
+    }
+}
+
+// Atualizar display do volume
+document.getElementById('soundVolume')?.addEventListener('input', function() {
+    document.getElementById('volumeValue').textContent = Math.round(this.value * 100) + '%';
+});
+
+// Carregar configurações ao abrir modal
+document.getElementById('settingsModal')?.addEventListener('show.bs.modal', function() {
+    if (window.kitchenSystem) {
+        document.getElementById('soundsEnabled').checked = window.kitchenSystem.soundsEnabled;
+        document.getElementById('soundVolume').value = window.kitchenSystem.soundVolume;
+        document.getElementById('volumeValue').textContent = Math.round(window.kitchenSystem.soundVolume * 100) + '%';
+        document.getElementById('refreshInterval').value = window.kitchenSystem.autoRefreshInterval;
+    }
+});
+
+// Inicializar o sistema quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // O sistema será inicializado automaticamente pelo kitchen-notification-system.js
+    console.log('Dashboard da Cozinha carregado');
 });
 </script>
 @endpush

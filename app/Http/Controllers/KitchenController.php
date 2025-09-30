@@ -11,6 +11,8 @@ use App\Models\UserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use App\Traits\HasPermissions;
 use App\Services\NotificationService;
 
@@ -20,7 +22,6 @@ class KitchenController extends Controller
 
     public function __construct()
     {
-        // Aplicar middleware de permissão para cozinha
         $this->middleware('permission:manage_kitchen');
     }
 
@@ -29,43 +30,49 @@ class KitchenController extends Controller
      */
     public function dashboard()
     {
-        $this->logActivity('kitchen_access', null, 'Acessou dashboard da cozinha');
+        try {
+            $this->logActivity('kitchen_access', null, 'Acessou dashboard da cozinha');
 
-        // Pedidos ativos organizados por prioridade (mais antigos primeiro)
-        $activeOrders = Order::with(['items.product.category', 'table', 'user'])
-                           ->where('status', 'active')
-                           ->orderBy('created_at', 'asc')
-                           ->get();
+            $activeOrders = Order::with(['items.product.category', 'table', 'user'])
+                               ->where('status', 'active')
+                               ->orderBy('created_at', 'asc')
+                               ->get();
 
-        // Estatísticas da cozinha
-        $stats = [
-            'active_orders' => $activeOrders->count(),
-            'pending_items' => OrderItem::whereHas('order', function($query) {
-                $query->where('status', 'active');
-            })->where('status', 'pending')->count(),
-            'preparing_items' => OrderItem::whereHas('order', function($query) {
-                $query->where('status', 'active');
-            })->where('status', 'preparing')->count(),
-            'ready_items' => OrderItem::whereHas('order', function($query) {
-                $query->where('status', 'active');
-            })->where('status', 'ready')->count(),
-            'orders_completed_today' => Order::whereDate('created_at', today())
-                                           ->where('status', 'completed')
-                                           ->count()
-        ];
+            $stats = [
+                'active_orders' => $activeOrders->count(),
+                'pending_items' => OrderItem::whereHas('order', function($query) {
+                    $query->where('status', 'active');
+                })->where('status', 'pending')->count(),
+                'preparing_items' => OrderItem::whereHas('order', function($query) {
+                    $query->where('status', 'active');
+                })->where('status', 'preparing')->count(),
+                'ready_items' => OrderItem::whereHas('order', function($query) {
+                    $query->where('status', 'active');
+                })->where('status', 'ready')->count(),
+                'orders_completed_today' => Order::whereDate('created_at', today())
+                                               ->where('status', 'completed')
+                                               ->count()
+            ];
 
-        // Tempo médio de preparo (últimas 24h)
-        $avgPrepTime = $this->calculateAveragePreparationTime();
+            $avgPrepTime = $this->calculateAveragePreparationTime();
+            $itemsByCategory = $this->getActiveItemsByCategory();
 
-        // Itens por categoria para facilitar organização
-        $itemsByCategory = $this->getActiveItemsByCategory();
+            return view('kitchen.dashboard', compact(
+                'activeOrders', 
+                'stats', 
+                'avgPrepTime',
+                'itemsByCategory'
+            ));
 
-        return view('kitchen.dashboard', compact(
-            'activeOrders', 
-            'stats', 
-            'avgPrepTime',
-            'itemsByCategory'
-        ));
+        } catch (\Exception $e) {
+            Log::error('Erro no dashboard da cozinha', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('dashboard')
+                ->with('error', 'Erro ao carregar dashboard da cozinha. Tente novamente.');
+        }
     }
 
     /**
@@ -73,16 +80,26 @@ class KitchenController extends Controller
      */
     public function showOrder(Order $order)
     {
-        if ($order->status !== 'active') {
+        try {
+            if ($order->status !== 'active') {
+                return redirect()->route('kitchen.dashboard')
+                    ->with('warning', 'Este pedido não está mais ativo.');
+            }
+
+            $order->load(['items.product.category', 'table', 'user']);
+            $this->logActivity('kitchen_view_order', $order, "Visualizou pedido #{$order->id} na cozinha");
+
+            return view('kitchen.order-details', compact('order'));
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao visualizar pedido na cozinha', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+
             return redirect()->route('kitchen.dashboard')
-                ->with('warning', 'Este pedido não está mais ativo.');
+                ->with('error', 'Erro ao carregar detalhes do pedido.');
         }
-
-        $order->load(['items.product.category', 'table', 'user']);
-
-        $this->logActivity('kitchen_view_order', $order, "Visualizou pedido #{$order->id} na cozinha");
-
-        return view('kitchen.order-details', compact('order'));
     }
 
     /**
@@ -90,11 +107,20 @@ class KitchenController extends Controller
      */
     public function byCategory()
     {
-        $this->logActivity('kitchen_by_category', null, 'Acessou visualização por categoria');
+        try {
+            $this->logActivity('kitchen_by_category', null, 'Acessou visualização por categoria');
+            $itemsByCategory = $this->getActiveItemsByCategory();
+            
+            return view('kitchen.by-category', compact('itemsByCategory'));
 
-        $itemsByCategory = $this->getActiveItemsByCategory();
-        
-        return view('kitchen.by-category', compact('itemsByCategory'));
+        } catch (\Exception $e) {
+            Log::error('Erro na visualização por categoria', [
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('kitchen.dashboard')
+                ->with('error', 'Erro ao carregar categorias.');
+        }
     }
 
     /**
@@ -102,213 +128,293 @@ class KitchenController extends Controller
      */
     public function history(Request $request)
     {
-        $query = Order::with(['items.product', 'table', 'user'])
-                     ->whereIn('status', ['completed', 'paid'])
-                     ->orderBy('completed_at', 'desc');
+        try {
+            $query = Order::with(['items.product', 'table', 'user'])
+                         ->whereIn('status', ['completed', 'paid'])
+                         ->orderBy('completed_at', 'desc');
 
-        // Filtros
-        if ($request->has('date_from') && $request->date_from) {
-            $query->whereDate('completed_at', '>=', $request->date_from);
+            if ($request->has('date_from') && $request->date_from) {
+                $query->whereDate('completed_at', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to') && $request->date_to) {
+                $query->whereDate('completed_at', '<=', $request->date_to);
+            }
+
+            if ($request->has('table_id') && $request->table_id) {
+                $query->where('table_id', $request->table_id);
+            }
+
+            $orders = $query->paginate(20);
+            $tables = Table::all();
+
+            $this->logActivity('kitchen_history', null, 'Acessou histórico da cozinha');
+
+            return view('kitchen.history', compact('orders','tables'));
+
+        } catch (\Exception $e) {
+            Log::error('Erro no histórico da cozinha', [
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('kitchen.dashboard')
+                ->with('error', 'Erro ao carregar histórico.');
         }
-
-        if ($request->has('date_to') && $request->date_to) {
-            $query->whereDate('completed_at', '<=', $request->date_to);
-        }
-
-        if ($request->has('table_id') && $request->table_id) {
-            $query->where('table_id', $request->table_id);
-        }
-
-        $orders = $query->paginate(20);
-        $tables = Table::all();
-
-        $this->logActivity('kitchen_history', null, 'Acessou histórico da cozinha');
-
-        return view('kitchen.history', compact('orders','tables'));
     }
 
     /**
-     * API: Obter pedidos ativos (para atualizações em tempo real)
-     */
-    public function getActiveOrders()
-    {
-        $orders = Order::with(['items' => function($query) {
-                $query->whereIn('status', ['pending', 'preparing', 'ready'])
-                      ->with('product.category');
-            }, 'table'])
-            ->where('status', 'active')
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        return response()->json([
-            'orders' => $orders->map(function($order) {
-                return [
-                    'id' => $order->id,
-                    'table_number' => $order->table?->number ?? 'Balcão',
-                    'customer_name' => $order->customer_name,
-                    'created_at' => $order->created_at,
-                    'elapsed_time' => $order->created_at->diffInMinutes(now()),
-                    'items' => $order->items->map(function($item) {
-                        return [
-                            'id' => $item->id,
-                            'product_name' => $item->product->name,
-                            'category' => $item->product->category->name ?? 'Sem categoria',
-                            'quantity' => $item->quantity,
-                            'status' => $item->status,
-                            'notes' => $item->notes,
-                            'preparation_time' => $this->getEstimatedPrepTime($item->product),
-                        ];
-                    })
-                ];
-            }),
-            'stats' => [
-                'total_orders' => $orders->count(),
-                'total_items' => $orders->sum(fn($order) => $order->items->count()),
-                'pending_items' => $orders->sum(fn($order) => $order->items->where('status', 'pending')->count()),
-                'preparing_items' => $orders->sum(fn($order) => $order->items->where('status', 'preparing')->count()),
-                'ready_items' => $orders->sum(fn($order) => $order->items->where('status', 'ready')->count()),
-            ]
-        ]);
-    }
-
-    /**
-     * Atualizar status de um item específico
+     * Atualizar status de um item específico com validação robusta
      */
     public function updateItemStatus(Request $request, OrderItem $item)
     {
-        $request->validate([
-            'status' => 'required|in:pending,preparing,ready,delivered'
-        ]);
+        // IMPORTANTE: Verificar se é requisição AJAX primeiro
+        $isAjax = $request->ajax() || $request->wantsJson() || $request->expectsJson();
 
-        $oldStatus = $item->status;
-        $item->status = $request->status;
-        
-        // Registrar timestamp para métricas
-        switch ($request->status) {
-            case 'preparing':
-                $item->started_at = now();
-                break;
-            case 'ready':
-                $item->finished_at = now();
-                break;
-        }
+        DB::beginTransaction();
 
-        $item->save();
-
-        $this->logActivity(
-            'kitchen_update_item',
-            $item,
-            "Alterou status do item '{$item->product->name}' de '{$oldStatus}' para '{$request->status}'",
-            [
-                'order_id' => $item->order_id,
-                'product_id' => $item->product_id,
-                'old_status' => $oldStatus,
-                'new_status' => $request->status
-            ]
-        );
-
-        // Verificar se todos os itens do pedido estão prontos
-        $this->checkOrderCompletion($item->order);
-
-        // --- Resposta condicional ---
-        if ($request->expectsJson()) {
-            // Para AJAX ou fetch()
-            return response()->json([
-                'success' => true,
-                'message' => "Status atualizado para '{$request->status}'",
-                'item' => [
-                    'id' => $item->id,
-                    'status' => $item->status,
-                    'started_at' => $item->started_at,
-                    'finished_at' => $item->finished_at
-                ]
+        try {
+            // Validação
+            $validated = $request->validate([
+                'status' => 'required|in:pending,preparing,ready,delivered'
             ]);
+
+            // Verificar se o pedido está ativo
+            if ($item->order->status !== 'active') {
+                throw ValidationException::withMessages([
+                    'status' => 'Este pedido não está mais ativo.'
+                ]);
+            }
+
+            // Validar transição de status
+            if (!$this->isValidStatusTransition($item->status, $validated['status'])) {
+                throw ValidationException::withMessages([
+                    'status' => "Não é possível mudar de '{$item->status}' para '{$validated['status']}'."
+                ]);
+            }
+
+            $oldStatus = $item->status;
+            $item->status = $validated['status'];
+            
+            // Registrar timestamps
+            switch ($validated['status']) {
+                case 'preparing':
+                    $item->started_at = now();
+                    break;
+                case 'ready':
+                    $item->finished_at = now();
+                    break;
+            }
+
+            $item->save();
+
+            // Log da atividade
+            $this->logActivity(
+                'kitchen_update_item',
+                $item,
+                "Alterou status do item '{$item->product->name}' de '{$oldStatus}' para '{$validated['status']}'",
+                [
+                    'order_id' => $item->order_id,
+                    'product_id' => $item->product_id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $validated['status']
+                ]
+            );
+
+            // Verificar conclusão do pedido
+            $this->checkOrderCompletion($item->order);
+
+            DB::commit();
+
+            // Mensagem personalizada
+            $messages = [
+                'preparing' => 'Preparo iniciado com sucesso',
+                'ready' => 'Item marcado como pronto',
+                'pending' => 'Item retornou para pendente'
+            ];
+
+            $message = $messages[$validated['status']] ?? 'Status atualizado com sucesso';
+
+            // SEMPRE retornar JSON para requisições AJAX
+            if ($isAjax) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'item' => [
+                        'id' => $item->id,
+                        'status' => $item->status,
+                        'started_at' => $item->started_at,
+                        'finished_at' => $item->finished_at
+                    ]
+                ], 200);
+            }
+
+            // Resposta para request tradicional
+            return redirect()
+                ->back()
+                ->with('success', $message);
+
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            return redirect()
+                ->back()
+                ->withErrors($e->errors())
+                ->with('error', $e->getMessage());
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Erro ao atualizar status do item', [
+                'item_id' => $item->id,
+                'new_status' => $request->status,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao atualizar status. Tente novamente.'
+                ], 500);
+            }
+
+            return redirect()
+                ->back()
+                ->with('error', 'Erro ao atualizar status. Tente novamente.');
         }
-
-        // Para request normal (via formulário / browser)
-        return redirect()
-            ->back()
-            ->with('success', "Status atualizado para '{$request->status}'");
     }
-
 
     /**
      * Iniciar preparo de todos os itens de um pedido
      */
     public function startAllItems(Order $order)
     {
-        if ($order->status !== 'active') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Este pedido não está ativo'
-            ], 400);
-        }
+        DB::beginTransaction();
 
-        $updatedItems = OrderItem::where('order_id', $order->id)
-                                ->where('status', 'pending')
-                                ->update([
-                                    'status' => 'preparing',
-                                    'started_at' => now()
-                                ]);
-
-        $this->logActivity('kitchen_start_all', $order, 
-            "Iniciou preparo de todos os itens do pedido #{$order->id}",
-            ['items_updated' => $updatedItems]
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => "Preparo iniciado para {$updatedItems} itens",
-            'items_updated' => $updatedItems
-        ]);
-    }
-
-   public function finishAllItems(Order $order)
-    {
-        if ($order->status !== 'active') {
-            if (request()->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Este pedido não está ativo'
-                ], 400);
+        try {
+            if ($order->status !== 'active') {
+                throw new \Exception('Este pedido não está ativo');
             }
 
-            return redirect()->back()->with('error', 'Este pedido não está ativo');
-        }
+            $updatedItems = OrderItem::where('order_id', $order->id)
+                                    ->where('status', 'pending')
+                                    ->update([
+                                        'status' => 'preparing',
+                                        'started_at' => now()
+                                    ]);
 
-        $updatedItems = OrderItem::where('order_id', $order->id)
-            ->whereIn('status', ['pending', 'preparing'])
-            ->update([
-                'status' => 'ready',
-                'finished_at' => now()
-            ]);
+            if ($updatedItems === 0) {
+                throw new \Exception('Nenhum item pendente para iniciar');
+            }
 
-        $this->logActivity('kitchen_finish_all', $order, 
-            "Finalizou todos os itens do pedido #{$order->id}",
-            ['items_updated' => $updatedItems]
-        );
+            $this->logActivity('kitchen_start_all', $order, 
+                "Iniciou preparo de todos os itens do pedido #{$order->id}",
+                ['items_updated' => $updatedItems]
+            );
 
-        // dispara notificação para o garçom
-        NotificationService::notifyWaiterOrderReady($order);
+            DB::commit();
 
-        $this->checkOrderCompletion($order);
-
-        if (request()->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => "Todos os itens foram finalizados ({$updatedItems} itens)",
+                'message' => "Preparo iniciado para {$updatedItems} " . 
+                            ($updatedItems === 1 ? 'item' : 'itens'),
                 'items_updated' => $updatedItems
             ]);
-        }
 
-        return redirect()
-            ->route('kitchen.order.show', $order)
-            ->with('success', "Todos os itens foram finalizados ({$updatedItems} itens)");
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Erro ao iniciar todos os itens', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Finalizar todos os itens de um pedido
+     */
+    public function finishAllItems(Order $order)
+    {
+        DB::beginTransaction();
+
+        try {
+            if ($order->status !== 'active') {
+                throw new \Exception('Este pedido não está ativo');
+            }
+
+            $updatedItems = OrderItem::where('order_id', $order->id)
+                ->whereIn('status', ['pending', 'preparing'])
+                ->update([
+                    'status' => 'ready',
+                    'finished_at' => now()
+                ]);
+
+            if ($updatedItems === 0) {
+                throw new \Exception('Nenhum item para finalizar');
+            }
+
+            $this->logActivity('kitchen_finish_all', $order, 
+                "Finalizou todos os itens do pedido #{$order->id}",
+                ['items_updated' => $updatedItems]
+            );
+
+            // Notificar garçom
+            NotificationService::notifyWaiterOrderReady($order);
+
+            $this->checkOrderCompletion($order);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Todos os itens foram finalizados ({$updatedItems} " . 
+                            ($updatedItems === 1 ? 'item' : 'itens') . ")",
+                'items_updated' => $updatedItems
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Erro ao finalizar todos os itens', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 
     /**
      * Métodos auxiliares privados
      */
+
+    private function isValidStatusTransition($currentStatus, $newStatus)
+    {
+        $validTransitions = [
+            'pending' => ['preparing', 'ready'],
+            'preparing' => ['ready', 'pending'],
+            'ready' => ['preparing', 'delivered']
+        ];
+
+        return in_array($newStatus, $validTransitions[$currentStatus] ?? []);
+    }
 
     private function getActiveItemsByCategory()
     {
@@ -361,7 +467,6 @@ class KitchenController extends Controller
 
     private function getEstimatedPrepTime(Product $product)
     {
-        // Tempo estimado baseado na categoria ou configuração do produto
         $categoryTimes = [
             'Bebidas' => 2,
             'Entradas' => 10,
@@ -371,7 +476,7 @@ class KitchenController extends Controller
         ];
 
         $categoryName = $product->category->name ?? 'Outros';
-        return $categoryTimes[$categoryName] ?? 12; // Padrão 12 minutos
+        return $categoryTimes[$categoryName] ?? 12;
     }
 
     private function checkOrderCompletion(Order $order)
@@ -381,16 +486,12 @@ class KitchenController extends Controller
                                ->count();
 
         if ($pendingItems === 0) {
-            // Todos os itens estão prontos, pode notificar o garçom
             $this->notifyWaiterOrderReady($order);
         }
     }
 
     private function notifyWaiterOrderReady(Order $order)
     {
-        // Implementar notificação para o garçom
-        // Pode ser WebSocket, notificação push, etc.
-        
         $this->logActivity('kitchen_notify_ready', $order, 
             "Pedido #{$order->id} está pronto para entrega",
             ['table_number' => $order->table?->number]
@@ -399,15 +500,21 @@ class KitchenController extends Controller
 
     private function logActivity($action, $model, $description, $extraData = [])
     {
-        UserActivity::create([
-            'user_id' => Auth::id(),
-            'action' => $action,
-            'model_type' => $model ? get_class($model) : 'Kitchen',
-            'model_id' => $model?->id,
-            'description' => $description,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'extra_data' => $extraData ? json_encode($extraData) : null,
-        ]);
+        try {
+            UserActivity::create([
+                'user_id' => Auth::id(),
+                'action' => $action,
+                'model_type' => $model ? get_class($model) : 'Kitchen',
+                'model_id' => $model?->id,
+                'description' => $description,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'extra_data' => $extraData ? json_encode($extraData) : null,
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Erro ao registrar atividade', [
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

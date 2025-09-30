@@ -20,33 +20,48 @@
         <!-- Status Legend -->
         <div class="row mb-4">
             <div class="col-12">
-            <div class="card">
-                <div class="card-body py-3">
-                <div class="d-flex flex-wrap gap-4 justify-content-center align-items-center">
-                    <div class="d-flex align-items-center">
-                    <div class="legend-color bg-success me-2"></div>
-                    <span class="small"><i class="mdi mdi-lock-open me-1"></i>Mesa Livre</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                    <div class="legend-color bg-danger me-2"></div>
-                    <span class="small"><i class="mdi mdi-lock me-1"></i>Mesa Ocupada</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                    <div class="legend-color bg-info me-2"></div>
-                    <span class="small"><i class="mdi mdi-link-variant me-1"></i>Mesa Agrupada</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                    <button type="button"
-                        class="btn btn-success btn-sm d-flex align-items-center px-3 py-1 fw-bold shadow"
-                        data-bs-toggle="modal" data-bs-target="#mergeTables"
-                        style="border-radius: 8px;">
-                        <i class="mdi mdi-link fs-5 me-2"></i>
-                        Unir Mesas
-                    </button>
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="d-flex flex-wrap gap-4 justify-content-center align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="legend-color bg-success me-2"></div>
+                                <span class="small"><i class="mdi mdi-lock-open me-1"></i>Mesa Livre</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="legend-color bg-danger me-2"></div>
+                                <span class="small"><i class="mdi mdi-lock me-1"></i>Mesa Ocupada</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="legend-color bg-info me-2"></div>
+                                <span class="small"><i class="mdi mdi-link-variant me-1"></i>Mesa Agrupada</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <button type="button"
+                                    class="btn btn-success btn-sm d-flex align-items-center px-3 py-1 fw-bold shadow"
+                                    data-bs-toggle="modal" data-bs-target="#mergeTables" style="border-radius: 8px;">
+                                    <i class="mdi mdi-link fs-5 me-2"></i>
+                                    Unir Mesas
+                                </button>
+                            </div>
+                            {{-- Se for admin ou gerente e todas mesas estiverem ocupadas --}}
+                            @php
+                                $allOccupied = $tables->every(fn($t) => $t->hasActiveOrder());
+                            @endphp
+
+                            @if (auth()->user()->hasRole(['admin', 'manager']) && $allOccupied)
+                                <div class="d-flex align-items-center ms-3">
+                                    <button type="button"
+                                        class="btn btn-primary btn-sm d-flex align-items-center px-3 py-1 fw-bold shadow"
+                                        data-bs-toggle="modal" data-bs-target="#createTable" style="border-radius: 8px;">
+                                        <i class="mdi mdi-table-plus fs-5 me-2"></i>
+                                        Criar Nova Mesa
+                                    </button>
+                                </div>
+                            @endif
+
+                        </div>
                     </div>
                 </div>
-                </div>
-            </div>
             </div>
         </div>
 
@@ -77,7 +92,8 @@
                                 @endphp
 
                                 <div class="col-xl-3 col-lg-4 col-md-6">
-                                    <div class="card table-card h-100 {{ $statusClass }} {{ $isGrouped ? 'border-info' : '' }}">
+                                    <div
+                                        class="card table-card h-100 {{ $statusClass }} {{ $isGrouped ? 'border-info' : '' }}">
                                         <div class="card-body">
                                             @if ($isGrouped)
                                                 <div class="position-absolute top-0 end-0 m-3">
@@ -88,8 +104,8 @@
                                             @endif
 
                                             <div class="text-center mb-3">
-                                                <div class="table-number bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2" 
-                                                     style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                                <div class="table-number bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2"
+                                                    style="width: 60px; height: 60px; font-size: 1.5rem;">
                                                     {{ $table->number }}
                                                 </div>
                                                 <h5 class="mb-1">Mesa {{ $table->number }}</h5>
@@ -123,14 +139,16 @@
 
                                             <div class="table-actions d-grid gap-2">
                                                 @if (!$hasActiveOrder && (!$isGrouped || $isMain))
-                                                    <form action="{{ route('tables.create-order', $table) }}" method="POST">
+                                                    <form action="{{ route('tables.create-order', $table) }}"
+                                                        method="POST">
                                                         @csrf
                                                         <button type="submit" class="btn btn-success btn-sm w-100">
                                                             <i class="mdi mdi-plus-circle me-1"></i> Novo Pedido
                                                         </button>
                                                     </form>
                                                 @elseif($hasActiveOrder && (!$isGrouped || $isMain))
-                                                    <a href="{{ route('orders.edit', $activeOrder->id) }}" class="btn btn-primary btn-sm w-100">
+                                                    <a href="{{ route('orders.edit', $activeOrder->id) }}"
+                                                        class="btn btn-primary btn-sm w-100">
                                                         <i class="mdi mdi-pencil me-1"></i> Ver Pedido
                                                     </a>
                                                 @endif
@@ -138,11 +156,19 @@
                                                 @if ($isGrouped && $isMain)
                                                     <form action="{{ route('tables.split') }}" method="POST">
                                                         @csrf
-                                                        <input type="hidden" name="group_id" value="{{ $table->group_id }}">
+                                                        <input type="hidden" name="group_id"
+                                                            value="{{ $table->group_id }}">
                                                         <button type="submit" class="btn btn-outline-danger btn-sm w-100">
                                                             <i class="mdi mdi-link-off me-1"></i> Separar Mesas
                                                         </button>
                                                     </form>
+                                                @endif
+
+                                                @if ($isGrouped && !$isMain)
+                                                    <small class="text-muted text-center d-block mt-2">
+                                                        <i class="mdi mdi-information-outline"></i>
+                                                        Use a mesa principal
+                                                    </small>
                                                 @endif
                                             </div>
                                         </div>
@@ -172,7 +198,8 @@
                     <div class="modal-body">
                         <div class="alert alert-info">
                             <i class="mdi mdi-information-outline me-2"></i>
-                            Selecione pelo menos duas mesas livres para uni-las. Escolha qual será a mesa principal onde os pedidos serão registrados.
+                            Selecione pelo menos duas mesas livres para uni-las. Escolha qual será a mesa principal onde os
+                            pedidos serão registrados.
                         </div>
 
                         <div class="mb-4">
@@ -182,11 +209,12 @@
                                     @if ($table->status === 'free' && !$table->group_id)
                                         <div class="col-md-6">
                                             <div class="form-check">
-                                                <input type="checkbox" class="form-check-input table-checkbox" 
-                                                       id="table-{{ $table->id }}" name="table_ids[]" 
-                                                       value="{{ $table->id }}">
-                                                <label class="form-check-label d-flex align-items-center p-2 border rounded" 
-                                                       for="table-{{ $table->id }}">
+                                                <input type="checkbox" class="form-check-input table-checkbox"
+                                                    id="table-{{ $table->id }}" name="table_ids[]"
+                                                    value="{{ $table->id }}">
+                                                <label
+                                                    class="form-check-label d-flex align-items-center p-2 border rounded"
+                                                    for="table-{{ $table->id }}">
                                                     <i class="mdi mdi-table-furniture text-primary me-2"></i>
                                                     <div>
                                                         <div class="fw-semibold">Mesa {{ $table->number }}</div>
@@ -224,148 +252,188 @@
             </div>
         </div>
     </div>
+
+    <!-- Create Table Modal -->
+<div class="modal fade" id="createTable" tabindex="-1" aria-labelledby="createTableLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('tables.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTableLabel">
+                        <i class="mdi mdi-table-plus me-2"></i> Criar Nova Mesa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="number" class="form-label fw-bold">Número da Mesa</label>
+                        <input type="text" class="form-control" id="number" name="number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="capacity" class="form-label fw-bold">Capacidade (lugares)</label>
+                        <input type="number" class="form-control" id="capacity" name="capacity" min="1" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="mdi mdi-close me-1"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="mdi mdi-check me-1"></i> Salvar Mesa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('styles')
-<style>
-    .table-card {
-        border: 2px solid;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .table-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .table-number {
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .table-card:hover .table-number {
-        transform: scale(1.1);
-    }
-
-    .legend-color {
-        width: 16px;
-        height: 16px;
-        border-radius: 4px;
-    }
-
-    .table-actions .btn {
-        border-radius: 8px;
-        font-weight: 500;
-    }
-
-    .form-check-label {
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border-radius: 8px;
-    }
-
-    .form-check-label:hover {
-        background-color: #f8f9fa;
-    }
-
-    .form-check-input:checked + .form-check-label {
-        background-color: #e3f2fd;
-        border-color: #2196f3;
-    }
-
-    .modal-content {
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .modal-header {
-        border-bottom: 1px solid #e9ecef;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-
-    @media (max-width: 768px) {
+    <style>
         .table-card {
-            margin-bottom: 1rem;
+            border: 2px solid;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .modal-dialog {
-            margin: 1rem;
+
+        .table-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-    }
-</style>
+
+        .table-number {
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .table-card:hover .table-number {
+            transform: scale(1.1);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .table-actions .btn {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+
+        .form-check-label:hover {
+            background-color: #f8f9fa;
+        }
+
+        .form-check-input:checked+.form-check-label {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        @media (max-width: 768px) {
+            .table-card {
+                margin-bottom: 1rem;
+            }
+
+            .modal-dialog {
+                margin: 1rem;
+            }
+        }
+    </style>
 @endpush
 
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tableCheckboxes = document.querySelectorAll('.table-checkbox');
-        const mainTableSelect = document.getElementById('main_table_id');
-        const mergeBtn = document.getElementById('merge-btn');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableCheckboxes = document.querySelectorAll('.table-checkbox');
+            const mainTableSelect = document.getElementById('main_table_id');
+            const mergeBtn = document.getElementById('merge-btn');
 
-        function updateMainTableSelect() {
-            const selectedTables = Array.from(tableCheckboxes)
-                .filter(cb => cb.checked)
-                .map(cb => ({
-                    id: cb.value,
-                    number: cb.closest('.form-check').querySelector('.fw-semibold').textContent.replace('Mesa ', '')
-                }));
+            function updateMainTableSelect() {
+                const selectedTables = Array.from(tableCheckboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => ({
+                        id: cb.value,
+                        number: cb.closest('.form-check').querySelector('.fw-semibold').textContent.replace(
+                            'Mesa ', '')
+                    }));
 
-            mainTableSelect.innerHTML = '<option value="">Selecione a mesa principal</option>';
-            
-            selectedTables.forEach(table => {
-                const option = document.createElement('option');
-                option.value = table.id;
-                option.textContent = `Mesa ${table.number}`;
-                mainTableSelect.appendChild(option);
-            });
+                mainTableSelect.innerHTML = '<option value="">Selecione a mesa principal</option>';
 
-            updateMergeButtonState(selectedTables.length);
-        }
+                selectedTables.forEach(table => {
+                    const option = document.createElement('option');
+                    option.value = table.id;
+                    option.textContent = `Mesa ${table.number}`;
+                    mainTableSelect.appendChild(option);
+                });
 
-        function updateMergeButtonState(selectedCount) {
-            const hasMainTable = mainTableSelect.value !== '';
-            mergeBtn.disabled = selectedCount < 2 || !hasMainTable;
-            
-            if (mergeBtn.disabled) {
-                mergeBtn.title = selectedCount < 2 ? 'Selecione pelo menos 2 mesas' : 'Selecione a mesa principal';
-            } else {
-                mergeBtn.title = '';
+                updateMergeButtonState(selectedTables.length);
             }
-        }
 
-        tableCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateMainTableSelect);
-        });
+            function updateMergeButtonState(selectedCount) {
+                const hasMainTable = mainTableSelect.value !== '';
+                mergeBtn.disabled = selectedCount < 2 || !hasMainTable;
 
-        mainTableSelect.addEventListener('change', function() {
-            const selectedCount = Array.from(tableCheckboxes).filter(cb => cb.checked).length;
-            updateMergeButtonState(selectedCount);
-        });
+                if (mergeBtn.disabled) {
+                    mergeBtn.title = selectedCount < 2 ? 'Selecione pelo menos 2 mesas' :
+                        'Selecione a mesa principal';
+                } else {
+                    mergeBtn.title = '';
+                }
+            }
 
-        // Auto-hide alerts
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert-dismissible');
-            alerts.forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
+            tableCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateMainTableSelect);
             });
-        }, 5000);
 
-        // Add animation to table cards
-        const tableCards = document.querySelectorAll('.table-card');
-        tableCards.forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-            card.classList.add('fade-in');
+            mainTableSelect.addEventListener('change', function() {
+                const selectedCount = Array.from(tableCheckboxes).filter(cb => cb.checked).length;
+                updateMergeButtonState(selectedCount);
+            });
+
+            // Auto-hide alerts
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert-dismissible');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+
+            // Add animation to table cards
+            const tableCards = document.querySelectorAll('.table-card');
+            tableCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.classList.add('fade-in');
+            });
         });
-    });
 
-    // CSS Animation
-    const style = document.createElement('style');
-    style.textContent = `
+        // CSS Animation
+        const style = document.createElement('style');
+        style.textContent = `
         .fade-in {
             animation: fadeInUp 0.6s ease forwards;
             opacity: 0;
@@ -382,6 +450,6 @@
             }
         }
     `;
-    document.head.appendChild(style);
-</script>
+        document.head.appendChild(style);
+    </script>
 @endpush

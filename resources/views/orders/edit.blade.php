@@ -15,7 +15,7 @@
         <div class="stats-card primary mb-4">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
                         <div class="stats-icon">
                             <i class="mdi mdi-receipt-text"></i>
                         </div>
@@ -23,7 +23,7 @@
                             <h2 class="mb-1 fw-bold text-dark">
                                 Pedido #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
                             </h2>
-                            <small class="text-muted">
+                            <small class="text-muted d-block">
                                 <i class="mdi mdi-clock-outline me-1"></i>
                                 {{ $order->created_at->format('d/m/Y H:i') }}
                             </small>
@@ -33,14 +33,25 @@
                         </span>
                     </div>
                 </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <div class="btn-group" role="group">
+
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                        {{-- Voltar para lista de pedidos --}}
                         <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
                             <i class="mdi mdi-arrow-left me-1"></i> Voltar
                         </a>
+
+                        {{-- Ver mesas (quando quiser voltar ao mapa de mesas) --}}
+                        <a href="{{ route('tables.index') }}" class="btn btn-outline-dark">
+                            <i class="mdi mdi-table-chair me-1"></i> Ver Mesas
+                        </a>
+
+                        {{-- Imprimir pedido --}}
                         <a href="{{ route('orders.print', $order) }}" target="_blank" class="btn btn-outline-primary">
                             <i class="mdi mdi-printer me-1"></i> Imprimir
                         </a>
+
+                        {{-- Cancelar pedido (apenas se ativo) --}}
                         @if ($order->status == 'active')
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                 data-bs-target="#cancelOrderModal">
@@ -51,6 +62,7 @@
                 </div>
             </div>
         </div>
+        <!-- Main Content -->
 
         <div class="row g-4">
             <!-- Left Column - Order Management -->
@@ -786,18 +798,19 @@
         }
 
         /* Search Section - Reduzido */
-        .search-input-wrapper {
+        /* .search-input-wrapper {
             position: relative;
             width: 100%;
             max-width: 250px;
-        }
+        } */
 
         .search-icon {
             position: absolute;
             left: 0.75rem;
             top: 50%;
+            right: 0;
             transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(67, 82, 0, 0.7);
             pointer-events: none;
             z-index: 1;
         }
@@ -814,6 +827,9 @@
 
         .search-input::placeholder {
             color: rgba(255, 255, 255, 0.7);
+            opacity: 1;
+            font-size: 0.85rem;
+            margin: 0 0 0.2rem 0;
         }
 
         .search-clear-btn {

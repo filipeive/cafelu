@@ -476,19 +476,16 @@
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <div class="metric-card tables">
+            <div class="metric-card expenses">
                 <div class="metric-header">
-                    <div class="metric-icon tables">
-                        <i class="mdi mdi-package-variant"></i>
+                    <div class="metric-icon expenses">
+                        <i class="mdi mdi-cash-minus"></i>
                     </div>
                 </div>
-                <div class="metric-label">Produtos</div>
-                <div class="metric-value">{{ $totalProducts }}</div>
+                <div class="metric-label">Despesas Hoje</div>
+                <div class="metric-value">{{ number_format($totalExpensesToday ?? 0, 0) }}</div>
                 <div class="metric-footer">
-                    <small class="text-{{ $lowStockProducts->count() > 0 ? 'danger' : 'success' }}">
-                        <i class="mdi mdi-{{ $lowStockProducts->count() > 0 ? 'alert' : 'check' }}-circle"></i>
-                        {{ $lowStockProducts->count() }} estoque baixo
-                    </small>
+                    <small class="text-muted">Mês: {{ number_format($totalExpensesMonth ?? 0, 0) }} MZN</small>
                 </div>
             </div>
         </div>
@@ -646,7 +643,7 @@
             </div>
         </div>
         <!-- Status das Mesas -->
-        <div class="col-lg-4">
+        <div class="col-lg-8">
             <div class="chart-card">
                 <div class="chart-header">
                     <div class="d-flex justify-content-between align-items-center">
@@ -668,9 +665,7 @@
                                 $hasActiveOrder = !is_null($activeOrder);
                             @endphp
 
-                            <div class="table-card {{ $hasActiveOrder ? 'occupied' : 'available' }}"
-                                onclick="window.location.href='{{ $hasActiveOrder ? route('orders.edit', $activeOrder->id) : route('tables.create-order', $table->id) }}'">
-
+                            <div class="table-card {{ $hasActiveOrder ? 'occupied' : 'available' }}">
                                 <div class="d-flex flex-column align-items-center">
                                     <i
                                         class="mdi mdi-table-chair {{ $hasActiveOrder ? 'text-warning' : 'text-success' }} fs-3"></i>
@@ -681,6 +676,20 @@
                                         <span class="badge bg-primary mt-1">
                                             Pedido #{{ $activeOrder->id }}
                                         </span>
+
+                                        <!-- Botão para ver pedido -->
+                                        <a href="{{ route('orders.edit', $activeOrder->id) }}"
+                                            class="btn btn-sm btn-outline-primary mt-2">
+                                            Ver Pedido
+                                        </a>
+                                    @else
+                                        <span class="badge bg-success mt-1">Disponível</span>
+
+                                        <!-- Botão para abrir mesa (criar pedido) -->
+                                        <a href="{{ route('tables.index') }}"
+                                            class="btn btn-sm btn-outline-success mt-2">
+                                            Abrir Mesa
+                                        </a>
                                     @endif
                                 </div>
                             </div>
@@ -689,8 +698,10 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row g-3 mt-2">
         <!-- Pedidos Recentes -->
-        <div class="col-lg-4">
+        <div class="col-12">
             <div class="chart-card">
                 <div class="chart-header">
                     <div class="d-flex justify-content-between align-items-center">

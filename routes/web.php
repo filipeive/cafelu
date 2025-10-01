@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\POSController;
@@ -27,6 +28,10 @@ use App\Http\Controllers\NotificationController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
+    if (View::exists('welcome')) {
+        return view('welcome');
+    }
+
     return redirect()->route('login');
 });
 

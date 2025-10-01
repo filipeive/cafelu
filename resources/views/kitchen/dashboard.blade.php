@@ -286,7 +286,29 @@
             </div>
         </div>
 
-
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="mb-3">Métricas de Hoje</h6>
+                        <div class="row text-center">
+                            <div class="col">
+                                <strong>{{ $todayMetrics['orders_completed'] }}</strong>
+                                <small class="d-block text-muted">Pedidos Completos</small>
+                            </div>
+                            <div class="col">
+                                <strong>{{ $todayMetrics['average_prep_time'] }}min</strong>
+                                <small class="d-block text-muted">Tempo Médio</small>
+                            </div>
+                            <div class="col">
+                                <strong>{{ $todayMetrics['total_items_prepared'] }}</strong>
+                                <small class="d-block text-muted">Itens Preparados</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Pedidos Ativos -->
         <div class="row" id="activeOrders">
             @forelse($activeOrders as $order)
@@ -354,7 +376,8 @@
                                                         <li>
                                                             <button class="dropdown-item update-status"
                                                                 data-item-id="{{ $item->id }}" data-status="ready">
-                                                                <i class="mdi mdi-check text-success me-2"></i>Marcar Pronto
+                                                                <i class="mdi mdi-check text-success me-2"></i>Marcar
+                                                                Pronto
                                                             </button>
                                                         </li>
                                                         <li>
@@ -367,7 +390,8 @@
                                                     @elseif($item->status == 'ready')
                                                         <li>
                                                             <button class="dropdown-item update-status"
-                                                                data-item-id="{{ $item->id }}" data-status="preparing">
+                                                                data-item-id="{{ $item->id }}"
+                                                                data-status="preparing">
                                                                 <i class="mdi mdi-arrow-left text-primary me-2"></i>Voltar
                                                                 para Preparo
                                                             </button>

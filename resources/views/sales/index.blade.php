@@ -13,91 +13,79 @@
 
 @section('content')
     <div class="row">
-        <div class="row mb-4">
-            <!-- Stats Cards Row -->
-            <div class="col-sm-12 col-lg-3 grid-margin stretch-card">
-                <div class="card card-rounded border-start border-primary border-4">
-                    <div class="card-body pb-0">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Vendas Totais</h6>
-                                <h2 class="rate-percentage text-primary mb-2">MZN {{ number_format($totalSalesAmount, 2) }}
-                                </h2>
-                                <p class="text-success d-flex align-items-center mb-3">
-                                    <i class="mdi mdi-trending-up me-1"></i>
-                                    <span>Total acumulado</span>
-                                </p>
-                            </div>
-                            <div class="bg-primary bg-opacity-10 rounded-circle p-3">
-                                <i class="mdi mdi-cash-multiple text-primary icon-md m-0"></i>
-                            </div>
+        <div class="row g-3 mb-4">
+            <!-- Vendas Totais -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-rounded shadow-sm h-100 border-0">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Vendas Totais</h6>
+                            <h2 class="fw-bold text-primary mb-2">MZN {{ number_format($totalSalesAmount, 2) }}</h2>
+                            <p class="text-success small d-flex align-items-center mb-0">
+                                <i class="mdi mdi-trending-up me-1"></i> Total acumulado
+                            </p>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="mdi mdi-cash-multiple text-primary fs-3"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-sm-12 col-lg-3 grid-margin stretch-card">
-                <div class="card card-rounded border-start border-success border-4">
-                    <div class="card-body pb-0">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Vendas Hoje</h6>
-                                <h2 class="rate-percentage text-success mb-2">MZN {{ number_format($todaySalesAmount, 2) }}
-                                </h2>
-                                <p class="text-success d-flex align-items-center mb-3">
-                                    <i class="mdi mdi-clock me-1"></i>
-                                    <span>Hoje</span>
-                                </p>
-                            </div>
-                            <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                                <i class="mdi mdi-calendar-today text-success icon-md m-0"></i>
-                            </div>
+            <!-- Vendas Hoje -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-rounded shadow-sm h-100 border-0">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Vendas Hoje</h6>
+                            <h2 class="fw-bold text-success mb-2">MZN {{ number_format($todaySalesAmount, 2) }}</h2>
+                            <p class="text-success small d-flex align-items-center mb-0">
+                                <i class="mdi mdi-clock me-1"></i> Hoje
+                            </p>
+                        </div>
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="mdi mdi-calendar-today text-success fs-3"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-sm-12 col-lg-3 grid-margin stretch-card">
-                <div class="card card-rounded border-start border-info border-4">
-                    <div class="card-body pb-0">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Total Transações</h6>
-                                <h2 class="rate-percentage text-info mb-2">{{ $totalSales }}</h2>
-                                <p class="text-info d-flex align-items-center mb-3">
-                                    <i class="mdi mdi-chart-line me-1"></i>
-                                    <span>Transações realizadas</span>
-                                </p>
-                            </div>
-                            <div class="bg-info bg-opacity-10 rounded-circle p-3">
-                                <i class="mdi mdi-receipt text-info icon-md m-0"></i>
-                            </div>
+            <!-- Total Transações -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-rounded shadow-sm h-100 border-0">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Transações</h6>
+                            <h2 class="fw-bold text-info mb-2">{{ $totalSales }}</h2>
+                            <p class="text-info small d-flex align-items-center mb-0">
+                                <i class="mdi mdi-chart-line me-1"></i> Transações realizadas
+                            </p>
+                        </div>
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                            <i class="mdi mdi-receipt text-info fs-3"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-sm-12 col-lg-3 grid-margin stretch-card">
-                <div class="card card-rounded border-start border-warning border-4">
-                    <div class="card-body pb-0">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Pendentes</h6>
-                                <h2 class="rate-percentage text-warning mb-2">{{ $pendingSalesCount }}</h2>
-                                <p class="text-warning d-flex align-items-center mb-3">
-                                    <i class="mdi mdi-alert-circle me-1"></i>
-                                    <span>Aguardando processamento</span>
-                                </p>
-                            </div>
-                            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
-                                <i class="mdi mdi-clock-alert text-warning icon-md m-0"></i>
-                            </div>
+            <!-- Pendentes -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-rounded shadow-sm h-100 border-0">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Pendentes</h6>
+                            <h2 class="fw-bold text-warning mb-2">{{ $pendingSalesCount }}</h2>
+                            <p class="text-warning small d-flex align-items-center mb-0">
+                                <i class="mdi mdi-alert-circle me-1"></i> Aguardando processamento
+                            </p>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="mdi mdi-clock-alert text-warning fs-3"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Sales Table Card -->
         <div class="col-lg-12 grid-margin mb-4">
             <div class="card card-rounded shadow-sm">

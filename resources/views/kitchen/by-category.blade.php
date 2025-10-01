@@ -13,24 +13,114 @@
 
 @push('styles')
 <style>
+    :root {
+        --primary-blue: #3b82f6;
+        --primary-dark: #1d4ed8;
+        --warning-yellow: #fbbf24;
+        --success-green: #10b981;
+        --danger-red: #ef4444;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-400: #9ca3af;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+    }
+
+    .kitchen-header {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .kitchen-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .filter-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: 0.9rem;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1.25rem;
+        border: 2px solid var(--gray-200);
+        background: white;
+        border-radius: 24px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        transform: translateY(-1px);
+    }
+
+    .filter-btn.active {
+        background: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue);
+    }
+
+    .filter-btn .badge {
+        background: rgba(255,255,255,0.2);
+        padding: 0.15rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+    }
+
+    .filter-btn.active .badge {
+        background: rgba(255,255,255,0.3);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+
     .category-section {
         background: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         margin-bottom: 2rem;
         overflow: hidden;
         transition: all 0.3s ease;
     }
 
     .category-section:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
     }
 
     .category-header {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
         color: white;
-        padding: 1.5rem;
+        padding: 1.75rem;
         position: relative;
         overflow: hidden;
     }
@@ -38,391 +128,662 @@
     .category-header::before {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
-        background-size: 20px 20px;
-        opacity: 0.3;
-        animation: backgroundMove 20s linear infinite;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(30%, -30%);
     }
 
-    @keyframes backgroundMove {
-        0% { transform: translate(0, 0) rotate(0deg); }
-        100% { transform: translate(-20px, -20px) rotate(360deg); }
+    .category-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        margin-bottom: 1rem;
     }
 
     .category-title {
-        position: relative;
-        z-index: 1;
         margin: 0;
-        font-weight: 600;
+        font-weight: 700;
+        font-size: 1.5rem;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .category-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .category-count {
+        background: rgba(255,255,255,0.25);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem 1rem;
+        border-radius: 24px;
+        font-weight: 600;
+        font-size: 0.9rem;
     }
 
     .category-stats {
-        display: flex;
-        gap: 2rem;
-        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1.5rem;
         position: relative;
         z-index: 1;
     }
 
-    .stat-item {
+    .stat-card {
         text-align: center;
+        padding: 0.75rem;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-2px);
     }
 
     .stat-number {
-        font-size: 1.5rem;
-        font-weight: 700;
+        font-size: 2rem;
+        font-weight: 800;
         display: block;
+        line-height: 1;
+        margin-bottom: 0.25rem;
     }
 
     .stat-label {
         font-size: 0.8rem;
-        opacity: 0.9;
+        opacity: 0.95;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .items-grid {
+    .items-container {
         padding: 1.5rem;
     }
 
-    .item-row {
+    .item-card {
         display: flex;
         align-items: center;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        background: #f8fafc;
+        gap: 1rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        background: var(--gray-50);
         border-radius: 12px;
-        border-left: 4px solid #e5e7eb;
+        border-left: 4px solid var(--gray-200);
         transition: all 0.3s ease;
+        position: relative;
     }
 
-    .item-row:hover {
-        background: #f1f5f9;
-        transform: translateX(5px);
+    .item-card:hover {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transform: translateX(4px);
     }
 
-    .item-row.pending {
-        border-left-color: #fbbf24;
+    .item-card.pending {
+        border-left-color: var(--warning-yellow);
         background: #fffbeb;
     }
 
-    .item-row.preparing {
-        border-left-color: #3b82f6;
+    .item-card.pending:hover {
+        background: #fef3c7;
+    }
+
+    .item-card.preparing {
+        border-left-color: var(--primary-blue);
         background: #eff6ff;
     }
 
-    .item-row.ready {
-        border-left-color: #10b981;
+    .item-card.preparing:hover {
+        background: #dbeafe;
+    }
+
+    .item-card.ready {
+        border-left-color: var(--success-green);
         background: #ecfdf5;
     }
 
-    .item-info {
+    .item-card.ready:hover {
+        background: #d1fae5;
+    }
+
+    .priority-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .priority-high {
+        background: var(--danger-red);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+        animation: pulse-high 2s infinite;
+    }
+
+    .priority-medium {
+        background: var(--warning-yellow);
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2);
+    }
+
+    .priority-low {
+        background: var(--success-green);
+    }
+
+    @keyframes pulse-high {
+        0%, 100% {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+        }
+        50% {
+            box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+        }
+    }
+
+    .item-content {
         flex-grow: 1;
+        min-width: 0;
     }
 
-    .item-name {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-
-    .item-meta {
-        font-size: 0.85rem;
-        color: #6b7280;
+    .item-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: var(--gray-700);
         display: flex;
-        gap: 1rem;
-    }
-
-    .status-controls {
-        display: flex;
+        align-items: center;
         gap: 0.5rem;
     }
 
-    .status-btn {
-        border: none;
+    .quantity-badge {
+        background: var(--primary-blue);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .item-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: var(--gray-600);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .meta-item i {
+        font-size: 1rem;
+    }
+
+    .time-badge {
+        background: var(--gray-100);
+        padding: 0.25rem 0.75rem;
+        border-radius: 16px;
+        font-weight: 600;
+    }
+
+    .time-badge.urgent {
+        background: #fee2e2;
+        color: var(--danger-red);
+    }
+
+    .notes-section {
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: #fef3c7;
         border-radius: 8px;
-        padding: 0.5rem;
-        font-size: 0.8rem;
+        border-left: 3px solid var(--warning-yellow);
+        display: flex;
+        align-items: start;
+        gap: 0.5rem;
+    }
+
+    .notes-section i {
+        color: var(--warning-yellow);
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+
+    .item-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .action-btn {
+        border: none;
+        border-radius: 10px;
+        padding: 0.65rem 1.25rem;
+        font-size: 0.85rem;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.2s ease;
-        min-width: 80px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
     }
 
-    .status-btn:hover {
-        transform: translateY(-1px);
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
-    .status-btn.start {
+    .action-btn:active {
+        transform: translateY(0);
+    }
+
+    .btn-start {
         background: #dbeafe;
-        color: #1d4ed8;
+        color: var(--primary-dark);
     }
 
-    .status-btn.start:hover {
-        background: #3b82f6;
+    .btn-start:hover {
+        background: var(--primary-blue);
         color: white;
     }
 
-    .status-btn.finish {
+    .btn-finish {
         background: #d1fae5;
         color: #065f46;
     }
 
-    .status-btn.finish:hover {
-        background: #10b981;
+    .btn-finish:hover {
+        background: var(--success-green);
         color: white;
     }
 
-    .empty-category {
-        text-align: center;
-        padding: 3rem 1.5rem;
-        color: #9ca3af;
-    }
-
-    .category-actions {
-        padding: 1rem 1.5rem;
-        background: #f8fafc;
-        border-top: 1px solid #e5e7eb;
+    .status-badge-ready {
+        background: var(--success-green);
+        color: white;
+        padding: 0.65rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
         display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-
-    .filter-bar {
-        background: white;
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        display: flex;
-        justify-content: space-between;
         align-items: center;
-    }
-
-    .filter-buttons {
-        display: flex;
         gap: 0.5rem;
     }
 
-    .filter-btn {
-        padding: 0.5rem 1rem;
-        border: 2px solid #e5e7eb;
-        background: white;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
+    .category-footer {
+        padding: 1.25rem 1.5rem;
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .bulk-action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .filter-btn.active {
-        background: #3b82f6;
+    .bulk-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-start-all {
+        background: var(--warning-yellow);
         color: white;
-        border-color: #3b82f6;
     }
 
-    .priority-indicator {
-        width: 8px;
-        height: 8px;
+    .btn-finish-all {
+        background: var(--success-green);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--gray-400);
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        font-weight: 600;
+        color: var(--gray-600);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-category {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: var(--gray-400);
+    }
+
+    .empty-category i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .loading-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .loading-spinner {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+
+    .spinner {
+        border: 4px solid var(--gray-200);
+        border-top-color: var(--primary-blue);
         border-radius: 50%;
-        display: inline-block;
-        margin-right: 0.5rem;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
     }
 
-    .priority-high {
-        background: #ef4444;
-        animation: pulse 2s infinite;
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
-    .priority-medium {
-        background: #f59e0b;
-    }
+    @media (max-width: 768px) {
+        .kitchen-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
 
-    .priority-low {
-        background: #10b981;
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-buttons {
+            width: 100%;
+        }
+
+        .filter-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .item-card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .item-actions {
+            width: 100%;
+        }
+
+        .action-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .category-stats {
+            grid-template-columns: repeat(3, 1fr);
+        }
     }
 </style>
 @endpush
 
 @section('content')
 <div class="container-fluid">
-    <!-- Controles -->
-    <div class="filter-bar">
-        <div class="d-flex align-items-center gap-3">
-            <h6 class="mb-0">Filtrar por status:</h6>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-status="all">Todos</button>
-                <button class="filter-btn" data-status="pending">Pendentes</button>
-                <button class="filter-btn" data-status="preparing">Em Preparo</button>
-                <button class="filter-btn" data-status="ready">Prontos</button>
+    @php
+        // Calcular totais para os filtros
+        $totalItems = collect($itemsByCategory)->sum(fn($c) => count($c['items']));
+        $totalPending = collect($itemsByCategory)->sum(fn($c) => collect($c['items'])->where('status', 'pending')->count());
+        $totalPreparing = collect($itemsByCategory)->sum(fn($c) => collect($c['items'])->where('status', 'preparing')->count());
+        $totalReady = collect($itemsByCategory)->sum(fn($c) => collect($c['items'])->where('status', 'ready')->count());
+    @endphp
+
+    <!-- Header com controles -->
+    <div class="kitchen-header">
+        <div class="kitchen-toolbar">
+            <div class="filter-section">
+                <span class="filter-label">Filtrar por:</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-status="all">
+                        Todos
+                        <span class="badge">{{ $totalItems }}</span>
+                    </button>
+                    <button class="filter-btn" data-status="pending">
+                        Pendentes
+                        <span class="badge">{{ $totalPending }}</span>
+                    </button>
+                    <button class="filter-btn" data-status="preparing">
+                        Em Preparo
+                        <span class="badge">{{ $totalPreparing }}</span>
+                    </button>
+                    <button class="filter-btn" data-status="ready">
+                        Prontos
+                        <span class="badge">{{ $totalReady }}</span>
+                    </button>
+                </div>
             </div>
-        </div>
-        
-        <div class="d-flex gap-2">
-            <a href="{{ route('kitchen.dashboard') }}" class="btn btn-outline-primary">
-                <i class="mdi mdi-view-dashboard"></i> Dashboard
-            </a>
-            <button class="btn btn-success" id="refreshData">
-                <i class="mdi mdi-refresh"></i> Atualizar
-            </button>
+            
+            <div class="action-buttons">
+                <a href="{{ route('kitchen.dashboard') }}" class="btn btn-outline-primary">
+                    <i class="mdi mdi-view-dashboard"></i> Dashboard
+                </a>
+                <button class="btn btn-success" id="refreshData">
+                    <i class="mdi mdi-refresh"></i> Atualizar
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Categorias -->
-    @forelse($itemsByCategory as $category)
-    <div class="category-section" data-category="{{ $category['category'] }}">
+    @forelse($itemsByCategory as $categoryData)
+    <div class="category-section" data-category="{{ $categoryData['category'] }}">
         <div class="category-header">
-            <h4 class="category-title">
-                <span>
-                   <i class="mdi mdi-{{ getCategoryIcon($category['category']) }} me-2"></i>
+            <div class="category-title-row">
+                <h4 class="category-title">
+                    <span class="category-icon">
+                        <i class="mdi mdi-{{ getCategoryIcon($categoryData['category']) }}"></i>
+                    </span>
+                    {{ $categoryData['category'] }}
+                </h4>
+                <span class="category-count">
+                    {{ $categoryData['total_items'] }} {{ $categoryData['total_items'] === 1 ? 'item' : 'itens' }}
                 </span>
-                <span class="badge bg-light text-dark">{{ $category['items']->count() }} itens</span>
-            </h4>
+            </div>
             
             <div class="category-stats">
-                <div class="stat-item">
-                    <span class="stat-number">{{ $category['items']->where('status', 'pending')->count() }}</span>
+                <div class="stat-card">
+                    <span class="stat-number">{{ $categoryData['pending_count'] }}</span>
                     <span class="stat-label">Pendentes</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">{{ $category['items']->where('status', 'preparing')->count() }}</span>
+                <div class="stat-card">
+                    <span class="stat-number">{{ $categoryData['preparing_count'] }}</span>
                     <span class="stat-label">Em Preparo</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">{{ $category['items']->where('status', 'ready')->count() }}</span>
+                <div class="stat-card">
+                    <span class="stat-number">{{ $categoryData['ready_count'] }}</span>
                     <span class="stat-label">Prontos</span>
                 </div>
             </div>
         </div>
 
-        <div class="items-grid">
-            @forelse($category['items'] as $item)
-            <div class="item-row {{ $item['status'] }}" data-item-id="{{ $item['id'] }}" data-status="{{ $item['status'] }}">
-                <div class="me-3">
-                    @php
-                        $priority = 'low';
-                        if ($item['elapsed_minutes'] > 30) $priority = 'high';
-                        elseif ($item['elapsed_minutes'] > 15) $priority = 'medium';
-                    @endphp
-                    <span class="priority-indicator priority-{{ $priority }}" 
-                          title="Pedido há {{ $item['elapsed_minutes'] }} minutos"></span>
-                </div>
+        <div class="items-container">
+            @forelse($categoryData['items'] as $item)
+            <div class="item-card {{ $item['status'] }}" data-item-id="{{ $item['id'] }}" data-status="{{ $item['status'] }}">
+                <span class="priority-indicator priority-{{ $item['priority'] }}" 
+                      title="Pedido há {{ $item['elapsed_minutes'] }} minutos"></span>
                 
-                <div class="item-info">
-                    <div class="item-name">
-                        {{ $item['quantity'] }}x {{ $item['product_name'] }}
+                <div class="item-content">
+                    <div class="item-title">
+                        <span class="quantity-badge">{{ $item['quantity'] }}x</span>
+                        {{ $item['product_name'] }}
                     </div>
+                    
                     <div class="item-meta">
-                        <span>
-                            <i class="mdi mdi-table-chair me-1"></i>
-                            {{ $item['table_number'] }}
+                        <span class="meta-item">
+                            <i class="mdi mdi-table-chair"></i>
+                            <strong>Mesa {{ $item['table_number'] }}</strong>
                         </span>
-                        <span>
-                            <i class="mdi mdi-clock-outline me-1"></i>
-                            {{ $item['elapsed_minutes'] }}min
+                        <span class="meta-item">
+                            <i class="mdi mdi-clock-outline"></i>
+                            <span class="time-badge {{ $item['elapsed_minutes'] > 20 ? 'urgent' : '' }}">
+                                {{ $item['elapsed_minutes'] }} min
+                            </span>
                         </span>
-                        <span>
-                            <i class="mdi mdi-receipt me-1"></i>
+                        <span class="meta-item">
+                            <i class="mdi mdi-receipt"></i>
                             Pedido #{{ $item['order_id'] }}
                         </span>
-                        @if($item['notes'])
-                        <span class="text-warning">
-                            <i class="mdi mdi-note-text me-1"></i>
-                            {{ $item['notes'] }}
-                        </span>
-                        @endif
                     </div>
+
+                    @if($item['notes'])
+                    <div class="notes-section">
+                        <i class="mdi mdi-alert-circle"></i>
+                        <span><strong>Obs:</strong> {{ $item['notes'] }}</span>
+                    </div>
+                    @endif
                 </div>
 
-                <div class="status-controls">
+                <div class="item-actions">
                     @if($item['status'] == 'pending')
-                    <button class="status-btn start update-status" 
-                            data-item-id="{{ $item['id'] }}" 
-                            data-status="preparing">
-                        <i class="mdi mdi-play me-1"></i>Iniciar
-                    </button>
-                    <button class="status-btn finish update-status" 
-                            data-item-id="{{ $item['id'] }}" 
-                            data-status="ready">
-                        <i class="mdi mdi-check me-1"></i>Pronto
-                    </button>
+                        <button class="action-btn btn-start update-status" 
+                                data-item-id="{{ $item['id'] }}" 
+                                data-status="preparing">
+                            <i class="mdi mdi-play"></i>Iniciar
+                        </button>
+                        <button class="action-btn btn-finish update-status" 
+                                data-item-id="{{ $item['id'] }}" 
+                                data-status="ready">
+                            <i class="mdi mdi-check"></i>Pronto
+                        </button>
                     @elseif($item['status'] == 'preparing')
-                    <button class="status-btn finish update-status" 
-                            data-item-id="{{ $item['id'] }}" 
-                            data-status="ready">
-                        <i class="mdi mdi-check me-1"></i>Finalizar
-                    </button>
+                        <button class="action-btn btn-finish update-status" 
+                                data-item-id="{{ $item['id'] }}" 
+                                data-status="ready">
+                            <i class="mdi mdi-check"></i>Finalizar
+                        </button>
                     @elseif($item['status'] == 'ready')
-                    <span class="badge bg-success">
-                        <i class="mdi mdi-check-circle me-1"></i>Pronto para Entrega
-                    </span>
+                        <span class="status-badge-ready">
+                            <i class="mdi mdi-check-circle"></i>
+                            Pronto para Entrega
+                        </span>
                     @endif
                 </div>
             </div>
             @empty
             <div class="empty-category">
-                <i class="mdi mdi-food-off" style="font-size: 3rem;"></i>
-                <p class="mt-2">Nenhum item nesta categoria</p>
+                <i class="mdi mdi-food-off"></i>
+                <p>Nenhum item nesta categoria</p>
             </div>
             @endforelse
         </div>
 
-        @if($category['items']->count() > 0)
-        <div class="category-actions">
-            @php
-                $hasPending = $category['items']->where('status', 'pending')->count() > 0;
-                $hasPreparing = $category['items']->where('status', 'preparing')->count() > 0;
-            @endphp
-            
-            @if($hasPending)
-            <button class="btn btn-warning start-all-category" 
-                    data-category="{{ $category['category'] }}">
-                <i class="mdi mdi-play"></i> Iniciar Todos desta Categoria
+        @if($categoryData['total_items'] > 0)
+        <div class="category-footer">
+            @if($categoryData['pending_count'] > 0)
+            <button class="bulk-action-btn btn-start-all start-all-category" 
+                    data-category="{{ $categoryData['category'] }}">
+                <i class="mdi mdi-play-circle"></i>
+                Iniciar Todos ({{ $categoryData['pending_count'] }})
             </button>
             @endif
             
-            @if($hasPending || $hasPreparing)
-            <button class="btn btn-success finish-all-category" 
-                    data-category="{{ $category['category'] }}">
-                <i class="mdi mdi-check-all"></i> Finalizar Todos desta Categoria
+            @if($categoryData['pending_count'] > 0 || $categoryData['preparing_count'] > 0)
+            <button class="bulk-action-btn btn-finish-all finish-all-category" 
+                    data-category="{{ $categoryData['category'] }}">
+                <i class="mdi mdi-check-all"></i>
+                Finalizar Todos ({{ $categoryData['pending_count'] + $categoryData['preparing_count'] }})
             </button>
             @endif
         </div>
         @endif
     </div>
     @empty
-    <div class="text-center py-5">
-        <i class="mdi mdi-chef-hat" style="font-size: 4rem; color: #d1d5db;"></i>
-        <h4 class="mt-3 mb-2">Nenhum item para preparar</h4>
-        <p class="text-muted">Todos os pedidos foram processados!</p>
-        <a href="{{ route('kitchen.dashboard') }}" class="btn btn-primary">
+    <div class="empty-state">
+        <i class="mdi mdi-chef-hat"></i>
+        <h4>Nenhum item para preparar</h4>
+        <p class="mb-4">Todos os pedidos foram processados!</p>
+        <a href="{{ route('kitchen.dashboard') }}" class="btn btn-primary btn-lg">
             <i class="mdi mdi-arrow-left"></i> Voltar ao Dashboard
         </a>
     </div>
     @endforelse
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p class="mb-0">Processando...</p>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
     // Filtros de status
     document.querySelectorAll('.filter-btn').forEach(button => {
         button.addEventListener('click', function() {
-            // Atualizar botão ativo
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             
-            // Filtrar itens
             const status = this.dataset.status;
             filterItemsByStatus(status);
         });
     });
 
-    // Atualizar status de item individual
+    // Atualizar status individual
     document.querySelectorAll('.update-status').forEach(button => {
         button.addEventListener('click', function() {
             const itemId = this.dataset.itemId;
@@ -431,7 +792,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Iniciar todos os itens de uma categoria
+    // Iniciar todos da categoria
     document.querySelectorAll('.start-all-category').forEach(button => {
         button.addEventListener('click', function() {
             const category = this.dataset.category;
@@ -439,7 +800,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Finalizar todos os itens de uma categoria
+    // Finalizar todos da categoria
     document.querySelectorAll('.finish-all-category').forEach(button => {
         button.addEventListener('click', function() {
             const category = this.dataset.category;
@@ -447,14 +808,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Refresh data
+    // Refresh
     document.getElementById('refreshData').addEventListener('click', function() {
+        showLoading();
         window.location.reload();
     });
 
-    // Funções
     function filterItemsByStatus(status) {
-        document.querySelectorAll('.item-row').forEach(item => {
+        document.querySelectorAll('.item-card').forEach(item => {
             if (status === 'all' || item.dataset.status === status) {
                 item.style.display = 'flex';
             } else {
@@ -462,36 +823,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Esconder categorias vazias
         document.querySelectorAll('.category-section').forEach(section => {
-            const visibleItems = section.querySelectorAll('.item-row[style="display: flex"], .item-row:not([style])').length;
-            if (status !== 'all' && visibleItems === 0) {
-                section.style.display = 'none';
-            } else {
-                section.style.display = 'block';
-            }
+            const visibleItems = section.querySelectorAll('.item-card[style*="display: flex"], .item-card:not([style*="display: none"])').length;
+            section.style.display = (status !== 'all' && visibleItems === 0) ? 'none' : 'block';
         });
     }
 
     function updateItemStatus(itemId, status) {
+        showLoading();
+        
         fetch(`/kitchen/items/${itemId}/status`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ status: status })
         })
         .then(response => response.json())
         .then(data => {
+            hideLoading();
             if (data.success) {
-                showToast(data.message, 'success');
-                updateItemRow(itemId, status);
+                showToast(data.message || 'Status atualizado com sucesso', 'success');
+                setTimeout(() => window.location.reload(), 500);
             } else {
-                showToast(data.message, 'error');
+                showToast(data.message || 'Erro ao atualizar status', 'error');
             }
         })
         .catch(error => {
+            hideLoading();
             console.error('Erro:', error);
             showToast('Erro ao atualizar status', 'error');
         });
@@ -499,105 +860,144 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function startAllInCategory(category) {
         const categorySection = document.querySelector(`[data-category="${category}"]`);
-        const pendingItems = categorySection.querySelectorAll('.item-row[data-status="pending"]');
+        const pendingItems = categorySection.querySelectorAll('.item-card[data-status="pending"]');
         
         if (pendingItems.length === 0) {
             showToast('Nenhum item pendente nesta categoria', 'warning');
             return;
         }
 
-        if (confirm(`Iniciar preparo de ${pendingItems.length} itens da categoria ${category}?`)) {
-            pendingItems.forEach(item => {
-                const itemId = item.dataset.itemId;
-                updateItemStatus(itemId, 'preparing');
+        if (confirm(`Deseja iniciar o preparo de ${pendingItems.length} ${pendingItems.length === 1 ? 'item' : 'itens'}?`)) {
+            showLoading();
+            
+            // Pegar o order_id do primeiro item pendente
+            const firstItem = pendingItems[0];
+            const orderId = firstItem.querySelector('[data-item-id]').dataset.itemId;
+            
+            // Na prática, você precisaria de uma rota específica ou iterar os itens
+            // Por simplicidade, vamos recarregar após atualizar
+            Promise.all(
+                Array.from(pendingItems).map(item => {
+                    const itemId = item.dataset.itemId;
+                    return fetch(`/kitchen/items/${itemId}/status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ status: 'preparing' })
+                    });
+                })
+            ).then(() => {
+                showToast('Itens iniciados com sucesso', 'success');
+                setTimeout(() => window.location.reload(), 500);
+            }).catch(error => {
+                hideLoading();
+                showToast('Erro ao iniciar itens', 'error');
             });
         }
     }
 
     function finishAllInCategory(category) {
         const categorySection = document.querySelector(`[data-category="${category}"]`);
-        const activeItems = categorySection.querySelectorAll('.item-row[data-status="pending"], .item-row[data-status="preparing"]');
+        const activeItems = categorySection.querySelectorAll('.item-card[data-status="pending"], .item-card[data-status="preparing"]');
         
         if (activeItems.length === 0) {
             showToast('Nenhum item para finalizar nesta categoria', 'warning');
             return;
         }
 
-        if (confirm(`Finalizar ${activeItems.length} itens da categoria ${category}?`)) {
-            activeItems.forEach(item => {
-                const itemId = item.dataset.itemId;
-                updateItemStatus(itemId, 'ready');
+        if (confirm(`Deseja finalizar ${activeItems.length} ${activeItems.length === 1 ? 'item' : 'itens'}?`)) {
+            showLoading();
+            
+            Promise.all(
+                Array.from(activeItems).map(item => {
+                    const itemId = item.dataset.itemId;
+                    return fetch(`/kitchen/items/${itemId}/status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ status: 'ready' })
+                    });
+                })
+            ).then(() => {
+                showToast('Itens finalizados com sucesso', 'success');
+                setTimeout(() => window.location.reload(), 500);
+            }).catch(error => {
+                hideLoading();
+                showToast('Erro ao finalizar itens', 'error');
             });
         }
     }
 
-    function updateItemRow(itemId, newStatus) {
-        const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
-        if (itemRow) {
-            // Atualizar classes CSS
-            itemRow.className = itemRow.className.replace(/\b(pending|preparing|ready)\b/g, '');
-            itemRow.classList.add(newStatus);
-            itemRow.dataset.status = newStatus;
+    function showLoading() {
+        loadingOverlay.classList.add('active');
+    }
 
-            // Atualizar controles
-            const controls = itemRow.querySelector('.status-controls');
-            let newControls = '';
+    function hideLoading() {
+        loadingOverlay.classList.remove('active');
+    }
+
+    function showToast(message, type = 'info') {
+        if (typeof window.showToast === 'function') {
+            window.showToast(message, type);
+        } else {
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type] || 'alert-info';
             
-            switch(newStatus) {
-                case 'pending':
-                    newControls = `
-                        <button class="status-btn start update-status" data-item-id="${itemId}" data-status="preparing">
-                            <i class="mdi mdi-play me-1"></i>Iniciar
-                        </button>
-                        <button class="status-btn finish update-status" data-item-id="${itemId}" data-status="ready">
-                            <i class="mdi mdi-check me-1"></i>Pronto
-                        </button>
-                    `;
-                    break;
-                case 'preparing':
-                    newControls = `
-                        <button class="status-btn finish update-status" data-item-id="${itemId}" data-status="ready">
-                            <i class="mdi mdi-check me-1"></i>Finalizar
-                        </button>
-                    `;
-                    break;
-                case 'ready':
-                    newControls = `
-                        <span class="badge bg-success">
-                            <i class="mdi mdi-check-circle me-1"></i>Pronto para Entrega
-                        </span>
-                    `;
-                    break;
-            }
+            const toast = document.createElement('div');
+            toast.className = `alert ${alertClass} position-fixed top-0 end-0 m-3`;
+            toast.style.zIndex = '10000';
+            toast.style.minWidth = '300px';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
             
-            controls.innerHTML = newControls;
+            document.body.appendChild(toast);
             
-            // Re-adicionar event listeners
-            controls.querySelectorAll('.update-status').forEach(button => {
-                button.addEventListener('click', function() {
-                    updateItemStatus(this.dataset.itemId, this.dataset.status);
-                });
-            });
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
     }
 
-    // Auto-refresh a cada 60 segundos
-    setInterval(() => {
-        window.location.reload();
-    }, 60000);
+    console.log('Kitchen By Category: Inicializado');
 });
 
-// Helper function para ícones de categoria
 @php
 function getCategoryIcon($category) {
     $icons = [
         'Bebidas' => 'cup',
+        'Sucos' => 'cup-water',
+        'Refrigerantes' => 'bottle-soda',
+        'Cafés' => 'coffee',
         'Entradas' => 'food-apple',
+        'Petiscos' => 'food-variant',
         'Pratos Principais' => 'silverware-fork-knife',
+        'Carnes' => 'food-steak',
+        'Massas' => 'pasta',
+        'Peixes' => 'fish',
         'Sobremesas' => 'cake',
+        'Doces' => 'candy',
         'Lanches' => 'hamburger',
+        'Sanduíches' => 'food',
         'Pizzas' => 'pizza',
         'Saladas' => 'leaf',
+        'Sopas' => 'bowl-mix',
+        'Grelhados' => 'grill',
     ];
     return $icons[$category] ?? 'food';
 }

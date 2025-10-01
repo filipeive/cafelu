@@ -1690,27 +1690,24 @@
         </nav>
 
         <!-- Mobile Search -->
-        <div class="container-fluid p-4 py-2">
-            <div class="card">
-                <div class="card-body">
-                    <div class="input-group">
-                        <i class="mdi mdi-magnify search-icon"></i>
-                        <input type="text" class="form-control border-start-0 search-input"
-                            placeholder="Buscar produtos, pedidos, clientes..." aria-label="Buscar"
-                            id="mobileSearchInput">
-                    </div>
-                </div>
+        <div class="container-fluid p-4 py-2 d-block d-md-none">
+            <div class="input-group">
+                <i class="mdi mdi-magnify search-icon"></i>
+                <input type="text" class="form-control border-start-0 search-input"
+                    placeholder="Buscar produtos, pedidos, clientes..." aria-label="Buscar" id="mobileSearchInput">
             </div>
-            <!-- Resultados da busca -->
-            <div class="dropdown w-100">
-                <div class="dropdown-menu w-100 shadow-sm mt-1" id="search-results" role="listbox">
-                    <div class="search-placeholder text-center py-3 text-muted">
-                        <i class="mdi mdi-magnify d-block fs-4 mb-1"></i>
-                        <span>Digite para buscar...</span>
-                    </div>
+        </div>
+
+        <!-- Resultados da busca (só no mobile também) -->
+        <div class="dropdown w-100 d-block d-md-none">
+            <div class="dropdown-menu w-100 shadow-sm mt-1" id="search-results" role="listbox">
+                <div class="search-placeholder text-center py-3 text-muted">
+                    <i class="mdi mdi-magnify d-block fs-4 mb-1"></i>
+                    <span>Digite para buscar...</span>
                 </div>
             </div>
         </div>
+
 
 
         <!-- Page Content -->
@@ -2106,19 +2103,19 @@
                 }
             }
             updateNotificationsList(notifications) {
-            if (!this.list) return;
+                if (!this.list) return;
 
-            if (notifications.length === 0) {
-                this.list.innerHTML = `
+                if (notifications.length === 0) {
+                    this.list.innerHTML = `
                     <div class="text-center py-4 text-muted">
                         <i class="mdi mdi-bell-off-outline fs-1"></i>
                         <p class="mt-2 mb-0">Nenhuma notificação</p>
                     </div>
                 `;
-                return;
-            }
+                    return;
+                }
 
-            this.list.innerHTML = notifications.map(notification => `
+                this.list.innerHTML = notifications.map(notification => `
                 <div class="px-3 py-2 border-bottom notification-item ${notification.is_read ? '' : 'bg-light'}"
                     data-notification-id="${notification.id}" style="cursor: default;">
                     
@@ -2140,17 +2137,17 @@
                         <!-- Ações -->
                         <div class="flex-shrink-0 d-flex gap-1 align-items-center">
                             ${!notification.is_read ? `
-                                <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
-                                        <i class="mdi mdi-check-circle"></i>
-                                    </button>
-                                </form>
-                            ` : `
-                                <span class="text-success" title="Lida">
-                                    <i class="mdi mdi-check-circle"></i>
-                                </span>
-                            `}
+                                        <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
+                                                <i class="mdi mdi-check-circle"></i>
+                                            </button>
+                                        </form>
+                                    ` : `
+                                        <span class="text-success" title="Lida">
+                                            <i class="mdi mdi-check-circle"></i>
+                                        </span>
+                                    `}
                             <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
                                 <i class="mdi mdi-arrow-right"></i>
                             </a>
@@ -2158,7 +2155,7 @@
                     </div>
                 </div>
             `).join('');
-        }
+            }
 
             updateBadge(count) {
                 this.unreadCount = count;

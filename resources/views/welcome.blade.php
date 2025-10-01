@@ -62,12 +62,17 @@
             border-bottom-left-radius: 60px;
             border-bottom-right-radius: 60px;
             overflow: hidden;
+            opacity: 0.95;
         }
         
         .header::after {
             content: '';
             position: absolute;
             bottom: 0;
+            backdrop-filter: blur(5px);
+            background-color: rgba(14, 165, 233, 0.1);
+            z-index: 1;
+            right: 0;
             left: 0;
             width: 100%;
             height: 100px;

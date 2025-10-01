@@ -1,0 +1,47 @@
+[90m= [39m[34;4mIlluminate\Database\Eloquent\Collection[39;24m {#6218
+    [34mall[39m: [
+      [34;4mApp\Models\CategoryPrepTime[39;24m {#6228
+        [34mid[39m: [35m1[39m,
+        [34mcategory_id[39m: [35m1[39m,
+        [34mestimated_minutes[39m: [35m11[39m,
+        [34mcreated_at[39m: "[32m2025-09-25 02:24:01[39m",
+        [34mupdated_at[39m: "[32m2025-10-01 17:59:20[39m",
+      },
+      [34;4mApp\Models\CategoryPrepTime[39;24m {#6229
+        [34mid[39m: [35m2[39m,
+        [34mcategory_id[39m: [35m2[39m,
+        [34mestimated_minutes[39m: [35m10[39m,
+        [34mcreated_at[39m: "[32m2025-09-25 02:24:01[39m",
+        [34mupdated_at[39m: "[32m2025-09-25 02:24:01[39m",
+      },
+      [34;4mApp\Models\CategoryPrepTime[39;24m {#6230
+        [34mid[39m: [35m3[39m,
+        [34mcategory_id[39m: [35m3[39m,
+        [34mestimated_minutes[39m: [35m25[39m,
+        [34mcreated_at[39m: "[32m2025-09-25 02:24:01[39m",
+        [34mupdated_at[39m: "[32m2025-09-25 02:24:01[39m",
+      },
+      [34;4mApp\Models\CategoryPrepTime[39;24m {#6231
+        [34mid[39m: [35m4[39m,
+        [34mcategory_id[39m: [35m4[39m,
+        [34mestimated_minutes[39m: [35m8[39m,
+        [34mcreated_at[39m: "[32m2025-09-25 02:24:01[39m",
+        [34mupdated_at[39m: "[32m2025-09-25 02:24:01[39m",
+      },
+      [34;4mApp\Models\CategoryPrepTime[39;24m {#6232
+        [34mid[39m: [35m5[39m,
+        [34mcategory_id[39m: [35m5[39m,
+        [34mestimated_minutes[39m: [35m15[39m,
+        [34mcreated_at[39m: "[32m2025-09-25 02:24:01[39m",
+        [34mupdated_at[39m: "[32m2025-09-25 02:24:01[39m",
+      },
+      [34;4mApp\Models\CategoryPrepTime[39;24m {#6233
+        [34mid[39m: [35m6[39m,
+        [34mcategory_id[39m: [35m6[39m,
+        [34mestimated_minutes[39m: [35m15[39m,
+        [34mcreated_at[39m: "[32m2025-10-01 18:01:04[39m",
+        [34mupdated_at[39m: "[32m2025-10-01 18:01:04[39m",
+      },
+    ],
+  }
+

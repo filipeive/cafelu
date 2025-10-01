@@ -1260,43 +1260,6 @@ function escapeHtml(text) {
     });
 }
 
-function showToast(message, type = "success") {
-    if (typeof window.ZalalaSystem?.showToast === "function") {
-        window.ZalalaSystem.showToast(message, type);
-    } else {
-        console.log(`${type.toUpperCase()}: ${message}`);
-
-        const toast = document.createElement("div");
-        toast.className = `toast-simple toast-${type}`;
-        toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${
-                type === "success"
-                    ? "#10b981"
-                    : type === "error"
-                    ? "#ef4444"
-                    : type === "warning"
-                    ? "#f59e0b"
-                    : "#06b6d4"
-            };
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            z-index: 9999;
-            animation: slideIn 0.3s ease-out;
-        `;
-
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.animation = "slideOut 0.3s ease-out";
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-}
 
 // Função para debug - ajuda a identificar problemas
 function debugPOSState() {

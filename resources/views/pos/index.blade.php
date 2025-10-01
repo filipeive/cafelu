@@ -158,7 +158,7 @@
                             <i class="mdi mdi-check-circle-outline"></i>
                             Finalizar Pedido
                         </button>
-                        <button class="btn bg-warning btn-finalize" onclick="previewReceipt()">
+                        <button class="btn bg-primary btn-finalize" onclick="previewReceipt()">
                             <i class="mdi mdi-printer"></i>
                             preview Recibo
                         </button>

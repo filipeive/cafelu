@@ -259,4 +259,8 @@ class SaleController extends Controller
             
         return response()->json($products);
     }
+    //Exportar vendas para PDF
+    public function exportSalesPDF(Request $request){
+        
+    }
 }

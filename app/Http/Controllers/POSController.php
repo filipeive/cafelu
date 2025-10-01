@@ -44,25 +44,24 @@ class POSController extends Controller
     {
         Log::info('Checkout Request:', $request->all());
 
-        try {
-            // Decodificar items do JSON
-            $itemsJson = $request->input('items');
-            $items = json_decode($itemsJson, true);
-            
-            // Validar se items foi decodificado corretamente
-            if (!$items || !is_array($items) || count($items) === 0) {
-                return redirect()->back()
-                    ->with('error', 'Carrinho vazio. Adicione produtos antes de finalizar.')
-                    ->withInput();
-            }
+    try {
+        // Decodificar items do JSON (vem como string do form)
+        $itemsJson = $request->input('items');
+        $items = json_decode($itemsJson, true);
+        
+        if (!$items || !is_array($items) || count($items) === 0) {
+            return redirect()->back()
+                ->with('error', 'Carrinho vazio. Adicione produtos antes de finalizar.')
+                ->withInput();
+        }
 
-            // Validar pagamentos
-            $validated = $request->validate([
-                'cashPayment' => 'nullable|numeric|min:0',
-                'cardPayment' => 'nullable|numeric|min:0',
-                'mpesaPayment' => 'nullable|numeric|min:0',
-                'emolaPayment' => 'nullable|numeric|min:0',
-            ]);
+        // Validar pagamentos
+        $validated = $request->validate([
+            'cashPayment' => 'nullable|numeric|min:0',
+            'cardPayment' => 'nullable|numeric|min:0',
+            'mpesaPayment' => 'nullable|numeric|min:0',
+            'emolaPayment' => 'nullable|numeric|min:0',
+        ]);
 
             // Validar estrutura de cada item
             foreach ($items as $index => $item) {
@@ -181,12 +180,7 @@ class POSController extends Controller
                 ->with('change', $change)
                 ->with('totalAmount', $totalAmount)
                 ->with('printReceipt', true);
-            /* // NOVO: Redirecionar direto para o recibo
-            return redirect()
-                ->route('pos.receipt', ['saleId' => $saleId])
-                ->with('success', 'Venda concluída com sucesso!')
-                ->with('change', $change)
-                ->with('totalAmount', $totalAmount); */
+
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -265,29 +259,4 @@ class POSController extends Controller
         ]);
     }
 
-     /**
-     * Determina o método de pagamento principal
-     */  /* 
-    private function determinePaymentMethod($paymentData)
-    {
-        $methods = [
-            'cash' => $paymentData['cashPayment'] ?? 0,
-            'card' => $paymentData['cardPayment'] ?? 0,
-            'mpesa' => $paymentData['mpesaPayment'] ?? 0,
-            'emola' => $paymentData['emolaPayment'] ?? 0
-        ];
-
-        // Se houver mais de um método, indica "multiple"
-        $usedMethods = array_filter($methods, function($amount) {
-            return $amount > 0;
-        });
-
-        if (count($usedMethods) > 1) {
-            return 'multiple';
-        }
-
-        // Retorna o método usado ou "cash" como padrão
-        $method = array_key_first($usedMethods);
-        return $method ?: 'cash';
-    } */
 }

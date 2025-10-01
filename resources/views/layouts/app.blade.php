@@ -517,7 +517,7 @@
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
+            color: gray;
             z-index: 2;
         }
 
@@ -1528,8 +1528,7 @@
                         <div class="search-container">
                             <i class="mdi mdi-magnify search-icon"></i>
                             <input type="text" class="form-control search-input"
-                                placeholder="Buscar produtos, pedidos, clientes..."
-                                id="">
+                                placeholder="Buscar produtos, pedidos, clientes..." id="">
                             <div class="search-results dropdown-menu" id="search-results">
                                 <div class="search-placeholder">
                                     <i class="mdi mdi-magnify"></i>
@@ -1691,19 +1690,28 @@
         </nav>
 
         <!-- Mobile Search -->
-        <div class="container-fluid d-md-none py-3">
-            <div class="search-container">
-                <i class="mdi mdi-magnify search-icon"></i>
-                <input type="text" class="form-control search-input"
-                    placeholder="Buscar produtos, pedidos, clientes...">
-                <div class="search-results dropdown-menu" id="search-results">
-                    <div class="search-placeholder">
-                        <i class="mdi mdi-magnify"></i>
+        <div class="container-fluid p-4 py-2">
+            <div class="card">
+                <div class="card-body">
+                    <div class="input-group">
+                        <i class="mdi mdi-magnify search-icon"></i>
+                        <input type="text" class="form-control border-start-0 search-input"
+                            placeholder="Buscar produtos, pedidos, clientes..." aria-label="Buscar"
+                            id="mobileSearchInput">
+                    </div>
+                </div>
+            </div>
+            <!-- Resultados da busca -->
+            <div class="dropdown w-100">
+                <div class="dropdown-menu w-100 shadow-sm mt-1" id="search-results" role="listbox">
+                    <div class="search-placeholder text-center py-3 text-muted">
+                        <i class="mdi mdi-magnify d-block fs-4 mb-1"></i>
                         <span>Digite para buscar...</span>
                     </div>
                 </div>
             </div>
         </div>
+
 
         <!-- Page Content -->
         <div class="container-fluid p-4">
@@ -1732,7 +1740,8 @@
                             class="footer-logo me-3"
                             style="width: 48px; height: 48px; border-radius: 50%; box-shadow: var(--shadow-md); background: rgba(255,255,255,0.15);">
                         <div>
-                            <div class="fw-bold" style="font-size: 1.2rem; letter-spacing: 1px;">ZALALA BEACH BAR
+                            <div class="fw-bold" style="font-size: 1.2rem; letter-spacing: 1px;">
+                                {{ env('APP_NAME', 'ZALALA BEACH BAR') }}
                             </div>
                             <div class="footer-subtitle" style="font-size: 0.9rem; color: rgba(255,255,255,0.85);">
                                 Sistema de Gestão</div>
@@ -1753,7 +1762,8 @@
                     <!-- Informações Legais & Stats -->
                     <div class="col-md-4 text-md-end text-center">
                         <div class="mb-1" style="font-size: 0.95rem;">
-                            © {{ date('Y') }} <span class="fw-semibold">ZALALA BEACH BAR</span>
+                            © {{ date('Y') }} <span
+                                class="fw-semibold">{{ env('APP_NAME', 'ZALALA BEACH BAR') }}</span>
                             <span class="mx-2">•</span>
                             <span class="developer" style="color: var(--secondary);">
                                 Desenvolvido por {{ env('APP_AUTHOR', 'ZALALA BEACH BAR') }}
@@ -2095,36 +2105,41 @@
                     console.error('Erro ao carregar notificações:', error);
                 }
             }
-
             updateNotificationsList(notifications) {
-                if (!this.list) return;
+            if (!this.list) return;
 
-                if (notifications.length === 0) {
-                    this.list.innerHTML = `
-                <div class="text-center py-4 text-muted">
-                    <i class="mdi mdi-bell-off-outline fs-1"></i>
-                    <p class="mt-2 mb-0">Nenhuma notificação</p>
-                </div>
-            `;
-                    return;
-                }
+            if (notifications.length === 0) {
+                this.list.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="mdi mdi-bell-off-outline fs-1"></i>
+                        <p class="mt-2 mb-0">Nenhuma notificação</p>
+                    </div>
+                `;
+                return;
+            }
 
-                this.list.innerHTML = notifications.map(notification => `
-            <div class="px-3 py-2 border-bottom notification-item ${notification.is_read ? '' : 'bg-light'}"
-                data-notification-id="${notification.id}" style="cursor: default;">
-                <div class="d-flex">
-                    <div class="flex-shrink-0 me-3">
-                        <div class="rounded-circle p-2 ${this.getNotificationColor(notification.type)}">
-                            <i class="mdi ${this.getNotificationIcon(notification.type)} text-white"></i>
+            this.list.innerHTML = notifications.map(notification => `
+                <div class="px-3 py-2 border-bottom notification-item ${notification.is_read ? '' : 'bg-light'}"
+                    data-notification-id="${notification.id}" style="cursor: default;">
+                    
+                    <div class="d-flex">
+                        <!-- Ícone -->
+                        <div class="flex-shrink-0 me-3">
+                            <div class="rounded-circle p-2 ${this.getNotificationColor(notification.type)}">
+                                <i class="mdi ${this.getNotificationIcon(notification.type)} text-white"></i>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1 small">${this.escapeHtml(notification.title)}</h6>
-                        <p class="mb-1 small text-muted">${this.escapeHtml(notification.message)}</p>
-                        <small class="text-muted">${this.formatTime(notification.created_at)}</small>
-                    </div>
-            <div class="flex-shrink-0 d-flex gap-1 align-items-center">
-                ${!notification.is_read ? `
+
+                        <!-- Conteúdo -->
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 small">${this.escapeHtml(notification.title)}</h6>
+                            <p class="mb-1 small text-muted">${this.escapeHtml(notification.message)}</p>
+                            <small class="text-muted">${this.formatTime(notification.created_at)}</small>
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="flex-shrink-0 d-flex gap-1 align-items-center">
+                            ${!notification.is_read ? `
                                 <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
@@ -2136,14 +2151,14 @@
                                     <i class="mdi mdi-check-circle"></i>
                                 </span>
                             `}
-                <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
-                    <i class="mdi mdi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-`).join('');
-            }
+                            <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
+                                <i class="mdi mdi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
             updateBadge(count) {
                 this.unreadCount = count;

@@ -10,153 +10,186 @@
 @endsection
 
 @push('styles')
-<style>
-    /* Header com gradiente */
-    .products-header {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
+    <style>
+        /* Header com gradiente */
+        .products-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .products-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--beach-gradient);
-    }
+        .products-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--beach-gradient);
+        }
 
-    .products-title {
-        font-size: 2rem;
-        font-weight: 800;
-        background: var(--beach-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-    }
+        .products-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--beach-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
 
-    /* Stats cards compactos */
-    .stats-card {
-        transition: var(--transition);
-        border-left: 4px solid transparent;
-    }
+        /* Stats cards compactos */
+        .stats-card {
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
 
-    .stats-card.low-stock { border-left-color: var(--danger-color); }
-    .stats-card.categories { border-left-color: var(--success-color); }
-    .stats-card.services { border-left-color: var(--warning-color); }
-    .stats-card.products { border-left-color: var(--primary-color); }
+        .stats-card.low-stock {
+            border-left-color: var(--danger-color);
+        }
 
-    .stats-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-lg);
-    }
+        .stats-card.categories {
+            border-left-color: var(--success-color);
+        }
 
-    /* Type badges */
-    .type-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+        .stats-card.services {
+            border-left-color: var(--warning-color);
+        }
 
-    /* Stock display */
-    .stock-display {
-        padding: 0.3rem 0.6rem;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+        .stats-card.products {
+            border-left-color: var(--primary-color);
+        }
 
-    /* Action buttons */
-    .action-btn {
-        width: 35px;
-        height: 35px;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: var(--transition);
-    }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
 
-    .action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
+        /* Type badges */
+        .type-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    /* Empty state */
-    .empty-state {
-        text-align: center;
-        padding: 3rem 2rem;
-        color: #6b7280;
-    }
+        /* Stock display */
+        .stock-display {
+            padding: 0.3rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-    }
-
-    /* Responsive buttons */
-    .header-actions {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-    }
-
-    @media (max-width: 768px) {
-        .header-actions {
-            width: 100%;
+        /* Action buttons */
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
         }
-        
-        .header-actions .btn {
-            flex: 1;
-            min-width: auto;
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
-    }
-</style>
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive buttons */
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-actions .btn {
+                flex: 1;
+                min-width: auto;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
     <!-- Header -->
     <div class="products-header fade-in">
-        <div class="row align-items-center">
+        <div class="row align-items-center mb-4">
+            <!-- Título e descrição -->
             <div class="col-lg-8">
-                <h1 class="products-title d-flex align-items-center gap-3">
-                    <i class="mdi mdi-food-variant"></i>
-                    Produtos e Serviços
-                </h1>
-                <p class="text-muted mb-0 fs-5">Gerencie todos os produtos e serviços do seu estabelecimento</p>
+                <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3">
+                    <h1 class="products-title d-flex align-items-center gap-2 mb-0">
+                        <i class="mdi mdi-food-variant text-primary fs-1"></i>
+                        <span>Produtos e Serviços</span>
+                    </h1>
+                </div>
+                <p class="text-muted mt-2 mb-0 fs-6">
+                    Gerencie todos os produtos e serviços <br> de forma simples e rápida.
+                </p>
             </div>
+
+            <!-- Ações -->
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <div class="header-actions">
-                    <a href="{{ route('products.create') }}?type=product" class="btn btn-primary">
-                        <i class="mdi mdi-plus me-1"></i> Novo Produto
-                    </a>
-                    <a href="{{ route('products.create') }}?type=service" class="btn btn-info">
-                        <i class="mdi mdi-cog me-1"></i> Serviço
-                    </a>
-                    <a href="{{ route('categories.index') }}" class="btn btn-success">
-                        <i class="mdi mdi-format-list-bulleted me-1"></i> Categorias
-                    </a>
-                    <a href="{{ route('products.report') }}" class="btn btn-outline-secondary">
-                        <i class="mdi mdi-file-export me-1"></i> Exportar
-                    </a>
+                <div class="btn-toolbar justify-content-lg-end gap-2" role="toolbar">
+                    <!-- Grupo: Adicionar -->
+                    <div class="btn-group" role="group" aria-label="Adicionar">
+                        <a href="{{ route('products.create') }}?type=product" class="btn btn-primary"
+                            data-bs-toggle="tooltip" title="Adicionar novo produto">
+                            <i class="mdi mdi-plus"></i> Produto
+                        </a>
+                        <a href="{{ route('products.create') }}?type=service" class="btn btn-info" data-bs-toggle="tooltip"
+                            title="Adicionar novo serviço">
+                            <i class="mdi mdi-cog"></i> Serviço
+                        </a>
+                        <!-- Categorias -->
+                        <a href="{{ route('categories.index') }}" class="btn btn-success" data-bs-toggle="tooltip"
+                            title="Gerenciar categorias">
+                            <i class="mdi mdi-format-list-bulleted"></i>
+                            <span class="d-none d-md-inline">Categorias</span>
+                        </a>
+                        @can('view_reports')
+                            <!-- Exportar -->
+                            <a href="{{ route('reports.inventory') }}" class="btn btn-outline-secondary"
+                                data-bs-toggle="tooltip" title="Exportar lista de produtos e serviços">
+                                <i class="mdi mdi-file-export"></i>
+                                <span class="d-none d-md-inline">Exportar</span>
+                            </a>
+                        @endcan
+                    </div>
+
+
                 </div>
             </div>
         </div>
@@ -342,7 +375,8 @@
                                 </td>
                                 <td class="text-center">
                                     @if ($product->type === 'product')
-                                        <span class="stock-display bg-{{ $product->isLowStock() ? 'warning' : 'success' }} bg-opacity-10 text-{{ $product->isLowStock() ? 'warning' : 'success' }}">
+                                        <span
+                                            class="stock-display bg-{{ $product->isLowStock() ? 'warning' : 'success' }} bg-opacity-10 text-{{ $product->isLowStock() ? 'warning' : 'success' }}">
                                             {{ $product->stock_quantity }} {{ $product->unit }}
                                             @if ($product->isLowStock())
                                                 <i class="mdi mdi-alert-circle"></i>
@@ -373,8 +407,7 @@
 
                                         @if ($product->type === 'product')
                                             <button type="button" class="action-btn btn btn-outline-success"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#stockModal{{ $product->id }}"
+                                                data-bs-toggle="modal" data-bs-target="#stockModal{{ $product->id }}"
                                                 title="Ajustar Estoque">
                                                 <i class="mdi mdi-warehouse"></i>
                                             </button>
@@ -387,21 +420,24 @@
                                         </a>
 
                                         <button type="button" class="action-btn btn btn-outline-danger"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteModal{{ $product->id }}" title="Excluir">
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal{{ $product->id }}"
+                                            title="Excluir">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
 
                                         <!-- Toggle Status -->
-                                        <form method="POST" action="{{ route('products.update', $product->id) }}" class="d-inline">
+                                        <form method="POST" action="{{ route('products.update', $product->id) }}"
+                                            class="d-inline">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="toggle_status" value="1">
-                                            <input type="hidden" name="is_active" value="{{ $product->is_active ? '0' : '1' }}">
+                                            <input type="hidden" name="is_active"
+                                                value="{{ $product->is_active ? '0' : '1' }}">
                                             <button type="submit"
                                                 class="action-btn btn btn-outline-{{ $product->is_active ? 'warning' : 'success' }}"
                                                 title="{{ $product->is_active ? 'Desativar' : 'Ativar' }}">
-                                                <i class="mdi mdi-{{ $product->is_active ? 'toggle-switch-off' : 'toggle-switch' }}"></i>
+                                                <i
+                                                    class="mdi mdi-{{ $product->is_active ? 'toggle-switch-off' : 'toggle-switch' }}"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -413,20 +449,23 @@
                                 <div class="modal fade" id="stockModal{{ $product->id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <form method="POST" action="{{ route('products.adjust-stock', $product->id) }}">
+                                            <form method="POST"
+                                                action="{{ route('products.adjust-stock', $product->id) }}">
                                                 @csrf
                                                 <div class="modal-header">
                                                     <h5 class="modal-title">
                                                         <i class="mdi mdi-warehouse me-2 text-success"></i>
                                                         Ajustar Estoque
                                                     </h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="alert alert-light mb-3">
                                                         <h6 class="mb-1">{{ $product->name }}</h6>
                                                         <small class="text-muted">
-                                                            Estoque atual: {{ $product->stock_quantity }} {{ $product->unit }}
+                                                            Estoque atual: {{ $product->stock_quantity }}
+                                                            {{ $product->unit }}
                                                         </small>
                                                     </div>
 
@@ -441,7 +480,8 @@
 
                                                     <div class="mb-3">
                                                         <label class="form-label fw-semibold">Quantidade *</label>
-                                                        <input type="number" class="form-control" name="quantity" min="1" required>
+                                                        <input type="number" class="form-control" name="quantity"
+                                                            min="1" required>
                                                     </div>
 
                                                     <div class="mb-3">
@@ -450,7 +490,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        data-bs-dismiss="modal">Cancelar</button>
                                                     <button type="submit" class="btn btn-success">
                                                         <i class="mdi mdi-content-save me-2"></i> Confirmar Ajuste
                                                     </button>
@@ -473,7 +514,8 @@
                                                     <i class="mdi mdi-delete me-2 text-danger"></i>
                                                     Confirmar Exclusão
                                                 </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                <button type="button" class="btn-close"
+                                                    data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body text-center py-4">
                                                 <i class="mdi mdi-alert-circle text-warning" style="font-size: 3rem;"></i>
@@ -481,10 +523,13 @@
                                                 <p class="text-muted">
                                                     <strong>{{ $product->name }}</strong><br>
                                                     @if ($product->stockMovements->count() > 0)
-                                                        <span class="text-danger fw-bold">⚠️ ATENÇÃO: Este produto tem histórico de estoque!</span><br>
+                                                        <span class="text-danger fw-bold">⚠️ ATENÇÃO: Este produto tem
+                                                            histórico de estoque!</span><br>
                                                         <small>
-                                                            O produto será <strong>marcado como excluído</strong> e seu estoque será zerado.<br>
-                                                            <strong>Todas as movimentações passadas serão preservadas.</strong>
+                                                            O produto será <strong>marcado como excluído</strong> e seu
+                                                            estoque será zerado.<br>
+                                                            <strong>Todas as movimentações passadas serão
+                                                                preservadas.</strong>
                                                         </small>
                                                     @else
                                                         Esta ação <strong>não pode ser desfeita</strong>.
@@ -492,7 +537,8 @@
                                                 </p>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    data-bs-dismiss="modal">Cancelar</button>
                                                 <button type="submit" class="btn btn-danger">
                                                     <i class="mdi mdi-delete me-2"></i> Excluir Produto
                                                 </button>
@@ -524,7 +570,8 @@
                 <div class="card-footer bg-light">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div class="text-muted small">
-                            Mostrando {{ $products->firstItem() ?? 0 }} a {{ $products->lastItem() ?? 0 }} de {{ $products->total() }}
+                            Mostrando {{ $products->firstItem() ?? 0 }} a {{ $products->lastItem() ?? 0 }} de
+                            {{ $products->total() }}
                         </div>
                         <div>
                             {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
@@ -537,35 +584,35 @@
 @endsection
 
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializa tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
 
-        // Hover effects nos stats cards
-        const statsCards = document.querySelectorAll('.stats-card');
-        statsCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
+            // Hover effects nos stats cards
+            const statsCards = document.querySelectorAll('.stats-card');
+            statsCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
             });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
 
-        // Hover effects nos action buttons
-        const actionBtns = document.querySelectorAll('.action-btn');
-        actionBtns.forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-            });
-            btn.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
+            // Hover effects nos action buttons
+            const actionBtns = document.querySelectorAll('.action-btn');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
             });
         });
-    });
-</script>
+    </script>
 @endpush

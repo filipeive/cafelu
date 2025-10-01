@@ -353,14 +353,16 @@ function validatePayment() {
 
 // ===== SALE PROCESSING - VERSÃO CORRIGIDA =====
 function processSale() {
+    console.log("[POS] Iniciando processo de venda...");
+
     if (cart.length === 0) {
         showToast("Adicione produtos ao carrinho primeiro", "warning");
-        return;
+        return false;
     }
 
     if (!validatePayment()) {
         showToast("Pagamento insuficiente ou inválido", "error");
-        return;
+        return false;
     }
 
     const finalizeBtn = document.getElementById("btnFinalizeOrder");
@@ -370,45 +372,111 @@ function processSale() {
             '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
     }
 
-    // Salvar dados da última venda
-    const cashAmount = parseFloat(
-        document.getElementById("cashAmount")?.value || 0
-    );
-    const cardAmount = parseFloat(
-        document.getElementById("cardAmount")?.value || 0
-    );
-    const mpesaAmount = parseFloat(
-        document.getElementById("mpesaAmount")?.value || 0
-    );
-    const emolaAmount = parseFloat(
-        document.getElementById("emolaAmount")?.value || 0
-    );
+    try {
+        const cashAmount = parseFloat(
+            document.getElementById("cashAmount")?.value || 0
+        );
+        const cardAmount = parseFloat(
+            document.getElementById("cardAmount")?.value || 0
+        );
+        const mpesaAmount = parseFloat(
+            document.getElementById("mpesaAmount")?.value || 0
+        );
+        const emolaAmount = parseFloat(
+            document.getElementById("emolaAmount")?.value || 0
+        );
 
-    lastSaleData = {
-        items: [...cart],
-        cashPayment: cashAmount,
-        cardPayment: cardAmount,
-        mpesaPayment: mpesaAmount,
-        emolaPayment: emolaAmount,
-        total: currentTotal,
-        timestamp: new Date(),
+        lastSaleData = {
+            items: JSON.parse(JSON.stringify(cart)),
+            cashPayment: cashAmount,
+            cardPayment: cardAmount,
+            mpesaPayment: mpesaAmount,
+            emolaPayment: emolaAmount,
+            total: currentTotal,
+            change: calculateChange(),
+            timestamp: new Date(),
+        };
+
+        const items = cart.map((item) => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price,
+        }));
+
+        submitFormTraditional(
+            items,
+            cashAmount,
+            cardAmount,
+            mpesaAmount,
+            emolaAmount
+        );
+    } catch (error) {
+        console.error("[POS] Erro ao processar venda:", error);
+        showToast("Erro ao processar venda. Tente novamente.", "error");
+
+        if (finalizeBtn) {
+            finalizeBtn.disabled = false;
+            finalizeBtn.innerHTML =
+                '<i class="mdi mdi-check-circle-outline"></i> Finalizar Pedido';
+        }
+
+        return false;
+    }
+}
+
+function submitFormTraditional(items, cash, card, mpesa, emola) {
+    console.log("[POS] Usando submit de formulário tradicional");
+
+    let form = document.getElementById("checkoutForm");
+
+    if (!form) {
+        form = document.createElement("form");
+        form.id = "checkoutForm";
+        form.method = "POST";
+        form.action = "/pos/checkout";
+        form.style.display = "none";
+        document.body.appendChild(form);
+    }
+
+    form.innerHTML = "";
+
+    // CSRF Token
+    const csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        ?.getAttribute("content");
+    if (csrfToken) {
+        const csrfInput = document.createElement("input");
+        csrfInput.type = "hidden";
+        csrfInput.name = "_token";
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+    }
+
+    // Items
+    const itemsInput = document.createElement("input");
+    itemsInput.type = "hidden";
+    itemsInput.name = "items";
+    itemsInput.value = JSON.stringify(items);
+    form.appendChild(itemsInput);
+
+    // Pagamentos
+    const paymentFields = {
+        cashPayment: cash,
+        cardPayment: card,
+        mpesaPayment: mpesa,
+        emolaPayment: emola,
     };
 
-    // NOVO: Usar formulário tradicional em vez de fetch
-    const items = cart.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity,
-        unit_price: item.price,
-    }));
+    Object.entries(paymentFields).forEach(([name, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = value || "0";
+        form.appendChild(input);
+    });
 
-    document.getElementById("formItems").value = JSON.stringify(items);
-    document.getElementById("formCash").value = cashAmount;
-    document.getElementById("formCard").value = cardAmount;
-    document.getElementById("formMpesa").value = mpesaAmount;
-    document.getElementById("formEmola").value = emolaAmount;
-
-    // Submit do formulário
-    document.getElementById("checkoutForm").submit();
+    console.log("[POS] Formulário preparado. Submetendo...");
+    form.submit();
 }
 
 // ===== FUNÇÕES DE RECIBO CORRIGIDAS =====

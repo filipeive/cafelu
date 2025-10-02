@@ -27,7 +27,7 @@ use App\Http\Controllers\NotificationController;
 | Rotas Públicas
 |--------------------------------------------------------------------------
 */
-Route::get('/zalala_beach_bar', function () {
+Route::get('/', function () {
         return view('welcome');
     });
 

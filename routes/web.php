@@ -27,13 +27,9 @@ use App\Http\Controllers\NotificationController;
 | Rotas Públicas
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    if (View::exists('welcome')) {
+Route::get('/zalala_beach_bar', function () {
         return view('welcome');
-    }
-
-    return redirect()->route('login');
-});
+    });
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Auth::routes();

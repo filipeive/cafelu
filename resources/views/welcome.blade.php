@@ -50,7 +50,7 @@
         }
         
         .header {
-            background: url('{{ asset('assets/images/zalala-beach-bg.jpg') }}') no-repeat center center fixed;
+            background: url('{{ asset('assets/images/zalala-beach-bg.jpeg') }}') no-repeat center center fixed;
             background-size: cover;
             height: 70vh;
             display: flex;

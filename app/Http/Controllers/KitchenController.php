@@ -262,7 +262,41 @@ class KitchenController extends Controller
                 ->with('error', 'Erro ao carregar detalhes do pedido.');
         }
     }
+     /**
+     * Histórico de pedidos
+     */
+    public function history(Request $request)
+    {
+        try {
+            $query = Order::with(['items.product', 'table', 'user'])
+                ->whereIn('status', ['completed', 'paid'])
+                ->orderBy('completed_at', 'desc');
 
+            if ($request->filled('date_from')) {
+                $query->whereDate('completed_at', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('completed_at', '<=', $request->date_to);
+            }
+            if ($request->filled('table_id')) {
+                $query->where('table_id', $request->table_id);
+            }
+
+            $orders = $query->paginate(20);
+            $tables = Table::all();
+
+            $this->logActivity('kitchen_history', null, 'Acessou histórico da cozinha');
+
+            return view('kitchen.history', compact('orders', 'tables'));
+        } catch (\Exception $e) {
+            Log::error('Erro no histórico da cozinha', [
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('kitchen.dashboard')
+                ->with('error', 'Erro ao carregar histórico.');
+        }
+    }
     /**
      * Iniciar preparo de todos os itens de um pedido
      */
@@ -422,6 +456,7 @@ class KitchenController extends Controller
             }
         }
     }
+
 
     private function logActivity($action, $model, $description, $extra = [])
     {

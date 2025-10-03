@@ -137,7 +137,14 @@
             .receipt {
                 padding: 10px;
             }
+            .total {
+                font-size: 16px !important;
+                font-weight: bold !important;
+                color: black !important;
+            }
+
         }
+
     </style>
 </head>
 <body>
@@ -190,9 +197,13 @@
 
         <div class="divider"></div>
 
-        <div class="total">
-            TOTAL: MZN {{ number_format($order->total_amount, 2, ',', '.') }}
-        </div>
+        <table style="width:100%; font-size:16px; font-weight:bold; margin-top:8px;">
+    <tr>
+        <td style="text-align:left;">TOTAL:</td>
+        <td style="text-align:right;">MZN {{ number_format($order->total_amount, 2, ',', '.') }}</td>
+    </tr>
+</table>
+        <div class="divider"></div>
 
         @if($order->payment_method)
             <div class="payment-info">

@@ -2065,7 +2065,6 @@
             }
 
             setupEventListeners() {
-                // Marcar todas como lidas - usar formulário
                 this.markAllBtn?.addEventListener('click', (e) => {
                     e.preventDefault();
                     this.submitMarkAllForm();
@@ -2079,12 +2078,12 @@
             submitMarkAllForm() {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '{{ route('notifications.markAllAsRead') }}';
+                form.action = '/notifications/read-all';
 
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_token';
-                csrf.value = '{{ csrf_token() }}';
+                csrf.value = document.querySelector('meta[name="csrf-token"]').content;
                 form.appendChild(csrf);
 
                 document.body.appendChild(form);
@@ -2093,68 +2092,75 @@
 
             async loadNotifications() {
                 try {
-                    const response = await fetch('{{ route('notifications.list') }}');
-                    const data = await response.json();
+                    const response = await fetch('/notifications/api/list', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    });
 
+                    if (!response.ok) {
+                        console.error('Erro na resposta:', response.status);
+                        return;
+                    }
+
+                    const data = await response.json();
                     this.updateNotificationsList(data.notifications);
                     this.updateBadge(data.unread_count);
                 } catch (error) {
                     console.error('Erro ao carregar notificações:', error);
                 }
             }
+
             updateNotificationsList(notifications) {
                 if (!this.list) return;
 
                 if (notifications.length === 0) {
                     this.list.innerHTML = `
-                    <div class="text-center py-4 text-muted">
-                        <i class="mdi mdi-bell-off-outline fs-1"></i>
-                        <p class="mt-2 mb-0">Nenhuma notificação</p>
-                    </div>
-                `;
+                        <div class="text-center py-4 text-muted">
+                            <i class="mdi mdi-bell-off-outline fs-1"></i>
+                            <p class="mt-2 mb-0">Nenhuma notificação</p>
+                        </div>
+                    `;
                     return;
                 }
 
                 this.list.innerHTML = notifications.map(notification => `
-                <div class="px-3 py-2 border-bottom notification-item ${notification.is_read ? '' : 'bg-light'}"
-                    data-notification-id="${notification.id}" style="cursor: default;">
-                    
-                    <div class="d-flex">
-                        <!-- Ícone -->
-                        <div class="flex-shrink-0 me-3">
-                            <div class="rounded-circle p-2 ${this.getNotificationColor(notification.type)}">
-                                <i class="mdi ${this.getNotificationIcon(notification.type)} text-white"></i>
+                    <div class="px-3 py-2 border-bottom notification-item ${notification.is_read ? '' : 'bg-light'}"
+                        data-notification-id="${notification.id}" style="cursor: default;">
+                        
+                        <div class="d-flex">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="rounded-circle p-2 ${this.getNotificationColor(notification.type)}">
+                                    <i class="mdi ${this.getNotificationIcon(notification.type)} text-white"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 small">${this.escapeHtml(notification.title)}</h6>
+                                <p class="mb-1 small text-muted">${this.escapeHtml(notification.message)}</p>
+                                <small class="text-muted">${this.formatTime(notification.created_at)}</small>
+                            </div>
+
+                            <div class="flex-shrink-0 d-flex gap-1 align-items-center">
+                                ${!notification.is_read ? `
+                                    <form method="POST" action="/notifications/${notification.id}/read" style="display: inline;">
+                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
+                                            <i class="mdi mdi-check-circle"></i>
+                                        </button>
+                                    </form>
+                                ` : `
+                                    <span class="text-success" title="Lida">
+                                        <i class="mdi mdi-check-circle"></i>
+                                    </span>
+                                `}
                             </div>
                         </div>
-
-                        <!-- Conteúdo -->
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 small">${this.escapeHtml(notification.title)}</h6>
-                            <p class="mb-1 small text-muted">${this.escapeHtml(notification.message)}</p>
-                            <small class="text-muted">${this.formatTime(notification.created_at)}</small>
-                        </div>
-
-                        <!-- Ações -->
-                        <div class="flex-shrink-0 d-flex gap-1 align-items-center">
-                            ${!notification.is_read ? `
-                                        <form method="POST" action="{{ url('/notifications') }}/${notification.id}/read" style="display: inline;">
-                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                            <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
-                                                <i class="mdi mdi-check-circle"></i>
-                                            </button>
-                                        </form>
-                                    ` : `
-                                        <span class="text-success" title="Lida">
-                                            <i class="mdi mdi-check-circle"></i>
-                                        </span>
-                                    `}
-                            <a href="{{ url('/notifications') }}" class="btn btn-sm btn-outline-secondary" title="Ver todas as notificações">
-                                <i class="mdi mdi-arrow-right"></i>
-                            </a>
-                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
             }
 
             updateBadge(count) {
@@ -2206,6 +2212,7 @@
             }
 
             escapeHtml(unsafe) {
+                if (!unsafe) return '';
                 return unsafe
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
@@ -2215,12 +2222,14 @@
             }
 
             startPolling() {
+                // Atualizar a cada 30 segundos
                 setInterval(() => {
                     this.loadNotifications();
                 }, 30000);
             }
         }
 
+        // Inicializar apenas após o DOM estar pronto
         document.addEventListener('DOMContentLoaded', function() {
             new NotificationManager();
         });

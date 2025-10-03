@@ -491,474 +491,609 @@
             </div>
         </div>
     </div>
+
+<!-- Modal: Confirmar Iniciar Todos -->
+<div class="modal fade" id="confirmStartAllModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning bg-opacity-10">
+                <h5 class="modal-title">
+                    <i class="mdi mdi-play-circle text-warning me-2"></i>
+                    Iniciar Preparo de Todos os Itens
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="mdi mdi-chef-hat text-warning" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 mb-2">Confirmar Ação</h5>
+                <p class="text-muted mb-0">
+                    Deseja iniciar o preparo de <strong id="startAllCount">todos</strong> os itens pendentes deste pedido?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="mdi mdi-close me-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-warning" id="confirmStartAllBtn">
+                    <i class="mdi mdi-play me-1"></i> Sim, Iniciar Todos
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Finalizar Todos -->
+<div class="modal fade" id="confirmFinishAllModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success bg-opacity-10">
+                <h5 class="modal-title">
+                    <i class="mdi mdi-check-all text-success me-2"></i>
+                    Finalizar Todos os Itens
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="mdi mdi-check-circle text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 mb-2">Confirmar Ação</h5>
+                <p class="text-muted mb-0">
+                    Deseja finalizar <strong id="finishAllCount">todos</strong> os itens (pendentes e em preparo) deste pedido?
+                </p>
+                <div class="alert alert-info mt-3 text-start">
+                    <small>
+                        <i class="mdi mdi-information me-1"></i>
+                        <strong>Atenção:</strong> Os itens serão marcados como prontos para entrega.
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="mdi mdi-close me-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="confirmFinishAllBtn">
+                    <i class="mdi mdi-check-all me-1"></i> Sim, Finalizar Todos
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Finalizar Tudo (Botão Global) -->
+<div class="modal fade" id="confirmMarkAllReadyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success bg-opacity-10">
+                <h5 class="modal-title">
+                    <i class="mdi mdi-check-all text-success me-2"></i>
+                    Finalizar Todos os Pedidos
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="mdi mdi-check-decagram text-success" style="font-size: 3.5rem;"></i>
+                <h5 class="mt-3 mb-2">Ação em Massa</h5>
+                <p class="text-muted mb-3">
+                    Deseja finalizar <strong id="markAllReadyCount">todos</strong> os itens em preparo de todos os pedidos ativos?
+                </p>
+                <div class="alert alert-warning text-start">
+                    <small>
+                        <i class="mdi mdi-alert me-1"></i>
+                        <strong>Importante:</strong> Esta ação afetará múltiplos pedidos simultaneamente.
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="mdi mdi-close me-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="confirmMarkAllReadyBtn">
+                    <i class="mdi mdi-check-all me-1"></i> Sim, Finalizar Tudo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
-
 @push('scripts')
-    <script>
-        /**
-         * Sistema de Notificações da Cozinha - Versão Inline
-         * TODO: Mover para arquivo separado public/assets/js/kitchen-notification-system.js
-         */
-        class KitchenNotificationSystem {
-            constructor() {
-                this.sounds = {
-                    success: '/assets/sounds/success.mp3',
-                    warning: '/assets/sounds/warning.mp3',
-                    error: '/assets/sounds/error.mp3',
-                    newOrder: '/assets/sounds/new-order.mp3',
-                    urgent: '/assets/sounds/urgent.mp3'
-                };
+<script>
+/**
+ * Sistema de Notificações da Cozinha - Com Modais
+ */
+class KitchenNotificationSystem {
+    constructor() {
+        this.sounds = {
+            success: '/assets/sounds/success.mp3',
+            warning: '/assets/sounds/warning.mp3',
+            error: '/assets/sounds/error.mp3',
+            newOrder: '/assets/sounds/new-order.mp3',
+            urgent: '/assets/sounds/urgent.mp3'
+        };
 
-                this.updateInProgress = false;
+        this.updateInProgress = false;
+        this.retryAttempts = 0;
+        this.maxRetries = 3;
+        
+        // Variáveis para armazenar contexto dos modais
+        this.pendingOrderId = null;
+        this.pendingButton = null;
+
+        this.loadPreferences();
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.setupModalListeners();
+        this.checkForSounds();
+        this.startAutoRefresh();
+    }
+
+    loadPreferences() {
+        const prefs = localStorage.getItem('kitchen_preferences');
+        if (prefs) {
+            const parsed = JSON.parse(prefs);
+            this.soundsEnabled = parsed.soundsEnabled ?? true;
+            this.soundVolume = parsed.soundVolume ?? 0.5;
+            this.autoRefreshInterval = parsed.autoRefreshInterval ?? 30000;
+        } else {
+            this.soundsEnabled = true;
+            this.soundVolume = 0.5;
+            this.autoRefreshInterval = 30000;
+        }
+    }
+
+    savePreferences() {
+        localStorage.setItem('kitchen_preferences', JSON.stringify({
+            soundsEnabled: this.soundsEnabled,
+            soundVolume: this.soundVolume,
+            autoRefreshInterval: this.autoRefreshInterval
+        }));
+    }
+
+    setupEventListeners() {
+        // Atualizar status individual
+        document.querySelectorAll('.update-status').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const itemId = button.dataset.itemId;
+                const status = button.dataset.status;
+                this.updateItemStatus(itemId, status, button);
+            });
+        });
+
+        // Iniciar todos - abre modal
+        document.querySelectorAll('.start-all').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const orderId = button.dataset.orderId;
+                this.showStartAllModal(orderId, button);
+            });
+        });
+
+        // Finalizar todos - abre modal
+        document.querySelectorAll('.finish-all').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const orderId = button.dataset.orderId;
+                this.showFinishAllModal(orderId, button);
+            });
+        });
+
+        // Atualizar pedidos
+        document.getElementById('refreshOrders')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.refreshOrders(true);
+        });
+
+        // Finalizar tudo (global) - abre modal
+        document.getElementById('markAllReady')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showMarkAllReadyModal();
+        });
+    }
+
+    setupModalListeners() {
+        // Confirmar iniciar todos
+        document.getElementById('confirmStartAllBtn')?.addEventListener('click', () => {
+            this.hideModal('confirmStartAllModal');
+            this.startAllItems(this.pendingOrderId, this.pendingButton);
+        });
+
+        // Confirmar finalizar todos
+        document.getElementById('confirmFinishAllBtn')?.addEventListener('click', () => {
+            this.hideModal('confirmFinishAllModal');
+            this.finishAllItems(this.pendingOrderId, this.pendingButton);
+        });
+
+        // Confirmar finalizar tudo (global)
+        document.getElementById('confirmMarkAllReadyBtn')?.addEventListener('click', () => {
+            this.hideModal('confirmMarkAllReadyModal');
+            this.markAllReady();
+        });
+    }
+
+    showStartAllModal(orderId, button) {
+        this.pendingOrderId = orderId;
+        this.pendingButton = button;
+        
+        // Contar itens pendentes
+        const orderCard = button.closest('.order-card');
+        const pendingItems = orderCard.querySelectorAll('.item-card.pending').length;
+        document.getElementById('startAllCount').textContent = `${pendingItems} item${pendingItems === 1 ? '' : 's'}`;
+        
+        this.showModal('confirmStartAllModal');
+    }
+
+    showFinishAllModal(orderId, button) {
+        this.pendingOrderId = orderId;
+        this.pendingButton = button;
+        
+        // Contar itens pendentes + em preparo
+        const orderCard = button.closest('.order-card');
+        const pendingItems = orderCard.querySelectorAll('.item-card.pending').length;
+        const preparingItems = orderCard.querySelectorAll('.item-card.preparing').length;
+        const total = pendingItems + preparingItems;
+        document.getElementById('finishAllCount').textContent = `${total} item${total === 1 ? '' : 's'}`;
+        
+        this.showModal('confirmFinishAllModal');
+    }
+
+    showMarkAllReadyModal() {
+        const preparingCount = document.querySelectorAll('.item-card.preparing').length;
+        
+        if (preparingCount === 0) {
+            this.showToast('Nenhum item em preparo para finalizar', 'info');
+            return;
+        }
+        
+        document.getElementById('markAllReadyCount').textContent = `${preparingCount} item${preparingCount === 1 ? '' : 's'}`;
+        this.showModal('confirmMarkAllReadyModal');
+    }
+
+    showModal(modalId) {
+        const modal = new bootstrap.Modal(document.getElementById(modalId));
+        modal.show();
+    }
+
+    hideModal(modalId) {
+        const modalElement = document.getElementById(modalId);
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
+    }
+
+    async updateItemStatus(itemId, status, button = null) {
+        if (this.updateInProgress) {
+            this.showToast('Aguarde a operação anterior concluir', 'warning');
+            return;
+        }
+
+        if (button) {
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
+            button.dataset.originalHtml = originalHTML;
+        }
+
+        this.updateInProgress = true;
+
+        try {
+            const response = await fetch(`/kitchen/items/${itemId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ status })
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta inválida do servidor');
+            }
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                this.showToast(data.message || 'Status atualizado com sucesso', 'success');
+                this.playSound('success');
                 this.retryAttempts = 0;
-                this.maxRetries = 3;
 
-                this.loadPreferences();
-                this.init();
+                setTimeout(() => {
+                    this.refreshOrders(false);
+                }, 500);
+            } else {
+                throw new Error(data.message || 'Erro ao atualizar status');
             }
 
-            init() {
-                this.setupEventListeners();
-                this.checkForSounds();
-                this.startAutoRefresh();
-            }
+        } catch (error) {
+            console.error('Erro ao atualizar status:', error);
+            this.handleError(error, () => this.updateItemStatus(itemId, status, button));
+        } finally {
+            this.updateInProgress = false;
 
-            loadPreferences() {
-                const prefs = localStorage.getItem('kitchen_preferences');
-                if (prefs) {
-                    const parsed = JSON.parse(prefs);
-                    this.soundsEnabled = parsed.soundsEnabled ?? true;
-                    this.soundVolume = parsed.soundVolume ?? 0.5;
-                    this.autoRefreshInterval = parsed.autoRefreshInterval ?? 30000;
-                } else {
-                    this.soundsEnabled = true;
-                    this.soundVolume = 0.5;
-                    this.autoRefreshInterval = 30000;
-                }
-            }
-
-            savePreferences() {
-                localStorage.setItem('kitchen_preferences', JSON.stringify({
-                    soundsEnabled: this.soundsEnabled,
-                    soundVolume: this.soundVolume,
-                    autoRefreshInterval: this.autoRefreshInterval
-                }));
-            }
-
-            setupEventListeners() {
-                document.querySelectorAll('.update-status').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const itemId = button.dataset.itemId;
-                        const status = button.dataset.status;
-                        this.updateItemStatus(itemId, status, button);
-                    });
-                });
-
-                document.querySelectorAll('.start-all').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const orderId = button.dataset.orderId;
-                        this.startAllItems(orderId, button);
-                    });
-                });
-
-                document.querySelectorAll('.finish-all').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const orderId = button.dataset.orderId;
-                        this.finishAllItems(orderId, button);
-                    });
-                });
-
-                document.getElementById('refreshOrders')?.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.refreshOrders(true);
-                });
-
-                document.getElementById('markAllReady')?.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.markAllReady();
-                });
-            }
-
-            async updateItemStatus(itemId, status, button = null) {
-                if (this.updateInProgress) {
-                    this.showToast('Aguarde a operação anterior concluir', 'warning');
-                    return;
-                }
-
-                if (button) {
-                    button.disabled = true;
-                    const originalHTML = button.innerHTML;
-                    button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
-                    button.dataset.originalHtml = originalHTML;
-                }
-
-                this.updateInProgress = true;
-
-                try {
-                    const response = await fetch(`/kitchen/items/${itemId}/status`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': this.getCsrfToken(),
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({
-                            status
-                        })
-                    });
-
-                    // Verificar se a resposta é JSON
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        throw new Error('Resposta inválida do servidor. Esperado JSON, recebido: ' + contentType);
-                    }
-
-                    const data = await response.json();
-
-                    if (response.ok && data.success) {
-                        this.showToast(data.message || 'Status atualizado com sucesso', 'success');
-                        this.playSound('success');
-                        this.retryAttempts = 0; // Resetar contador de tentativas
-
-                        // Aguardar 500ms antes de recarregar para dar feedback visual
-                        setTimeout(() => {
-                            this.refreshOrders(false);
-                        }, 500);
-                    } else {
-                        throw new Error(data.message || 'Erro ao atualizar status');
-                    }
-
-                } catch (error) {
-                    console.error('Erro ao atualizar status:', error);
-                    this.handleError(error, () => this.updateItemStatus(itemId, status, button));
-                } finally {
-                    this.updateInProgress = false;
-
-                    if (button) {
-                        button.disabled = false;
-                        button.innerHTML = button.dataset.originalHtml || 'Atualizar';
-                    }
-                }
-            }
-
-            async startAllItems(orderId, button = null) {
-                if (this.updateInProgress) {
-                    this.showToast('Aguarde a operação anterior concluir', 'warning');
-                    return;
-                }
-
-                const confirmed = confirm('Iniciar preparo de todos os itens pendentes?');
-                if (!confirmed) return;
-
-                if (button) {
-                    button.disabled = true;
-                    const originalHTML = button.innerHTML;
-                    button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Iniciando...';
-                    button.dataset.originalHtml = originalHTML;
-                }
-
-                this.updateInProgress = true;
-
-                try {
-                    const response = await fetch(`/kitchen/orders/${orderId}/start-all`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': this.getCsrfToken(),
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        throw new Error('Resposta inválida do servidor');
-                    }
-
-                    const data = await response.json();
-
-                    if (response.ok && data.success) {
-                        this.showToast(data.message || 'Itens iniciados com sucesso', 'success');
-                        this.playSound('success');
-                        this.retryAttempts = 0;
-
-                        setTimeout(() => {
-                            this.refreshOrders(false);
-                        }, 500);
-                    } else {
-                        throw new Error(data.message || 'Erro ao iniciar itens');
-                    }
-
-                } catch (error) {
-                    console.error('Erro ao iniciar itens:', error);
-                    this.handleError(error, () => this.startAllItems(orderId, button));
-                } finally {
-                    this.updateInProgress = false;
-
-                    if (button) {
-                        button.disabled = false;
-                        button.innerHTML = button.dataset.originalHtml || '<i class="mdi mdi-play"></i> Iniciar Todos';
-                    }
-                }
-            }
-
-            async finishAllItems(orderId, button = null) {
-                if (this.updateInProgress) {
-                    this.showToast('Aguarde a operação anterior concluir', 'warning');
-                    return;
-                }
-
-                const confirmed = confirm('Finalizar todos os itens (pendentes e em preparo)?');
-                if (!confirmed) return;
-
-                if (button) {
-                    button.disabled = true;
-                    const originalHTML = button.innerHTML;
-                    button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Finalizando...';
-                    button.dataset.originalHtml = originalHTML;
-                }
-
-                this.updateInProgress = true;
-
-                try {
-                    const response = await fetch(`/kitchen/orders/${orderId}/finish-all`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': this.getCsrfToken(),
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        throw new Error('Resposta inválida do servidor');
-                    }
-
-                    const data = await response.json();
-
-                    if (response.ok && data.success) {
-                        this.showToast(data.message || 'Itens finalizados com sucesso', 'success');
-                        this.playSound('success');
-                        this.retryAttempts = 0;
-
-                        setTimeout(() => {
-                            this.refreshOrders(false);
-                        }, 500);
-                    } else {
-                        throw new Error(data.message || 'Erro ao finalizar itens');
-                    }
-
-                } catch (error) {
-                    console.error('Erro ao finalizar itens:', error);
-                    this.handleError(error, () => this.finishAllItems(orderId, button));
-                } finally {
-                    this.updateInProgress = false;
-
-                    if (button) {
-                        button.disabled = false;
-                        button.innerHTML = button.dataset.originalHtml ||
-                            '<i class="mdi mdi-check-all"></i> Finalizar Todos';
-                    }
-                }
-            }
-
-            async markAllReady() {
-                const preparingCount = document.querySelectorAll('.item-card.preparing').length;
-
-                if (preparingCount === 0) {
-                    this.showToast('Nenhum item em preparo para finalizar', 'info');
-                    return;
-                }
-
-                const confirmed = confirm(`Finalizar ${preparingCount} itens em preparo?`);
-                if (!confirmed) return;
-
-                const finishButtons = document.querySelectorAll('.finish-all');
-
-                for (const button of finishButtons) {
-                    const orderId = button.dataset.orderId;
-                    await this.finishAllItems(orderId, null);
-                }
-            }
-
-            async refreshOrders(showMessage = true) {
-                try {
-                    if (showMessage) {
-                        this.showToast('Atualizando pedidos...', 'info');
-                    }
-                    window.location.reload();
-                } catch (error) {
-                    console.error('Erro ao atualizar pedidos:', error);
-                    this.showToast('Erro ao atualizar pedidos', 'error');
-                }
-            }
-
-            handleError(error, retryCallback) {
-                this.retryAttempts++;
-
-                if (this.retryAttempts < this.maxRetries) {
-                    this.showToast(
-                        `Tentando novamente... (${this.retryAttempts}/${this.maxRetries})`,
-                        'warning'
-                    );
-
-                    setTimeout(() => {
-                        if (retryCallback && typeof retryCallback === 'function') {
-                            retryCallback();
-                        }
-                    }, 1000 * this.retryAttempts);
-                } else {
-                    // Resetar tudo após falha máxima
-                    this.retryAttempts = 0;
-                    this.updateInProgress = false;
-
-                    this.showToast(
-                        'Não foi possível completar a operação. Verifique a conexão e tente novamente.',
-                        'error'
-                    );
-                    this.playSound('error');
-
-                    // Recarregar página após 2 segundos para sincronizar
-                    setTimeout(() => {
-                        this.refreshOrders(false);
-                    }, 2000);
-                }
-            }
-
-            showToast(message, type = 'success') {
-                if (typeof window.showToast === 'function') {
-                    window.showToast(message, type);
-                } else {
-                    console.log(`[${type.toUpperCase()}] ${message}`);
-                }
-            }
-
-            playSound(soundType) {
-                if (!this.soundsEnabled) return;
-
-                try {
-                    const audioContext = new(window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-
-                    const soundConfig = {
-                        success: {
-                            frequency: 800,
-                            duration: 0.15
-                        },
-                        warning: {
-                            frequency: 600,
-                            duration: 0.2
-                        },
-                        error: {
-                            frequency: 400,
-                            duration: 0.3
-                        },
-                        newOrder: {
-                            frequency: 1000,
-                            duration: 0.1
-                        },
-                        urgent: {
-                            frequency: 500,
-                            duration: 0.5
-                        }
-                    };
-
-                    const config = soundConfig[soundType] || soundConfig.success;
-
-                    oscillator.frequency.value = config.frequency;
-                    oscillator.type = 'sine';
-
-                    gainNode.gain.setValueAtTime(this.soundVolume * 0.3, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + config.duration);
-
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + config.duration);
-                } catch (error) {
-                    console.warn('Erro ao reproduzir som:', error);
-                }
-            }
-
-            checkForSounds() {
-                this.soundsEnabled = true;
-            }
-
-            startAutoRefresh() {
-                if (this.refreshInterval) {
-                    clearInterval(this.refreshInterval);
-                }
-
-                if (this.autoRefreshInterval > 0) {
-                    this.refreshInterval = setInterval(() => {
-                        if (!this.updateInProgress) {
-                            this.refreshOrders(false);
-                        }
-                    }, this.autoRefreshInterval);
-                }
-            }
-
-            getCsrfToken() {
-                const token = document.querySelector('meta[name="csrf-token"]');
-                if (!token) {
-                    throw new Error('Token de segurança não encontrado');
-                }
-                return token.content;
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml || 'Atualizar';
             }
         }
+    }
 
-        // Inicializar sistema
-        document.addEventListener('DOMContentLoaded', function() {
-            window.kitchenSystem = new KitchenNotificationSystem();
-            console.log('Sistema da Cozinha inicializado');
-        });
-
-        // Função para salvar configurações
-        function saveSettings() {
-            if (window.kitchenSystem) {
-                window.kitchenSystem.soundsEnabled = document.getElementById('soundsEnabled').checked;
-                window.kitchenSystem.soundVolume = parseFloat(document.getElementById('soundVolume').value);
-                window.kitchenSystem.autoRefreshInterval = parseInt(document.getElementById('refreshInterval').value);
-                window.kitchenSystem.savePreferences();
-
-                bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
-                showToast('Configurações salvas com sucesso', 'success');
-
-                // Reiniciar auto-refresh se necessário
-                if (window.kitchenSystem.autoRefreshInterval > 0) {
-                    window.kitchenSystem.startAutoRefresh();
-                }
-            }
+    async startAllItems(orderId, button = null) {
+        if (this.updateInProgress) {
+            this.showToast('Aguarde a operação anterior concluir', 'warning');
+            return;
         }
 
-        // Atualizar display do volume
-        document.getElementById('soundVolume')?.addEventListener('input', function() {
-            document.getElementById('volumeValue').textContent = Math.round(this.value * 100) + '%';
-        });
+        if (button) {
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Iniciando...';
+            button.dataset.originalHtml = originalHTML;
+        }
 
-        // Carregar configurações ao abrir modal
-        document.getElementById('settingsModal')?.addEventListener('show.bs.modal', function() {
-            if (window.kitchenSystem) {
-                document.getElementById('soundsEnabled').checked = window.kitchenSystem.soundsEnabled;
-                document.getElementById('soundVolume').value = window.kitchenSystem.soundVolume;
-                document.getElementById('volumeValue').textContent = Math.round(window.kitchenSystem.soundVolume *
-                    100) + '%';
-                document.getElementById('refreshInterval').value = window.kitchenSystem.autoRefreshInterval;
+        this.updateInProgress = true;
+
+        try {
+            const response = await fetch(`/kitchen/orders/${orderId}/start-all`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta inválida do servidor');
             }
-        });
 
-        // Inicializar o sistema quando o DOM carregar
-        document.addEventListener('DOMContentLoaded', function() {
-            // O sistema será inicializado automaticamente pelo kitchen-notification-system.js
-            console.log('Dashboard da Cozinha carregado');
-        });
-    </script>
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                this.showToast(data.message || 'Itens iniciados com sucesso', 'success');
+                this.playSound('success');
+                this.retryAttempts = 0;
+
+                setTimeout(() => {
+                    this.refreshOrders(false);
+                }, 500);
+            } else {
+                throw new Error(data.message || 'Erro ao iniciar itens');
+            }
+
+        } catch (error) {
+            console.error('Erro ao iniciar itens:', error);
+            this.handleError(error, () => this.startAllItems(orderId, button));
+        } finally {
+            this.updateInProgress = false;
+
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml || '<i class="mdi mdi-play"></i> Iniciar Todos';
+            }
+        }
+    }
+
+    async finishAllItems(orderId, button = null) {
+        if (this.updateInProgress) {
+            this.showToast('Aguarde a operação anterior concluir', 'warning');
+            return;
+        }
+
+        if (button) {
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Finalizando...';
+            button.dataset.originalHtml = originalHTML;
+        }
+
+        this.updateInProgress = true;
+
+        try {
+            const response = await fetch(`/kitchen/orders/${orderId}/finish-all`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta inválida do servidor');
+            }
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                this.showToast(data.message || 'Itens finalizados com sucesso', 'success');
+                this.playSound('success');
+                this.retryAttempts = 0;
+
+                setTimeout(() => {
+                    this.refreshOrders(false);
+                }, 500);
+            } else {
+                throw new Error(data.message || 'Erro ao finalizar itens');
+            }
+
+        } catch (error) {
+            console.error('Erro ao finalizar itens:', error);
+            this.handleError(error, () => this.finishAllItems(orderId, button));
+        } finally {
+            this.updateInProgress = false;
+
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml || '<i class="mdi mdi-check-all"></i> Finalizar Todos';
+            }
+        }
+    }
+
+    async markAllReady() {
+        const finishButtons = document.querySelectorAll('.finish-all');
+
+        for (const button of finishButtons) {
+            const orderId = button.dataset.orderId;
+            await this.finishAllItems(orderId, null);
+        }
+    }
+
+    async refreshOrders(showMessage = true) {
+        try {
+            if (showMessage) {
+                this.showToast('Atualizando pedidos...', 'info');
+            }
+            window.location.reload();
+        } catch (error) {
+            console.error('Erro ao atualizar pedidos:', error);
+            this.showToast('Erro ao atualizar pedidos', 'error');
+        }
+    }
+
+    handleError(error, retryCallback) {
+        this.retryAttempts++;
+
+        if (this.retryAttempts < this.maxRetries) {
+            this.showToast(
+                `Tentando novamente... (${this.retryAttempts}/${this.maxRetries})`,
+                'warning'
+            );
+
+            setTimeout(() => {
+                if (retryCallback && typeof retryCallback === 'function') {
+                    retryCallback();
+                }
+            }, 1000 * this.retryAttempts);
+        } else {
+            this.retryAttempts = 0;
+            this.updateInProgress = false;
+
+            this.showToast(
+                'Não foi possível completar a operação. Verifique a conexão e tente novamente.',
+                'error'
+            );
+            this.playSound('error');
+
+            setTimeout(() => {
+                this.refreshOrders(false);
+            }, 2000);
+        }
+    }
+
+    showToast(message, type = 'success') {
+        if (typeof window.showToast === 'function') {
+            window.showToast(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+    }
+
+    playSound(soundType) {
+        if (!this.soundsEnabled) return;
+
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            const soundConfig = {
+                success: { frequency: 800, duration: 0.15 },
+                warning: { frequency: 600, duration: 0.2 },
+                error: { frequency: 400, duration: 0.3 },
+                newOrder: { frequency: 1000, duration: 0.1 },
+                urgent: { frequency: 500, duration: 0.5 }
+            };
+
+            const config = soundConfig[soundType] || soundConfig.success;
+
+            oscillator.frequency.value = config.frequency;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(this.soundVolume * 0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + config.duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + config.duration);
+        } catch (error) {
+            console.warn('Erro ao reproduzir som:', error);
+        }
+    }
+
+    checkForSounds() {
+        this.soundsEnabled = true;
+    }
+
+    startAutoRefresh() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
+
+        if (this.autoRefreshInterval > 0) {
+            this.refreshInterval = setInterval(() => {
+                if (!this.updateInProgress) {
+                    this.refreshOrders(false);
+                }
+            }, this.autoRefreshInterval);
+        }
+    }
+
+    getCsrfToken() {
+        const token = document.querySelector('meta[name="csrf-token"]');
+        if (!token) {
+            throw new Error('Token de segurança não encontrado');
+        }
+        return token.content;
+    }
+}
+
+// Inicializar sistema
+document.addEventListener('DOMContentLoaded', function() {
+    window.kitchenSystem = new KitchenNotificationSystem();
+    console.log('Sistema da Cozinha inicializado com modais');
+});
+
+// Função para salvar configurações
+function saveSettings() {
+    if (window.kitchenSystem) {
+        window.kitchenSystem.soundsEnabled = document.getElementById('soundsEnabled').checked;
+        window.kitchenSystem.soundVolume = parseFloat(document.getElementById('soundVolume').value);
+        window.kitchenSystem.autoRefreshInterval = parseInt(document.getElementById('refreshInterval').value);
+        window.kitchenSystem.savePreferences();
+
+        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+        showToast('Configurações salvas com sucesso', 'success');
+
+        if (window.kitchenSystem.autoRefreshInterval > 0) {
+            window.kitchenSystem.startAutoRefresh();
+        }
+    }
+}
+
+// Atualizar display do volume
+document.getElementById('soundVolume')?.addEventListener('input', function() {
+    document.getElementById('volumeValue').textContent = Math.round(this.value * 100) + '%';
+});
+
+// Carregar configurações ao abrir modal
+document.getElementById('settingsModal')?.addEventListener('show.bs.modal', function() {
+    if (window.kitchenSystem) {
+        document.getElementById('soundsEnabled').checked = window.kitchenSystem.soundsEnabled;
+        document.getElementById('soundVolume').value = window.kitchenSystem.soundVolume;
+        document.getElementById('volumeValue').textContent = Math.round(window.kitchenSystem.soundVolume * 100) + '%';
+        document.getElementById('refreshInterval').value = window.kitchenSystem.autoRefreshInterval;
+    }
+});
+</script>
 @endpush

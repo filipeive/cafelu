@@ -1822,7 +1822,7 @@
             },
             csrfToken: '{{ csrf_token() }}'
         };
-        
+
         // Helper para substituir parâmetros nas rotas
         window.route = function(routeName, params = {}) {
             let url = window.AppConfig.routes[routeName];
@@ -1838,6 +1838,7 @@
             
             return url;
         };
+
         // ===== SIDEBAR MANAGEMENT =====
         class SidebarManager {
             constructor() {
@@ -1949,16 +1950,16 @@
             };
 
             const toastHtml = `
-        <div class="toast ${colorMap[type]} border-0" role="alert" data-bs-delay="4000">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="mdi ${iconMap[type]} me-2"></i>
-                    ${message}
+                <div class="toast ${colorMap[type]} border-0" role="alert" data-bs-delay="4000">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="mdi ${iconMap[type]} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    `;
+            `;
 
             let toastContainer = document.getElementById('toast-container');
             if (!toastContainer) {
@@ -1979,30 +1980,6 @@
             });
         }
 
-        // Auto-show toasts from session
-        document.addEventListener('DOMContentLoaded', function() {
-            @if (session('success'))
-                showToast('{{ session('success') }}', 'success');
-            @endif
-
-            @if (session('error'))
-                showToast('{{ session('error') }}', 'error');
-            @endif
-
-            @if (session('warning'))
-                showToast('{{ session('warning') }}', 'warning');
-            @endif
-
-            @if (session('info'))
-                showToast('{{ session('info') }}', 'info');
-            @endif
-
-            @if ($errors->any())
-                @foreach ($errors->all() as $error)
-                    showToast('{{ $error }}', 'error');
-                @endforeach
-            @endif
-        });
         // ===== PROFESSIONAL SEARCH MANAGER =====
         class ProfessionalSearch {
             constructor() {
@@ -2039,45 +2016,11 @@
 
             performSearch(query) {
                 if (query.trim().length === 0) return;
-
-                const searchUrl = window.location.origin + '/search?q=' + encodeURIComponent(query);
+                const searchUrl = window.AppConfig.baseUrl + '/search?q=' + encodeURIComponent(query);
                 window.location.href = searchUrl;
             }
         }
 
-        // ===== INITIALIZATION =====
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load saved theme
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-bs-theme', savedTheme);
-
-            // Initialize components
-            try {
-                new SidebarManager();
-                new ProfessionalSearch();
-            } catch (error) {
-                console.error('Error initializing components:', error);
-            }
-
-            // Initialize Bootstrap tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-
-            // Auto-hide alerts after 5 seconds
-            setTimeout(() => {
-                document.querySelectorAll('.alert.show').forEach(alert => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    setTimeout(() => bsAlert?.close(), 5000);
-                });
-            }, 100);
-
-            // Show welcome message
-            setTimeout(() => {
-                console.log('Bem-vindo ao ZALALA BEACH BAR!', 'info');
-            }, 1000);
-        });
         // ===== NOTIFICATION MANAGER =====
         class NotificationManager {
             constructor() {
@@ -2110,12 +2053,12 @@
             submitMarkAllForm() {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '/notifications/read-all';
+                form.action = window.route('notificationsMarkAllAsRead');
 
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_token';
-                csrf.value = document.querySelector('meta[name="csrf-token"]').content;
+                csrf.value = window.AppConfig.csrfToken;
                 form.appendChild(csrf);
 
                 document.body.appendChild(form);
@@ -2124,7 +2067,6 @@
 
             async loadNotifications() {
                 try {
-                    // Usar URL do Laravel
                     const response = await fetch(window.route('notificationsList'), {
                         method: 'GET',
                         headers: {
@@ -2144,22 +2086,6 @@
                     this.updateBadge(data.unread_count);
                 } catch (error) {
                     console.error('Erro ao carregar notificações:', error);
-                }
-            }
-                submitMarkAllForm() {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    // Usar URL do Laravel
-                    form.action = window.route('notificationsMarkAllAsRead');
-
-                    const csrf = document.createElement('input');
-                    csrf.type = 'hidden';
-                    csrf.name = '_token';
-                    csrf.value = window.AppConfig.csrfToken;
-                    form.appendChild(csrf);
-
-                    document.body.appendChild(form);
-                    form.submit();
                 }
             }
 
@@ -2195,8 +2121,8 @@
 
                             <div class="flex-shrink-0 d-flex gap-1 align-items-center">
                                 ${!notification.is_read ? `
-                                    <form method="POST" action="/notifications/${notification.id}/read" style="display: inline;">
-                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                                    <form method="POST" action="${window.AppConfig.baseUrl}/notifications/${notification.id}/read" style="display: inline;">
+                                        <input type="hidden" name="_token" value="${window.AppConfig.csrfToken}">
                                         <button type="submit" class="btn btn-sm btn-success" title="Marcar como lida">
                                             <i class="mdi mdi-check-circle"></i>
                                         </button>
@@ -2271,17 +2197,64 @@
             }
 
             startPolling() {
-                // Atualizar a cada 30 segundos
                 setInterval(() => {
                     this.loadNotifications();
                 }, 30000);
             }
         }
 
-        // Inicializar apenas após o DOM estar pronto
+        // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', function() {
-            new NotificationManager();
+            // Auto-show toasts from session
+            @if (session('success'))
+                showToast('{{ session('success') }}', 'success');
+            @endif
+            @if (session('error'))
+                showToast('{{ session('error') }}', 'error');
+            @endif
+            @if (session('warning'))
+                showToast('{{ session('warning') }}', 'warning');
+            @endif
+            @if (session('info'))
+                showToast('{{ session('info') }}', 'info');
+            @endif
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    showToast('{{ $error }}', 'error');
+                @endforeach
+            @endif
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+
+            // Initialize components
+            try {
+                new SidebarManager();
+                new ProfessionalSearch();
+                new NotificationManager();
+            } catch (error) {
+                console.error('Error initializing components:', error);
+            }
+
+            // Initialize Bootstrap tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Auto-hide alerts
+            setTimeout(() => {
+                document.querySelectorAll('.alert.show').forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    setTimeout(() => bsAlert?.close(), 5000);
+                });
+            }, 100);
         });
+
+        // Expose functions globally
+        window.toggleTheme = toggleTheme;
+        window.showToast = showToast;
     </script>
 
     @stack('scripts')

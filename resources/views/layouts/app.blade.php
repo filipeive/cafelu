@@ -1806,6 +1806,38 @@
     <!-- Bootstrap JS (já deve estar via CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Configuração global de URLs do Laravel
+        window.AppConfig = {
+            baseUrl: '{{ url('/') }}',
+            routes: {
+                // Notificações
+                notificationsList: '{{ route('notifications.list') }}',
+                notificationsMarkAsRead: '{{ route('notifications.markAsRead', ':id') }}',
+                notificationsMarkAllAsRead: '{{ route('notifications.markAllAsRead') }}',
+                
+                // Cozinha
+                kitchenUpdateItemStatus: '{{ route('kitchen.update-item-status', ':id') }}',
+                kitchenStartAll: '{{ route('kitchen.start-all', ':id') }}',
+                kitchenFinishAll: '{{ route('kitchen.finish-all', ':id') }}',
+            },
+            csrfToken: '{{ csrf_token() }}'
+        };
+        
+        // Helper para substituir parâmetros nas rotas
+        window.route = function(routeName, params = {}) {
+            let url = window.AppConfig.routes[routeName];
+            if (!url) {
+                console.error('Rota não encontrada:', routeName);
+                return '/';
+            }
+            
+            // Substituir :id por valor real
+            Object.keys(params).forEach(key => {
+                url = url.replace(':' + key, params[key]);
+            });
+            
+            return url;
+        };
         // ===== SIDEBAR MANAGEMENT =====
         class SidebarManager {
             constructor() {
@@ -2092,7 +2124,8 @@
 
             async loadNotifications() {
                 try {
-                    const response = await fetch('/notifications/api/list', {
+                    // Usar URL do Laravel
+                    const response = await fetch(window.route('notificationsList'), {
                         method: 'GET',
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
@@ -2111,6 +2144,22 @@
                     this.updateBadge(data.unread_count);
                 } catch (error) {
                     console.error('Erro ao carregar notificações:', error);
+                }
+            }
+                submitMarkAllForm() {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    // Usar URL do Laravel
+                    form.action = window.route('notificationsMarkAllAsRead');
+
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = window.AppConfig.csrfToken;
+                    form.appendChild(csrf);
+
+                    document.body.appendChild(form);
+                    form.submit();
                 }
             }
 

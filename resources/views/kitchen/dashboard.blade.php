@@ -778,12 +778,13 @@ class KitchenNotificationSystem {
 
         this.updateInProgress = true;
 
-        try {
-            const response = await fetch(`/kitchen/items/${itemId}/status`, {
+         try {
+            // Usar URL do Laravel
+            const response = await fetch(window.route('kitchenUpdateItemStatus', {id: itemId}), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'X-CSRF-TOKEN': window.AppConfig.csrfToken,
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
@@ -838,15 +839,16 @@ class KitchenNotificationSystem {
         this.updateInProgress = true;
 
         try {
-            const response = await fetch(`/kitchen/orders/${orderId}/start-all`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.getCsrfToken(),
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
+        // Usar URL do Laravel
+        const response = await fetch(window.route('kitchenStartAll', {id: orderId}), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': window.AppConfig.csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
 
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
@@ -895,12 +897,13 @@ class KitchenNotificationSystem {
 
         this.updateInProgress = true;
 
-        try {
-            const response = await fetch(`/kitchen/orders/${orderId}/finish-all`, {
+         try {
+            // Usar URL do Laravel
+            const response = await fetch(window.route('kitchenFinishAll', {id: orderId}), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.getCsrfToken(),
+                    'X-CSRF-TOKEN': window.AppConfig.csrfToken,
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }

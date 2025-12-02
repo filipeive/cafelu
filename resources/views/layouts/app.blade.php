@@ -642,19 +642,4 @@
     </script>
     @stack('scripts')
 </body>
-
-</html>
-.setItem('sidebarCollapsed', 
-                document.getElementById('appContainer').classList.contains('sidebar-collapsed')
-            );
-        }
-
-        // Load sidebar state
-        document.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                document.getElementById('appContainer').classList.add('sidebar-collapsed');
-            }
-        });
-    </script>
-</body>
 </html>

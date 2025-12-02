@@ -7,52 +7,110 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: 'Arial', monospace;
+            font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            padding: 10px;
-            font-size: 15px;
+            padding: 6mm;
+            font-size: 12px;
+            color: #000;
+            -webkit-print-color-adjust: exact;
+            box-sizing: border-box;
         }
         .receipt {
-            max-width: 250px;
+            width: 80mm;
+            max-width: 80mm;
+            padding: 20px;
             margin: 0 auto;
+            background: #fff;
         }
         .header {
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         .logo {
-            max-width: 100px;
-            margin-bottom: 5px;
+            max-width: 60px;
+            height: auto;
+            display: block;
+            margin: 0 auto 4px;
+        }
+        .company-name {
+            font-size: 14px;
+            margin: 0;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .company-subtitle {
+            font-size: 11px;
+            margin: 0;
+        }
+        .company-info {
+            font-size: 10px;
+            margin: 0;
         }
         .divider {
             border-top: 1px dashed #000;
-            margin: 10px 0;
+            margin: 6px 0;
         }
         .items, .totals, .payment-methods, .footer {
-            margin-top: 15px;
+            margin-top: 6px;
+        }
+        .items table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        .items th, .items td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+        .items th {
+            font-weight: 600;
+            text-align: left;
+        }
+        .items td:nth-child(2),
+        .items td:nth-child(3),
+        .items td:nth-child(4) {
+            text-align: right;
+        }
+        .items td {
+            word-break: break-word;
         }
         .item {
             display: flex;
             justify-content: space-between;
         }
-        .totals strong {
-            font-weight: bold;
+        .totals .item {
+            padding-top: 4px;
+            border-top: 1px solid transparent;
+            font-size: 12px;
         }
         .footer {
             text-align: center;
-            font-size: 12px;
-            margin-top: 20px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        .no-print {
+            text-align: center;
+            margin-top: 8px;
         }
         @media print {
             @page {
-                margin: 0;
-                size: 80mm 297mm;
+            size: 80mm auto;
+            margin: 3mm;
             }
             body {
-                margin: 0;
+            margin: 0;
+            padding: 0;
+            }
+            .receipt {
+            width: 80mm;
+            margin: 0;
+            padding: 0;
             }
             .no-print {
-                display: none;
+            display: none !important;
+            }
+            img {
+            -webkit-print-color-adjust: exact;
             }
         }
     </style>

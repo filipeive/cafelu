@@ -7,33 +7,43 @@
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 12pt;
+            font-size: 10pt;
             margin: 0;
             padding: 0;
-            width: 72mm; /* Reduzido para economizar papel */
+            width: 80mm;
+            -webkit-print-color-adjust: exact;
+            box-sizing: border-box;
         }
         .receipt {
-            padding: 3mm; /* Reduzido */
+            padding: 3mm;
+            width: calc(80mm - 6mm);
+            box-sizing: border-box;
         }
         .header {
             text-align: center;
-            margin-bottom: 3mm; /* Reduzido */
+            margin-bottom: 2mm;
         }
         .logo {
-            max-width: 35mm; /* Reduzido */
+            max-width: 30mm;
             height: auto;
-            margin-bottom: 2mm; /* Reduzido */
+            display: block;
+            margin: 0 auto 1mm;
         }
-        .header h1, .header h2 {
-            font-size: 12pt; /* Reduzido */
-            margin: 1mm 0; /* Reduzido */
+        .header .company-name {
+            font-size: 12pt;
+            margin: 1mm 0;
+        }
+        .header .company-subtitle {
+            font-size: 9pt;
+            margin: 0;
         }
         .header p {
-            margin: 0.5mm 0; /* Reduzido */
-            font-size: 10pt; /* Reduzido */
+            margin: 0.4mm 0;
+            font-size: 8pt;
         }
         .info {
-            margin-bottom: 3mm; /* Reduzido */
+            margin-bottom: 2mm;
+            font-size: 9pt;
         }
         .info p {
             margin: 0;
@@ -41,37 +51,65 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 3mm; /* Reduzido */
+            margin-bottom: 2mm;
+            font-size: 9pt;
         }
         th, td {
-            text-align: left;
-            padding: 0.5mm; /* Reduzido */
+            padding: 0.8mm 0;
+            vertical-align: top;
         }
         th {
             border-bottom: 1px solid #000;
+            font-weight: 700;
+            font-size: 9pt;
+        }
+        th:nth-child(2), td:nth-child(2) {
+            text-align: center;
+            width: 12%;
+        }
+        th:nth-child(3), td:nth-child(3) {
+            text-align: right;
+            width: 18%;
+        }
+        th:nth-child(4), td:nth-child(4) {
+            text-align: right;
+            width: 20%;
         }
         .total {
             text-align: right;
             font-weight: bold;
-            margin-top: 2mm; /* Reduzido */
+            margin-top: 2mm;
+            font-size: 10pt;
         }
         .footer {
             text-align: center;
-            margin-top: 5mm; /* Reduzido */
-            font-size: 8pt; /* Reduzido */
+            margin-top: 4mm;
+            font-size: 8pt;
         }
         .divider {
             border-top: 1px dashed #000;
-            margin: 2mm 0; /* Reduzido */
+            margin: 2mm 0;
+        }
+        .print-button {
+            text-align: center;
+            margin: 12px;
         }
         @media print {
             body {
-                width: 72mm; /* Reduzido */
+                width: 80mm;
                 margin: 0;
                 padding: 0;
             }
+            .receipt {
+                padding: 2.5mm;
+                width: calc(80mm - 5mm);
+            }
             .print-button {
                 display: none;
+            }
+            @page {
+                size: 80mm auto;
+                margin: 0;
             }
         }
     </style>
@@ -131,7 +169,7 @@
         <div class="divider"></div>
 
         <div class="total">
-            <p>SUBTOTAL: {{ number_format($sale->total_amount, 2, ',', '.') }} MZN</p>
+            <!--<p>SUBTOTAL: {{-- number_format($sale->total_amount, 2, ',', '.') --}} MZN</p>-->
             <p>TOTAL: {{ number_format($sale->total_amount, 2, ',', '.') }} MZN</p>
         </div>
 

@@ -72,6 +72,8 @@ class SaleController extends Controller
     {
         // Validação dos dados recebidos
         $validated = $request->validate([
+            'user_id' => auth()->id(),
+            'customer_name' => $order->customer_name ?? 'Cliente',
             'payment_method' => 'required|string',
             'products' => 'required|array',
             'products.*.id' => 'required|exists:products,id',
@@ -94,7 +96,8 @@ class SaleController extends Controller
             }
 
             // Criar a venda
-            $sale = Sale::create([
+               $sale = Sale::create([
+                'user_id' => auth()->id(),
                 'sale_date' => now(),
                 'total_amount' => $total_amount,
                 'payment_method' => $validated['payment_method'],

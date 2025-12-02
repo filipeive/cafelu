@@ -8,16 +8,18 @@ class Sale extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'sale_date',
+       protected $fillable = [
+        'order_id',
+        'user_id',
+        'customer_name',
         'total_amount',
         'payment_method',
-        'status',
         'cash_amount',
         'card_amount',
         'mpesa_amount',
         'emola_amount',
-        'notes'  // Adicionado o novo campo
+        'notes',
+        'status',
     ];
 
     protected $casts = [

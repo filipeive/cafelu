@@ -89,6 +89,7 @@ class POSController extends Controller
 
             // Criação da venda
             $saleId = DB::table('sales')->insertGetId([
+                'user_id' => auth()->user()->id,
                 'sale_date' => now(),
                 'total_amount' => $totalAmount,
                 'payment_method' => $this->determinePaymentMethod($validated),

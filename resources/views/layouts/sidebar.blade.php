@@ -71,7 +71,7 @@
             @endphp
 
             <x-sidebar.dropdown-item route="sales.index" icon="mdi-cash-multiple" title="Vendas">
-                <span class="badge badge-success">R$ {{ $formattedSales }}</span>
+                <span class="badge badge-success">MZN {{ $formattedSales }}</span>
             </x-sidebar.dropdown-item>
 
             @if (Auth::user()->role == 'admin')

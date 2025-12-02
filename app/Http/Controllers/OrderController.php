@@ -216,25 +216,45 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
+            // Garantir total do pedido (calcula a partir dos itens se estiver nulo ou zero)
+            $total = $order->total_amount;
+            if (is_null($total) || $total == 0) {
+                $total = $order->items->sum('total_price');
+                $order->total_amount = $total;
+                $order->save();
+            }
+
             $request->validate([
                 'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh',
                 'notes' => 'nullable|string',
-                'amount_paid' => 'required|numeric|min:' . $order->total_amount,
+                'amount_paid' => 'required|numeric|min:' . $total,
             ]);
 
             if ($order->status !== 'completed') {
                 throw new \Exception('Apenas pedidos finalizados podem ser pagos.');
             }
 
-            // 1. Registrar a venda
-            $sale = Sale::create([
+            // Distribui o valor pago para a coluna correspondente
+            $amountPaid = (float) $request->amount_paid;
+            $cash = $card = $mpesa = $emola = 0.00;
+            switch ($request->payment_method) {
+                case 'card': $card = $amountPaid; break;
+                case 'mpesa': $mpesa = $amountPaid; break;
+                case 'emola': $emola = $amountPaid; break;
+                default: $cash = $amountPaid; break; // cash, mkesh ou fallback
+            }
+
+            // 1. Registrar a venda preenchendo total_amount e os campos de pagamento existentes na tabela
+           $sale = Sale::create([
                 'order_id' => $order->id,
                 'user_id' => auth()->id(),
-                'customer_name' => $order->customer_name,
-                'total_amount' => $order->total_amount,
+                'customer_name' => $order->customer_name ?? 'Cliente',
+                'total_amount' => $total,
                 'payment_method' => $request->payment_method,
-                'amount_paid' => $request->amount_paid,
-                'change_amount' => $request->amount_paid - $order->total_amount,
+                'cash_amount' => $cash,
+                'card_amount' => $card,
+                'mpesa_amount' => $mpesa,
+                'emola_amount' => $emola,
                 'notes' => $request->notes ?? $order->notes,
                 'status' => 'completed'
             ]);
@@ -264,14 +284,10 @@ class OrderController extends Controller
                 'paid_at' => now()
             ]);
 
-            // 5. Liberar e separar mesas
+            // 5. Liberar mesas (mantém seu código existente)
             if ($order->table) {
                 if ($order->table->group_id) {
-                    // Busca todas as mesas do grupo
-                    $groupedTables = Table::where('group_id', $order->table->group_id)
-                        ->get();
-
-                    // Atualiza cada mesa do grupo
+                    $groupedTables = Table::where('group_id', $order->table->group_id)->get();
                     foreach ($groupedTables as $table) {
                         $table->update([
                             'status' => 'free',
@@ -281,7 +297,6 @@ class OrderController extends Controller
                         ]);
                     }
                 } else {
-                    // Se for mesa individual, apenas libera
                     $order->table->update(['status' => 'free']);
                 }
             }

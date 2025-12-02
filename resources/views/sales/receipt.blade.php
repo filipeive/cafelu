@@ -117,6 +117,21 @@
             border-top: 1px dashed #000;
             margin: 2mm 0;
         }
+        .total {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 2mm;
+    font-size: 12pt;
+    color: #000 !important;
+}
+
+@media print {
+    .total {
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
         @media print {
             body {
                 width: 72mm;
@@ -190,9 +205,10 @@
             <p>TOTAL: MZN {{ number_format($sale->total_amount, 2, ',', '.') }}</p>
         </div>
         @else
-        <div class="total">
-            <p>TOTAL: MZN {{ number_format($sale->total_amount, 2, ',', '.') }}</p>
-        </div>
+        <div class="total" style="display:block; background:#fff;">
+    TOTAL: <span style="font-weight:bold;">MZN {{ number_format($sale->total_amount, 2, ',', '.') }}</span>
+</div>
+
         @endif
 
         @if($sale->payment_method)

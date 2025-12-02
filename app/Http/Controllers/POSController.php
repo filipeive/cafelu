@@ -44,156 +44,148 @@ class POSController extends Controller
     {
         Log::info('Checkout Request:', $request->all());
 
-    try {
-        // Decodificar items do JSON (vem como string do form)
-        $itemsJson = $request->input('items');
-        $items = json_decode($itemsJson, true);
-        
-        if (!$items || !is_array($items) || count($items) === 0) {
-            return redirect()->back()
-                ->with('error', 'Carrinho vazio. Adicione produtos antes de finalizar.')
-                ->withInput();
-        }
-
-        // Validar pagamentos
-        $validated = $request->validate([
-            'cashPayment' => 'nullable|numeric|min:0',
-            'cardPayment' => 'nullable|numeric|min:0',
-            'mpesaPayment' => 'nullable|numeric|min:0',
-            'emolaPayment' => 'nullable|numeric|min:0',
-        ]);
-
-            // Validar estrutura de cada item
-            foreach ($items as $index => $item) {
-                if (!isset($item['product_id']) || !isset($item['quantity']) || !isset($item['unit_price'])) {
-                    return redirect()->back()
-                        ->with('error', 'Dados do produto inválidos.')
-                        ->withInput();
-                }
-
-                // Validar se produto existe
-                $productExists = DB::table('products')->where('id', $item['product_id'])->exists();
-                if (!$productExists) {
-                    return redirect()->back()
-                        ->with('error', 'Produto ID ' . $item['product_id'] . ' não encontrado.')
-                        ->withInput();
-                }
-            }
-
-            DB::beginTransaction();
-
-            // Cálculo do total
-            $totalAmount = collect($items)->sum(function($item) {
-                return $item['unit_price'] * $item['quantity'];
-            });
-
-            // Pagamentos recebidos
-            $cashPayment = floatval($validated['cashPayment'] ?? 0);
-            $cardPayment = floatval($validated['cardPayment'] ?? 0);
-            $mpesaPayment = floatval($validated['mpesaPayment'] ?? 0);
-            $emolaPayment = floatval($validated['emolaPayment'] ?? 0);
+        try {
+            // Decodificar items do JSON (vem como string do form)
+            $itemsJson = $request->input('items');
+            $items = json_decode($itemsJson, true);
             
-            // Pagamentos não em dinheiro
-            $nonCashPayments = $cardPayment + $mpesaPayment + $emolaPayment;
-            
-            // Verificar se pagamentos não em dinheiro ultrapassam o total
-            if ($nonCashPayments > $totalAmount) {
-                DB::rollBack();
+            if (!$items || !is_array($items) || count($items) === 0) {
                 return redirect()->back()
-                    ->with('error', sprintf(
-                        'Pagamentos sem dinheiro (MZN %s) ultrapassam o valor total (MZN %s)',
-                        number_format($nonCashPayments, 2),
-                        number_format($totalAmount, 2)
-                    ))
+                    ->with('error', 'Carrinho vazio. Adicione produtos antes de finalizar.')
                     ->withInput();
             }
-            
-            // Calcular valor restante que deve ser pago em dinheiro
-            $remainingAmount = $totalAmount - $nonCashPayments;
-            
-            // Verificar se pagamento em dinheiro é suficiente
-            if ($cashPayment < $remainingAmount) {
-                DB::rollBack();
-                $missing = $remainingAmount - $cashPayment;
-                return redirect()->back()
-                    ->with('error', sprintf(
-                        'Pagamento insuficiente. Faltam MZN %s',
-                        number_format($missing, 2)
-                    ))
-                    ->withInput();
-            }
-            
-            // Calcular troco (apenas do pagamento em dinheiro)
-            $change = $cashPayment > $remainingAmount ? $cashPayment - $remainingAmount : 0;
 
-            // Criar a venda
-            $saleId = DB::table('sales')->insertGetId([
-                'user_id' => auth()->id(),
-                'sale_date' => now(),
-                'total_amount' => $totalAmount,
-                'payment_method' => $this->determinePaymentMethod([
-                    'cashPayment' => $cashPayment,
-                    'cardPayment' => $cardPayment,
-                    'mpesaPayment' => $mpesaPayment,
-                    'emolaPayment' => $emolaPayment
-                ]),
-                'status' => 'completed',
-                'cash_amount' => $cashPayment,
-                'card_amount' => $cardPayment,
-                'mpesa_amount' => $mpesaPayment,
-                'emola_amount' => $emolaPayment,
-                'created_at' => now(),
-                'updated_at' => now(),
+            // Validar pagamentos
+            $validated = $request->validate([
+                'cashPayment' => 'nullable|numeric|min:0',
+                'cardPayment' => 'nullable|numeric|min:0',
+                'mpesaPayment' => 'nullable|numeric|min:0',
+                'emolaPayment' => 'nullable|numeric|min:0',
             ]);
 
-            // Inserir itens da venda e atualizar estoque
-            foreach ($items as $item) {
-                // Inserir item da venda
-                DB::table('sale_items')->insert([
-                    'sale_id' => $saleId,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
+                // Validar estrutura de cada item
+                foreach ($items as $index => $item) {
+                    if (!isset($item['product_id']) || !isset($item['quantity']) || !isset($item['unit_price'])) {
+                        return redirect()->back()
+                            ->with('error', 'Dados do produto inválidos.')
+                            ->withInput();
+                    }
+
+                    // Validar se produto existe
+                    $productExists = DB::table('products')->where('id', $item['product_id'])->exists();
+                    if (!$productExists) {
+                        return redirect()->back()
+                            ->with('error', 'Produto ID ' . $item['product_id'] . ' não encontrado.')
+                            ->withInput();
+                    }
+                }
+
+                DB::beginTransaction();
+
+                // Cálculo do total
+                $totalAmount = collect($items)->sum(function($item) {
+                    return $item['unit_price'] * $item['quantity'];
+                });
+
+                // Pagamentos recebidos
+                $cashPayment = floatval($validated['cashPayment'] ?? 0);
+                $cardPayment = floatval($validated['cardPayment'] ?? 0);
+                $mpesaPayment = floatval($validated['mpesaPayment'] ?? 0);
+                $emolaPayment = floatval($validated['emolaPayment'] ?? 0);
+                
+                // Pagamentos não em dinheiro
+                $nonCashPayments = $cardPayment + $mpesaPayment + $emolaPayment;
+                
+                // Verificar se pagamentos não em dinheiro ultrapassam o total
+                if ($nonCashPayments > $totalAmount) {
+                    DB::rollBack();
+                    return redirect()->back()
+                        ->with('error', sprintf(
+                            'Pagamentos sem dinheiro (MZN %s) ultrapassam o valor total (MZN %s)',
+                            number_format($nonCashPayments, 2),
+                            number_format($totalAmount, 2)
+                        ))
+                        ->withInput();
+                }
+                
+                // Calcular valor restante que deve ser pago em dinheiro
+                $remainingAmount = $totalAmount - $nonCashPayments;
+                
+                // Verificar se pagamento em dinheiro é suficiente
+                if ($cashPayment < $remainingAmount) {
+                    DB::rollBack();
+                    $missing = $remainingAmount - $cashPayment;
+                    return redirect()->back()
+                        ->with('error', sprintf(
+                            'Pagamento insuficiente. Faltam MZN %s',
+                            number_format($missing, 2)
+                        ))
+                        ->withInput();
+                }
+                
+                // Calcular troco (apenas do pagamento em dinheiro)
+                $change = $cashPayment > $remainingAmount ? $cashPayment - $remainingAmount : 0;
+
+                // Criar a venda
+                $saleId = DB::table('sales')->insertGetId([
+                    'user_id' => auth()->id(),
+                    'sale_date' => now(),
+                    'total_amount' => $totalAmount,
+                    'payment_method' => $this->determinePaymentMethod([
+                        'cashPayment' => $cashPayment,
+                        'cardPayment' => $cardPayment,
+                        'mpesaPayment' => $mpesaPayment,
+                        'emolaPayment' => $emolaPayment
+                    ]),
+                    'status' => 'completed',
+                    'cash_amount' => $cashPayment,
+                    'card_amount' => $cardPayment,
+                    'mpesa_amount' => $mpesaPayment,
+                    'emola_amount' => $emolaPayment,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
 
-                // Atualizar estoque
-                DB::table('products')
-                    ->where('id', $item['product_id'])
-                    ->decrement('stock_quantity', $item['quantity']);
-            }
+                // Inserir itens da venda e atualizar estoque
+                foreach ($items as $item) {
+                    // Inserir item da venda
+                    DB::table('sale_items')->insert([
+                        'sale_id' => $saleId,
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
 
-            DB::commit();
+                    // Atualizar estoque
+                    DB::table('products')
+                        ->where('id', $item['product_id'])
+                        ->decrement('stock_quantity', $item['quantity']);
+                }
 
+                DB::commit();
+            
             Log::info('Venda processada com sucesso', [
                 'sale_id' => $saleId,
                 'total' => $totalAmount,
                 'change' => $change
             ]);
 
-            // Redirecionar com sucesso
-            return redirect()
-                ->route('pos.index')
-                ->with('success', 'Venda concluída com sucesso!')
-                ->with('saleId', $saleId)
-                ->with('change', $change)
-                ->with('totalAmount', $totalAmount)
-                ->with('printReceipt', true);
-
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
+            // Manter os dados da venda na sessão para uso posterior
+            session()->put('last_sale_id', $saleId);
+            session()->put('last_sale_change', $change);
+            session()->put('last_sale_total', $totalAmount);
             
-            $errors = collect($e->errors())->flatten()->implode(' ');
-            
-            return redirect()->back()
-                ->with('error', 'Erro de validação: ' . $errors)
-                ->withInput();
-                
+        // Redirecionar com sucesso
+        return redirect()
+            ->route('pos.index', ['saleId' => $saleId])
+            ->with('success', 'Venda concluída com sucesso!')
+            ->with('change', $change)
+            ->with('totalAmount', $totalAmount);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            
             Log::error('Checkout Error: ' . $e->getMessage(), [
                 'exception' => $e,
                 'trace' => $e->getTraceAsString(),
@@ -205,7 +197,7 @@ class POSController extends Controller
                 ->withInput();
         }
     }
-
+    
     /**
      * Determina o método de pagamento principal
      */

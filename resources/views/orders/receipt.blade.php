@@ -11,7 +11,7 @@
             margin: 0;
             padding: 10px;
             font-size: 14px;
-            line-height: 1.4;
+            line-height: 1.0;
             background: white;
         }
         .receipt {
@@ -22,11 +22,11 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .logo {
             max-width: 80px;
-            margin: 0 auto 8px;
+            margin: 0 auto 4px;
             display: block;
         }
         .company-name {
@@ -53,7 +53,7 @@
         }
         .divider {
             border-top: 1px dashed #000;
-            margin: 12px 0;
+            margin: 10px 0;
         }
         .order-info p {
             margin: 3px 0;
@@ -135,7 +135,7 @@
                 display: none;
             }
             .receipt {
-                padding: 10px;
+                padding: 5px;
             }
             .total {
                 font-size: 16px !important;

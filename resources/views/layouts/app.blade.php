@@ -10,8 +10,10 @@
 
     <title>ZALALA BEACH BAR - @yield('title', 'Sistema de Gestão')</title>
 
-    <!-- Por: -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
+{{--     <link rel="stylesheet" href="{{ asset('assets/css/vertical-layout-light/style.css') }}"> --}}
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+
 
     <!-- FontAwesome - usar CDN -->
     <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
@@ -68,8 +70,9 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
+            /*reduza o zoom da tela para 80%*/
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #c5f1fc 0%, #06b6d4 50%, #fbbf24 100%);
             min-height: 100vh;
@@ -1790,6 +1793,9 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+    {{-- local --}}
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -1804,7 +1810,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <!-- Bootstrap JS (já deve estar via CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> --}}
     <script>
         // Configuração global de URLs do Laravel
         window.AppConfig = {
@@ -2256,8 +2262,6 @@
         window.toggleTheme = toggleTheme;
         window.showToast = showToast;
     </script>
-
     @stack('scripts')
 </body>
-
 </html>

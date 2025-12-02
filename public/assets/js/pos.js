@@ -353,39 +353,31 @@ function validatePayment() {
 
 // ===== SALE PROCESSING - VERSÃO CORRIGIDA =====
 function processSale() {
-    console.log("[POS] Iniciando processo de venda...");
+    console.log('[POS] Iniciando processo de venda...');
 
     if (cart.length === 0) {
-        showToast("Adicione produtos ao carrinho primeiro", "warning");
+        showToast('Adicione produtos ao carrinho primeiro', 'warning');
         return false;
     }
 
     if (!validatePayment()) {
-        showToast("Pagamento insuficiente ou inválido", "error");
+        showToast('Pagamento insuficiente ou inválido', 'error');
         return false;
     }
 
-    const finalizeBtn = document.getElementById("btnFinalizeOrder");
+    const finalizeBtn = document.getElementById('btnFinalizeOrder');
     if (finalizeBtn) {
         finalizeBtn.disabled = true;
-        finalizeBtn.innerHTML =
-            '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
+        finalizeBtn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Processando...';
     }
 
     try {
-        const cashAmount = parseFloat(
-            document.getElementById("cashAmount")?.value || 0
-        );
-        const cardAmount = parseFloat(
-            document.getElementById("cardAmount")?.value || 0
-        );
-        const mpesaAmount = parseFloat(
-            document.getElementById("mpesaAmount")?.value || 0
-        );
-        const emolaAmount = parseFloat(
-            document.getElementById("emolaAmount")?.value || 0
-        );
+        const cashAmount = parseFloat(document.getElementById('cashAmount')?.value || 0);
+        const cardAmount = parseFloat(document.getElementById('cardAmount')?.value || 0);
+        const mpesaAmount = parseFloat(document.getElementById('mpesaAmount')?.value || 0);
+        const emolaAmount = parseFloat(document.getElementById('emolaAmount')?.value || 0);
 
+        // Armazenar dados para uso após redirect
         lastSaleData = {
             items: JSON.parse(JSON.stringify(cart)),
             cashPayment: cashAmount,
@@ -397,30 +389,106 @@ function processSale() {
             timestamp: new Date(),
         };
 
-        const items = cart.map((item) => ({
+        const items = cart.map(item => ({
             product_id: item.id,
             quantity: item.quantity,
             unit_price: item.price,
         }));
 
-        submitFormTraditional(
-            items,
-            cashAmount,
-            cardAmount,
-            mpesaAmount,
-            emolaAmount
-        );
+        // Submeter formulário
+        submitFormWithPrintFlag(items, cashAmount, cardAmount, mpesaAmount, emolaAmount);
+
     } catch (error) {
-        console.error("[POS] Erro ao processar venda:", error);
-        showToast("Erro ao processar venda. Tente novamente.", "error");
+        console.error('[POS] Erro ao processar venda:', error);
+        showToast('Erro ao processar venda. Tente novamente.', 'error');
 
         if (finalizeBtn) {
             finalizeBtn.disabled = false;
-            finalizeBtn.innerHTML =
-                '<i class="mdi mdi-check-circle-outline"></i> Finalizar Pedido';
+            finalizeBtn.innerHTML = '<i class="mdi mdi-check-circle-outline"></i> Finalizar Pedido';
         }
+    }
+}
 
-        return false;
+// NOVA FUNÇÃO: Submit com flag de impressão
+function submitFormWithPrintFlag(items, cash, card, mpesa, emola) {
+    console.log('[POS] Preparando formulário com flag de impressão');
+
+    let form = document.getElementById('checkoutForm');
+    
+    if (!form) {
+        form = document.createElement('form');
+        form.id = 'checkoutForm';
+        form.method = 'POST';
+        form.style.display = 'none';
+        document.body.appendChild(form);
+    }
+
+    // Definir action com parâmetro de impressão
+    form.action = '/pos/checkout?print=true';
+    form.innerHTML = '';
+
+    // CSRF Token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+    }
+
+    // Items
+    const itemsInput = document.createElement('input');
+    itemsInput.type = 'hidden';
+    itemsInput.name = 'items';
+    itemsInput.value = JSON.stringify(items);
+    form.appendChild(itemsInput);
+
+    // Pagamentos
+    const paymentFields = {
+        cashPayment: cash,
+        cardPayment: card,
+        mpesaPayment: mpesa,
+        emolaPayment: emola,
+    };
+
+    Object.entries(paymentFields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value || '0';
+        form.appendChild(input);
+    });
+
+    console.log('[POS] Submetendo formulário...');
+    form.submit();
+}
+// Função para abrir a janela do recibo
+function openReceiptWindow(saleId) {
+    try {
+        const receiptUrl = `/pos/receipt/${saleId}`;
+        console.log('[POS] Abrindo URL do recibo:', receiptUrl);
+        
+        const receiptWindow = window.open(
+            receiptUrl,
+            'receiptWindow',
+            'width=400,height=700,scrollbars=yes,resizable=yes,menubar=no,toolbar=no,location=no'
+        );
+        
+        if (!receiptWindow) {
+            showToast('Erro: Pop-up bloqueado. Por favor, permita pop-ups para este site.', 'error');
+            
+            // Oferecer alternativa: abrir em nova aba
+            if (confirm('Pop-ups bloqueados. Deseja abrir o recibo em uma nova aba?')) {
+                window.open(receiptUrl, '_blank');
+            }
+        } else {
+            receiptWindow.focus();
+            showToast('Recibo aberto para impressão', 'success');
+        }
+    } catch (error) {
+        console.error('[POS] Erro ao abrir recibo:', error);
+        showToast('Erro ao abrir recibo: ' + error.message, 'error');
     }
 }
 
@@ -1037,7 +1105,7 @@ function processSaleWithBackendReceipt() {
 }
 
 // ===== PRODUCT FILTERING =====
-function filterProducts() {
+/*function filterProducts() {
     const searchTerm =
         document.getElementById("searchInput")?.value.toLowerCase() || "";
     const categoryId = document.getElementById("categorySelect")?.value || "";
@@ -1105,6 +1173,72 @@ function setupCategoryFilters() {
             filterProducts();
         });
     });
+}*/
+// ===== CATEGORY FILTERING - VERSÃO CORRIGIDA (AGORA USANDO RECARREGAMENTO) =====
+function setupCategoryFilters() {
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.dataset.category;
+            
+            // Atualizar select
+            const categorySelect = document.getElementById('categorySelect');
+            if (categorySelect) {
+                categorySelect.value = category === 'all' ? '' : category;
+            }
+            
+            // Chamar a função de filtro principal que recarrega a página
+            filterProducts();
+        });
+    });
+    
+    // O select já tem o onchange="filterProducts()" no HTML, então não precisa de listener aqui.
+    // Apenas garantimos que o botão ativo está correto na inicialização (feito no Blade)
+}
+
+// NOVA FUNÇÃO: Verificar e abrir recibo automaticamente
+function checkAndOpenReceipt() {
+    // Verificar se existe flag de impressão na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const printReceipt = urlParams.get('print');
+    const saleId = urlParams.get('saleId');
+    
+    if (printReceipt === 'true' && saleId) {
+        console.log('[POS] Abrindo recibo automaticamente para venda:', saleId);
+        
+        // Aguardar um momento para página carregar completamente
+        setTimeout(() => {
+            openReceiptWindow(saleId);
+            
+            // Limpar parâmetros da URL sem recarregar
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }, 800);
+    }
+}
+
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput')?.value || '';
+    const categoryId = document.getElementById('categorySelect')?.value || '';
+
+    // Construir a URL com os parâmetros de filtro
+    const url = new URL(window.location.href);
+    
+    if (categoryId) {
+        url.searchParams.set('category', categoryId);
+    } else {
+        url.searchParams.delete('category');
+    }
+
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    } else {
+        url.searchParams.delete('search');
+    }
+
+    // Redirecionar para a nova URL, forçando o recarregamento dos produtos pelo backend
+    window.location.href = url.toString();
 }
 
 // ===== KEYBOARD SHORTCUTS =====
@@ -1303,8 +1437,8 @@ document.addEventListener("DOMContentLoaded", function () {
             searchInput.focus();
         }
     }, 500);
-
     console.log("🏖️ POS System initialized successfully!");
+    checkAndOpenReceipt();
 });
 
 // ===== EXPORT FOR GLOBAL ACCESS =====

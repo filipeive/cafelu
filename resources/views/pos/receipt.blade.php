@@ -59,19 +59,15 @@
 </head>
 <body>
     <div class="receipt">
-        <<div class="header">
+        <div class="header">
             <img src="/assets/images/Logo.png" alt="Lu & Yosh Catering Logo" class="logo">
-            <h2>Lu & Yoshi Catering</h2>
-            <h3>Café Lufamina</h3>
-            <div class="company-info">
-                <p>
-                    Av. Samora Machel<br>
-                    Cidade de Quelimane<br>
-                    Tel: (+258) 878643715 / 844818014<br>
-                    Email: cafelufamina@gmail.com<br>
-                    NUIT: 1110947722
-                </p>
-            </div>
+            <h2 class="company-name">ZALALA BEACH BAR</h2>
+            <h3 class="company-subtitle">BEACH BAR & RESTAURANT</h3>
+            <p class="company-info">Bairro de Zalala, ER470</p>
+            <p class="company-info">Quelimane, Zambézia</p>
+            <p class="company-info">Tel: (+258) 846 885 214</p>
+            <p class="company-info">NUIT: 110735901</p>
+            <p class="company-info">Email: zalalabeachbar@gmail.com</p>
             <p>Data: {{ date('d/m/Y H:i', strtotime($sale->sale_date)) }}</p>
         </div>
         

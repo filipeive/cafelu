@@ -391,11 +391,11 @@ class OrderController extends Controller
                 ];
             }),
             'logo' => asset('assets/images/logo.png'),
-            'companyName' => 'Lu & Yoshi Catering - Café Lufamina',
-            'address' => 'Av. Samora Machel, Cidade de Quelimane',
-            'phone' => 'Tel: (+258) 878643715 / 844818014',
-            'nuit' => '1110947722',
-            'email' => 'cafelufamina@gmail.com',
+            'companyName' => 'ZALALA BEACH BAR',
+            'address' => 'Bairro de Zalala, ER470, Cidade de Quelimane',
+            'phone' => 'Tel: (+258) 846 885 214',
+            'nuit' => '110735901',
+            'email' => 'zalalabeachbar@gmail.com',
         ]);
     }
     /**

@@ -1,17 +1,10 @@
 <div class="sidebar bg-dark sidebar-offcanvas" id="sidebar">
-    <!-- Logo e nome do restaurante -->
-    {{-- <div class="sidebar-brand">
-        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="logo-img">
-        <span class="sidebar-brand-text">{{ config('app.company', 'Café Lufamina') }}</span>
-    </div> --}}
-
     <!-- Loader para o sistema (será mostrado no carregamento inicial) -->
     <div id="system-loader" class="system-loader">
         <div class="spinner-border text-warning" role="status">
             <span class="visually-hidden">Carregando...</span>
         </div>
     </div>
-
     <!-- Menu de Navegação -->
     <ul class="nav flex-column main-nav">
         <!-- Dashboard -->
@@ -58,8 +51,8 @@
             <x-sidebar.dropdown-item route="categories.index" icon="mdi-shape" title="Categorias" />
 
             @if (Auth::user()->role == 'admin')
-                <x-sidebar.dropdown-item route="menus.index" icon="mdi-book-open-variant" title="Cardápios" />
-                <x-sidebar.dropdown-item route="ingredients.index" icon="mdi-flask" title="Ingredientes" />
+                <!--<x-sidebar.dropdown-item route="menus.index" icon="mdi-book-open-variant" title="Cardápios" />
+                <x-sidebar.dropdown-item route="ingredients.index" icon="mdi-flask" title="Ingredientes" />-->
             @endif
         </x-sidebar.dropdown>
 
@@ -71,12 +64,12 @@
             @endphp
 
             <x-sidebar.dropdown-item route="sales.index" icon="mdi-cash-multiple" title="Vendas">
-                <span class="badge badge-success">R$ {{ $formattedSales }}</span>
+                <span class="badge badge-success">MZN {{ $formattedSales }}</span>
             </x-sidebar.dropdown-item>
 
             @if (Auth::user()->role == 'admin')
-                <x-sidebar.dropdown-item route="expenses.index" icon="mdi-cash-remove" title="Despesas" />
-                <x-sidebar.dropdown-item route="cashier.index" icon="mdi-cash-register" title="Caixa" />
+                <!--<x-sidebar.dropdown-item route="expenses.index" icon="mdi-cash-remove" title="Despesas" />
+                <x-sidebar.dropdown-item route="cashier.index" icon="mdi-cash-register" title="Caixa" />-->
                 <x-sidebar.dropdown-item route="reports.index" icon="mdi-chart-bar" title="Relatórios" />
             @endif
         </x-sidebar.dropdown>
@@ -90,18 +83,18 @@
 
             @if (Auth::user()->role == 'admin')
                 <x-sidebar.dropdown-item route="employees.index" icon="mdi-account-tie" title="Funcionários" />
-                <x-sidebar.dropdown-item route="suppliers.index" icon="mdi-truck" title="Fornecedores" />
+                <!--<x-sidebar.dropdown-item route="suppliers.index" icon="mdi-truck" title="Fornecedores" />-->
             @endif
         </x-sidebar.dropdown>
 
         <!-- Seção Marketing -->
-        @if (Auth::user()->role == 'admin')
+       {{-- @if (Auth::user()->role == 'admin')
             <x-sidebar.dropdown icon="mdi-bullhorn" title="Marketing" id="marketing-menu">
                 <x-sidebar.dropdown-item route="promotions.index" icon="mdi-tag" title="Promoções" />
                 <x-sidebar.dropdown-item route="coupons.index" icon="mdi-ticket-percent" title="Cupons" />
                 <x-sidebar.dropdown-item route="loyalty.index" icon="mdi-star" title="Fidelidade" />
             </x-sidebar.dropdown>
-        @endif
+        @endif--}}
 
         @if (Auth::user()->role == 'admin')
             <!-- Seção Administração -->

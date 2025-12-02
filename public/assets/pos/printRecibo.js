@@ -1,23 +1,111 @@
 // Função para imprimir o recibo
 
 function printRecibo(orderId) {
-    alert("Aguarde, carregando o recibo para impressão...");
+    // Mostra um loader elegante em overlay
+    function showLoader(message = "Carregando...") {
+        if (document.getElementById('recibo-loader')) return;
+
+        // Adiciona estilos apenas uma vez
+        if (!document.getElementById('recibo-loader-styles')) {
+            const style = document.createElement('style');
+            style.id = 'recibo-loader-styles';
+            style.textContent = `
+                #recibo-loader {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0,0,0,0.45);
+                    z-index: 99999;
+                    backdrop-filter: blur(2px);
+                }
+                #recibo-loader .card {
+                    background: linear-gradient(135deg,#ffffff 0%, #f7fbff 100%);
+                    padding: 18px 22px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+                    display: flex;
+                    gap: 14px;
+                    align-items: center;
+                    min-width: 260px;
+                    max-width: 90%;
+                }
+                #recibo-loader .spinner {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    border: 5px solid rgba(0,0,0,0.08);
+                    border-top-color: #1976d2;
+                    animation: recibo-spin 1s linear infinite;
+                    box-shadow: 0 4px 10px rgba(25,118,210,0.18);
+                }
+                @keyframes recibo-spin { to { transform: rotate(360deg); } }
+                #recibo-loader .text {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+                #recibo-loader .text .main {
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
+                    color: #0b2546;
+                    font-weight: 600;
+                }
+                #recibo-loader .dots {
+                    font-family: monospace;
+                    color: #145ea8;
+                    letter-spacing: 2px;
+                    font-size: 12px;
+                }
+                /* animação de pontos */
+                #recibo-loader .dots span { opacity: 0.2; }
+                #recibo-loader .dots span:nth-child(1) { animation: d 1s infinite; animation-delay: 0s; }
+                #recibo-loader .dots span:nth-child(2) { animation: d 1s infinite; animation-delay: 0.15s; }
+                #recibo-loader .dots span:nth-child(3) { animation: d 1s infinite; animation-delay: 0.3s; }
+                @keyframes d { 50% { opacity: 1; } 100% { opacity: 0.2; } }
+            `;
+            document.head.appendChild(style);
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'recibo-loader';
+        overlay.innerHTML = `
+            <div class="card" role="status" aria-live="polite">
+                <div class="spinner" aria-hidden="true"></div>
+                <div class="text">
+                    <div class="main">${message}</div>
+                    <div class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    function hideLoader() {
+        const el = document.getElementById('recibo-loader');
+        if (el) el.remove();
+    }
+
+    showLoader("Aguarde, carregando o recibo para impressão");
 
     fetch(`/orders/data/${orderId}`)
         .then((response) => {
-            if (!response.ok)
-                throw new Error("Erro ao carregar os dados do pedido.");
+            if (!response.ok) throw new Error("Erro ao carregar os dados do pedido.");
             return response.json();
         })
         .then((orderData) => {
+            hideLoader();
             const receiptHTML = generateReceiptHTML(orderData);
             openPrintWindow(receiptHTML);
         })
         .catch((error) => {
+            hideLoader();
             console.error("Erro ao carregar o recibo:", error);
-            alert(
-                "Ocorreu um erro ao imprimir o recibo. Por favor, tente novamente."
-            );
+            alert("Ocorreu um erro ao imprimir o recibo. Por favor, tente novamente.");
         });
 }
 

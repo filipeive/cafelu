@@ -8,7 +8,7 @@
                     style="height: 40px;">
             </div>
             <a href="{{ route('dashboard') }}" class="sidebar-brand-text ml-3 d-none d-lg-block text-decoration-none">
-                <span class="font-weight-bold text-white">CaféLufamina</span>
+                <span class="font-weight-bold text-white">ZALALA BB</span> <br>
                 <span class="text-warning">POS</span>
             </a>
         </div>

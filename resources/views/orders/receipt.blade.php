@@ -1,13 +1,14 @@
 <div class="receipt">
     <div class="header">
-        <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo">
-        <div class="company-name">Lu & Yoshi Catering</div>
-        <div class="company-name">Café Lufamina</div>
-        <div class="company-info">Av. Samora Machel</div>
-        <div class="company-info">Cidade de Quelimane</div>
-        <div class="company-info">Tel: (+258) 878643715 / 844818014</div>
-        <div class="company-info">NUIT: 1110947722</div>
-        <div class="company-info">Email: cafelufamina@gmail.com</div>
+        <img src="/assets/images/Logo.png" alt="Lu & Yosh Catering Logo" class="logo">
+        <h2 class="company-name">ZALALA BEACH BAR</h2>
+        <h3 class="company-subtitle">BEACH BAR & RESTAURANT</h3>
+        <p class="company-info">Bairro de Zalala, ER470</p>
+        <p class="company-info">Quelimane, Zambézia</p>
+        <p class="company-info">Tel: (+258) 846 885 214</p>
+        <p class="company-info">NUIT: 110735901</p>
+        <p class="company-info">Email: zalalabeachbar@gmail.com</p>
+        <p>Data: {{ date('d/m/Y H:i', strtotime($sale->sale_date)) }}</p>
     </div>
 
     <div class="divider"></div>

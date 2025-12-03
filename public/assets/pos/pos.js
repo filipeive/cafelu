@@ -104,7 +104,6 @@ function calculateChange() {
 }
 
 // Função para processar a venda utilizando o controller Laravel
-// Função para processar a venda utilizando o controller Laravel
 async function processSale() {
     if (saleItems.length === 0) {
         showNotification('Erro', 'Adicione itens ao carrinho antes de finalizar.', 'error');
@@ -170,135 +169,6 @@ async function processSale() {
     }
 }
 
-// Função para imprimir recibo
-function printReceipt(saleId) {
-    // Redirecionar para a página de impressão do recibo
-    window.open(`/pos/receipt/${saleId}`, '_blank');
-}
-
-// Função para pré-visualizar recibo
-function previewReceipt() {
-    if (saleItems.length === 0) {
-        showNotification('Erro', 'Adicione itens ao carrinho antes de visualizar o recibo.', 'error');
-        return;
-    }
-
-    // Você pode implementar a pré-visualização sem salvar a venda
-    // Por simplicidade, apenas notificaremos o usuário
-    showNotification('Info', 'Esta função será implementada em breve.', 'info');
-}
-
-// Função para limpar a venda
-function resetSale() {
-    saleItems = [];
-    updateCartDisplay();
-    calculateTotals();
-    document.querySelectorAll('#cashAmount, #cardAmount, #mpesaAmount, #emolaAmount').forEach(input => {
-        input.value = '';
-    });
-    document.getElementById('changeAmount').value = '';
-    document.querySelectorAll('.payment-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-}
-
-// Função para mostrar notificações
-function showNotification(title, message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <i class="mdi mdi-${type === 'success' ? 'check-circle' : type === 'info' ? 'information' : 'alert-circle'}"></i>
-        <div>
-            <h6 class="mb-1">${title}</h6>
-            <p class="mb-0">${message}</p>
-        </div>
-    `;
-
-    document.body.appendChild(notification);
-    setTimeout(() => notification.classList.add('show'), 100);
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Função para filtrar produtos através do Laravel
-function filterProducts() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const categoryId = document.getElementById('categorySelect').value;
-
-    // Construir URL com parâmetros
-    let url = '/pos';
-    const params = new URLSearchParams();
-
-    if (searchTerm) {
-        params.append('search', searchTerm);
-    }
-
-    if (categoryId) {
-        params.append('category', categoryId);
-    }
-
-    if (params.toString()) {
-        url += '?' + params.toString();
-    }
-
-    // Redirecionar para a URL filtrada 
-    window.location.href = url;
-}
-
-// Função para carregar mais produtos (paginação)
-function loadMoreProducts(page) {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const categoryId = document.getElementById('categorySelect').value;
-
-    // Construir URL com parâmetros
-    let url = '/pos';
-    const params = new URLSearchParams();
-
-    params.append('page', page);
-
-    if (searchTerm) {
-        params.append('search', searchTerm);
-    }
-
-    if (categoryId) {
-        params.append('category', categoryId);
-    }
-
-    if (params.toString()) {
-        url += '?' + params.toString();
-    }
-
-    // Redirecionar para a URL paginada
-    window.location.href = url;
-}
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar listeners para inputs de pagamento
-    document.querySelectorAll('#cashAmount, #cardAmount, #mpesaAmount, #emolaAmount')
-        .forEach(input => input.addEventListener('input', calculateChange));
-
-    // Inicializar filtros de categoria
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const categoryId = btn.dataset.category === 'all' ? '' : btn.dataset.category;
-
-            // Redirecionar com filtro de categoria
-            window.location.href = `/pos?category=${categoryId}`;
-        });
-    });
-});
-/* // Função para imprimir recibo
-function printReceipt(saleId) {
-    // Redirecionar para a página de impressão do recibo
-    window.open(`/pos/receipt/${saleId}`, '_blank');
-}
- */
 // Função para imprimir o recibo final
 function printReceipt(saleId) {
     if (!saleId) {
@@ -313,6 +183,7 @@ function printReceipt(saleId) {
         window.open(`/pos/receipt/${saleId}`, '_blank');
     }
 }
+
 // Função para gerar o conteúdo do recibo
 function generateReceiptContent(isPreview = false) {
     const date = new Date().toLocaleString('pt-BR');
@@ -473,15 +344,14 @@ function generateReceiptContent(isPreview = false) {
                         <button onclick="window.print()" class="btn btn-primary">
                             Imprimir Pré-visualização
                         </button>
-                        <button onclick="closeAndReturn()" class="btn btn-secondary">
-                            Fechar e Voltar
+                        <button onclick="window.close()" class="btn btn-secondary">
+                            Fechar
                         </button>
                     </div>
                 ` : ''}
             </div>
             
             <script>
-                // Auto-print para recibos não preview
                 ${!isPreview ? 'window.onload = function() { window.print(); };' : ''}
             </script>
         </body>
@@ -503,3 +373,198 @@ function previewReceipt() {
     previewWindow.document.write(receiptContent);
     previewWindow.document.close();
 }
+
+// Função para limpar a venda
+function resetSale() {
+    saleItems = [];
+    updateCartDisplay();
+    calculateTotals();
+    document.querySelectorAll('#cashAmount, #cardAmount, #mpesaAmount, #emolaAmount').forEach(input => {
+        input.value = '';
+    });
+    document.getElementById('changeAmount').value = '';
+    document.querySelectorAll('.payment-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+}
+
+// Função para mostrar notificações
+function showNotification(title, message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="mdi mdi-${type === 'success' ? 'check-circle' : type === 'info' ? 'information' : 'alert-circle'}"></i>
+        <div>
+            <h6 class="mb-1">${title}</h6>
+            <p class="mb-0">${message}</p>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 100);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Variáveis de paginação
+let currentPage = 1;
+const itemsPerPage = 12;
+
+// Função de debug para verificar categorias
+function debugCategories() {
+    const productItems = document.querySelectorAll('.product-item');
+    console.log('Total de produtos:', productItems.length);
+    
+    const categoriesFound = new Set();
+    productItems.forEach(item => {
+        const category = item.dataset.category;
+        categoriesFound.add(category);
+        console.log('Produto:', item.querySelector('.card-title').textContent, 'Categoria ID:', category);
+    });
+    
+    console.log('Categorias encontradas:', Array.from(categoriesFound));
+}
+
+// NOVA FUNÇÃO: Filtrar produtos dinamicamente SEM recarregar a página
+function filterProducts() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const categoryId = document.getElementById('categorySelect').value;
+
+    const productItems = document.querySelectorAll('.product-item');
+    let visibleProducts = [];
+
+    productItems.forEach(item => {
+        const productCard = item.querySelector('.product-card');
+        const productName = item.querySelector('.card-title').textContent.toLowerCase();
+        const productCategory = item.dataset.category;
+
+        const matchesSearch = productName.includes(searchTerm);
+        const matchesCategory = !categoryId || productCategory === categoryId;
+
+        if (matchesSearch && matchesCategory) {
+            visibleProducts.push(item);
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    // Reset para primeira página quando filtrar
+    currentPage = 1;
+    paginateProducts(visibleProducts);
+}
+
+// Função para paginar produtos
+function paginateProducts(products) {
+    const totalPages = Math.ceil(products.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    // Esconder todos primeiro
+    products.forEach(item => item.style.display = 'none');
+
+    // Mostrar apenas os da página atual
+    products.slice(startIndex, endIndex).forEach(item => {
+        item.style.display = 'block';
+    });
+
+    // Atualizar controles de paginação
+    updatePaginationControls(totalPages, products.length);
+}
+
+// Função para atualizar os controles de paginação
+function updatePaginationControls(totalPages, totalProducts) {
+    let paginationContainer = document.getElementById('paginationControls');
+    
+    if (!paginationContainer) {
+        // Criar container de paginação se não existir
+        paginationContainer = document.createElement('div');
+        paginationContainer.id = 'paginationControls';
+        paginationContainer.className = 'pagination-controls mt-4';
+        document.getElementById('productsGrid').parentElement.appendChild(paginationContainer);
+    }
+
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    const startItem = ((currentPage - 1) * itemsPerPage) + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalProducts);
+
+    paginationContainer.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="pagination-info">
+                Mostrando ${startItem}-${endItem} de ${totalProducts} produtos
+            </div>
+            <div class="pagination-buttons">
+                <button class="btn btn-outline-primary btn-sm" 
+                        onclick="changePage(${currentPage - 1})" 
+                        ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="mdi mdi-chevron-left"></i> Anterior
+                </button>
+                <span class="mx-3">Página ${currentPage} de ${totalPages}</span>
+                <button class="btn btn-outline-primary btn-sm" 
+                        onclick="changePage(${currentPage + 1})" 
+                        ${currentPage === totalPages ? 'disabled' : ''}>
+                    Próxima <i class="mdi mdi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Função para mudar de página
+function changePage(newPage) {
+    currentPage = newPage;
+    filterProducts();
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar listeners para inputs de pagamento
+    document.querySelectorAll('#cashAmount, #cardAmount, #mpesaAmount, #emolaAmount')
+        .forEach(input => input.addEventListener('input', calculateChange));
+
+    // MODIFICADO: Filtros de categoria agora filtram SEM recarregar
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const categoryId = btn.dataset.category === 'all' ? '' : btn.dataset.category;
+            
+            // Atualizar o select de categoria
+            document.getElementById('categorySelect').value = categoryId;
+            
+            // Filtrar produtos dinamicamente
+            filterProducts();
+        });
+    });
+
+    // Listener para o campo de busca
+    document.getElementById('searchInput').addEventListener('input', filterProducts);
+    
+    // Listener para o select de categoria
+    document.getElementById('categorySelect').addEventListener('change', () => {
+        const categoryId = document.getElementById('categorySelect').value;
+        
+        // Atualizar botões de categoria
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if ((categoryId === '' && btn.dataset.category === 'all') || 
+                btn.dataset.category === categoryId) {
+                btn.classList.add('active');
+            }
+        });
+        
+        filterProducts();
+    });
+
+    // Inicializar paginação na primeira carga
+    filterProducts();
+    
+    // Debug: verificar categorias carregadas
+    debugCategories();
+});

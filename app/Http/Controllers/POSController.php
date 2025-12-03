@@ -10,34 +10,33 @@ use Illuminate\Support\Facades\Log;
 class POSController extends Controller
 {
     public function index(Request $request)
-    {
-        $categoryFilter = $request->query('category');
-        $searchTerm = $request->query('search');
-        $limit = 12;
-        $page = $request->query('page', 1);
-        $offset = ($page - 1) * $limit;
+{
+    $categoryFilter = $request->query('category');
+    $searchTerm = $request->query('search');
 
-        $categories = Category::all();
+    $categories = Category::all();
 
-        $query = Product::query();
+    $query = Product::query();
 
-        if ($categoryFilter) {
-            $query->where('category_id', $categoryFilter);
-        }
+    // REMOVIDO: O filtro de categoria do servidor
+    // if ($categoryFilter) {
+    //     $query->where('category_id', $categoryFilter);
+    // }
 
-        if ($searchTerm) {
-            $query->where('name', 'LIKE', "%$searchTerm%");
-        }
-
-        $products = $query->offset($offset)->limit($limit)->get();
-
-        return view('pos.index', [
-            'categories' => $categories,
-            'products' => $products,
-            'categoryFilter' => $categoryFilter,
-            'searchTerm' => $searchTerm
-        ]);
+    if ($searchTerm) {
+        $query->where('name', 'LIKE', "%$searchTerm%");
     }
+
+    // Carregar TODOS os produtos para filtrar no front-end
+    $products = $query->get();
+
+    return view('pos.index', [
+        'categories' => $categories,
+        'products' => $products,
+        'categoryFilter' => $categoryFilter,
+        'searchTerm' => $searchTerm
+    ]);
+}
 
     // No POSController.php, vamos modificar a verificação de pagamento para considerar o troco
 

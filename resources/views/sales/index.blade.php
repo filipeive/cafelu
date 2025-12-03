@@ -236,7 +236,7 @@
                                             </div>
                                         </td>
                                         <td class="py-3">
-                                            <div class="d-flex justify-content-center gap-2">
+                                            <div class="d-flex justify-content-center gap-2" style="min-width: 200px; background: #006d8bff; border-radius: 10px;">
                                                 <a href="{{ route('sales.show', $sale->id) }}" class="btn btn-primary btn-icon btn-sm" data-bs-toggle="tooltip"
                                                     title="Ver Detalhes">
                                                     <i class="mdi mdi-eye"></i>

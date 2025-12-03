@@ -91,6 +91,7 @@ class POSController extends Controller
             $saleId = DB::table('sales')->insertGetId([
                 'user_id' => auth()->user()->id,
                 'sale_date' => now(),
+                'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
                 'total_amount' => $totalAmount,
                 'payment_method' => $this->determinePaymentMethod($validated),
                 'status' => 'completed',

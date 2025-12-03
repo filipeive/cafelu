@@ -67,6 +67,48 @@
         .alert {
             border-radius: 0.375rem;
         }
+        /* Estilos específicos para o campo de preço */
+        .form-label {
+            font-weight: 600;
+            color: #2d2d2d;
+            margin-bottom: .35rem;
+            font-size: .95rem;
+        }
+
+        .input-group-text {
+            background: #f5f7fb;
+            border: 1px solid #e6e9ef;
+            color: #495057;
+            font-weight: 600;
+            min-width: 56px;
+            justify-content: center;
+        }
+
+        .price-input {
+            border-left: 0;
+            border-radius: .375rem;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+            transition: box-shadow .15s ease, border-color .15s ease;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #6c63ff;
+            box-shadow: 0 0 0 .15rem rgba(108,99,255,0.12);
+        }
+
+        .form-text {
+            color: #6c757d;
+            font-size: .85rem;
+        }
+
+        @media (max-width: 576px) {
+            .input-group-text {
+                min-width: 46px;
+                font-size: .9rem;
+            }
+            .price-input::placeholder { font-size: .95rem; }
+        }
     </style>
 @endsection
 
@@ -267,6 +309,7 @@
                         <div class="form-group mb-3">
                             <div class="form-check">
                                 <label class="form-check-label">
+                                    <input type="hidden" name="is_active" value="0">
                                     <input type="checkbox" class="form-check-input" id="is_active" name="is_active"
                                         value="1">
                                     Produto Ativo

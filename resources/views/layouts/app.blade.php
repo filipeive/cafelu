@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/orders.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/sidebar-custom.css') }}">
     <style>
-         body,
+        body,
         .main-panel,
         .content-wrapper {
             background-color: #1C1C1C;
@@ -44,21 +44,27 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('{{ asset('assets/images/restaurant-bg.jpg') }}');
+            background-image: url('{{ asset('assets/images/restaurant-bg.jpeg') }}');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
-            opacity: 0.25;
+            opacity: 0.1;
             z-index: -1;
             filter: brightness(0.9);
             pointer-events: none;
         }
-            /* Ajustes adicionais para layout */
+        .main-panel::before,
+        .content-wrapper::before {
+            backdrop-filter: blur(2px);
+            background-color: rgba(0, 0, 0, 0.85);
+            opacity: 1;
+        }
+        /* Ajustes adicionais para layout */
         body,
         .main-panel,
         .content-wrapper {
             position: relative;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(28, 28, 28, 0.55);
         }
         /* ========================================
            CUSTOM TOAST NOTIFICATIONS

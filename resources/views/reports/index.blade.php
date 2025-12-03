@@ -80,5 +80,33 @@
                 </div>
             </div>
         </div>
-</div>
+    </div>
+@endsection
+
+@section('scripts')
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Exemplo mínimo de inicialização (remova ou adapte conforme necessário) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Se quiser um canvas, adicione: <canvas id="myChart"></canvas> em algum lugar do conteúdo
+            // Exemplo de inicialização:
+            // const ctx = document.getElementById('myChart');
+            // if (ctx) {
+            //     new Chart(ctx, {
+            //         type: 'bar',
+            //         data: {
+            //             labels: ['Produto A', 'Produto B', 'Produto C'],
+            //             datasets: [{
+            //                 label: 'Vendas',
+            //                 data: [12, 19, 7],
+            //                 backgroundColor: ['#007bff', '#28a745', '#17a2b8']
+            //             }]
+            //         },
+            //         options: {}
+            //     });
+            // }
+        });
+    </script>
 @endsection

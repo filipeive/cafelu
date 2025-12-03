@@ -160,7 +160,7 @@
                         <small class="text-muted">{{ Auth::user()->email }}</small>
                     </div>
                     <div class="py-2">
-                        <a class="dropdown-item" href="{{ route('profile') }}">
+                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
                             <i class="mdi mdi-account-edit-outline text-primary me-2"></i> Editar Perfil
                         </a>
                         <a class="dropdown-item" href="#">

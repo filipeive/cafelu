@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: url('{{ asset('assets/images/restaurant-bg.jpg') }}') no-repeat center center fixed;
+            background: url('{{ asset('assets/images/restaurant-bg.jpeg') }}') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
         }
@@ -46,7 +46,7 @@
 <div class="container d-flex justify-content-center align-items-center min-vh-100">
     <div class="login-container text-center">
         <img src="{{ asset('assets/images/Logo.png') }}" alt="Lu & Yosh Catering" class="logo">
-        <h2 class="mb-4">Lu & Yosh Catering</h2>
+        <h2 class="mb-4"><strong>ZALALABB</strong><strong style="color: #ff6b6b"> - POS</strong></h2>
 
         @if ($errors->any())
             <div class="alert alert-danger">

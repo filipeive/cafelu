@@ -28,7 +28,10 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Auth::routes(['register' => true]); // Disable public registration
 
 // Dashboard
-Route::get('dashboard/', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
+});
 
 // Resource Routes
 Route::middleware(['auth'])->group(function () {
@@ -57,6 +60,9 @@ Route::middleware(['auth'])->group(function () {
      // Rotas das mesas
     Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
     Route::post('/tables/{table}/update-status', [TableController::class, 'updateStatus'])->name('tables.update-status');
+     // Rota GET para mostrar o formulário de criação de pedido a partir da mesa
+    Route::get('/tables/{table}/create-order', [TableController::class, 'createOrder'])->name('tables.create-order');
+    // Rota POST que cria o pedido (mantém o comportamento existente) — renomeada
     Route::post('/tables/{table}/create-order', [TableController::class, 'createOrder'])->name('tables.create-order');
     Route::post('/tables/merge', [TableController::class, 'mergeTables'])->name('tables.merge');
     Route::post('/tables/split', [TableController::class, 'splitTables'])->name('tables.split');
@@ -138,8 +144,8 @@ Route::middleware(['auth'])->group(function () {
 
     
     // Profile Management
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
-    Route::put('/profile', [ProfileController::class, 'save'])->name('save');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.save');
 
     //reports
     Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {

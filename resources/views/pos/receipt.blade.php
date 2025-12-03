@@ -157,12 +157,12 @@
         <div class="totals">
             <div class="item">
                 <strong>Total:</strong>
-                <span>MZN {{ number_format($sale->total_amount, 2) }}</span>
+                <strong>MZN {{ number_format($sale->total_amount, 2) }}</strong>
             </div>
         </div>
         
         <div class="payment-methods">
-            <h6>Método de Pagamento:</h6>
+            <small>Método de Pagamento:</small><br>
             @if($sale->payment_method == 'multiple')
                 <div class="item">Múltiplos métodos</div>
             @else
@@ -180,9 +180,10 @@
             @if($sale->emola_amount > 0)
                 <div class="item">E-mola: <span>MZN {{ number_format($sale->emola_amount, 2) }}</span></div>
             @endif
-            {{-- @if($sale->cash_amount > 0 && $sale->cash_amount > $sale->total_amount)
+            
+            @if($sale->cash_amount > 0 && $sale->cash_amount > $sale->total_amount)
                 <div class="item">Troco: <span>MZN {{ number_format($sale->cash_amount - $sale->total_amount, 2) }}</span></div>
-            @endif --}}
+            @endif
         </div>
         
         <div class="divider"></div>

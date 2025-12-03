@@ -248,7 +248,7 @@ class OrderController extends Controller
            $sale = Sale::create([
                 'order_id' => $order->id,
                 'user_id' => auth()->id(),
-                'customer_name' => $order->customer_name ?? 'Cliente',
+                'customer_name' => $order->customer_name ?? 'Cliente Geral',
                 'total_amount' => $total,
                 'payment_method' => $request->payment_method,
                 'cash_amount' => $cash,

@@ -41,7 +41,7 @@
                 />
 
                 @php
-                    $tablesAvailable = \App\Models\Table::where('status', 'available')->count();
+                    $tablesAvailable = \App\Models\Table::where('status', 'free')->count();
                     $totalTables = \App\Models\Table::count();
                 @endphp
 
@@ -143,7 +143,14 @@
                     badgeClass="badge-info"
                     :showBadge="$newClientsCount > 0"
                 />
+                <!--funcionarios-->
+                <x-sidebar.dropdown-item 
+                    route="employees.index" 
+                    icon="mdi-account-tie" 
+                    title="Funcionários" 
+                />
             </x-sidebar.dropdown>
+            
         </div>
 
         <!-- CONFIGURAÇÕES (Admin Only) -->

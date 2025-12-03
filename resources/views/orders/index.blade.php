@@ -130,11 +130,11 @@
                     <div class="card-body pb-0">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Total Pedidos</h6>
+                                <h6 class="card-title card-title-dash text-white mb-1">Total Pedidos</h6>
                                 <h2 class="rate-percentage text-primary mb-2">{{ $total_orders }}</h2>
                                 <p class="text-primary d-flex align-items-center mb-3">
                                     <i class="mdi mdi-receipt me-1"></i>
-                                    <span>Pedidos acumulados</span>
+                                    <span class="text-primary">Pedidos acumulados</span>
                                 </p>
                             </div>
                             <div class="bg-primary bg-opacity-10 rounded-circle p-3">
@@ -150,11 +150,11 @@
                     <div class="card-body pb-0">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Pedidos Hoje</h6>
+                                <h6 class="card-title card-title-dash text-white mb-1">Pedidos Hoje</h6>
                                 <h2 class="rate-percentage text-success mb-2">{{ $totalToday }}</h2>
                                 <p class="text-success d-flex align-items-center mb-3">
                                     <i class="mdi mdi-calendar-today me-1"></i>
-                                    <span>Hoje</span>
+                                    <span class="text-success">Hoje</span>
                                 </p>
                             </div>
                             <div class="bg-success bg-opacity-10 rounded-circle p-3">
@@ -170,11 +170,11 @@
                     <div class="card-body pb-0">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Valor Total</h6>
+                                <h6 class="card-title card-title-dash text-white mb-1">Valor Total</h6>
                                 <h2 class="rate-percentage text-info mb-2">MZN {{ number_format($totalToday, 2) }}</h2>
                                 <p class="text-info d-flex align-items-center mb-3">
                                     <i class="mdi mdi-cash-multiple me-1"></i>
-                                    <span>Total do dia</span>
+                                    <span class="text-info">Total do dia</span>
                                 </p>
                             </div>
                             <div class="bg-info bg-opacity-10 rounded-circle p-3">
@@ -190,11 +190,11 @@
                     <div class="card-body pb-0">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h6 class="card-title card-title-dash text-muted mb-1">Pedidos Ativos</h6>
+                                <h6 class="card-title card-title-dash text-white mb-1">Pedidos Ativos</h6>
                                 <h2 class="rate-percentage text-warning mb-2">{{ $totalOpen }}</h2>
                                 <p class="text-warning d-flex align-items-center mb-3">
                                     <i class="mdi mdi-clock-alert me-1"></i>
-                                    <span>Em andamento</span>
+                                    <span class="text-warning">Em andamento</span>
                                 </p>
                             </div>
                             <div class="bg-warning bg-opacity-10 rounded-circle p-3">
@@ -211,7 +211,7 @@
                         <!-- Cabeçalho -->
                         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                             <div class="d-flex align-items-center">
-                                <h4 class="card-title mb-0 me-2">Lista de Pedidos</h4>
+                                <h4 class="card-title mb-0 me-2 text-primary">Lista de Pedidos</h4>
                                 <span class="badge bg-primary rounded-pill">{{ $total_orders }} pedidos</span>
                             </div>
                             <div class="d-flex align-items-center gap-3 flex-wrap">

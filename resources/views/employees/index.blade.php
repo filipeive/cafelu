@@ -6,7 +6,7 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Lista de Funcionários</h4>
+                        <h4 class="card-title text-white">Lista de Funcionários</h4>
                         <a href="{{ route('employees.create') }}" class="btn btn-primary mb-3">+ Novo Funcionário</a>
 
                         @if (session('success'))

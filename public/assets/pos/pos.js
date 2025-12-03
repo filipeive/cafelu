@@ -156,7 +156,7 @@ async function processSale() {
             if (result.change && result.change > 0) {
                 showNotification('Troco', `Devolva ao cliente: MZN ${result.change.toFixed(2)}`, 'info');
             }
-            
+
             showNotification('Sucesso', 'Venda realizada com sucesso!', 'success');
             printReceipt(result.sale_id);
             resetSale();
@@ -182,7 +182,7 @@ function previewReceipt() {
         showNotification('Erro', 'Adicione itens ao carrinho antes de visualizar o recibo.', 'error');
         return;
     }
-    
+
     // Você pode implementar a pré-visualização sem salvar a venda
     // Por simplicidade, apenas notificaremos o usuário
     showNotification('Info', 'Esta função será implementada em breve.', 'info');
@@ -317,12 +317,12 @@ function printReceipt(saleId) {
 function generateReceiptContent(isPreview = false) {
     const date = new Date().toLocaleString('pt-BR');
     const total = saleItems.reduce((sum, item) => sum + item.total, 0);
-    
+
     const cashAmount = parseFloat(document.getElementById('cashAmount').value) || 0;
     const cardAmount = parseFloat(document.getElementById('cardAmount').value) || 0;
     const mpesaAmount = parseFloat(document.getElementById('mpesaAmount').value) || 0;
     const emolaAmount = parseFloat(document.getElementById('emolaAmount').value) || 0;
-    
+
     const totalPaid = cashAmount + cardAmount + mpesaAmount + emolaAmount;
     const change = totalPaid - total;
 
@@ -404,18 +404,13 @@ function generateReceiptContent(isPreview = false) {
         <body>
             <div class="receipt">
                 <div class="header">
-                    <img src="/assets/images/logo.png" alt="Lu & Yoshi Catering Logo" class="logo">
-                    <div class="company-name">Lu & Yoshi Catering</div>
-                    <div class="company-name">Café Lufamina</div>
-                    <div class="company-info">
-                        <p>
-                            Av. Samora Machel<br>
-                            Cidade de Quelimane<br>
-                            Tel: (+258) 878643715 / 844818014<br>
-                            Email: cafelufamina@gmail.com<br>
-                            NUIT: 1110947722
-                        </p>
-                    </div>
+                    <img src="/assets/images/Logo.png" alt="zalalabeachbar Logo" class="logo">
+                    <h2 class="company-name">ZALALA BEACH BAR</h2>
+                    <p class="company-info">Bairro de Zalala, ER470</p>
+                    <p class="company-info">Quelimane, Zambézia</p>
+                    <p class="company-info">Tel: (+258) 846 885 214</p>
+                    <p class="company-info">NUIT: 110735901</p>
+                    <p class="company-info">Email: zalalabeachbar@gmail.com</p>
                     <p>Data: ${date}</p>
                     ${isPreview ? '<div style="color: red; font-weight: bold;">PRÉ-VISUALIZAÇÃO</div>' : ''}
                 </div>
@@ -468,15 +463,18 @@ function generateReceiptContent(isPreview = false) {
                 
                 <div class="footer">
                     <p>Obrigado pela preferência!</p>
-                    ${isPreview ? 
-                        '<p style="color: red; font-weight: bold;">ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO</p>' : 
-                        '<p>Este documento não serve como fatura</p>'}
+                    ${isPreview ?
+            '<p style="color: red; font-weight: bold;">ESTE É UM EXEMPLO - NÃO É UM RECIBO VÁLIDO</p>' :
+            '<p>Este documento não serve como fatura</p>'}
                 </div>
                 
                 ${isPreview ? `
                     <div class="no-print" style="margin-top: 20px; text-align: center;">
                         <button onclick="window.print()" class="btn btn-primary">
                             Imprimir Pré-visualização
+                        </button>
+                        <button onclick="closeAndReturn()" class="btn btn-secondary">
+                            Fechar e Voltar
                         </button>
                     </div>
                 ` : ''}

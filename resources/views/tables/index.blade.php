@@ -336,20 +336,7 @@
                 </div>
             </div>
         </div>
-        <!-- Notifications -->
-        @if (session('success'))
-            <div class="toast-notification toast-success">
-                <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
-                <div class="toast-message">{{ session('success') }}</div>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="toast-notification toast-error">
-                <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
-                <div class="toast-message">{{ session('error') }}</div>
-            </div>
-        @endif       
+        
         <!-- Status Legend -->
         <div class="card mb-4">
             <div class="card-body">

@@ -84,21 +84,23 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
     Route::get('/orders/kitchen', [OrderController::class, 'kitchen'])->name('orders.kitchen');
+
     // Products & Categories
     Route::resource('products', ProductController::class);
+    // Rotas principais de produtos (CRUD)
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-    Route::get('/{product}/stock-history', [ProductController::class, 'stockHistory'])->name('products.stock-history');
-    Route::get('/{product}/sales-data', [ProductController::class, 'salesData'])->name('products.sales-data');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    Route::put('/products/{product}/stock', [ProductController::class, 'updateStock'])->name('products.updateStock');
-    Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])
-    ->name('products.stock.update');
-    //product export
+    
+    // Rotas especiais de produtos
+    Route::post('/products/{product}/stock', [ProductController::class, 'updateStock'])->name('products.stock.update');
+    Route::get('/products/{product}/stock-history', [ProductController::class, 'stockHistory'])->name('products.stock-history');
+    Route::get('/products/{product}/sales-data', [ProductController::class, 'salesData'])->name('products.sales-data');
     Route::get('/products/export', [ProductController::class, 'export'])->name('products.export');
+    
+    // Categorias
     Route::resource('categories', CategoryController::class);
     
     // Sales Management
@@ -157,4 +159,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sales-by-payment-method', 'salesByPaymentMethod')->name('salesByPaymentMethod');
         Route::get('/sales-by-date', 'salesByDate')->name('salesByDate');
     });
+});
+// Restricted Routes with Throttling
+Route::middleware(['auth:web', 'throttle:6,1'])->group(function () {
+    Route::get('/restricted-page', 'RestrictedController@show')->name('restricted-page');
 });

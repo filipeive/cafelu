@@ -32,23 +32,6 @@
                                 </form>
                             </div>
                         </div>
-
-                        <!-- Alertas de Feedback -->
-                        <!-- Notifications -->
-                        @if (session('success'))
-                            <div class="toast-notification toast-success bg-success">
-                                <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
-                                <div class="toast-message">{{ session('success') }}</div>
-                            </div>
-                        @endif
-
-                        @if (session('error'))
-                            <div class="toast-notification toast-error bg-danger">
-                                <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
-                                <div class="toast-message">{{ session('error') }}</div>
-                            </div>
-                        @endif
-
                         <!-- Tabela de Usuários -->
                         <div class="table-responsive">
                             <table class="table table-hover">

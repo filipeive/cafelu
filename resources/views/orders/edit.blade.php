@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-wrapper">
         <!-- Order Header Card -->
         <div class="card mb-4">
             <div class="card-body">
@@ -127,21 +127,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Notifications -->
-        @if (session('success'))
-            <div class="toast-notification toast-success bg-success">
-                <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
-                <div class="toast-message">{{ session('success') }}</div>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="toast-notification toast-error bg-danger">
-                <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
-                <div class="toast-message">{{ session('error') }}</div>
-            </div>
-        @endif
 
         <div class="row">
             <!-- Left Column - Order Details -->

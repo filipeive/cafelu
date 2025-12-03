@@ -7,15 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'name', 'description', 'price', 'stock_quantity', 
-        'category_id', 'image_path', 'menu_id', 'is_active'
-    ];
+    'name',
+    'description',
+    'purchase_price',
+    'selling_price',
+    'stock_quantity',
+    'category_id',
+    'type',
+    'unit',
+    'min_stock_level',
+    'image_path',
+    'is_active'
+];
 
-    protected $casts = [
-    'price' => 'decimal:2',
-        'stock_quantity' => 'integer',
-        'is_active' => 'boolean'
-    ];
+protected $casts = [
+    'purchase_price' => 'decimal:2',
+    'selling_price' => 'decimal:2',
+    'stock_quantity' => 'integer',
+    'is_active' => 'boolean',
+    'min_stock_level' => 'integer'
+];
 
     public function category()
     {

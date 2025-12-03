@@ -202,11 +202,12 @@ class DashboardController extends Controller
     private function getStatusColor($status)
     {
         return match ($status) {
-            'pending' => 'warning',
+            'pending' => 'danger',
             'active', 'preparing' => 'primary',
             'ready', 'delivered', 'completed' => 'success',
-            'cancelled' => 'danger',
-            default => 'secondary'
+            'cancelled' => 'warning',
+            'paid' => 'success',
+            default => 'primary',
         };
     }
 

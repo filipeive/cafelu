@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - Café Lufamina')
+@section('title', 'Dashboard - Zalala Beach Bar')
 @section('icon', 'view-dashboard')
 
 @push('styles')
@@ -586,7 +586,7 @@
             </h1>
             <div class="d-flex gap-2">
                 <a href="{{ route('pos.index') }}" class="btn btn-warning">
-                    <i class="mdi mdi-cash-register me-2"></i> Novo Pedido
+                    <i class="mdi mdi-cash-register me-2"></i> Ir para POS
                 </a>
                 <button class="btn btn-warning" onclick="refreshDashboard()">
                     <i class="mdi mdi-refresh"></i>
@@ -851,7 +851,7 @@
                                                     MT
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-{{ $order->status_color ?? 'secondary' }}">
+                                                    <span class="badge bg-{{ $order->status_color ?? 'success' }}">
                                                         {{ $order->status_label ?? 'N/A' }}
                                                     </span>
                                                 </td>

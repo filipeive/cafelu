@@ -118,20 +118,6 @@
                     </div>
                 </div>
 
-                @if (session('success'))
-                    <div class="toast-notification toast-success bg-success shadow-lg">
-                        <div class="toast-icon"><i class="mdi mdi-check-circle"></i></div>
-                        <div class="toast-message">{{ session('success') }}</div>
-                    </div>
-                @endif
-
-                @if (session('error'))
-                    <div class="toast-notification toast-error bg-danger shadow-lg">
-                        <div class="toast-icon"><i class="mdi mdi-alert-circle"></i></div>
-                        <div class="toast-message">{{ session('error') }}</div>
-                    </div>
-                @endif
-
                 <div class="row">
                     <div class="col-md-8">
                         <div class="card shadow-sm">
@@ -311,12 +297,6 @@
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
-                }
-
-                .toast-notification {
-                    border-radius: 8px;
-                    padding: 1rem;
-                    margin-bottom: 1rem;
                 }
 
                 .card {

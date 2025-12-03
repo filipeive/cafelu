@@ -410,6 +410,15 @@
                                             <i class="mdi mdi-receipt me-1"></i>
                                             Pedido #{{ $activeOrder->id }}
                                         </span>
+                                        <!--nome do cliente do pedido-->
+                                        @if($activeOrder->customer_name)
+                                        <div class="mt-1">
+                                            <span class="badge bg-info text-dark" style="margin-top: 5px; font-size: 0.9em;">
+                                                <i class="mdi mdi-account me-1"></i>
+                                                {{ htmlspecialchars($activeOrder->customer_name) }}
+                                            </span>
+                                        </div>
+                                        @endif
                                     </div>
                                 @endif
                             </div>

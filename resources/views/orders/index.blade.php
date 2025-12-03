@@ -235,6 +235,7 @@
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="py-3">ID</th>
+                                        <th class="py-3">Cliente</th>
                                         <th class="py-3">Data</th>
                                         <th class="py-3">Mesa</th>
                                         <th class="py-3">Total</th>
@@ -248,6 +249,21 @@
                                             <td class="py-3">
                                                 <span
                                                     class="fw-medium text-primary">#{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                            </td>
+                                            <td class="py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="bg-secondary bg-opacity-10 p-2 rounded me-2">
+                                                        <i class="mdi mdi-account text-secondary"></i>
+                                                    </span>
+                                                    <div>
+                                                        <div class="fw-medium">
+                                                            {{ $order->customer_name ?? 'Cliente Anônimo' }}
+                                                        </div>
+                                                        @if ($order->customer_phone)
+                                                            <small class="text-muted">{{ $order->customer_phone }}</small>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td class="py-3">
                                                 <div class="d-flex align-items-center">
@@ -277,7 +293,7 @@
                                                 </div>
                                             </td>
                                             <td class="py-3">
-                                                <div class="d-flex justify-content-center gap-2">
+                                                <div class="d-flex justify-content-center gap-2" style="min-width: 200px; background: #006d8bff; border-radius: 10px;">
                                                     <a href="{{ route('orders.show', $order->id) }}"
                                                         class="btn btn-primary btn-icon btn-sm" data-bs-toggle="tooltip"
                                                         title="Ver Detalhes">

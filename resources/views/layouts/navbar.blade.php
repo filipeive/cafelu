@@ -51,7 +51,7 @@
                         <i class="mdi mdi-cart-plus text-success me-2"></i> Pedidos
                     </a>
                     <a class="dropdown-item" href="{{ route('tables.index') }}">
-                        <i class="mdi mdi-calendar-plus text-info me-2"></i> Nova Reserva
+                        <i class="mdi mdi-calendar-plus text-info me-2"></i> Mesas
                     </a>
                     <a class="dropdown-item" href="{{ route('products.create') }}">
                         <i class="mdi mdi-food-variant text-warning me-2"></i> Adicionar Produto

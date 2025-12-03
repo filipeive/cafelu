@@ -143,6 +143,7 @@
                         <i class="mdi mdi-check-circle-outline"></i>
                         Finalizar Pedido
                     </button>
+                    <!--pré-visualizar o recibo-->
                     <button class="btn-preview" onclick="previewReceipt()">
                         <i class="mdi mdi-printer"></i>
                         Pré-visualizar Recibo

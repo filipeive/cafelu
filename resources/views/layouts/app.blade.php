@@ -219,7 +219,21 @@
             from { width: 100%; }
             to { width: 0%; }
         }
+    /*CARDS DARK THEME*/
+    .card {
+        background-color: #2C2C2C;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        color: #F5F5F5;
+    }
 
+    .card-header {
+        background-color: #3A3A3A;
+        border-bottom: none;
+        font-weight: 600;
+        font-size: 16px;
+    }
         /* ========================================
            SCROLLBAR
         ======================================== */

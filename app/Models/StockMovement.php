@@ -5,20 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Traits\Auditable;
-
-class Expense extends Model
+class StockMovement extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory;
 
     protected $fillable = [
-        'description',
-        'amount',
-        'category',
-        'expense_date',
-        'notes',
+        'product_id',
         'user_id',
+        'quantity',
+        'type',
+        'reference_type',
+        'reference_id',
+        'notes',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 
     public function user()
     {

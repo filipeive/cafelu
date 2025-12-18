@@ -4,11 +4,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Traits\Auditable;
+
 class Sale extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
-       protected $fillable = [
+    protected $fillable = [
         'order_id',
         'user_id',
         'customer_name',
@@ -50,8 +52,8 @@ class Sale extends Model
     public function getTotalPayments()
     {
         return $this->cash_amount +
-               $this->card_amount +
-               $this->mpesa_amount +
-               $this->emola_amount;
+            $this->card_amount +
+            $this->mpesa_amount +
+            $this->emola_amount;
     }
 }

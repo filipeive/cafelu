@@ -4,9 +4,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\Auditable;
+
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
     protected $table = 'orders'; // Specify the table name if different from the model name
     protected $fillable = [
         'table_id',
@@ -18,7 +20,7 @@ class Order extends Model
         'payment_method',
         'notes'
     ];
-    
+
     public function table()
     {
         return $this->belongsTo(Table::class);

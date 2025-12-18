@@ -14,6 +14,9 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\StockController;
+use App\Http\Controllers\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +42,8 @@ Route::middleware(['auth'])->group(function () {
     // Users Management (Admin only)
     Route::middleware(['role:admin'])->group(function () {
         Route::resource('users', UserController::class);
+        Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit_logs.index');
+        Route::get('audit-logs/{audit_log}', [AuditLogController::class, 'show'])->name('audit_logs.show');
     });
 
     // POS
@@ -126,6 +131,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('expenses', ExpenseController::class);
 
     // Employees Management
+    Route::get('/employees/payroll', [EmployeeController::class, 'payroll'])->name('employees.payroll');
+    Route::post('/employees/{employee}/pay-salary', [EmployeeController::class, 'paySalary'])->name('employees.pay-salary');
+    Route::get('employees/search', [EmployeeController::class, 'search'])->name('employees.search');
     Route::resource('employees', EmployeeController::class);
 
     // Clients Management
@@ -145,17 +153,6 @@ Route::middleware(['auth'])->group(function () {
     //destroy
     Route::delete('clients/{client}', [ClientController::class, 'destroy'])->name('client.destroy');
 
-    //employes
-    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
-    Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
-    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
-    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
-    Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
-    Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
-    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-    Route::get('/employees/payroll', [EmployeeController::class, 'payroll'])->name('employees.payroll');
-    Route::post('/employees/{employee}/pay-salary', [EmployeeController::class, 'paySalary'])->name('employees.pay-salary');
-    Route::get('employees/search', [EmployeeController::class, 'search'])->name('employees.search');
 
 
 
@@ -173,6 +170,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sales-by-payment-method', 'salesByPaymentMethod')->name('salesByPaymentMethod');
         Route::get('/sales-by-date', 'salesByDate')->name('salesByDate');
     });
+
+    // Stock Management
+    Route::get('stock', [StockController::class, 'index'])->name('stock.index');
+    Route::get('stock/history', [StockController::class, 'history'])->name('stock.history');
+    Route::get('stock/{product}/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
+    Route::post('stock/{product}/adjust', [StockController::class, 'storeAdjustment'])->name('stock.store-adjustment');
+
+    // Settings
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
 });
 // Restricted Routes with Throttling
 // Route::middleware(['auth:web', 'throttle:6,1'])->group(function () {

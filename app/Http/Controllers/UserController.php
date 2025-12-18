@@ -17,7 +17,7 @@ class UserController extends Controller
         // Filtrar os usuários pelo nome ou email
         $users = User::when($search, function ($query, $search) {
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                ->orWhere('email', 'like', "%{$search}%");
         })->paginate(8);
         $loggedId = intval(Auth::id());
 
@@ -47,6 +47,7 @@ class UserController extends Controller
         $user->password = Hash::make($validatedData['password']);
         $user->name = $validatedData['name'];
         $user->role = $validatedData['role'];
+        $user->status = $validatedData['status'];
         $user->save();
 
         return redirect()->route('users.index')->with('success', 'User created successfully');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Models\Product;
 use App\Models\SaleItem;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -120,6 +121,17 @@ class SaleController extends Controller
 
                 // Atualizar o estoque
                 $product->decrement('stock_quantity', $item['quantity']);
+
+                // Registrar movimentação de estoque
+                StockMovement::create([
+                    'product_id' => $item['id'],
+                    'user_id' => auth()->id(),
+                    'quantity' => -$item['quantity'],
+                    'type' => 'sale',
+                    'reference_type' => 'Sale',
+                    'reference_id' => $sale->id,
+                    'notes' => 'Venda Manual'
+                ]);
             }
 
             // Commit da transação
@@ -220,6 +232,17 @@ class SaleController extends Controller
 
                 // Update stock
                 $product->decrement('stock_quantity', $item['quantity']);
+
+                // Registrar movimentação de estoque
+                StockMovement::create([
+                    'product_id' => $item['id'],
+                    'user_id' => auth()->id(),
+                    'quantity' => -$item['quantity'],
+                    'type' => 'sale',
+                    'reference_type' => 'Sale',
+                    'reference_id' => $sale->id,
+                    'notes' => 'Venda Processada'
+                ]);
             }
 
             DB::commit();
@@ -230,6 +253,8 @@ class SaleController extends Controller
                 if ($order && $order->table_id) {
                     $table = DB::table('tables')->where('id', $order->table_id)->first();
                     if ($table && $table->is_temporary) {
+                        // Set table_id to null in orders to avoid FK constraint violation
+                        DB::table('orders')->where('table_id', $table->id)->update(['table_id' => null]);
                         // Delete temporary table
                         DB::table('tables')->where('id', $table->id)->delete();
                     }

@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Category;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
 //validator
 use Illuminate\Http\Request;
@@ -346,9 +347,20 @@ class OrderController extends Controller
                 $product = $item->product;
                 $product->stock_quantity -= $item->quantity;
                 $product->save();
+
+                // 4. Registrar movimentação de estoque
+                StockMovement::create([
+                    'product_id' => $item->product_id,
+                    'user_id' => auth()->id(),
+                    'quantity' => -$item->quantity,
+                    'type' => 'sale',
+                    'reference_type' => 'Sale',
+                    'reference_id' => $sale->id,
+                    'notes' => 'Venda via Pedido #' . $order->id
+                ]);
             }
 
-            // 4. Atualizar o status do pedido
+            // 5. Atualizar o status do pedido
             $order->update([
                 'status' => 'paid',
                 'payment_method' => $request->payment_method,
@@ -407,28 +419,50 @@ class OrderController extends Controller
      */
     public function cancel(Order $order)
     {
-        //chamar o request
         $request = request();
-        // Verificar se o pedido já foi cancelado ou pago
-        if ($order->status === 'canceled' || $order->status === 'paid') {
-            $message = 'Este pedido não pode ser cancelado.';
-
+        
+        // Verificar se o pedido já foi cancelado
+        if ($order->status === 'canceled') {
+            $message = 'Este pedido já está cancelado.';
             if (request()->wantsJson() || request()->ajax()) {
                 return response()->json(['success' => false, 'message' => $message], 400);
             }
-
             return redirect()->back()->with('error', $message);
         }
 
         try {
-            //validar o campo notes da tabela orders
+            DB::beginTransaction();
+
             $request->validate([
                 'notes' => 'nullable|string',
             ]);
-            // Verificar se o pedido já foi pago
+
+            // Se o pedido já foi pago, reverter o estoque
             if ($order->status === 'paid') {
-                return redirect()->back()->with('error', 'Não é possível cancelar um pedido já pago.');
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    $product->stock_quantity += $item->quantity;
+                    $product->save();
+
+                    // Registrar movimentação de estorno
+                    StockMovement::create([
+                        'product_id' => $item->product_id,
+                        'user_id' => auth()->id(),
+                        'quantity' => $item->quantity,
+                        'type' => 'return',
+                        'reference_type' => 'Order',
+                        'reference_id' => $order->id,
+                        'notes' => 'Estorno por cancelamento de pedido pago #' . $order->id
+                    ]);
+                }
+
+                // Marcar a venda vinculada como cancelada
+                $sale = Sale::where('order_id', $order->id)->first();
+                if ($sale) {
+                    $sale->update(['status' => 'canceled']);
+                }
             }
+
             // Atualizar o status do pedido para 'canceled'
             $order->notes = $request->notes;
             $order->status = 'canceled';
@@ -440,7 +474,9 @@ class OrderController extends Controller
                 $order->table->save();
             }
 
-            $message = 'Pedido cancelado com sucesso';
+            DB::commit();
+
+            $message = 'Pedido cancelado com sucesso' . ($order->status === 'paid' ? ' e estoque estornado.' : '.');
 
             if (request()->wantsJson() || request()->ajax()) {
                 return response()->json(['success' => true, 'message' => $message]);
@@ -448,6 +484,7 @@ class OrderController extends Controller
 
             return redirect()->route('tables.index')->with('success', $message);
         } catch (\Exception $e) {
+            DB::rollBack();
             $message = 'Erro ao cancelar pedido: ' . $e->getMessage();
 
             if (request()->wantsJson() || request()->ajax()) {

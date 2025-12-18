@@ -129,6 +129,11 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right space-x-2">
+                                    <a href="{{ route('employees.show', $employee) }}"
+                                        class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors inline-block"
+                                        title="Ver">
+                                        <i class="mdi mdi-eye text-xl"></i>
+                                    </a>
                                     <a href="{{ route('employees.edit', $employee) }}"
                                         class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors inline-block"
                                         title="Editar">

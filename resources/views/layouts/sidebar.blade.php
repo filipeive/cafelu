@@ -88,6 +88,12 @@
                     icon="mdi-shape" 
                     title="Categorias" 
                 />
+
+                <x-sidebar.dropdown-item 
+                    route="stock.index" 
+                    icon="mdi-box" 
+                    title="Gestão de Estoque" 
+                />
             </x-sidebar.dropdown>
         </div>
 
@@ -193,6 +199,12 @@
                         route="settings.index" 
                         icon="mdi-cog" 
                         title="Configurações" 
+                    />
+
+                    <x-sidebar.dropdown-item 
+                        route="audit_logs.index" 
+                        icon="mdi-history" 
+                        title="Auditoria" 
                     />
                     
                     @if(Auth::user()->role == 'super_admin')

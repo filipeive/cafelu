@@ -4,9 +4,15 @@
     <div class="flex items-center justify-center border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300"
         :class="sidebarCollapsed ? 'w-20' : 'w-64'">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-decoration-none">
-            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="h-8 w-auto">
+            @if($logo = \App\Models\Setting::get('system_logo'))
+                <img src="{{ asset('storage/' . $logo) }}" alt="Logo" class="h-8 w-auto">
+            @else
+                <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="h-8 w-auto">
+            @endif
             <div class="hidden lg:block leading-tight" x-show="!sidebarCollapsed" x-transition>
-                <span class="block font-bold text-gray-800 dark:text-white tracking-wide">ZALALA BB</span>
+                <span class="block font-bold text-gray-800 dark:text-white tracking-wide">
+                    {{ \App\Models\Setting::get('company_name', 'ZALALA BB') }}
+                </span>
                 <span class="block text-xs text-warning font-semibold">POS SYSTEM</span>
             </div>
         </a>

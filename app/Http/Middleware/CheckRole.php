@@ -15,12 +15,26 @@ class CheckRole
      * @param  string  $role
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
-            return redirect('/')->with('error', 'You do not have permission to access this area.');
+        if (!Auth::check()) {
+            return redirect('login');
         }
 
-        return $next($request);
+        $userRole = strtolower(trim(Auth::user()->role));
+
+        // If no roles specified, just check if authenticated
+        if (empty($roles)) {
+            return $next($request);
+        }
+
+        // Check if user has any of the required roles
+        foreach ($roles as $role) {
+            if ($userRole === strtolower(trim($role))) {
+                return $next($request);
+            }
+        }
+
+        return redirect('/')->with('error', 'Você não tem permissão para acessar esta área.');
     }
 }

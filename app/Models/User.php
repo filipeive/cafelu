@@ -7,9 +7,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use App\Traits\Auditable;
+
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Auditable;
 
     protected $table = 'users';
     public $timestamps = true; // Agora que tens created_at e updated_at
@@ -34,4 +36,8 @@ class User extends Authenticatable
         'last_login_at' => 'datetime', // 👈 Aqui
     ];
 
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
+    }
 }

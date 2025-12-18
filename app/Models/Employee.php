@@ -3,10 +3,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\Auditable;
+
 //id 	name 	role 	hire_date
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
     protected $table = 'employees';
     public $timestamps = false;
     protected $fillable = [

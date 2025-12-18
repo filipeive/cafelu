@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Table;
+use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -118,6 +119,17 @@ class POSController extends Controller
                 DB::table('products')
                     ->where('id', $item['product_id'])
                     ->decrement('stock_quantity', $item['quantity']);
+
+                // Registra movimentação de estoque
+                StockMovement::create([
+                    'product_id' => $item['product_id'],
+                    'user_id' => auth()->user()->id,
+                    'quantity' => -$item['quantity'], // Quantidade negativa para saída de estoque
+                    'type' => 'sale',
+                    'reference_type' => 'Sale',
+                    'reference_id' => $saleId,
+                    'notes' => 'Venda via POS'
+                ]);
             }
 
             DB::commit();

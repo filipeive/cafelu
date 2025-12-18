@@ -6,10 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Sistema de Gestão de Restaurantes">
-    <title>{{ config('app.name', 'Restaurant System') }} | @yield('title')</title>
+    <title>{{ \App\Models\Setting::get('company_name', config('app.name', 'Restaurant System')) }} | @yield('title')
+    </title>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
+    @if($favicon = \App\Models\Setting::get('system_favicon'))
+        <link rel="shortcut icon" href="{{ asset('storage/' . $favicon) }}">
+    @else
+        <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
+    @endif
 
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,8 +31,8 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FFA500',
-                        warning: '#FFA500',
+                        primary: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
+                        warning: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
                         danger: '#EF4444',
                         success: '#10B981',
                         info: '#3B82F6',

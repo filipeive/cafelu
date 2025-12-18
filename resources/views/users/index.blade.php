@@ -1,304 +1,255 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-wrapper">
-        <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <h4 class="card-title mb-0">Gestão de Usuários</h4>
-                                <small class="text-muted">Gerencie todos os usuários do sistema</small>
-                            </div>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#createUserModal">
-                                <i class="mdi mdi-account-plus me-1"></i>
-                                Novo Usuário
-                            </button>
-                        </div>
+    <div class="w-full">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="mdi mdi-account-group text-orange-500"></i>
+                    Gestão de Usuários
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Gerencie todos os usuários do sistema e suas permissões.</p>
+            </div>
+            <button type="button" 
+                onclick="openCreateModal()"
+                class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
+                <i class="mdi mdi-account-plus mr-2"></i>
+                Novo Usuário
+            </button>
+        </div>
 
-                        <!-- Barra de Pesquisa -->
-                        <div class="row mb-4">
-                            <div class="col-lg-4">
-                                <form action="{{ route('users.index') }}" method="GET">
-                                    <div class="input-group">
-                                        <input type="text" name="search" class="form-control"
-                                            placeholder="Buscar usuários..." value="{{ $search ?? '' }}">
-                                        <button class="btn btn-outline-primary" type="submit">
-                                            <i class="mdi mdi-magnify"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        <!-- Tabela de Usuários -->
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Usuário</th>
-                                        <th>Função</th>
-                                        <th>Status</th>
-                                        <th>Último Acesso</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($users as $user)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar avatar-sm me-3">
-                                                        <div
-                                                            class="avatar-title rounded-circle bg-primary-light text-primary">
-                                                            {{ strtoupper(substr($user->name, 0, 2)) }}
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <h6 class="mb-0">{{ $user->name }}</h6>
-                                                        <small class="text-muted">{{ $user->email }}</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-{{ get_role_class($user->role) }}">
-                                                    {{ ucfirst($user->role) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if ($user->status == 'active')
-                                                    <span class="badge bg-success">Ativo</span>
-                                                @else
-                                                    <span class="badge bg-warning">Inativo</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <small class="text-muted">
-                                                    {{ $user->last_login_at ? $user->last_login_at->format('d/m/Y H:i') : 'Nunca acessou' }}
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-info btn-icon btn-sm" title="Detalhes">
-                                                    <i class="mdi mdi-eye"></i>
-                                                </a>
-
-                                                <button type="button" class="btn btn-outline-warning btn-icon btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#editUserModal{{ $user->id }}" title="Editar">
-                                                    <i class="mdi mdi-pencil"></i>
-                                                </button>
-                                                @if ($loggedId !== intval($user->id))
-                                                    <form class="d-inline" action="{{ route('users.destroy', $user->id) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Tem certeza que deseja excluir este usuário?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm"
-                                                            title="Excluir">
-                                                            <i class="mdi mdi-delete"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4">
-                                                <i class="mdi mdi-account-multiple-remove text-muted"
-                                                    style="font-size: 3rem;"></i>
-                                                <p class="text-muted mt-2">Nenhum usuário encontrado</p>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Paginação -->
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <p class="text-muted mb-0">
-                                Mostrando {{ $users->firstItem() ?? 0 }} - {{ $users->lastItem() ?? 0 }}
-                                de {{ $users->total() }} usuários
-                            </p>
-                            {{ $users->links() }}
-                        </div>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-500">
+                        <i class="mdi mdi-account-multiple text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Usuários</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $users->total() }}</h3>
                     </div>
                 </div>
             </div>
+            <!-- Add more stats if needed -->
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+            <form action="{{ route('users.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="mdi mdi-magnify text-gray-400"></i>
+                    </span>
+                    <input type="text" name="search" value="{{ $search ?? '' }}"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent sm:text-sm transition-all"
+                        placeholder="Buscar por nome, email ou usuário...">
+                </div>
+                <button type="submit" class="px-6 py-2 bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white font-bold rounded-xl transition-all">
+                    Filtrar
+                </button>
+            </form>
+        </div>
+
+        <!-- Users Table -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usuário</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Função</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Último Acesso</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @forelse ($users as $user)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 font-bold">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $user->name }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ get_role_class($user->role) }}-100 text-{{ get_role_class($user->role) }}-800 dark:bg-{{ get_role_class($user->role) }}-900/30 dark:text-{{ get_role_class($user->role) }}-300">
+                                        {{ ucfirst($user->role) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if ($user->status == 'active')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
+                                            Ativo
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
+                                            Inativo
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $user->last_login_at ? $user->last_login_at->format('d/m/Y H:i') : 'Nunca' }}
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <a href="{{ route('users.show', $user->id) }}" 
+                                            class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Detalhes">
+                                            <i class="mdi mdi-eye text-lg"></i>
+                                        </a>
+                                        <button type="button" 
+                                            onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->username }}', '{{ $user->role }}')"
+                                            class="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors" title="Editar">
+                                            <i class="mdi mdi-pencil text-lg"></i>
+                                        </button>
+                                        @if ($loggedId !== intval($user->id))
+                                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Excluir">
+                                                    <i class="mdi mdi-delete text-lg"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <i class="mdi mdi-account-off text-6xl text-gray-200 dark:text-gray-700"></i>
+                                        <p class="text-gray-500 dark:text-gray-400 mt-4">Nenhum usuário encontrado.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if($users->hasPages())
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
+                    {{ $users->links() }}
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- Modal de Criação -->
-    <div class="modal fade" id="createUserModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('users.store') }}" method="POST">
+    <!-- Modals (Using Alpine.js or simple JS) -->
+    <div id="userModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form id="userForm" method="POST">
                     @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title">Novo Usuário</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <input type="hidden" name="_method" id="formMethod" value="POST">
+
+                    <div class="px-8 py-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="modalTitle">Novo Usuário</h3>
+                            <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500">
+                                <i class="mdi mdi-close text-2xl"></i>
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label>
+                                <input type="text" name="name" id="userName" required
+                                    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">E-mail</label>
+                                <input type="email" name="email" id="userEmail" required
+                                    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Nome de Usuário</label>
+                                <input type="text" name="username" id="userUsername" required
+                                    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            </div>
+
+                            <div id="passwordField">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Senha</label>
+                                <input type="password" name="password" id="userPassword"
+                                    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1" id="passwordHelp">Deixe em branco para manter a senha atual.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Função</label>
+                                <select name="role" id="userRole" required
+                                    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                    <option value="admin">Administrador</option>
+                                    <option value="manager">Gerente</option>
+                                    <option value="waiter">Garçom</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Nome Completo</label>
-                            <input type="text" name="name" class="form-control" required>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">E-mail</label>
-                            <input type="email" name="email" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Nome de Usuário</label>
-                            <input type="text" name="username" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Senha</label>
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Função</label>
-                            <select name="role" class="form-select" required>
-                                <option value="">Selecione uma função</option>
-                                <option value="admin">Administrador</option>
-                                <option value="manager">Gerente</option>
-                                <option value="waiter">Garçom</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="mdi mdi-account-plus me-1"></i>
-                            Criar Usuário
+                    <div class="px-8 py-6 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
+                        <button type="button" onclick="closeModal()"
+                            class="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 transition-all">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
+                            Salvar
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <!-- Modal de Edição -->
-    @foreach ($users as $user)
-        <div class="modal fade" id="editUserModal{{ $user->id }}" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form action="{{ route('users.update', $user->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-header">
-                            <h5 class="modal-title">Editar Usuário</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Nome Completo</label>
-                                <input type="text" name="name" class="form-control" value="{{ $user->name }}"
-                                    required>
-                            </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">E-mail</label>
-                                <input type="email" name="email" class="form-control" value="{{ $user->email }}"
-                                    required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Nome de Usuário</label>
-                                <input type="text" name="username" class="form-control"
-                                    value="{{ $user->username }}" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Função</label>
-                                <select name="role" class="form-select" required>
-                                    <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Administrador
-                                    </option>
-                                    <option value="manager" {{ $user->role == 'manager' ? 'selected' : '' }}>Gerente
-                                    </option>
-                                    <option value="waiter" {{ $user->role == 'waiter' ? 'selected' : '' }}>Garçom</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="mdi mdi-content-save me-1"></i>
-                                Salvar Alterações
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    @endforeach
-@endsection
-
-@push('scripts')
     <script>
-        function confirmDelete(userId) {
-            Swal.fire({
-                title: 'Tem certeza?',
-                text: "Esta ação não pode ser desfeita!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sim, excluir!',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('deleteForm' + userId).submit();
-                }
-            });
+        const modal = document.getElementById('userModal');
+        const form = document.getElementById('userForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const formMethod = document.getElementById('formMethod');
+        const passwordHelp = document.getElementById('passwordHelp');
+
+        function openCreateModal() {
+            modalTitle.innerText = 'Novo Usuário';
+            form.action = "{{ route('users.store') }}";
+            formMethod.value = 'POST';
+            form.reset();
+            passwordHelp.classList.add('hidden');
+            document.getElementById('userPassword').required = true;
+            modal.classList.remove('hidden');
         }
 
-        // Inicializa tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
+        function openEditModal(id, name, email, username, role) {
+            modalTitle.innerText = 'Editar Usuário';
+            form.action = `/users/${id}`;
+            formMethod.value = 'PUT';
+            document.getElementById('userName').value = name;
+            document.getElementById('userEmail').value = email;
+            document.getElementById('userUsername').value = username;
+            document.getElementById('userRole').value = role;
+            document.getElementById('userPassword').required = false;
+            passwordHelp.classList.remove('hidden');
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
     </script>
-@endpush
-
-@push('styles')
-    <style>
-        .avatar {
-            width: 32px;
-            height: 32px;
-        }
-
-        .avatar-title {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-        }
-
-        .bg-primary-light {
-            background-color: rgba(0, 123, 255, 0.1) !important;
-        }
-
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            margin: 0 2px;
-        }
-
-        .btn-icon i {
-            font-size: 1rem;
-        }
-    </style>
-@endpush
+@endsection

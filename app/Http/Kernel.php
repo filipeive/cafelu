@@ -36,16 +36,17 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SetLocale::class,
         ],
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
-     // Register this middleware in app/Http/Kernel.php by adding it to the $routeMiddleware array:
-     protected $routeMiddleware = [
+    // Register this middleware in app/Http/Kernel.php by adding it to the $routeMiddleware array:
+    protected $routeMiddleware = [
         // Other middleware...
         'role' => \App\Http\Middleware\CheckRole::class,
     ];

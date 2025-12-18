@@ -29,7 +29,7 @@
 
             <div class="hidden lg:block">
                 <h1 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                    Bem-vindo, <span class="text-warning">{{ Auth::user()->name }}</span>
+                    {{ __('messages.welcome') }}, <span class="text-warning">{{ Auth::user()->name }}</span>
                 </h1>
                 <div id="dateTime" class="text-xs text-gray-500 dark:text-gray-400"></div>
             </div>
@@ -42,7 +42,7 @@
                 <button @click="open = !open" @click.outside="open = false"
                     class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium text-warning hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors">
                     <i class="mdi mdi-plus-circle-outline text-lg"></i>
-                    <span>Ações Rápidas</span>
+                    <span>{{ __('messages.quick_actions') }}</span>
                 </button>
 
                 <div x-show="open" x-transition
@@ -50,15 +50,41 @@
                     style="display: none;">
                     <a href="{{ route('orders.index') }}"
                         class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <i class="mdi mdi-cart-plus text-success"></i> Pedidos
+                        <i class="mdi mdi-cart-plus text-success"></i> {{ __('messages.orders') }}
                     </a>
                     <a href="{{ route('tables.index') }}"
                         class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <i class="mdi mdi-calendar-plus text-info"></i> Mesas
+                        <i class="mdi mdi-calendar-plus text-info"></i> {{ __('messages.tables') }}
                     </a>
-                    <a href="{{ route('products.create') }}"
+                    <a href="{{ route('products.index', ['create' => 1]) }}"
                         class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <i class="mdi mdi-food-variant text-warning"></i> Adicionar Produto
+                        <i class="mdi mdi-food-variant text-warning"></i> {{ __('messages.add_product') }}
+                    </a>
+                </div>
+            </li>
+
+            <!-- Language Switcher -->
+            <li class="relative" x-data="{ open: false }">
+                <button @click="open = !open" @click.outside="open = false"
+                    class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2">
+                    @if(app()->getLocale() == 'pt')
+                        <span class="text-xl">🇵🇹</span>
+                    @else
+                        <span class="text-xl">🇬🇧</span>
+                    @endif
+                    <i class="mdi mdi-chevron-down text-xs"></i>
+                </button>
+
+                <div x-show="open" x-transition
+                    class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+                    style="display: none;">
+                    <a href="{{ route('lang.switch', 'pt') }}"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 {{ app()->getLocale() == 'pt' ? 'bg-orange-50 dark:bg-gray-700 font-bold' : '' }}">
+                        <span class="text-lg">🇵🇹</span> {{ __('messages.portuguese') }}
+                    </a>
+                    <a href="{{ route('lang.switch', 'en') }}"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 {{ app()->getLocale() == 'en' ? 'bg-orange-50 dark:bg-gray-700 font-bold' : '' }}">
+                        <span class="text-lg">🇬🇧</span> {{ __('messages.english') }}
                     </a>
                 </div>
             </li>
@@ -94,14 +120,16 @@
                     style="display: none;">
                     <div
                         class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-lg">
-                        <h6 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Notificações</h6>
+                        <h6 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                            {{ __('messages.notifications') }}
+                        </h6>
                         <span
                             class="px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">0
                             Novas</span>
                     </div>
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
                         <i class="mdi mdi-bell-off-outline text-3xl mb-2 block"></i>
-                        <p class="text-sm">Nenhuma notificação nova</p>
+                        <p class="text-sm">{{ __('messages.no_new_notifications') }}</p>
                     </div>
                 </div>
             </li>
@@ -139,17 +167,17 @@
                     <div class="py-1">
                         <a href="{{ route('profile.edit') }}"
                             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-account-edit-outline text-primary"></i> Editar Perfil
+                            <i class="mdi mdi-account-edit-outline text-primary"></i> {{ __('messages.edit_profile') }}
                         </a>
-                        <a href="#"
+                        <a href="{{ route('settings.index') }}"
                             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-cog-outline text-primary"></i> Configurações
+                            <i class="mdi mdi-cog-outline text-primary"></i> {{ __('messages.system_settings') }}
                         </a>
                         <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                         <a href="{{ route('logout') }}"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                             class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-                            <i class="mdi mdi-logout-variant"></i> Sair
+                            <i class="mdi mdi-logout-variant"></i> {{ __('messages.logout') }}
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                             @csrf
@@ -175,7 +203,7 @@
                 minute: '2-digit',
                 second: '2-digit'
             };
-            document.getElementById('dateTime').textContent = now.toLocaleDateString('pt-BR', options);
+            document.getElementById('dateTime').textContent = now.toLocaleDateString('{{ app()->getLocale() }}', options);
         }
 
         // Atualiza imediatamente e depois a cada segundo

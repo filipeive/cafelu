@@ -7,15 +7,15 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <i class="mdi mdi-account-group text-orange-500"></i>
-                    Gestão de Usuários
+                    {{ __('messages.users_management') }}
                 </h1>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Gerencie todos os usuários do sistema e suas permissões.</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ __('messages.users_desc') }}</p>
             </div>
             <button type="button" 
                 onclick="openCreateModal()"
                 class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
                 <i class="mdi mdi-account-plus mr-2"></i>
-                Novo Usuário
+                {{ __('messages.new_user') }}
             </button>
         </div>
 
@@ -27,7 +27,7 @@
                         <i class="mdi mdi-account-multiple text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Usuários</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.total_users') }}</p>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $users->total() }}</h3>
                     </div>
                 </div>
@@ -44,10 +44,10 @@
                     </span>
                     <input type="text" name="search" value="{{ $search ?? '' }}"
                         class="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent sm:text-sm transition-all"
-                        placeholder="Buscar por nome, email ou usuário...">
+                        placeholder="{{ __('messages.search_users_placeholder') }}">
                 </div>
                 <button type="submit" class="px-6 py-2 bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white font-bold rounded-xl transition-all">
-                    Filtrar
+                    {{ __('messages.filter') }}
                 </button>
             </form>
         </div>
@@ -58,11 +58,11 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usuário</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Função</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Último Acesso</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.user') }}</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.role') }}</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.status') }}</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.last_access') }}</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -81,41 +81,41 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ get_role_class($user->role) }}-100 text-{{ get_role_class($user->role) }}-800 dark:bg-{{ get_role_class($user->role) }}-900/30 dark:text-{{ get_role_class($user->role) }}-300">
-                                        {{ ucfirst($user->role) }}
+                                        {{ __('messages.' . $user->role) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
                                     @if ($user->status == 'active')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
                                             <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
-                                            Ativo
+                                            {{ __('messages.active') }}
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
                                             <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
-                                            Inativo
+                                            {{ __('messages.inactive') }}
                                         </span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $user->last_login_at ? $user->last_login_at->format('d/m/Y H:i') : 'Nunca' }}
+                                    {{ $user->last_login_at ? $user->last_login_at->format('d/m/Y H:i') : __('messages.never') }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end gap-2">
                                         <a href="{{ route('users.show', $user->id) }}" 
-                                            class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Detalhes">
+                                            class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="{{ __('messages.view_details') }}">
                                             <i class="mdi mdi-eye text-lg"></i>
                                         </a>
                                         <button type="button" 
                                             onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->username }}', '{{ $user->role }}')"
-                                            class="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors" title="Editar">
+                                            class="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors" title="{{ __('messages.edit') }}">
                                             <i class="mdi mdi-pencil text-lg"></i>
                                         </button>
                                         @if ($loggedId !== intval($user->id))
-                                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?')">
+                                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_user') }}')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Excluir">
+                                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="{{ __('messages.delete') }}">
                                                     <i class="mdi mdi-delete text-lg"></i>
                                                 </button>
                                             </form>
@@ -128,7 +128,7 @@
                                 <td colspan="5" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
                                         <i class="mdi mdi-account-off text-6xl text-gray-200 dark:text-gray-700"></i>
-                                        <p class="text-gray-500 dark:text-gray-400 mt-4">Nenhum usuário encontrado.</p>
+                                        <p class="text-gray-500 dark:text-gray-400 mt-4">{{ __('messages.no_users_found') }}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -159,7 +159,7 @@
 
                     <div class="px-8 py-6">
                         <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="modalTitle">Novo Usuário</h3>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="modalTitle">{{ __('messages.new_user') }}</h3>
                             <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500">
                                 <i class="mdi mdi-close text-2xl"></i>
                             </button>
@@ -167,37 +167,37 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.full_name') }}</label>
                                 <input type="text" name="name" id="userName" required
                                     class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">E-mail</label>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.email') }}</label>
                                 <input type="email" name="email" id="userEmail" required
                                     class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Nome de Usuário</label>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.username') }}</label>
                                 <input type="text" name="username" id="userUsername" required
                                     class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                             </div>
 
                             <div id="passwordField">
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Senha</label>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.password') }}</label>
                                 <input type="password" name="password" id="userPassword"
                                     class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                                <p class="text-xs text-gray-500 mt-1" id="passwordHelp">Deixe em branco para manter a senha atual.</p>
+                                <p class="text-xs text-gray-500 mt-1" id="passwordHelp">{{ __('messages.password_help') }}</p>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Função</label>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.role') }}</label>
                                 <select name="role" id="userRole" required
                                     class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                                    <option value="admin">Administrador</option>
-                                    <option value="manager">Gerente</option>
-                                    <option value="waiter">Garçom</option>
+                                    <option value="admin">{{ __('messages.admin') }}</option>
+                                    <option value="manager">{{ __('messages.manager') }}</option>
+                                    <option value="waiter">{{ __('messages.waiter') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -206,11 +206,11 @@
                     <div class="px-8 py-6 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
                         <button type="button" onclick="closeModal()"
                             class="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 transition-all">
-                            Cancelar
+                            {{ __('messages.cancel') }}
                         </button>
                         <button type="submit"
                             class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
-                            Salvar
+                            {{ __('messages.save') }}
                         </button>
                     </div>
                 </form>
@@ -226,7 +226,7 @@
         const passwordHelp = document.getElementById('passwordHelp');
 
         function openCreateModal() {
-            modalTitle.innerText = 'Novo Usuário';
+            modalTitle.innerText = "{{ __('messages.new_user') }}";
             form.action = "{{ route('users.store') }}";
             formMethod.value = 'POST';
             form.reset();
@@ -236,7 +236,7 @@
         }
 
         function openEditModal(id, name, email, username, role) {
-            modalTitle.innerText = 'Editar Usuário';
+            modalTitle.innerText = "{{ __('messages.edit_user') }}";
             form.action = `/users/${id}`;
             formMethod.value = 'PUT';
             document.getElementById('userName').value = name;

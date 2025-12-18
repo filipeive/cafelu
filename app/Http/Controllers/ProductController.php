@@ -42,7 +42,7 @@ class ProductController extends Controller
 
             return view('products.index', compact('products', 'categories'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Erro ao carregar produtos: ' . $e->getMessage());
+            return back()->with('error', __('messages.error_loading_products') . ': ' . $e->getMessage());
         }
     }
 
@@ -67,7 +67,7 @@ class ProductController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Erro de validação',
+                    'message' => __('messages.validation_error'),
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -101,14 +101,14 @@ class ProductController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Produto adicionado com sucesso!'
+                'message' => __('messages.product_created')
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao adicionar produto: ' . $e->getMessage()
+                'message' => __('messages.error_adding_product') . ': ' . $e->getMessage()
             ], 500);
         }
     }
@@ -121,7 +121,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Produto não encontrado'
+                'message' => __('messages.product_not_found')
             ], 404);
         }
     }
@@ -149,7 +149,7 @@ class ProductController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Erro de validação',
+                    'message' => __('messages.validation_error'),
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -187,14 +187,14 @@ class ProductController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Produto atualizado com sucesso!'
+                'message' => __('messages.product_updated')
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao atualizar produto: ' . $e->getMessage()
+                'message' => __('messages.error_updating_product') . ': ' . $e->getMessage()
             ], 500);
         }
     }
@@ -217,14 +217,14 @@ class ProductController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Produto removido com sucesso!'
+                'message' => __('messages.product_deleted')
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao remover produto: ' . $e->getMessage()
+                'message' => __('messages.error_deleting_product') . ': ' . $e->getMessage()
             ], 500);
         }
     }
@@ -241,7 +241,7 @@ class ProductController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Quantidade inválida'
+                    'message' => __('messages.invalid_quantity')
                 ], 422);
             }
 
@@ -251,14 +251,14 @@ class ProductController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Estoque atualizado com sucesso!',
+                'message' => __('messages.stock_updated'),
                 'new_stock' => $product->stock_quantity
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao atualizar estoque: ' . $e->getMessage()
+                'message' => __('messages.error_updating_stock') . ': ' . $e->getMessage()
             ], 500);
         }
     }
@@ -287,7 +287,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao buscar histórico'
+                'message' => __('messages.error_fetching_history')
             ], 500);
         }
     }
@@ -317,7 +317,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao buscar dados de vendas'
+                'message' => __('messages.error_fetching_sales_data')
             ], 500);
         }
     }
@@ -327,7 +327,7 @@ class ProductController extends Controller
         // Implementação futura de exportação
         return response()->json([
             'success' => true,
-            'message' => 'Funcionalidade de exportação será implementada em breve.'
+            'message' => __('messages.export_feature_soon')
         ]);
     }
 }

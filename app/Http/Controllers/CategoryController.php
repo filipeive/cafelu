@@ -13,33 +13,23 @@ class CategoryController extends Controller
         return view('categories.index', compact('categories'));
     }
 
-    public function create()
-    {
-        return view('categories.create');
-    }
-
     public function store(Request $request)
     {
         $request->validate(['name' => 'required|string|max:50']);
         Category::create($request->all());
-        return redirect()->route('categories.index')->with('success', 'Categoria criada com sucesso!');
-    }
-
-    public function edit(Category $category)
-    {
-        return view('categories.edit', compact('category'));
+        return redirect()->route('categories.index')->with('success', __('messages.category_created'));
     }
 
     public function update(Request $request, Category $category)
     {
         $request->validate(['name' => 'required|string|max:50']);
         $category->update($request->all());
-        return redirect()->route('categories.index')->with('success', 'Categoria atualizada com sucesso!');
+        return redirect()->route('categories.index')->with('success', __('messages.category_updated'));
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Categoria excluída com sucesso!');
+        return redirect()->route('categories.index')->with('success', __('messages.category_deleted'));
     }
 }

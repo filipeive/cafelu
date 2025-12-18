@@ -45,7 +45,7 @@ class EmployeeController extends Controller
 
         Employee::create($request->all());
 
-        return redirect()->route('employees.index')->with('success', 'Funcionário criado com sucesso.');
+        return redirect()->route('employees.index')->with('success', __('messages.employee_created'));
     }
 
     public function show(Employee $employee)
@@ -70,13 +70,13 @@ class EmployeeController extends Controller
 
         $employee->update($request->all());
 
-        return redirect()->route('employees.index')->with('success', 'Funcionário atualizado com sucesso.');
+        return redirect()->route('employees.index')->with('success', __('messages.employee_updated'));
     }
 
     public function destroy(Employee $employee)
     {
         $employee->delete();
-        return redirect()->route('employees.index')->with('success', 'Funcionário removido com sucesso.');
+        return redirect()->route('employees.index')->with('success', __('messages.employee_deleted'));
     }
 
     public function search(Request $request)
@@ -98,7 +98,7 @@ class EmployeeController extends Controller
         $year = $request->year;
 
         if (!$employee->salary || $employee->salary <= 0) {
-            return redirect()->back()->with('error', 'Funcionário não possui salário definido.');
+            return redirect()->back()->with('error', __('messages.no_salary_defined'));
         }
 
         // Check if already paid
@@ -108,16 +108,16 @@ class EmployeeController extends Controller
             ->exists();
 
         if ($exists) {
-            return redirect()->back()->with('error', 'Salário já foi pago para este mês.');
+            return redirect()->back()->with('error', __('messages.salary_already_paid'));
         }
 
         try {
             $expense = Expense::create([
-                'description' => 'Pagamento de Salário: ' . $employee->name . ' (' . $month . '/' . $year . ')',
+                'description' => __('messages.salary_payment_desc', ['name' => $employee->name, 'month' => $month, 'year' => $year]),
                 'amount' => $employee->salary,
                 'category' => 'Salaries',
                 'expense_date' => now(),
-                'notes' => 'Pagamento automático via folha de pagamento.',
+                'notes' => __('messages.auto_payroll_note'),
                 'user_id' => auth()->id(),
             ]);
 
@@ -130,9 +130,9 @@ class EmployeeController extends Controller
                 'expense_id' => $expense->id,
             ]);
 
-            return redirect()->back()->with('success', 'Salário pago e registrado com sucesso.');
+            return redirect()->back()->with('success', __('messages.salary_paid'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erro ao registrar pagamento: ' . $e->getMessage());
+            return redirect()->back()->with('error', __('messages.error_registering_payment') . ': ' . $e->getMessage());
         }
     }
 }

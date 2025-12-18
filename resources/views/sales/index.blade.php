@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Vendas')
+@section('title', __('messages.sales_title'))
 
 @section('content')
     <div class="w-full">
@@ -10,12 +10,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Vendas Totais</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.total_sales') }}</p>
                         <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-1">MZN
                             {{ number_format($totalSalesAmount, 2) }}</h3>
                         <p class="text-xs text-green-500 flex items-center">
                             <i class="mdi mdi-trending-up mr-1"></i>
-                            Total acumulado
+                            {{ __('messages.accumulated_total') }}
                         </p>
                     </div>
                     <div class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-full">
@@ -28,12 +28,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-green-500">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Vendas Hoje</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.today_sales') }}</p>
                         <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-1">MZN
                             {{ number_format($todaySalesAmount, 2) }}</h3>
                         <p class="text-xs text-green-500 flex items-center">
                             <i class="mdi mdi-clock mr-1"></i>
-                            Hoje
+                            {{ __('messages.today') }}
                         </p>
                     </div>
                     <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-full">
@@ -46,11 +46,11 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total Transações</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.total_transactions') }}</p>
                         <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-1">{{ $totalSales }}</h3>
                         <p class="text-xs text-blue-500 flex items-center">
                             <i class="mdi mdi-chart-line mr-1"></i>
-                            Transações realizadas
+                            {{ __('messages.total_transactions') }}
                         </p>
                     </div>
                     <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full">
@@ -63,11 +63,11 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Pendentes</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.pending_plural') }}</p>
                         <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-1">{{ $pendingSalesCount }}</h3>
                         <p class="text-xs text-yellow-500 flex items-center">
                             <i class="mdi mdi-alert-circle mr-1"></i>
-                            Aguardando processamento
+                            {{ __('messages.waiting_processing') }}
                         </p>
                     </div>
                     <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-full">
@@ -84,10 +84,10 @@
             <div
                 class="p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3">
-                    <h4 class="text-lg font-bold text-gray-800 dark:text-white">Histórico de Vendas</h4>
+                    <h4 class="text-lg font-bold text-gray-800 dark:text-white">{{ __('messages.sales_history') }}</h4>
                     <span
                         class="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
-                        {{ $totalSales }} vendas
+                        {{ $totalSales }} {{ __('messages.sales_count') }}
                     </span>
                 </div>
 
@@ -99,14 +99,14 @@
                         </span>
                         <input type="text" id="salesSearch"
                             class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                            placeholder="Pesquisar vendas...">
+                            placeholder="{{ __('messages.search_sales_placeholder') }}">
                     </div>
 
                     <!-- New Sale Button -->
                     <a href="{{ route('pos.index') }}"
                         class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors flex items-center gap-2">
                         <i class="mdi mdi-plus"></i>
-                        Nova Venda
+                        {{ __('messages.new_sale') }}
                     </a>
                 </div>
             </div>
@@ -117,12 +117,12 @@
                     <thead>
                         <tr
                             class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold">
-                            <th class="px-6 py-3">ID</th>
-                            <th class="px-6 py-3">Data</th>
-                            <th class="px-6 py-3">Total</th>
-                            <th class="px-6 py-3">Método de Pagamento</th>
-                            <th class="px-6 py-3">Status</th>
-                            <th class="px-6 py-3 text-center">Ações</th>
+                            <th class="px-6 py-3">{{ __('messages.id') }}</th>
+                            <th class="px-6 py-3">{{ __('messages.date') }}</th>
+                            <th class="px-6 py-3">{{ __('messages.total') }}</th>
+                            <th class="px-6 py-3">{{ __('messages.payment_method') }}</th>
+                            <th class="px-6 py-3">{{ __('messages.status') }}</th>
+                            <th class="px-6 py-3 text-center">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -172,12 +172,12 @@
                                     <div class="flex justify-center gap-2">
                                         <a href="{{ route('sales.show', $sale->id) }}"
                                             class="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-colors"
-                                            title="Ver Detalhes">
+                                            title="{{ __('messages.view_details') }}">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
                                         <button onclick="window.printSaleRecibo({{ $sale->id }})"
                                             class="p-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-400 dark:hover:bg-cyan-900/40 transition-colors"
-                                            title="Imprimir">
+                                            title="{{ __('messages.print') }}">
                                             <i class="mdi mdi-printer"></i>
                                         </button>
                                     </div>
@@ -188,8 +188,8 @@
                                 <td colspan="6" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
                                         <i class="mdi mdi-cash-remove text-6xl mb-3 opacity-50"></i>
-                                        <p class="text-lg font-medium mb-1">Nenhuma venda encontrada</p>
-                                        <p class="text-sm">As vendas realizadas aparecerão aqui</p>
+                                        <p class="text-lg font-medium mb-1">{{ __('messages.no_sales_found') }}</p>
+                                        <p class="text-sm">{{ __('messages.no_sales_found_desc') }}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -202,10 +202,10 @@
             <div
                 class="p-6 border-t border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                    Mostrando <span class="font-medium text-gray-700 dark:text-gray-300">{{ $sales->firstItem() }}</span>
-                    até
-                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ $sales->lastItem() }}</span> de
-                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ $sales->total() }}</span> registros
+                    {{ __('messages.showing') }} <span class="font-medium text-gray-700 dark:text-gray-300">{{ $sales->firstItem() }}</span>
+                    {{ __('messages.to') }}
+                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ $sales->lastItem() }}</span> {{ __('messages.of') }}
+                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ $sales->total() }}</span> {{ __('messages.records') }}
                 </div>
                 {{ $sales->links() }}
             </div>

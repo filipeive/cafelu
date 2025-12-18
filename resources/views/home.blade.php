@@ -11,17 +11,17 @@
                 </div>
                 <div class="relative z-10 text-center">
                     <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2">
-                        {{ __('Bem-vindo ao') }} {{ \App\Models\Setting::get('company_name', 'Café Lufamina') }}
+                        {{ __('messages.welcome_to') }} {{ \App\Models\Setting::get('company_name', 'Café Lufamina') }}
                     </h1>
                     <p class="text-orange-100 text-lg">
-                        {{ __('Lu & Yosh Catering - Gestão Profissional') }}
+                        {{ __('messages.professional_management') }}
                     </p>
                 </div>
             </div>
 
             <div class="p-8 text-center">
                 <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10">
-                    {{ __('Explore nosso sistema para gerenciar pedidos, cardápios, funcionários e muito mais com eficiência e estilo.') }}
+                    {{ __('messages.system_description') }}
                 </p>
 
                 <!-- Quick Actions Grid -->
@@ -34,11 +34,11 @@
                             <i class="mdi mdi-view-dashboard text-2xl"></i>
                         </div>
                         <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">
-                            Dashboard
+                            {{ __('messages.dashboard') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-orange-100 transition-colors mt-1">
-                            Dashboard</p>
+                            {{ __('messages.dashboard') }}</p>
                     </a>
                     <a href="{{ route('pos.index') }}"
                         class="group p-6 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-100 dark:border-orange-800/50 hover:bg-orange-500 transition-all duration-300 transform hover:-translate-y-1">
@@ -46,11 +46,11 @@
                             class="w-14 h-14 bg-orange-500 text-white rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white group-hover:text-orange-500 transition-colors shadow-lg shadow-orange-500/20">
                             <i class="mdi mdi-cash-register text-2xl"></i>
                         </div>
-                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">POS
+                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">{{ __('messages.pos') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-orange-100 transition-colors mt-1">
-                            Vendas Rápidas</p>
+                            {{ __('messages.quick_sales') }}</p>
                     </a>
 
                     <a href="{{ route('tables.index') }}"
@@ -59,11 +59,11 @@
                             class="w-14 h-14 bg-blue-500 text-white rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white group-hover:text-blue-500 transition-colors shadow-lg shadow-blue-500/20">
                             <i class="mdi mdi-table-chair text-2xl"></i>
                         </div>
-                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">Mesas
+                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">{{ __('messages.tables') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-100 transition-colors mt-1">
-                            Gerenciar Salão</p>
+                            {{ __('messages.manage_hall') }}</p>
                     </a>
 
                     <a href="{{ route('orders.index') }}"
@@ -72,11 +72,11 @@
                             class="w-14 h-14 bg-green-500 text-white rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white group-hover:text-green-500 transition-colors shadow-lg shadow-green-500/20">
                             <i class="mdi mdi-clipboard-list text-2xl"></i>
                         </div>
-                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">Pedidos
+                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">{{ __('messages.orders') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-green-100 transition-colors mt-1">
-                            Ver Histórico</p>
+                            {{ __('messages.view_history') }}</p>
                     </a>
                     <!-- historico de vendas sales -->
                     <a href="{{ route('sales.index') }}"
@@ -85,11 +85,11 @@
                             class="w-14 h-14 bg-green-500 text-white rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white group-hover:text-green-500 transition-colors shadow-lg shadow-green-500/20">
                             <i class="mdi mdi-clipboard-list text-2xl"></i>
                         </div>
-                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">Vendas
+                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">{{ __('messages.sales') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-green-100 transition-colors mt-1">
-                            Ver Histórico</p>
+                            {{ __('messages.view_history') }}</p>
                     </a>
                     <!-- Despesas -->
                     <a href="{{ route('expenses.index') }}"
@@ -99,11 +99,11 @@
                             <i class="mdi mdi-cash text-2xl"></i>
                         </div>
                         <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">
-                            Despesas
+                            {{ __('messages.expenses') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-green-100 transition-colors mt-1">
-                            Ver Histórico</p>
+                            {{ __('messages.view_history') }}</p>
                     </a>
                     <!-- Estoque -->
                     <a href="{{ route('stock.index') }}"
@@ -113,11 +113,11 @@
                             <i class="mdi mdi-box-variant text-2xl"></i>
                         </div>
                         <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">
-                            Estoque
+                            {{ __('messages.stock_management') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-green-100 transition-colors mt-1">
-                            Gerenciar Estoque</p>
+                            {{ __('messages.manage_stock') }}</p>
                     </a>
                     <!-- relatorios -->
                     <a href="{{ route('reports.index') }}"
@@ -127,10 +127,10 @@
                             <i class="mdi mdi-chart-bar text-2xl"></i>
                         </div>
                         <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">
-                            Relatórios</h3>
+                            {{ __('messages.reports') }}</h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-purple-100 transition-colors mt-1">
-                            Análise de Dados</p>
+                            {{ __('messages.data_analysis') }}</p>
                     </a>
                     <!-- Configurações -->
                     <a href="{{ route('settings.index') }}"
@@ -140,11 +140,11 @@
                             <i class="mdi mdi-cog text-2xl"></i>
                         </div>
                         <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-white transition-colors">
-                            Configurações
+                            {{ __('messages.system_settings') }}
                         </h3>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-100 transition-colors mt-1">
-                            Ajustes do Sistema</p>
+                            {{ __('messages.system_adjustments') }}</p>
                     </a>
                 </div>
             </div>

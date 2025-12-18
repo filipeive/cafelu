@@ -50,7 +50,7 @@ class UserController extends Controller
         $user->status = $validatedData['status'];
         $user->save();
 
-        return redirect()->route('users.index')->with('success', 'User created successfully');
+        return redirect()->route('users.index')->with('success', __('messages.user_created'));
     }
 
     // Display the specified user
@@ -59,7 +59,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         if (!$user) {
-            return redirect()->route('users.index')->with('error', 'User not found');
+            return redirect()->route('users.index')->with('error', __('messages.user_not_found'));
         }
 
         return view('users.show', compact('user'));
@@ -71,7 +71,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         if (!$user) {
-            return redirect()->route('users.index')->with('error', 'User not found');
+            return redirect()->route('users.index')->with('error', __('messages.user_not_found'));
         }
 
         return view('users.edit', compact('user'));
@@ -83,7 +83,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         if (!$user) {
-            return redirect()->route('users.index')->with('error', 'User not found');
+            return redirect()->route('users.index')->with('error', __('messages.user_not_found'));
         }
 
         $validatedData = $request->validate([
@@ -103,7 +103,7 @@ class UserController extends Controller
         $user->role = $validatedData['role'] ?? $user->role;
         $user->save();
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully');
+        return redirect()->route('users.index')->with('success', __('messages.user_updated'));
     }
 
     // Remove the specified user from storage
@@ -112,11 +112,11 @@ class UserController extends Controller
         $user = User::find($id);
 
         if (!$user) {
-            return redirect()->route('users.index')->with('error', 'User not found');
+            return redirect()->route('users.index')->with('error', __('messages.user_not_found'));
         }
 
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'User deleted successfully');
+        return redirect()->route('users.index')->with('success', __('messages.user_deleted'));
     }
 }

@@ -5,17 +5,17 @@
         <!-- Page Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestão de Funcionários</h1>
-                <p class="text-gray-500 dark:text-gray-400">Gerencie sua equipe e pagamentos de salários</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.employees_management') }}</h1>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.employees_desc') }}</p>
             </div>
             <div class="flex gap-3">
                 <a href="{{ route('employees.payroll') }}"
                     class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors shadow-sm">
-                    <i class="mdi mdi-cash-multiple mr-2"></i> Folha de Pagamento
+                    <i class="mdi mdi-cash-multiple mr-2"></i> {{ __('messages.payroll') }}
                 </a>
                 <a href="{{ route('employees.create') }}"
                     class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors shadow-sm">
-                    <i class="mdi mdi-account-plus mr-2"></i> Novo Funcionário
+                    <i class="mdi mdi-account-plus mr-2"></i> {{ __('messages.new_employee') }}
                 </a>
             </div>
         </div>
@@ -28,7 +28,7 @@
                         <i class="mdi mdi-account-group text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Equipe</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.total_team') }}</p>
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $employees->count() }}</h3>
                     </div>
                 </div>
@@ -39,9 +39,9 @@
                         <i class="mdi mdi-cash-multiple text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Folha Mensal</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.monthly_payroll') }}</p>
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ number_format($employees->sum('salary'), 2) }} MZN
+                            {{ number_format($employees->sum('salary'), 2) }} {{ __('messages.currency_symbol') }}
                         </h3>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                         <i class="mdi mdi-calendar-check text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Contratações Recentes</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.recent_hires') }}</p>
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
                             {{ $employees->where('hire_date', '>=', now()->subMonth())->count() }}
                         </h3>
@@ -65,7 +65,7 @@
         <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
             <div class="relative">
                 <i class="mdi mdi-magnify absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl"></i>
-                <input type="text" x-model="searchQuery" placeholder="Pesquisar por nome ou cargo..."
+                <input type="text" x-model="searchQuery" placeholder="{{ __('messages.search_employees_placeholder') }}"
                     class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
             </div>
         </div>
@@ -79,19 +79,19 @@
                         <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <th
                                 class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Funcionário</th>
+                                {{ __('messages.employee') }}</th>
                             <th
                                 class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Cargo</th>
+                                {{ __('messages.role') }}</th>
                             <th
                                 class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Contato</th>
+                                {{ __('messages.contact') }}</th>
                             <th
                                 class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Salário</th>
+                                {{ __('messages.salary') }}</th>
                             <th
                                 class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
-                                Ações</th>
+                                {{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -107,7 +107,7 @@
                                         <div>
                                             <div class="font-semibold text-gray-900 dark:text-white">{{ $employee->name }}
                                             </div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">Contratado em:
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.hired_on') }}:
                                                 {{ $employee->hire_date->format('d/m/Y') }}
                                             </div>
                                         </div>
@@ -117,7 +117,7 @@
                                     <span
                                         class="px-2.5 py-1 rounded-full text-xs font-medium
                                                 {{ $employee->role == 'manager' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ($employee->role == 'chef' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400') }}">
-                                        {{ ucfirst($employee->role) }}
+                                        {{ __('messages.' . $employee->role) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
@@ -125,18 +125,18 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-bold text-gray-900 dark:text-white">
-                                        {{ number_format($employee->salary, 2) }} MZN
+                                        {{ number_format($employee->salary, 2) }} {{ __('messages.currency_symbol') }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right space-x-2">
                                     <a href="{{ route('employees.show', $employee) }}"
                                         class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors inline-block"
-                                        title="Ver">
+                                        title="{{ __('messages.view') }}">
                                         <i class="mdi mdi-eye text-xl"></i>
                                     </a>
                                     <a href="{{ route('employees.edit', $employee) }}"
                                         class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors inline-block"
-                                        title="Editar">
+                                        title="{{ __('messages.edit') }}">
                                         <i class="mdi mdi-pencil text-xl"></i>
                                     </a>
                                     <form action="{{ route('employees.destroy', $employee) }}" method="POST" class="inline">
@@ -144,7 +144,7 @@
                                         @method('DELETE')
                                         <button type="submit"
                                             class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                            title="Excluir" onclick="return confirm('Tem certeza que deseja excluir?')">
+                                            title="{{ __('messages.delete') }}" onclick="return confirm('{{ __('messages.are_you_sure') }}')">
                                             <i class="mdi mdi-delete text-xl"></i>
                                         </button>
                                     </form>
@@ -153,7 +153,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
-                                    Nenhum funcionário encontrado.
+                                    {{ __('messages.no_employees_found') }}
                                 </td>
                             </tr>
                         @endforelse

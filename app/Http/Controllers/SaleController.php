@@ -139,11 +139,11 @@ class SaleController extends Controller
 
             // Redirecionar de volta para a lista de vendas com uma mensagem de sucesso
             return redirect()->route('sales.index')
-                ->with('success', 'Sale completed successfully');
+                ->with('success', __('messages.sale_completed'));
         } catch (\Exception $e) {
             // Caso ocorra um erro, fazer rollback da transação
             DB::rollBack();
-            return back()->with('error', 'An error occurred: ' . $e->getMessage());
+            return back()->with('error', __('messages.error_occurred') . ': ' . $e->getMessage());
         }
     }
 
@@ -263,7 +263,7 @@ class SaleController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Venda realizada com sucesso!',
+                'message' => __('messages.sale_completed'),
                 'sale_id' => $sale->id,
                 'receipt_url' => route('sales.receipt', $sale->id)
             ]);
@@ -272,7 +272,7 @@ class SaleController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao processar venda: ' . $e->getMessage()
+                'message' => __('messages.error_processing_sale') . ': ' . $e->getMessage()
             ], 500);
         }
     }

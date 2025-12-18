@@ -33,7 +33,7 @@ class SettingController extends Controller
             }
         }
 
-        return redirect()->route('settings.index')->with('success', 'Configurações atualizadas com sucesso.');
+        return redirect()->route('settings.index')->with('success', __('messages.settings_updated'));
     }
 
     private function seedDefaults()
@@ -54,6 +54,12 @@ class SettingController extends Controller
             // Finance
             ['key' => 'currency_symbol', 'value' => 'MZN', 'group' => 'finance', 'type' => 'text'],
             ['key' => 'tax_rate', 'value' => '17', 'group' => 'finance', 'type' => 'number'],
+
+            // System
+            ['key' => 'system_language', 'value' => 'pt', 'group' => 'system', 'type' => 'select'],
+            ['key' => 'system_timezone', 'value' => 'Africa/Maputo', 'group' => 'system', 'type' => 'select'],
+            ['key' => 'date_format', 'value' => 'd/m/Y', 'group' => 'system', 'type' => 'text'],
+            ['key' => 'time_format', 'value' => 'H:i', 'group' => 'system', 'type' => 'text'],
 
             // Stock
             ['key' => 'low_stock_threshold', 'value' => '10', 'group' => 'stock', 'type' => 'number'],

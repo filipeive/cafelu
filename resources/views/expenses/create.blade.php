@@ -9,8 +9,8 @@
                 <i class="mdi mdi-arrow-left text-xl"></i>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Nova Despesa</h1>
-                <p class="text-gray-500 dark:text-gray-400">Registre uma nova saída de caixa</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.new_expense') }}</h1>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.register_expense_desc') }}</p>
             </div>
         </div>
 
@@ -23,7 +23,8 @@
                     <!-- Description -->
                     <div class="md:col-span-2">
                         <label for="description"
-                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Descrição *</label>
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.description') }}
+                            *</label>
                         <div class="relative">
                             <i class="mdi mdi-text-short absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" name="description" id="description" value="{{ old('description') }}" required
@@ -34,7 +35,8 @@
 
                     <!-- Amount -->
                     <div>
-                        <label for="amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Valor
+                        <label for="amount"
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.amount') }}
                             (MZN) *</label>
                         <div class="relative">
                             <i class="mdi mdi-cash absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -48,14 +50,15 @@
                     <!-- Category -->
                     <div>
                         <label for="category"
-                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Categoria *</label>
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.category') }}
+                            *</label>
                         <div class="relative">
                             <i class="mdi mdi-tag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <select name="category" id="category" required
                                 class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all appearance-none">
                                 @foreach($categories as $category)
                                     <option value="{{ $category }}" {{ old('category') == $category ? 'selected' : '' }}>
-                                        {{ $category }}
+                                        {{ __('messages.' . strtolower($category)) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -65,7 +68,8 @@
                     <!-- Date -->
                     <div>
                         <label for="expense_date"
-                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Data *</label>
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.date') }}
+                            *</label>
                         <div class="relative">
                             <i class="mdi mdi-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="date" name="expense_date" id="expense_date"
@@ -76,22 +80,23 @@
 
                     <!-- Notes -->
                     <div class="md:col-span-2">
-                        <label for="notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Notas
-                            (Opcional)</label>
+                        <label for="notes"
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.notes') }}
+                            ({{ __('messages.optional') }})</label>
                         <textarea name="notes" id="notes" rows="3"
                             class="w-full px-4 py-3 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                            placeholder="Observações adicionais...">{{ old('notes') }}</textarea>
+                            placeholder="{{ __('messages.additional_obs') }}">{{ old('notes') }}</textarea>
                     </div>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-700">
                     <a href="{{ route('expenses.index') }}"
                         class="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold hover:bg-gray-50 dark:hover:bg-gray-900 transition-all">
-                        Cancelar
+                        {{ __('messages.cancel') }}
                     </a>
                     <button type="submit"
                         class="px-10 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all transform hover:-translate-y-0.5">
-                        Salvar Despesa
+                        {{ __('messages.save_expense') }}
                     </button>
                 </div>
             </form>

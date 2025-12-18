@@ -5,10 +5,9 @@
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <i class="mdi mdi-cog text-orange-500"></i>
-                Configurações do Sistema
+                {{ __('messages.system_settings_title') }}
             </h1>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Gerencie as informações da empresa e preferências do
-                sistema.</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ __('messages.system_settings_desc') }}</p>
         </div>
 
         <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data">
@@ -19,14 +18,14 @@
                         class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                         <div class="px-8 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                                {{ ucfirst($group) }}
+                                {{ __('messages.' . $group) }}
                             </h2>
                         </div>
                         <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                             @foreach($groupSettings as $setting)
                                 <div>
                                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ ucwords(str_replace('_', ' ', $setting->key)) }}
+                                        {{ __('messages.' . $setting->key) }}
                                     </label>
                                     @if($setting->type === 'text')
                                         <input type="text" name="{{ $setting->key }}" value="{{ $setting->value }}"
@@ -53,6 +52,22 @@
                                             <input type="text" value="{{ $setting->value }}" readonly
                                                 class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm">
                                         </div>
+                                    @elseif($setting->type === 'select')
+                                        <select name="{{ $setting->key }}"
+                                            class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+                                            @if($setting->key === 'system_language')
+                                                <option value="en" {{ $setting->value === 'en' ? 'selected' : '' }}>
+                                                    {{ __('messages.english') }}</option>
+                                                <option value="pt" {{ $setting->value === 'pt' ? 'selected' : '' }}>
+                                                    {{ __('messages.portuguese') }}</option>
+                                            @elseif($setting->key === 'system_timezone')
+                                                @foreach(\DateTimeZone::listIdentifiers() as $timezone)
+                                                    <option value="{{ $timezone }}" {{ $setting->value === $timezone ? 'selected' : '' }}>
+                                                        {{ $timezone }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
                                     @endif
                                 </div>
                             @endforeach
@@ -64,7 +79,7 @@
                     <button type="submit"
                         class="px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center gap-2">
                         <i class="mdi mdi-content-save"></i>
-                        Salvar Configurações
+                        {{ __('messages.save_settings') }}
                     </button>
                 </div>
             </div>

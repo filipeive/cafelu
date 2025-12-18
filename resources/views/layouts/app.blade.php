@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Sistema de Gestão de Restaurantes">
+    <meta name="description" content="{{ __('messages.system_description_meta') }}">
     <title>{{ \App\Models\Setting::get('company_name', config('app.name', 'Restaurant System')) }} | @yield('title')
     </title>
 
@@ -247,25 +247,25 @@
                 const config = {
                     success: {
                         icon: 'mdi-check-circle',
-                        title: 'Sucesso',
+                        title: '{{ __('messages.success') }}',
                         classes: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
                         iconColor: 'text-green-500'
                     },
                     error: {
                         icon: 'mdi-alert-circle',
-                        title: 'Erro',
+                        title: '{{ __('messages.error') }}',
                         classes: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
                         iconColor: 'text-red-500'
                     },
                     warning: {
                         icon: 'mdi-alert',
-                        title: 'Atenção',
+                        title: '{{ __('messages.warning') }}',
                         classes: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
                         iconColor: 'text-yellow-500'
                     },
                     info: {
                         icon: 'mdi-information',
-                        title: 'Informação',
+                        title: '{{ __('messages.info') }}',
                         classes: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
                         iconColor: 'text-blue-500'
                     }
@@ -366,6 +366,24 @@
                 document.documentElement.classList.add('dark');
             }
 
+            // Theme Toggle
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark');
+                    const isDark = document.documentElement.classList.contains('dark');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                });
+            }
+
+            // Fullscreen Toggle
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', () => {
+                    window.toggleFullscreen();
+                });
+            }
+
             // Show session messages
             @if(session('success'))
                 showToast('{{ session('success') }}', 'success');
@@ -383,7 +401,7 @@
                 showToast('{{ session('info') }}', 'info');
             @endif
 
-            console.log('✅ Sistema inicializado com Tailwind CDN');
+            console.log('✅ {{ __('messages.system_initialized') }}');
         });
     </script>
 

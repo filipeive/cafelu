@@ -17,6 +17,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\LanguageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,9 @@ use App\Http\Controllers\SettingController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Language Switcher
+Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 //home
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 // Authentication routes (provided by Laravel)

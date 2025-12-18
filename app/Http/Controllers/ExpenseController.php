@@ -40,7 +40,7 @@ class ExpenseController extends Controller
             'user_id' => auth()->id(),
         ]);
 
-        return redirect()->route('expenses.index')->with('success', 'Despesa registrada com sucesso.');
+        return redirect()->route('expenses.index')->with('success', __('messages.expense_registered'));
     }
 
     public function edit(Expense $expense)
@@ -60,12 +60,12 @@ class ExpenseController extends Controller
 
         $expense->update($request->all());
 
-        return redirect()->route('expenses.index')->with('success', 'Despesa atualizada com sucesso.');
+        return redirect()->route('expenses.index')->with('success', __('messages.expense_updated'));
     }
 
     public function destroy(Expense $expense)
     {
         $expense->delete();
-        return redirect()->route('expenses.index')->with('success', 'Despesa removida com sucesso.');
+        return redirect()->route('expenses.index')->with('success', __('messages.expense_deleted'));
     }
 }

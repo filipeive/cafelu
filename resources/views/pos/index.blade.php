@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'POS - Sistema de Vendas')
+@section('title', 'POS - ' . __('messages.pos_system'))
 
 @section('content')
     <div class="h-[calc(100vh-6rem)] flex flex-col lg:flex-row gap-6" x-data="posSystem({ 
-                                                    products: {{ json_encode($products) }}, 
-                                                    categories: {{ json_encode($categories) }},
-                                                    csrfToken: '{{ csrf_token() }}'
-                                                })">
+                                                            products: {{ json_encode($products) }}, 
+                                                            categories: {{ json_encode($categories) }},
+                                                            csrfToken: '{{ csrf_token() }}'
+                                                        })">
 
         <!-- Products Area -->
         <div class="w-full lg:w-2/3 flex flex-col h-full">
@@ -21,11 +21,11 @@
                         </span>
                         <input type="text" x-model="searchQuery"
                             class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors"
-                            placeholder="Pesquisar produtos...">
+                            placeholder="{{ __('messages.search_products') }}">
                     </div>
                     <select x-model="selectedCategory"
                         class="w-full md:w-auto px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors md:hidden">
-                        <option value="all">Todas as Categorias</option>
+                        <option value="all">{{ __('messages.all_categories') }}</option>
                         <template x-for="category in categories" :key="category.id">
                             <option :value="category.id" x-text="category.name"></option>
                         </template>
@@ -37,7 +37,7 @@
                     class="hidden md:flex flex-wrap gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                     <button @click="selectedCategory = 'all'" :class="{'active': selectedCategory === 'all'}"
                         class="category-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border border-transparent hover:shadow-md flex items-center gap-2 whitespace-nowrap">
-                        <i class="mdi mdi-view-grid"></i>Todos
+                        <i class="mdi mdi-view-grid"></i>{{ __('messages.all') }}
                     </button>
                     <template x-for="category in categories" :key="category.id">
                         <button @click="selectedCategory = category.id"
@@ -79,10 +79,10 @@
                                     <div class="absolute top-2 right-2">
                                         <span class="px-1.5 py-0.5 rounded text-[10px] font-bold shadow-sm backdrop-blur-sm"
                                             :class="{
-                                                                                        'bg-green-100/90 text-green-700': product.stock_quantity > 10,
-                                                                                        'bg-yellow-100/90 text-yellow-700': product.stock_quantity <= 10 && product.stock_quantity > 5,
-                                                                                        'bg-red-100/90 text-red-700': product.stock_quantity <= 5
-                                                                                    }">
+                                                                                                'bg-green-100/90 text-green-700': product.stock_quantity > 10,
+                                                                                                'bg-yellow-100/90 text-yellow-700': product.stock_quantity <= 10 && product.stock_quantity > 5,
+                                                                                                'bg-red-100/90 text-red-700': product.stock_quantity <= 5
+                                                                                            }">
                                             <span x-text="product.stock_quantity"></span>
                                         </span>
                                     </div>
@@ -103,7 +103,7 @@
                     <!-- Empty State -->
                     <div x-show="filteredProducts.length === 0" class="col-span-full text-center py-12">
                         <i class="mdi mdi-package-variant-closed text-4xl text-gray-300 dark:text-gray-600 mb-2 block"></i>
-                        <p class="text-gray-500 dark:text-gray-400">Nenhum produto encontrado</p>
+                        <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_products_found') }}</p>
                     </div>
                 </div>
             </div>
@@ -117,12 +117,12 @@
                 class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
                 <h4 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
                     <i class="mdi mdi-cart text-orange-500"></i>
-                    Pedido Atual
+                    {{ __('messages.current_order') }}
                 </h4>
                 <button @click="clearCart()"
                     class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
                     :disabled="cart.length === 0">
-                    <i class="mdi mdi-delete"></i> Limpar
+                    <i class="mdi mdi-delete"></i> {{ __('messages.clear') }}
                 </button>
             </div>
 
@@ -166,7 +166,7 @@
 
                 <div x-show="cart.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500">
                     <i class="mdi mdi-cart-outline text-4xl mb-2 block"></i>
-                    <p>Seu carrinho está vazio</p>
+                    <p>{{ __('messages.empty_cart') }}</p>
                 </div>
             </div>
 
@@ -174,11 +174,11 @@
             <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                 <div class="space-y-2 mb-4">
                     <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                        <span>Subtotal:</span>
+                        <span>{{ __('messages.subtotal') }}:</span>
                         <span class="font-medium">MZN <span x-text="formatMoney(cartTotal)"></span></span>
                     </div>
                     <div class="flex justify-between text-xl font-bold text-gray-800 dark:text-white">
-                        <span>Total:</span>
+                        <span>{{ __('messages.total') }}:</span>
                         <span>MZN <span x-text="formatMoney(cartTotal)"></span></span>
                     </div>
                 </div>
@@ -187,7 +187,7 @@
                 <div class="mb-4">
                     <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                         <i class="mdi mdi-credit-card-outline"></i>
-                        Método de Pagamento
+                        {{ __('messages.payment_method') }}
                     </h5>
                     <div class="grid grid-cols-2 gap-3">
                         <template x-for="method in paymentMethods" :key="method.id">
@@ -211,7 +211,7 @@
                     class="mb-4 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-between">
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                         <i class="mdi mdi-cash-refund text-green-500"></i>
-                        Troco:
+                        {{ __('messages.change') }}:
                     </label>
                     <span class="text-right font-bold text-lg text-gray-800 dark:text-white w-32">
                         MZN <span x-text="formatMoney(changeAmount)"></span>
@@ -223,25 +223,26 @@
                     <button @click="holdOrder()" :disabled="cart.length === 0 || isLoading"
                         class="flex flex-col items-center justify-center p-2 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="mdi mdi-pause-circle-outline text-xl mb-1"></i>
-                        <span class="text-xs font-medium">Guardar</span>
+                        <span class="text-xs font-medium">{{ __('messages.hold') }}</span>
                     </button>
                     <button @click="fetchHeldOrders()"
                         class="flex flex-col items-center justify-center p-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors">
                         <i class="mdi mdi-clipboard-text-clock-outline text-xl mb-1"></i>
-                        <span class="text-xs font-medium">Recuperar</span>
+                        <span class="text-xs font-medium">{{ __('messages.retrieve') }}</span>
                     </button>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <button @click="printLastReceipt()" :disabled="!lastSaleId || isLoading"
                         class="flex flex-col items-center justify-center p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="mdi mdi-printer text-xl mb-1"></i>
-                        <span class="text-xs font-medium">Recibo</span>
+                        <span class="text-xs font-medium">{{ __('messages.receipt') }}</span>
                     </button>
                     <button @click="processSale()" :disabled="cart.length === 0 || isLoading"
                         class="flex flex-col items-center justify-center p-2 rounded-lg bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="mdi mdi-check-circle-outline text-xl mb-1"
                             :class="{'mdi-loading mdi-spin': isLoading, 'mdi-check-circle-outline': !isLoading}"></i>
-                        <span class="text-xs font-medium" x-text="isLoading ? 'Processando...' : 'Finalizar'"></span>
+                        <span class="text-xs font-medium"
+                            x-text="isLoading ? '{{ __('messages.processing') }}' : '{{ __('messages.finish') }}'"></span>
                     </button>
                 </div>
             </div>
@@ -258,7 +259,7 @@
                     class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                            Pedidos Guardados
+                            {{ __('messages.held_orders') }}
                         </h3>
                         <div class="max-h-60 overflow-y-auto custom-scrollbar">
                             <template x-for="order in heldOrders" :key="order.id">
@@ -269,10 +270,10 @@
                                             x-text="order.customer_name || 'Cliente Geral'"></p>
                                         <p class="text-xs text-gray-500">
                                             <i class="mdi mdi-table-furniture"></i>
-                                            <span x-show="order.table_number">Mesa: <span
+                                            <span x-show="order.table_number">{{ __('messages.tables') }}: <span
                                                     x-text="order.table_number"></span></span>
                                             <span x-show="order.is_temporary" class="ml-1 text-yellow-600">(Temp)</span>
-                                            <span x-show="!order.table_number">Sem mesa</span>
+                                            <span x-show="!order.table_number">{{ __('messages.no_table') }}</span>
                                         </p>
                                         <p class="text-xs text-gray-500"
                                             x-text="new Date(order.created_at).toLocaleString()">
@@ -282,19 +283,19 @@
                                         <p class="font-bold text-orange-600">MZN <span
                                                 x-text="formatMoney(order.total_amount)"></span></p>
                                         <span
-                                            class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">Pendente</span>
+                                            class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">{{ __('messages.pending') }}</span>
                                     </div>
                                 </div>
                             </template>
                             <div x-show="heldOrders.length === 0" class="text-center py-4 text-gray-500">
-                                Nenhum pedido guardado.
+                                {{ __('messages.no_held_orders') }}
                             </div>
                         </div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="button" @click="showHeldOrdersModal = false"
                             class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Fechar
+                            {{ __('messages.close') }}
                         </button>
                     </div>
                 </div>
@@ -389,10 +390,10 @@
                     heldOrders: [],
 
                     paymentMethods: [
-                        { id: 'cash', name: 'Dinheiro', icon: 'mdi-cash', colorClass: 'text-green-500' },
-                        { id: 'card', name: 'Cartão', icon: 'mdi-credit-card', colorClass: 'text-blue-500' },
-                        { id: 'mpesa', name: 'M-Pesa', icon: 'mdi-phone', colorClass: 'text-red-500' },
-                        { id: 'emola', name: 'E-mola', icon: 'mdi-wallet', colorClass: 'text-purple-500' }
+                        { id: 'cash', name: '{{ __('messages.cash') }}', icon: 'mdi-cash', colorClass: 'text-green-500' },
+                        { id: 'card', name: '{{ __('messages.card') }}', icon: 'mdi-credit-card', colorClass: 'text-blue-500' },
+                        { id: 'mpesa', name: '{{ __('messages.mpesa') }}', icon: 'mdi-phone', colorClass: 'text-red-500' },
+                        { id: 'emola', name: '{{ __('messages.emola') }}', icon: 'mdi-wallet', colorClass: 'text-purple-500' }
                     ],
 
                     init() {
@@ -427,7 +428,7 @@
 
                     addToCart(product) {
                         if (product.stock_quantity <= 0) {
-                            showToast('Produto sem estoque!', 'error');
+                            showToast('{{ __('messages.out_of_stock') }}', 'error');
                             return;
                         }
 
@@ -435,7 +436,7 @@
 
                         if (existingItem) {
                             if (existingItem.quantity >= product.stock_quantity) {
-                                showToast('Estoque insuficiente!', 'warning');
+                                showToast('{{ __('messages.insufficient_stock') }}', 'warning');
                                 return;
                             }
                             existingItem.quantity++;
@@ -466,12 +467,12 @@
                             item.quantity = newQuantity;
                             this.saveCart();
                         } else {
-                            showToast('Estoque insuficiente!', 'warning');
+                            showToast('{{ __('messages.insufficient_stock') }}', 'warning');
                         }
                     },
 
                     clearCart() {
-                        if (confirm('Tem certeza que deseja limpar o carrinho?')) {
+                        if (confirm('{{ __('messages.confirm_clear_cart') }}')) {
                             this.cart = [];
                             this.saveCart();
                             this.resetPayments();
@@ -511,7 +512,7 @@
 
                         // Validation
                         if (totalPaid < this.cartTotal) {
-                            showToast('Valor pago insuficiente! Total pago: ' + this.formatMoney(totalPaid), 'error');
+                            showToast('{{ __('messages.insufficient_amount_paid') }}: ' + this.formatMoney(totalPaid), 'error');
                             return;
                         }
 
@@ -563,7 +564,7 @@
                             .then(data => {
                                 this.isLoading = false;
                                 if (data.success) {
-                                    showToast('Venda realizada com sucesso!', 'success');
+                                    showToast('{{ __('messages.sale_completed') }}', 'success');
                                     this.cart = [];
                                     this.saveCart();
                                     this.resetPayments();
@@ -576,13 +577,13 @@
                                         window.printSaleRecibo(data.sale_id);
                                     }
                                 } else {
-                                    showToast(data.message || 'Erro ao processar venda', 'error');
+                                    showToast(data.message || '{{ __('messages.error_processing_sale') }}', 'error');
                                 }
                             })
                             .catch(err => {
                                 this.isLoading = false;
                                 console.error(err);
-                                showToast('Erro de conexão', 'error');
+                                showToast('{{ __('messages.connection_error') }}', 'error');
                             });
                     },
 
@@ -598,29 +599,29 @@
 
                                 // Build table options for select
                                 const tableOptions = tables.reduce((acc, table) => {
-                                    acc[table.id] = `Mesa ${table.number} (${table.capacity} lugares)`;
+                                    acc[table.id] = `{{ __('messages.table') }} ${table.number} (${table.capacity} {{ __('messages.seats') }})`;
                                     return acc;
-                                }, { '': 'Mesa Temporária (Auto)' });
+                                }, { '': '{{ __('messages.temporary_table_auto') }}' });
 
                                 Swal.fire({
-                                    title: 'Guardar Pedido',
+                                    title: '{{ __('messages.hold_order') }}',
                                     html: `
-                                                                                                <div class="text-left space-y-4">
-                                                                                                    <div>
-                                                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Cliente</label>
-                                                                                                        <input id="swal-customer-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors" placeholder="Nome do Cliente">
-                                                                                                    </div>
-                                                                                                    <div>
-                                                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecionar Mesa</label>
-                                                                                                        <select id="swal-table-select" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors">
-                                                                                                            ${Object.entries(tableOptions).map(([id, label]) => `<option value="${id}">${label}</option>`).join('')}
-                                                                                                        </select>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            `,
+                                                                                                                <div class="text-left space-y-4">
+                                                                                                                    <div>
+                                                                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.customer_name') }}</label>
+                                                                                                                        <input id="swal-customer-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors" placeholder="{{ __('messages.customer_name') }}">
+                                                                                                                    </div>
+                                                                                                                    <div>
+                                                                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.select_table') }}</label>
+                                                                                                                        <select id="swal-table-select" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors">
+                                                                                                                            ${Object.entries(tableOptions).map(([id, label]) => `<option value="${id}">${label}</option>`).join('')}
+                                                                                                                        </select>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            `,
                                     showCancelButton: true,
-                                    confirmButtonText: 'Guardar',
-                                    cancelButtonText: 'Cancelar',
+                                    confirmButtonText: '{{ __('messages.hold') }}',
+                                    cancelButtonText: '{{ __('messages.cancel') }}',
                                     confirmButtonColor: '#F97316',
                                     background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
                                     color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937',
@@ -660,7 +661,7 @@
                                             .then(data => {
                                                 this.isLoading = false;
                                                 if (data.success) {
-                                                    showToast('Pedido guardado com sucesso!', 'success');
+                                                    showToast('{{ __('messages.order_held_successfully') }}', 'success');
                                                     this.cart = [];
                                                     this.saveCart();
                                                     this.resetPayments(); // Clear amount paid
@@ -668,13 +669,13 @@
                                                     this.lastOrderId = data.order_id;
                                                     this.lastSaleId = null;
                                                 } else {
-                                                    showToast('Erro ao guardar pedido', 'error');
+                                                    showToast('{{ __('messages.error_holding_order') }}', 'error');
                                                 }
                                             })
                                             .catch(err => {
                                                 this.isLoading = false;
                                                 console.error(err);
-                                                showToast('Erro de conexão', 'error');
+                                                showToast('{{ __('messages.connection_error') }}', 'error');
                                             });
                                     }
                                 });
@@ -682,7 +683,7 @@
                             .catch(err => {
                                 this.isLoading = false;
                                 console.error(err);
-                                showToast('Erro ao buscar mesas', 'error');
+                                showToast('{{ __('messages.error_fetching_tables') }}', 'error');
                             });
                     },
 
@@ -698,7 +699,7 @@
                             .catch(err => {
                                 console.error(err);
                                 this.isLoading = false;
-                                showToast('Erro ao buscar pedidos', 'error');
+                                showToast('{{ __('messages.error_fetching_orders') }}', 'error');
                             });
                     },
 
@@ -713,7 +714,7 @@
                                     this.saveCart();
                                     this.lastOrderId = data.order_id;
                                     this.showHeldOrdersModal = false;
-                                    showToast('Pedido recuperado!', 'success');
+                                    showToast('{{ __('messages.order_retrieved') }}', 'success');
                                 } else {
                                     showToast(data.message, 'error');
                                 }
@@ -721,7 +722,7 @@
                             .catch(err => {
                                 console.error(err);
                                 this.isLoading = false;
-                                showToast('Erro ao recuperar pedido', 'error');
+                                showToast('{{ __('messages.error_retrieving_order') }}', 'error');
                             });
                     },
 
@@ -731,7 +732,7 @@
                         } else if (this.lastOrderId) {
                             window.printRecibo(this.lastOrderId);
                         } else {
-                            showToast('Nenhuma venda ou pedido recente para imprimir', 'info');
+                            showToast('{{ __('messages.no_recent_sale_or_order') }}', 'info');
                         }
                     }
                 }));

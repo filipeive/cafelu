@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detalhes da Venda')
+@section('title', __('messages.sale_details'))
 
 @section('content')
     <div class="w-full">
@@ -9,7 +9,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h4 class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                        Venda #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}
+                        {{ __('messages.sale_number') }} #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}
                     </h4>
                     <span class="{{ get_status_class_staradmins($sale->status) }} px-4 py-2 rounded-full text-sm font-medium inline-flex items-center">
                         <i class="mdi mdi-circle-medium"></i>
@@ -17,7 +17,7 @@
                     </span>
                 </div>
                 <div class="text-right">
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Data da Venda</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.sale_date') }}</p>
                     <h5 class="text-lg font-bold text-gray-900 dark:text-white">
                         {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y H:i') }}
                     </h5>
@@ -34,16 +34,16 @@
         <!-- Sale Items -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
             <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h5 class="text-lg font-bold text-gray-900 dark:text-white">Itens da Venda</h5>
+                <h5 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('messages.sale_items') }}</h5>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Produto</th>
-                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">Quantidade</th>
-                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right">Preço Unit.</th>
-                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right">Total</th>
+                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('messages.product') }}</th>
+                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">{{ __('messages.quantity') }}</th>
+                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right">{{ __('messages.unit_price') }}</th>
+                            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right">{{ __('messages.total') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -67,7 +67,7 @@
                     </tbody>
                     <tfoot class="bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
                         <tr>
-                            <th colspan="3" class="px-6 py-4 text-right text-gray-700 dark:text-gray-300 font-semibold">Total:</th>
+                            <th colspan="3" class="px-6 py-4 text-right text-gray-700 dark:text-gray-300 font-semibold">{{ __('messages.total') }}:</th>
                             <th class="px-6 py-4 text-right text-xl font-bold text-orange-600 dark:text-orange-400">
                                 MZN {{ number_format($sale->total_amount, 2) }}
                             </th>
@@ -81,13 +81,13 @@
         @if ($sale->payment_method == 'mixed')
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 max-w-lg mx-auto">
                 <div class="p-6">
-                    <h6 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Detalhes do Pagamento</h6>
+                    <h6 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ __('messages.payment_details') }}</h6>
                     <table class="w-full text-sm">
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @if ($sale->cash_amount > 0)
                                 <tr>
                                     <td class="py-2 text-gray-700 dark:text-gray-300">
-                                        <i class="mdi mdi-cash mr-2 text-green-500"></i>Dinheiro
+                                        <i class="mdi mdi-cash mr-2 text-green-500"></i>{{ __('messages.cash') }}
                                     </td>
                                     <td class="py-2 text-right font-medium text-gray-900 dark:text-white">MZN {{ number_format($sale->cash_amount, 2) }}</td>
                                 </tr>
@@ -95,7 +95,7 @@
                             @if ($sale->card_amount > 0)
                                 <tr>
                                     <td class="py-2 text-gray-700 dark:text-gray-300">
-                                        <i class="mdi mdi-credit-card mr-2 text-blue-500"></i>Cartão
+                                        <i class="mdi mdi-credit-card mr-2 text-blue-500"></i>{{ __('messages.card') }}
                                     </td>
                                     <td class="py-2 text-right font-medium text-gray-900 dark:text-white">MZN {{ number_format($sale->card_amount, 2) }}</td>
                                 </tr>
@@ -103,7 +103,7 @@
                             @if ($sale->mpesa_amount > 0)
                                 <tr>
                                     <td class="py-2 text-gray-700 dark:text-gray-300">
-                                        <i class="mdi mdi-phone mr-2 text-yellow-500"></i>M-Pesa
+                                        <i class="mdi mdi-phone mr-2 text-yellow-500"></i>{{ __('messages.mpesa') }}
                                     </td>
                                     <td class="py-2 text-right font-medium text-gray-900 dark:text-white">MZN {{ number_format($sale->mpesa_amount, 2) }}</td>
                                 </tr>
@@ -111,13 +111,13 @@
                             @if ($sale->emola_amount > 0)
                                 <tr>
                                     <td class="py-2 text-gray-700 dark:text-gray-300">
-                                        <i class="mdi mdi-wallet mr-2 text-cyan-500"></i>e-Mola
+                                        <i class="mdi mdi-wallet mr-2 text-cyan-500"></i>{{ __('messages.emola') }}
                                     </td>
                                     <td class="py-2 text-right font-medium text-gray-900 dark:text-white">MZN {{ number_format($sale->emola_amount, 2) }}</td>
                                 </tr>
                             @endif
                             <tr class="border-t-2 border-gray-300 dark:border-gray-600">
-                                <th class="py-2 text-gray-900 dark:text-white">Total Pago</th>
+                                <th class="py-2 text-gray-900 dark:text-white">{{ __('messages.total_paid') }}</th>
                                 <th class="py-2 text-right text-green-600 dark:text-green-400">MZN {{ number_format($sale->getTotalPayments(), 2) }}</th>
                             </tr>
                         </tbody>
@@ -130,12 +130,12 @@
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
             <a href="{{ route('sales.index') }}" class="px-6 py-3 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium transition-colors flex items-center gap-2">
                 <i class="mdi mdi-arrow-left"></i>
-                Voltar para Vendas
+                {{ __('messages.back_to_sales') }}
             </a>
             <button type="button" class="px-6 py-3 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                 onclick="window.printSaleRecibo({{ $sale->id }})">
                 <i class="mdi mdi-printer"></i>
-                Imprimir Recibo
+                {{ __('messages.print_receipt') }}
             </button>
         </div>
     </div>

@@ -18,6 +18,8 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,17 @@ use App\Http\Controllers\LanguageController;
 */
 Route::get('/', function () {
     return view('welcome');
+});
+
+// Global Search
+Route::get('/search', [SearchController::class, 'search'])->name('search');
+
+// Notifications
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 // Language Switcher

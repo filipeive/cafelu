@@ -6,6 +6,11 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Table;
 use App\Models\StockMovement;
+use App\Models\Sale;
+use App\Models\User;
+use App\Notifications\SaleCompletedNotification;
+use App\Notifications\LowStockNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -130,9 +135,23 @@ class POSController extends Controller
                     'reference_id' => $saleId,
                     'notes' => 'Venda via POS'
                 ]);
+
+                // Verificar estoque baixo
+                $product = Product::find($item['product_id']);
+                if ($product && $product->stock_quantity <= $product->min_stock_level) {
+                    $users = User::all();
+                    Notification::send($users, new LowStockNotification($product));
+                }
             }
 
             DB::commit();
+
+            // Notificar venda concluída
+            $sale = Sale::find($saleId);
+            if ($sale) {
+                $users = User::all();
+                Notification::send($users, new SaleCompletedNotification($sale));
+            }
 
             return response()->json([
                 'success' => true,

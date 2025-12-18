@@ -460,14 +460,7 @@
                 get isOccupied() { return this.table.status === 'occupied'; },
                 get statusColor() { return this.isOccupied ? 'text-red-500' : 'text-green-500'; },
                 get statusText() { return this.isOccupied ? 'Ocupada' : 'Disponível'; },
-                get statusBadge() { return this.isOccupied ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'; },
-                get actionUrl() { 
-                    return this.isOccupied 
-                        ? '{{ route('tables.index') }}' 
-                        : '{{ route('tables.create-order', ':tableId') }}'.replace(':tableId', this.table.id);
-                },
-                get actionIcon() { return this.isOccupied ? 'mdi-table-furniture' : 'mdi-cart-plus'; },
-                get actionText() { return this.isOccupied ? 'Ir para Mesas' : 'Iniciar Pedido'; }
+                get statusBadge() { return this.isOccupied ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'; }
              }"
              @open-table-modal.window="open = true; table = $event.detail"
              x-show="open"
@@ -524,10 +517,21 @@
                         </div>
 
                         <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                            <a :href="actionUrl" class="inline-flex w-full justify-center rounded-md bg-warning px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-warning/90 sm:col-start-2">
-                                <i class="mdi me-2" :class="actionIcon"></i>
-                                <span x-text="actionText"></span>
+                            <!-- Iniciar Pedido (POST) -->
+                            <form x-show="!isOccupied" :action="'{{ route('tables.create-order', ':tableId') }}'.replace(':tableId', table.id)" method="POST" class="sm:col-start-2">
+                                @csrf
+                                <button type="submit" class="inline-flex w-full justify-center rounded-md bg-warning px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-warning/90">
+                                    <i class="mdi mdi-cart-plus me-2"></i>
+                                    Iniciar Pedido
+                                </button>
+                            </form>
+
+                            <!-- Ir para Mesas (GET) -->
+                            <a x-show="isOccupied" href="{{ route('tables.index') }}" class="inline-flex w-full justify-center rounded-md bg-warning px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-warning/90 sm:col-start-2">
+                                <i class="mdi mdi-table-furniture me-2"></i>
+                                Ir para Mesas
                             </a>
+
                             <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 sm:col-start-1 sm:mt-0" @click="open = false">
                                 Cancelar
                             </button>

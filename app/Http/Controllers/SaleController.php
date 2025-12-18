@@ -6,10 +6,14 @@ use App\Models\Sale;
 use App\Models\Product;
 use App\Models\SaleItem;
 use App\Models\StockMovement;
+use App\Models\User;
+use App\Notifications\SaleCompletedNotification;
+use App\Notifications\LowStockNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
@@ -132,7 +136,17 @@ class SaleController extends Controller
                     'reference_id' => $sale->id,
                     'notes' => 'Venda Manual'
                 ]);
+
+                // Verificar estoque baixo
+                if ($product->stock_quantity <= $product->min_stock_level) {
+                    $users = User::all();
+                    Notification::send($users, new LowStockNotification($product));
+                }
             }
+
+            // Notificar venda concluída
+            $users = User::all();
+            Notification::send($users, new SaleCompletedNotification($sale));
 
             // Commit da transação
             DB::commit();
@@ -287,7 +301,7 @@ class SaleController extends Controller
     {
         $sale = Sale::with('saleItems.product')->findOrFail($id);
 
-        $pdf = PDF::loadView('sales.export.pdf', compact('sale'));
+        $pdf = Pdf::loadView('sales.export.pdf', compact('sale'));
 
         return $pdf->download('Venda_' . str_pad($sale->id, 5, '0', STR_PAD_LEFT) . '.pdf');
     }

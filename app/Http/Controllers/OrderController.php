@@ -10,6 +10,11 @@ use App\Models\Category;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\StockMovement;
+use App\Models\User;
+use App\Notifications\NewOrderNotification;
+use App\Notifications\SaleCompletedNotification;
+use App\Notifications\LowStockNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
 //validator
 use Illuminate\Http\Request;
@@ -96,6 +101,10 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
+            // Notificar novo pedido
+            $users = User::all();
+            Notification::send($users, new NewOrderNotification($order));
 
             return redirect()->route('orders.edit', $order->id)
                 ->with('success', 'Pedido criado com sucesso!');
@@ -358,7 +367,17 @@ class OrderController extends Controller
                     'reference_id' => $sale->id,
                     'notes' => 'Venda via Pedido #' . $order->id
                 ]);
+
+                // Verificar estoque baixo
+                if ($product->stock_quantity <= $product->min_stock_level) {
+                    $users = User::all();
+                    Notification::send($users, new LowStockNotification($product));
+                }
             }
+
+            // Notificar venda concluída
+            $users = User::all();
+            Notification::send($users, new SaleCompletedNotification($sale));
 
             // 5. Atualizar o status do pedido
             $order->update([
@@ -420,7 +439,7 @@ class OrderController extends Controller
     public function cancel(Order $order)
     {
         $request = request();
-        
+
         // Verificar se o pedido já foi cancelado
         if ($order->status === 'canceled') {
             $message = 'Este pedido já está cancelado.';

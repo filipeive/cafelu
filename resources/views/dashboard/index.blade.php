@@ -3,733 +3,161 @@
 @section('title', 'Dashboard - Zalala Beach Bar')
 @section('icon', 'view-dashboard')
 
-@push('styles')
-    <style>
-        /* ========================================
-                   DASHBOARD CONTAINER
-                ======================================== */
-        .dashboard-container {
-            padding: 1.5rem;
-            min-height: calc(100vh - 140px);
-        }
-
-        /* ========================================
-                   STATS CARDS - Glassmorphism Design
-                ======================================== */
-        .card {
-            background: rgba(26, 26, 46, 0.95) !important;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            color: #F5F5F5;
-            position: relative;
-            overflow: hidden;
-            height: 100%;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 165, 0, 0.3);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(to bottom, #FFA500, #FF8C00);
-        }
-
-        .card.bg-gradient-primary::before {
-            background: linear-gradient(to bottom, #4F46E5, #7C3AED);
-        }
-
-        .card.bg-gradient-warning::before {
-            background: linear-gradient(to bottom, #F59E0B, #D97706);
-        }
-
-        .card.bg-gradient-danger::before {
-            background: linear-gradient(to bottom, #EF4444, #DC2626);
-        }
-
-        .card.bg-gradient-info::before {
-            background: linear-gradient(to bottom, #3B82F6, #2563EB);
-        }
-
-        .stats-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .stats-label {
-            font-size: 0.9rem;
-            font-weight: 500;
-            opacity: 0.85;
-            margin-bottom: 0.25rem;
-        }
-
-        .stats-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 0;
-            color: #FFA500;
-        }
-
-        /* ========================================
-                   CARD STYLES
-                ======================================== */
-        .card {
-            background: rgba(26, 26, 46, 0.95) !important;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            color: #F5F5F5;
-        }
-
-        .card-header {
-            background: rgba(35, 35, 60, 0.6) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-            padding: 1.25rem 1.5rem !important;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            color: #FFA500 !important;
-            font-weight: 600 !important;
-            display: flex;
-            align-items: center;
-            margin: 0 !important;
-        }
-
-        .card-title i {
-            margin-right: 0.5rem;
-            color: #FFA500;
-        }
-
-        /* ========================================
-                   REAL-TIME STATUS
-                ======================================== */
-        .real-time-status {
-            padding: 0;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            padding: 1.25rem 1.25rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            transition: background 0.3s ease;
-        }
-
-        .status-item:last-child {
-            border-bottom: none;
-        }
-
-        .status-item:hover {
-            background: rgba(45, 45, 75, 0.5);
-        }
-
-        .status-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            margin-right: 1rem;
-        }
-
-        .status-icon.bg-primary {
-            background: rgba(255, 165, 0, 0.2);
-            color: #FFA500;
-        }
-
-        .status-icon.bg-success {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10B981;
-        }
-
-        .status-icon.bg-info {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3B82F6;
-        }
-
-        .status-icon.bg-warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: #F59E0B;
-        }
-
-        .status-content {
-            flex: 1;
-        }
-
-        .status-content h6 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #F5F5F5;
-            margin: 0 0 0.25rem 0;
-        }
-
-        /* ========================================
-                   TOP PRODUCTS
-                ======================================== */
-        .top-products-list {
-            padding: 0;
-        }
-
-        .top-product-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.85rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .top-product-item:last-child {
-            border-bottom: none;
-        }
-
-        .product-rank {
-            margin-right: 1rem;
-        }
-
-        .rank-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-            background: rgba(255, 165, 0, 0.2);
-            color: #FFA500;
-        }
-
-        .product-info {
-            flex: 1;
-        }
-
-        .product-info h6 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin: 0 0 0.25rem 0;
-            color: #F5F5F5;
-        }
-
-        .product-info small {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* ========================================
-                   TABLES GRID
-                ======================================== */
-        .tables-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 0.8rem;
-        }
-
-        .table-card {
-            background: rgba(35, 35, 60, 0.7);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .table-card:hover {
-            transform: scale(1.03);
-            border-color: rgba(255, 165, 0, 0.4);
-        }
-
-        .table-card[data-status="occupied"] {
-            border-color: rgba(239, 68, 68, 0.5);
-            background: rgba(89, 35, 42, 0.5);
-        }
-
-        .table-card[data-status="available"] {
-            border-color: rgba(72, 187, 120, 0.5);
-            background: rgba(28, 85, 61, 0.3);
-        }
-
-        .table-icon {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            color: #F5F5F5;
-        }
-
-        .table-info h6 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin: 0 0 0.25rem 0;
-            color: #F5F5F5;
-        }
-
-        .table-info small {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.75rem;
-        }
-
-        .table-status {
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .status-dot.occupied {
-            background: #EF4444;
-        }
-
-        .status-dot.available {
-            background: #10B981;
-        }
-
-        .table-status small {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.7rem;
-        }
-
-        /* ========================================
-                   LOW STOCK
-                ======================================== */
-        .low-stock-list {
-            padding: 0;
-        }
-
-        .low-stock-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .low-stock-item:last-child {
-            border-bottom: none;
-        }
-
-        .product-image {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-right: 1rem;
-            flex-shrink: 0;
-        }
-
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .image-placeholder {
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9CA3AF;
-            font-size: 1.2rem;
-        }
-
-        .product-details {
-            flex: 1;
-        }
-
-        .product-details h6 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin: 0 0 0.25rem 0;
-            color: #F5F5F5;
-        }
-
-        .product-details small {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* ========================================
-                   QUICK ACTIONS
-                ======================================== */
-        .quick-action-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            border-radius: 16px;
-            background: rgba(35, 35, 60, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #F5F5F5;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            height: 120px;
-            text-align: center;
-        }
-
-        .quick-action-btn:hover {
-            background: rgba(45, 45, 75, 0.8);
-            transform: translateY(-4px);
-            border-color: rgba(255, 165, 0, 0.4);
-            color: #FFA500;
-            text-decoration: none;
-        }
-
-        .quick-action-btn i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .quick-action-btn span {
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        /* ========================================
-                   TABLE STYLES
-                ======================================== */
-        .table {
-            color: #F5F5F5 !important;
-        }
-
-        .table thead th {
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
-            color: #FFA500 !important;
-            font-weight: 600 !important;
-            background: transparent !important;
-        }
-
-        .table tbody tr {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .table tbody tr:hover {
-            background: rgba(45, 45, 75, 0.5) !important;
-        }
-
-        .table tbody td {
-            border-top: none !important;
-            padding: 1rem 0.75rem;
-        }
-
-        /* ========================================
-                   BADGES
-                ======================================== */
-        .badge {
-            font-weight: 600;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-        }
-
-        .badge.bg-success {
-            background-color: rgba(16, 185, 129, 0.2) !important;
-            color: #10B981 !important;
-        }
-
-        .badge.bg-danger {
-            background-color: rgba(239, 68, 68, 0.2) !important;
-            color: #EF4444 !important;
-        }
-
-        .badge.bg-warning {
-            background-color: rgba(245, 158, 11, 0.2) !important;
-            color: #F59E0B !important;
-        }
-
-        .badge.bg-info {
-            background-color: rgba(59, 130, 246, 0.2) !important;
-            color: #3B82F6 !important;
-        }
-
-        .badge.bg-primary {
-            background-color: rgba(255, 165, 0, 0.2) !important;
-            color: #FFA500 !important;
-        }
-
-        /* ========================================
-                   CHART CONTAINER
-                ======================================== */
-        .chart-container {
-            height: 280px;
-            position: relative;
-        }
-
-        /* ========================================
-                   BUTTONS
-                ======================================== */
-        .btn-warning {
-            background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
-            border: none;
-            color: #1a1a2e;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.4);
-            color: #1a1a2e;
-        }
-
-        .btn-outline-warning {
-            border: 2px solid #FFA500;
-            color: #FFA500;
-            background: transparent;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-warning:hover {
-            background: #FFA500;
-            color: #1a1a2e;
-            transform: translateY(-2px);
-        }
-
-        .btn-outline-warning.active {
-            background: #FFA500;
-            color: #1a1a2e;
-        }
-
-        .btn-sm {
-            padding: 0.4rem 1rem;
-            font-size: 0.85rem;
-        }
-
-        /* ========================================
-                   RESPONSIVE
-                ======================================== */
-        @media (max-width: 991px) {
-            .card {
-                min-height: auto;
-            }
-
-            .chart-container {
-                height: 240px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 1rem;
-            }
-
-            .tables-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-
-            .card-header {
-                flex-direction: column;
-                gap: 0.75rem;
-                align-items: flex-start !important;
-            }
-
-            .stats-value {
-                font-size: 1.5rem;
-            }
-        }
-
-        /* ========================================
-                   MODAL STYLES
-                ======================================== */
-        .modal-content {
-            background: rgba(26, 26, 46, 0.98) !important;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        .modal-title {
-            color: #FFA500 !important;
-        }
-    </style>
-@endpush
-
 @section('content')
-    <div class="dashboard-container">
+    <div class="space-y-6">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0" style="color: #FFA500; font-weight: 700; letter-spacing: -0.5px;">
-                <i class="mdi mdi-view-dashboard me-2"></i> Dashboard
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <i class="mdi mdi-view-dashboard text-primary"></i> Dashboard
             </h1>
-            <div class="d-flex gap-2">
-                <a href="{{ route('pos.index') }}" class="btn btn-warning">
-                    <i class="mdi mdi-cash-register me-2"></i> Ir para POS
+            <div class="flex gap-3">
+                <a href="{{ route('pos.index') }}"
+                    class="flex items-center gap-2 px-4 py-2 bg-warning hover:bg-warning/90 text-white rounded-lg transition-colors font-medium">
+                    <i class="mdi mdi-cash-register"></i> Ir para POS
                 </a>
-                <button class="btn btn-warning" onclick="refreshDashboard()">
-                    <i class="mdi mdi-refresh"></i>
+                <button
+                    class="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    onclick="refreshDashboard()">
+                    <i class="mdi mdi-refresh text-xl"></i>
                 </button>
             </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="row g-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             <!-- Vendas Hoje -->
-            <div class="col-xl-3 col-lg-6 col-md-6" style="color: #F5F5F5 !important; ">
-                <div class="card bg-gradient-primary">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="stats-icon text-white">
-                                <i class="mdi mdi-cash-multiple"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="stats-label text-white">Vendas Hoje</h6>
-                                <h3 class="stats-value text-white">{{ number_format($todaySales ?? 0, 2, ',', '.') }} MT
-                                </h3>
-                            </div>
+            <div
+                class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class="mdi mdi-cash-multiple text-6xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                            <i class="mdi mdi-cash-multiple text-2xl"></i>
                         </div>
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted text-white"
-                                    style="opacity: 0.7; font-size: 0.85rem; color: #F5F5F5 !important;">Vs ontem</span>
-                                <span class="badge {{ ($salesGrowth ?? 0) >= 0 ? 'bg-success' : 'bg-danger' }} text-white">
-                                    {{ number_format($salesGrowth ?? 0, 1) }}%
-                                    <i
-                                        class="mdi mdi-arrow-{{ ($salesGrowth ?? 0) >= 0 ? 'up' : 'down' }} ms-1 text-white"></i>
-                                </span>
-                            </div>
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">Vendas Hoje</p>
+                            <h3 class="text-2xl font-bold">{{ number_format($todaySales ?? 0, 2, ',', '.') }} MT</h3>
                         </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-blue-100">Vs ontem</span>
+                        <span
+                            class="flex items-center gap-1 {{ ($salesGrowth ?? 0) >= 0 ? 'text-green-300' : 'text-red-300' }} font-medium bg-white/10 px-2 py-0.5 rounded">
+                            {{ number_format($salesGrowth ?? 0, 1) }}%
+                            <i class="mdi mdi-arrow-{{ ($salesGrowth ?? 0) >= 0 ? 'up' : 'down' }}"></i>
+                        </span>
                     </div>
                 </div>
             </div>
 
             <!-- Pedidos Ativos -->
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card bg-gradient-warning">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center text-white">
-                            <div class="stats-icon">
-                                <i class="mdi mdi-cart"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="stats-label text-white">Pedidos Ativos</h6>
-                                <h3 class="stats-value text-white">{{ $openOrders ?? 0 }}</h3>
-                            </div>
+            <div
+                class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class="mdi mdi-cart text-6xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                            <i class="mdi mdi-cart text-2xl"></i>
                         </div>
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted text-white"
-                                    style="opacity: 0.7; font-size: 0.85rem; color: #F5F5F5 !important;">Pendentes:
-                                    {{ $pendingOrders ?? 0 }}</span>
-                                <a href="{{ route('orders.index') }}" class="btn btn-sm btn-warning text-white">
-                                    Ver Todos
-                                </a>
-                            </div>
+                        <div>
+                            <p class="text-amber-100 text-sm font-medium">Pedidos Ativos</p>
+                            <h3 class="text-2xl font-bold">{{ $openOrders ?? 0 }}</h3>
                         </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-amber-100">Pendentes: {{ $pendingOrders ?? 0 }}</span>
+                        <a href="{{ route('orders.index') }}"
+                            class="text-white hover:text-amber-100 underline decoration-amber-300/50 hover:decoration-amber-100 transition-colors">
+                            Ver Todos
+                        </a>
                     </div>
                 </div>
             </div>
 
             <!-- Estoque Baixo -->
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card bg-gradient-danger">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="stats-icon text-white">
-                                <i class="mdi mdi-alert-circle"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="stats-label text-white">Estoque Baixo</h6>
-                                <h3 class="stats-value text-white">{{ $lowStockProducts->count() ?? 0 }}</h3>
-                            </div>
+            <div
+                class="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class="mdi mdi-alert-circle text-6xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                            <i class="mdi mdi-alert-circle text-2xl"></i>
                         </div>
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted text-white"
-                                    style="opacity: 0.7; font-size: 0.85rem; color: #F5F5F5 !important;">Total:
-                                    {{ $totalProducts ?? 0 }}</span>
-                                <a href="{{ route('products.index') }}" class="btn btn-sm btn-warning text-white">
-                                    Gerenciar
-                                </a>
-                            </div>
+                        <div>
+                            <p class="text-red-100 text-sm font-medium">Estoque Baixo</p>
+                            <h3 class="text-2xl font-bold">{{ $lowStockProducts->count() ?? 0 }}</h3>
                         </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-red-100">Total: {{ $totalProducts ?? 0 }}</span>
+                        <a href="{{ route('products.index') }}"
+                            class="px-2 py-1 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors">
+                            Gerenciar
+                        </a>
                     </div>
                 </div>
             </div>
 
             <!-- Status Mesas -->
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card bg-gradient-info">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center text-white">
-                            <div class="stats-icon">
-                                <i class="mdi mdi-table-furniture"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="stats-label text-white">Status das Mesas</h6>
-                                <h3 class="stats-value text-white">{{ $availableTables ?? 0 }}/{{ $tables->count() ?? 0 }}
-                                </h3>
-                            </div>
+            <div
+                class="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class="mdi mdi-table-furniture text-6xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                            <i class="mdi mdi-table-furniture text-2xl"></i>
                         </div>
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted"
-                                    style="opacity: 0.7; font-size: 0.85rem; color: #F5F5F5 !important;">{{ $occupiedTables ?? 0 }}
-                                    ocupadas</span>
-                                <a href="{{ route('tables.index') }}" class="btn btn-sm btn-warning">
-                                    Ver Mesas
-                                </a>
-                            </div>
+                        <div>
+                            <p class="text-teal-100 text-sm font-medium">Status das Mesas</p>
+                            <h3 class="text-2xl font-bold">{{ $availableTables ?? 0 }}/{{ $tables->count() ?? 0 }}</h3>
                         </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-teal-100">{{ $occupiedTables ?? 0 }} ocupadas</span>
+                        <a href="{{ route('tables.index') }}"
+                            class="text-white hover:text-teal-100 underline decoration-teal-300/50 hover:decoration-teal-100 transition-colors">
+                            Ver Mesas
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Charts and Info -->
-        <div class="row g-4 mb-4">
+        <!-- Charts and Info -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <!-- Sales Chart -->
-            <div class="col-xl-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">
-                            <i class="mdi mdi-chart-line"></i>
+            <div class="xl:col-span-2">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <h5 class="font-semibold text-gray-800 dark:text-dark flex items-center gap-2">
+                            <i class="mdi mdi-chart-line text-primary"></i>
                             Desempenho de Vendas
                         </h5>
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-outline-warning active"
+                        <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                            <button type="button"
+                                class="px-3 py-1 text-sm font-medium rounded-md transition-colors active bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white"
                                 onclick="changeChartPeriod('daily')">
                                 Diário
                             </button>
-                            <button type="button" class="btn btn-outline-warning" onclick="changeChartPeriod('hourly')">
+                            <button type="button"
+                                class="px-3 py-1 text-sm font-medium rounded-md transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                onclick="changeChartPeriod('hourly')">
                                 Por Hora
                             </button>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
+                    <div class="p-6">
+                        <div class="h-80 w-full">
                             <canvas id="salesChart"></canvas>
                         </div>
                     </div>
@@ -737,334 +165,372 @@
             </div>
 
             <!-- Real-time Status -->
-            <div class="col-xl-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card card-statistic mb-4">
-                            <div class="card-icon bg-primary">
-                                <i class="mdi mdi-cart-plus"></i>
-                            </div>
-                            <div class="card-body">
-                                <h6>Pedidos em Andamento</h6>
-                                <span class="card-number">{{ $openOrders ?? 0 }}</span>
-                            </div>
+            <div class="xl:col-span-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+                        <div class="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                            <i class="mdi mdi-cart-plus text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Pedidos em Andamento</p>
+                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">{{ $openOrders ?? 0 }}</h4>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card card-statistic mb-4">
-                            <div class="card-icon bg-success">
-                                <i class="mdi mdi-check-circle"></i>
-                            </div>
-                            <div class="card-body">
-                                <h6>Pedidos Hoje</h6>
-                                <span class="card-number">{{ $completedOrdersToday ?? 0 }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card card-statistic mb-4">
-                            <div class="card-icon bg-info">
-                                <i class="mdi mdi-account-multiple"></i>
-                            </div>
-                            <div class="card-body">
-                                <h6>Novos Clientes</h6>
-                                <span class="card-number">+{{ $newClientsToday ?? 0 }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card card-statistic mb-4">
-                            <div class="card-icon bg-warning">
-                                <i class="mdi mdi-calendar-clock"></i>
-                            </div>
-                            <div class="card-body">
-                                <h6>Vendas da Semana</h6>
-                                <span class="card-number">{{ number_format($weekSales ?? 0, 2, ',', '.') }} MT</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Top Products -->
-            <div class="row g-4 mb-4">
-                <div class="col-xl-6">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="mdi mdi-trophy"></i>
-                                Produtos Mais Vendidos
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="top-products-list">
-                                @forelse($topProducts ?? [] as $index => $product)
-                                    <div class="top-product-item">
-                                        <div class="product-rank">
-                                            <span class="rank-badge">{{ $index + 1 }}</span>
-                                        </div>
-                                        <div class="product-info flex-grow-1">
-                                            <h6 class="mb-1">{{ $product->name }}</h6>
-                                            <small>{{ $product->category->name ?? 'Sem categoria' }}</small>
-                                        </div>
-                                        <div class="product-stats">
-                                            <span class="badge bg-primary">{{ $product->total_sold ?? 0 }} vendas</span>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <p class="text-center text-muted py-3">Nenhum produto vendido</p>
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Recent Orders -->
-                <div class="col-xl-6">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
-                                <i class="mdi mdi-clock-fast"></i>
-                                Pedidos Recentes
-                            </h5>
-                            <a href="{{ route('orders.index') }}" class="btn btn-sm btn-outline-warning">
-                                Ver Todos
-                            </a>
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+                        <div class="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg">
+                            <i class="mdi mdi-check-circle text-2xl"></i>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th class="ps-3">ID</th>
-                                            <th>Cliente</th>
-                                            <th>Total</th>
-                                            <th>Status</th>
-                                            <th class="pe-3">Hora</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($recentOrders ?? [] as $order)
-                                            <tr>
-                                                <td class="ps-3">#{{ $order->id }}</td>
-                                                <td>{{ $order->client_name ?? 'Consumidor Final' }}</td>
-                                                <td class="fw-bold">{{ number_format($order->total_amount, 2, ',', '.') }}
-                                                    MT
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-{{ $order->status_color ?? 'success' }}">
-                                                        {{ $order->status_label ?? 'N/A' }}
-                                                    </span>
-                                                </td>
-                                                <td class="pe-3">{{ $order->created_at->format('H:i') }}</td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted py-3">Nenhum pedido
-                                                    recente
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Pedidos Hoje</p>
+                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">{{ $completedOrdersToday ?? 0 }}
+                            </h4>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Tables and Low Stock -->
-            <div class="row g-4 mb-4">
-                <!-- Tables Status -->
-                <div class="col-xl-6">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
-                                <i class="mdi mdi-table-furniture"></i>
-                                Status das Mesas
-                            </h5>
-                            <a href="{{ route('tables.index') }}" class="btn btn-sm btn-outline-warning">
-                                Ver Todas
-                            </a>
+
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+                        <div class="p-3 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-lg">
+                            <i class="mdi mdi-account-multiple text-2xl"></i>
                         </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                @forelse($tables->take(8) ?? [] as $table)
-                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                        <div class="card h-100" role="button" tabindex="0"
-                                            onclick="openTableInstructionsModal({{ $table->id }}, '{{ $table->number }}', '{{ $table->status }}')"
-                                            style="cursor: pointer; background: {{ $table->status === 'occupied' ? 'rgba(239, 68, 68, 0.06)' : 'rgba(16, 185, 129, 0.06)' }}; border: 1px solid {{ $table->status === 'occupied' ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)' }};">
-                                            <div class="card-body d-flex flex-column align-items-center text-center">
-                                                <div class="fs-1 mb-2"
-                                                    style="color: {{ $table->status === 'occupied' ? '#EF4444' : '#10B981' }};">
-                                                    <i class="mdi mdi-table-furniture"></i>
-                                                </div>
-                                                <h6 class="mb-1">Mesa {{ $table->number }}</h6>
-                                                <small class="text-muted d-block mb-2">{{ $table->capacity }}
-                                                    lugares</small>
-
-                                                @if (isset($table->current_order) && $table->current_order)
-                                                    <div class="w-100 mb-3 p-2 rounded"
-                                                        style="background: rgba(255,165,0,0.06); border: 1px solid rgba(255,165,0,0.12);">
-                                                        <small class="d-block text-truncate"
-                                                            style="font-weight:600; color:#FFA500;">
-                                                            Pedido: #{{ $table->current_order->id ?? '—' }}
-                                                        </small>
-                                                        <small class="text-muted">Valor:
-                                                            {{ number_format($table->current_order->total_amount ?? 0, 2, ',', '.') }}
-                                                            MT</small>
-                                                    </div>
-                                                @endif
-
-                                                <div
-                                                    class="d-flex gap-2 w-100 justify-content-center align-items-center mt-auto">
-                                                    <span
-                                                        class="badge {{ $table->status === 'occupied' ? 'bg-danger' : 'bg-success' }}">
-                                                        {{ $table->status === 'occupied' ? 'Ocupada' : 'Disponível' }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="col-12">
-                                        <p class="text-center text-muted py-3">Nenhuma mesa cadastrada</p>
-                                    </div>
-                                @endforelse
-                            </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Novos Clientes</p>
+                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">+{{ $newClientsToday ?? 0 }}</h4>
                         </div>
                     </div>
-                </div>
 
-                <!-- Low Stock -->
-                <div class="col-xl-6">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
-                                <i class="mdi mdi-alert"></i>
-                                Estoque Baixo
-                            </h5>
-                            <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-warning">
-                                Ver Todos
-                            </a>
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+                        <div class="p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg">
+                            <i class="mdi mdi-calendar-clock text-2xl"></i>
                         </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                @forelse($lowStockProducts->take(8) ?? [] as $product)
-                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                                        <div class="card h-100" role="button" tabindex="0"
-                                            onclick="openProductInstructionsModal({{ $product->id }}, '{{ $product->name }}', {{ $product->stock_quantity }})">
-                                            <div class="card-body">
-                                                <div class="product-image mb-3">
-                                                    @if ($product->image)
-                                                        <img src="{{ asset('storage/' . $product->image) }}"
-                                                            alt="{{ $product->name }}" class="w-100 rounded">
-                                                    @else
-                                                        <div class="image-placeholder">
-                                                            <i class="mdi mdi-food"></i>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                <h6 class="mb-2">{{ $product->name }}</h6>
-                                                <small class="text-muted d-block mb-3">Estoque:
-                                                    <strong>{{ $product->stock_quantity }}</strong></small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="col-12">
-                                        <p class="text-center text-muted py-3">Estoque adequado</p>
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="row g-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="mdi mdi-lightning-bolt"></i>
-                                Ações Rápidas
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                                    <a href="{{ route('pos.index') }}" class="quick-action-btn">
-                                        <i class="mdi mdi-cash-register"></i>
-                                        <span>Novo Pedido</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                                    <a href="{{ route('tables.index') }}" class="quick-action-btn">
-                                        <i class="mdi mdi-table-furniture"></i>
-                                        <span>Gerenciar Mesas</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                                    <a href="{{ route('products.create') }}" class="quick-action-btn">
-                                        <i class="mdi mdi-plus-circle"></i>
-                                        <span>Adicionar Produto</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                                    <a href="{{ route('clients.index') }}" class="quick-action-btn">
-                                        <i class="mdi mdi-account-plus"></i>
-                                        <span>Novo Cliente</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                                    <a href="{{ route('reports.index') }}" class="quick-action-btn">
-                                        <i class="mdi mdi-chart-bar"></i>
-                                        <span>Relatórios</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                                    <a href="{{-- route('reservations.create') --}}#" class="quick-action-btn">
-                                        <i class="mdi mdi-calendar-plus"></i>
-                                        <span>Nova Reserva</span>
-                                    </a>
-                                </div>
-                            </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Vendas da Semana</p>
+                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">
+                                {{ number_format($weekSales ?? 0, 2, ',', '.') }} MT</h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Table Instructions Modal -->
-        <div class="modal fade" id="tableInstructionsModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Gerenciar Mesa</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="text-center mb-4">
-                            <div class="fs-1 mb-2" id="instructionTableIcon">
-                                <i class="mdi mdi-table-furniture" style="color: #10B981;"></i>
+        <!-- Top Products and Recent Orders -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <!-- Top Products -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                        <i class="mdi mdi-trophy text-warning"></i>
+                        Produtos Mais Vendidos
+                    </h5>
+                </div>
+                <div class="p-4">
+                    <div class="space-y-4">
+                        @forelse($topProducts ?? [] as $index => $product)
+                            <div
+                                class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-sm">
+                                    {{ $index + 1 }}
+                                </div>
+                                <div class="flex-grow min-w-0">
+                                    <h6 class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $product->name }}
+                                    </h6>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                        {{ optional($product->category)->name ?? 'Sem categoria' }}</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span
+                                        class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-lg">
+                                        {{ $product->total_sold ?? 0 }} vendas
+                                    </span>
+                                </div>
                             </div>
-                            <h4 id="instructionTableNumber">Mesa</h4>
-                            <span class="badge" id="instructionTableStatus" style="font-size: 0.9rem;"></span>
-                        </div>
+                        @empty
+                            <p class="text-center text-gray-500 dark:text-gray-400 py-4">Nenhum produto vendido</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
 
-                        <div class="alert alert-info mb-4"
-                            style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #3B82F6; border-radius: 8px;">
-                            <i class="mdi mdi-information-outline me-2"></i>
-                            <span id="instructionText"></span>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <a href="#" id="actionButton" class="btn btn-warning">
-                                <i class="mdi me-2"></i>
-                                <span id="actionButtonText"></span>
+            <!-- Recent Orders -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                        <i class="mdi mdi-clock-fast text-info"></i>
+                        Pedidos Recentes
+                    </h5>
+                    <a href="{{ route('orders.index') }}"
+                        class="text-sm text-warning hover:text-warning/80 font-medium transition-colors">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead
+                            class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs uppercase font-medium">
+                            <tr>
+                                <th class="px-4 py-3 rounded-tl-lg">ID</th>
+                                <th class="px-4 py-3">Cliente</th>
+                                <th class="px-4 py-3">Total</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3 rounded-tr-lg">Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                            @forelse($recentOrders ?? [] as $order)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium">#{{ $order->id }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                        {{ $order->client_name ?? 'Consumidor Final' }}</td>
+                                    <td class="px-4 py-3 text-sm font-bold text-gray-800 dark:text-white">
+                                        {{ number_format($order->total_amount, 2, ',', '.') }} MT</td>
+                                    <td class="px-4 py-3">
+                                        <span
+                                            class="px-2 py-1 text-xs font-medium rounded-lg bg-{{ $order->status_color ?? 'success' }}-100 text-{{ $order->status_color ?? 'success' }}-600 dark:bg-{{ $order->status_color ?? 'success' }}-900/30 dark:text-{{ $order->status_color ?? 'success' }}-400">
+                                            {{ $order->status_label ?? 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $order->created_at->format('H:i') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum pedido
+                                        recente</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Tables and Low Stock -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <!-- Tables Status -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="mdi mdi-table-furniture text-info"></i>
+                                Status das Mesas
+                            </h5>
+                            <a href="{{ route('tables.index') }}" class="text-sm text-warning hover:text-warning/80 font-medium transition-colors">
+                                Ver Todas
                             </a>
-                            <button class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                        <div class="p-4">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                @forelse($tables->take(8) ?? [] as $table)
+                                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow cursor-pointer flex flex-col items-center text-center h-full"
+                                        role="button" tabindex="0"
+                                        onclick="openTableInstructionsModal({{ $table->id }}, '{{ $table->number }}', '{{ $table->status }}')"
+                                        data-status="{{ $table->status }}">
+                                        <div class="mb-2">
+                                            <i class="mdi mdi-table-furniture text-3xl {{ $table->status === 'occupied' ? 'text-red-500' : 'text-green-500' }}"></i>
+                                        </div>
+                                        <h6 class="font-medium text-gray-900 dark:text-white mb-1">Mesa {{ $table->number }}</h6>
+                                        <small class="text-gray-500 dark:text-gray-400 mb-2 block">{{ $table->capacity }} lugares</small>
+
+                                        @if (isset($table->current_order) && $table->current_order)
+                                            <div class="w-full mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30">
+                                                <small class="block truncate text-amber-600 dark:text-amber-400 font-bold">
+                                                    Pedido: #{{ $table->current_order->id ?? '—' }}
+                                                </small>
+                                                <small class="text-gray-500 dark:text-gray-400">
+                                                    {{ number_format($table->current_order->total_amount ?? 0, 2, ',', '.') }} MT
+                                                </small>
+                                            </div>
+                                        @endif
+
+                                        <div class="mt-auto">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $table->status === 'occupied' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' }}">
+                                                {{ $table->status === 'occupied' ? 'Ocupada' : 'Disponível' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="col-span-full">
+                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">Nenhuma mesa cadastrada</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Low Stock -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="mdi mdi-alert text-danger"></i>
+                                Estoque Baixo
+                            </h5>
+                            <a href="{{ route('products.index') }}" class="text-sm text-warning hover:text-warning/80 font-medium transition-colors">
+                                Ver Todos
+                            </a>
+                        </div>
+                        <div class="p-4">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                @forelse($lowStockProducts->take(8) ?? [] as $product)
+                                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow cursor-pointer h-full"
+                                        role="button" tabindex="0"
+                                        onclick="openProductInstructionsModal({{ $product->id }}, '{{ $product->name }}', {{ $product->stock_quantity }})">
+                                        <div class="aspect-square mb-3 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
+                                            @if ($product->image)
+                                                <img src="{{ asset('storage/' . $product->image) }}"
+                                                    alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                            @else
+                                                <i class="mdi mdi-food text-3xl text-gray-400"></i>
+                                            @endif
+                                        </div>
+                                        <h6 class="font-medium text-gray-900 dark:text-white text-sm truncate mb-1" title="{{ $product->name }}">{{ $product->name }}</h6>
+                                        <small class="text-red-500 font-medium block">Estoque: {{ $product->stock_quantity }}</small>
+                                    </div>
+                                @empty
+                                    <div class="col-span-full">
+                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">Estoque adequado</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-lightning-bolt text-warning"></i>
+                            Ações Rápidas
+                        </h5>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            <a href="{{ route('pos.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all group">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="mdi mdi-cash-register text-2xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Novo Pedido</span>
+                            </a>
+
+                            <a href="{{ route('tables.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-600 dark:hover:text-teal-400 transition-all group">
+                                <div class="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="mdi mdi-table-furniture text-2xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-teal-600 dark:group-hover:text-teal-400">Mesas</span>
+                            </a>
+
+                            <a href="{{ route('products.create') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all group">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="mdi mdi-plus-circle text-2xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400">Add Produto</span>
+                            </a>
+
+                            <a href="{{ route('clients.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all group">
+                                <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="mdi mdi-account-plus text-2xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-orange-600 dark:group-hover:text-orange-400">Novo Cliente</span>
+                            </a>
+
+                            <a href="{{ route('reports.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all group">
+                                <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="mdi mdi-chart-bar text-2xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Relatórios</span>
+                            </a>
+
+                            <a href="#" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-600 dark:hover:text-pink-400 transition-all group opacity-50 cursor-not-allowed">
+                                <div class="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="mdi mdi-calendar-plus text-2xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-400">Reserva</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Instructions Modal -->
+        <div x-data="{ 
+                open: false, 
+                table: { id: null, number: '', status: '' },
+                get isOccupied() { return this.table.status === 'occupied'; },
+                get statusColor() { return this.isOccupied ? 'text-red-500' : 'text-green-500'; },
+                get statusText() { return this.isOccupied ? 'Ocupada' : 'Disponível'; },
+                get statusBadge() { return this.isOccupied ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'; },
+                get actionUrl() { 
+                    return this.isOccupied 
+                        ? '{{ route('tables.index') }}' 
+                        : '{{ route('tables.create-order', ':tableId') }}'.replace(':tableId', this.table.id);
+                },
+                get actionIcon() { return this.isOccupied ? 'mdi-table-furniture' : 'mdi-cart-plus'; },
+                get actionText() { return this.isOccupied ? 'Ir para Mesas' : 'Iniciar Pedido'; }
+             }"
+             @open-table-modal.window="open = true; table = $event.detail"
+             x-show="open"
+             style="display: none;"
+             class="fixed inset-0 z-50 overflow-y-auto"
+             aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            
+            <!-- Backdrop -->
+            <div x-show="open" 
+                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
+                 class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity" 
+                 @click="open = false"></div>
+
+            <!-- Panel -->
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="open" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    
+                    <div class="bg-white dark:bg-gray-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="absolute top-0 right-0 pt-4 pr-4">
+                            <button @click="open = false" type="button" class="rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 focus:outline-none">
+                                <span class="sr-only">Fechar</span>
+                                <i class="mdi mdi-close text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mb-6">
+                            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+                                <i class="mdi mdi-table-furniture text-3xl" :class="statusColor"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold leading-6 text-gray-900 dark:text-white" id="modal-title" x-text="'Mesa ' + table.number"></h3>
+                            <div class="mt-2">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full" :class="statusBadge" x-text="statusText"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="mdi mdi-information-outline text-blue-400"></i>
+                                </div>
+                                <div class="ml-3 flex-1 md:flex md:justify-between">
+                                    <p class="text-sm text-blue-700 dark:text-blue-300" x-show="isOccupied">
+                                        <strong>Esta mesa está ocupada.</strong> Você pode visualizar o pedido atual ou fechar a conta na página de gerenciamento de mesas.
+                                    </p>
+                                    <p class="text-sm text-blue-700 dark:text-blue-300" x-show="!isOccupied">
+                                        <strong>Esta mesa está livre.</strong> Clique abaixo para iniciar um novo pedido.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                            <a :href="actionUrl" class="inline-flex w-full justify-center rounded-md bg-warning px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-warning/90 sm:col-start-2">
+                                <i class="mdi me-2" :class="actionIcon"></i>
+                                <span x-text="actionText"></span>
+                            </a>
+                            <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 sm:col-start-1 sm:mt-0" @click="open = false">
+                                Cancelar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1072,58 +538,89 @@
         </div>
 
         <!-- Product Instructions Modal -->
-        <div class="modal fade" id="productInstructionsModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Reabastecer Estoque</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="text-center mb-4">
-                            <div class="fs-1 mb-2" style="color: #EF4444;">
-                                <i class="mdi mdi-alert-circle"></i>
+        <div x-data="{ 
+                open: false, 
+                product: { id: null, name: '', stock: 0 }
+             }"
+             @open-product-modal.window="open = true; product = $event.detail"
+             x-show="open"
+             style="display: none;"
+             class="fixed inset-0 z-50 overflow-y-auto"
+             aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            
+            <!-- Backdrop -->
+            <div x-show="open" 
+                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
+                 class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity" 
+                 @click="open = false"></div>
+
+            <!-- Panel -->
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="open" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    
+                    <div class="bg-white dark:bg-gray-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="absolute top-0 right-0 pt-4 pr-4">
+                            <button @click="open = false" type="button" class="rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 focus:outline-none">
+                                <span class="sr-only">Fechar</span>
+                                <i class="mdi mdi-close text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mb-6">
+                            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                                <i class="mdi mdi-alert-circle text-3xl text-red-600 dark:text-red-400"></i>
                             </div>
-                            <h4 id="instructionProductName">Produto</h4>
-                            <p class="text-muted mb-0">Estoque Atual: <strong id="instructionProductStock">0</strong>
-                                unidades
+                            <h3 class="text-xl font-semibold leading-6 text-gray-900 dark:text-white" id="modal-title" x-text="product.name"></h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Estoque Atual: <strong x-text="product.stock"></strong> unidades
                             </p>
                         </div>
 
-                        <div class="alert alert-warning mb-4"
-                            style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: #F59E0B; border-radius: 8px;">
-                            <i class="mdi mdi-alert me-2"></i>
-                            Este produto está com estoque baixo. Acesse a página de produtos para realizar o
-                            reabastecimento.
+                        <div class="mb-6 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="mdi mdi-alert text-amber-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-amber-700 dark:text-amber-300">
+                                        Este produto está com estoque baixo. Acesse a página de produtos para realizar o reabastecimento.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('products.index') }}" class="btn btn-warning">
+                        <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                            <a href="{{ route('products.index') }}" class="inline-flex w-full justify-center rounded-md bg-warning px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-warning/90 sm:col-start-2">
                                 <i class="mdi mdi-package-variant me-2"></i>
                                 Ir para Produtos
                             </a>
-                            <button class="btn btn-outline-light" data-bs-dismiss="modal">Fechar</button>
+                            <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 sm:col-start-1 sm:mt-0" @click="open = false">
+                                Fechar
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Toast Container -->
-        <div id="toastContainer" class="toast-container"></div>
+            <!-- Toast Container -->
+            <div id="toastContainer" class="toast-container"></div>
 
-        <!-- Loading Overlay -->
-        <div id="loadingOverlay" class="loading-overlay">
-            <div class="loading-spinner"></div>
-        </div>
-    @endsection
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-spinner"></div>
+            </div>
+@endsection
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 initializeChart();
             });
 
@@ -1174,7 +671,7 @@
                             tooltip: {
                                 backgroundColor: 'rgba(15, 15, 30, 0.9)',
                                 titleColor: '#FFA500',
-                                bodyColor: '#F5F5F5',
+                                bodyColor: '#e06500ff',
                                 borderColor: 'rgba(255, 165, 0, 0.3)',
                                 borderWidth: 1,
                                 padding: 12,
@@ -1190,7 +687,7 @@
                                     color: 'rgba(255, 255, 255, 0.05)'
                                 },
                                 ticks: {
-                                    color: '#F5F5F5',
+                                    color: '#ff5e00ff',
                                     callback: value => value.toFixed(0) + ' MT'
                                 }
                             },
@@ -1199,7 +696,7 @@
                                     display: false
                                 },
                                 ticks: {
-                                    color: '#F5F5F5'
+                                    color: '#000000ff'
                                 }
                             }
                         }
@@ -1208,8 +705,18 @@
             }
 
             function changeChartPeriod(type) {
-                document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
-                event.target.classList.add('active');
+                // Remove active classes from all buttons
+                const buttons = event.target.closest('div').querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.classList.remove('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'text-gray-800', 'dark:text-white');
+                    btn.classList.add('text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-200');
+                });
+
+                // Add active classes to clicked button
+                const activeBtn = event.target;
+                activeBtn.classList.remove('text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-200');
+                activeBtn.classList.add('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'text-gray-800', 'dark:text-white');
+
                 initializeChart(type);
             }
 
@@ -1220,11 +727,11 @@
                 btn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i>';
 
                 fetch('{{ route('dashboard.stats') }}', {
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        }
-                    })
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
                     .then(r => r.json())
                     .then(data => {
                         showToast('Dashboard atualizado com sucesso!', 'success');
@@ -1241,49 +748,23 @@
             }
 
             function openTableInstructionsModal(tableId, tableNumber, status) {
-                const modal = new bootstrap.Modal(document.getElementById('tableInstructionsModal'));
-                const isOccupied = status === 'occupied';
-                const statusColor = isOccupied ? '#EF4444' : '#10B981';
-                const statusText = isOccupied ? 'Ocupada' : 'Disponível';
-                const statusBadge = isOccupied ? 'bg-danger' : 'bg-success';
-
-                document.getElementById('instructionTableIcon').innerHTML =
-                    `<i class="mdi mdi-table-furniture" style="color: ${statusColor};"></i>`;
-                document.getElementById('instructionTableNumber').textContent = `Mesa ${tableNumber}`;
-                document.getElementById('instructionTableStatus').className = `badge ${statusBadge}`;
-                document.getElementById('instructionTableStatus').textContent = statusText;
-
-                if (isOccupied) {
-                    document.getElementById('instructionText').innerHTML = `
-                <strong>Esta mesa está ocupada.</strong> Você pode visualizar o pedido atual ou fechar a conta na página de gerenciamento de mesas.
-            `;
-                    document.getElementById('actionButton').href = `{{ route('tables.index') }}`;
-                    document.getElementById('actionButton').innerHTML =
-                        '<i class="mdi mdi-table-furniture me-2"></i><span>Ir para Mesas</span>';
-                } else {
-                    // mensagem informativa
-                    document.getElementById('instructionText').innerHTML =
-                        `<strong>Esta mesa está livre.</strong> Clique abaixo para iniciar um novo pedido.`;
-
-                    // monta a URL usando a rota blade com placeholder e substitui pelo id real
-                    const createOrderUrlTemplate = "{{ route('tables.create-order', ':tableId') }}";
-                    const createOrderUrl = createOrderUrlTemplate.replace(':tableId', tableId);
-
-                    const actionButton = document.getElementById('actionButton');
-                    actionButton.href = createOrderUrl;
-                    actionButton.innerHTML = '<i class="mdi mdi-cart-plus me-2"></i><span>Iniciar Pedido</span>';
-                }
-
-                modal.show();
+                window.dispatchEvent(new CustomEvent('open-table-modal', {
+                    detail: {
+                        id: tableId,
+                        number: tableNumber,
+                        status: status
+                    }
+                }));
             }
 
             function openProductInstructionsModal(productId, productName, stockQuantity) {
-                const modal = new bootstrap.Modal(document.getElementById('productInstructionsModal'));
-
-                document.getElementById('instructionProductName').textContent = productName;
-                document.getElementById('instructionProductStock').textContent = stockQuantity;
-
-                modal.show();
+                window.dispatchEvent(new CustomEvent('open-product-modal', {
+                    detail: {
+                        id: productId,
+                        name: productName,
+                        stock: stockQuantity
+                    }
+                }));
             }
         </script>
     @endpush

@@ -15,9 +15,9 @@ class User extends Authenticatable
     public $timestamps = true; // Agora que tens created_at e updated_at
 
     protected $fillable = [
-        'username', 
-        'password', 
-        'name', 
+        'username',
+        'password',
+        'name',
         'role',
         'status',
         'last_login_at'

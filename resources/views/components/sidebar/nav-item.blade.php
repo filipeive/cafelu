@@ -14,23 +14,24 @@
     $href = $external ? $route : ($route !== '#' ? route($route) : '#');
 @endphp
 
-<li class="nav-item {{ $isActive ? 'active' : '' }}">
-    <a class="nav-link {{ $isActive ? 'active' : '' }}" 
+<li class="mb-1">
+    <a class="flex items-center px-3 py-2 rounded-lg transition-colors group {{ $isActive ? 'bg-orange-50 text-primary dark:bg-gray-800 dark:text-primary' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' }}" 
+       :class="{ 'justify-center': sidebarCollapsed }"
        href="{{ $href }}"
        @if($external) target="_blank" @endif>
-        <div class="menu-icon-wrapper">
-            <i class="mdi {{ $icon }} menu-icon"></i>
-        </div>
-        <span class="menu-title">{{ $title }}</span>
+        <i class="mdi {{ $icon }} text-xl {{ $isActive ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300' }}"
+           :class="{ 'mr-3': !sidebarCollapsed }"></i>
+        
+        <span class="font-medium flex-1" x-show="!sidebarCollapsed" x-transition>{{ $title }}</span>
         
         @if(isset($badge) && $showBadge && $badge)
-            <span class="badge {{ $badgeClass }} ml-auto">
+            <span class="{{ $badgeClass }} px-2 py-0.5 rounded text-xs font-semibold ml-2" x-show="!sidebarCollapsed" x-transition>
                 {{ $badgePrefix }}{{ $badge }}
             </span>
         @endif
         
         @if(isset($slot) && $slot->isNotEmpty())
-            <span class="ml-auto status-indicator">
+            <span class="ml-2" x-show="!sidebarCollapsed" x-transition>
                 {{ $slot }}
             </span>
         @endif

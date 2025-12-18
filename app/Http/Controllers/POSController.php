@@ -4,39 +4,40 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Table;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class POSController extends Controller
 {
     public function index(Request $request)
-{
-    $categoryFilter = $request->query('category');
-    $searchTerm = $request->query('search');
+    {
+        $categoryFilter = $request->query('category');
+        $searchTerm = $request->query('search');
 
-    $categories = Category::all();
+        $categories = Category::all();
 
-    $query = Product::query();
+        $query = Product::query();
 
-    // REMOVIDO: O filtro de categoria do servidor
-    // if ($categoryFilter) {
-    //     $query->where('category_id', $categoryFilter);
-    // }
+        // REMOVIDO: O filtro de categoria do servidor
+        // if ($categoryFilter) {
+        //     $query->where('category_id', $categoryFilter);
+        // }
 
-    if ($searchTerm) {
-        $query->where('name', 'LIKE', "%$searchTerm%");
+        if ($searchTerm) {
+            $query->where('name', 'LIKE', "%$searchTerm%");
+        }
+
+        // Carregar TODOS os produtos para filtrar no front-end (Otimizado)
+        $products = $query->select('id', 'name', 'price', 'category_id', 'stock_quantity', 'image')->get();
+
+        return view('pos.index', [
+            'categories' => $categories,
+            'products' => $products,
+            'categoryFilter' => $categoryFilter,
+            'searchTerm' => $searchTerm
+        ]);
     }
-
-    // Carregar TODOS os produtos para filtrar no front-end
-    $products = $query->get();
-
-    return view('pos.index', [
-        'categories' => $categories,
-        'products' => $products,
-        'categoryFilter' => $categoryFilter,
-        'searchTerm' => $searchTerm
-    ]);
-}
 
     // No POSController.php, vamos modificar a verificação de pagamento para considerar o troco
 
@@ -59,7 +60,7 @@ class POSController extends Controller
             DB::beginTransaction();
 
             // Cálculo do total
-            $totalAmount = collect($validated['items'])->sum(function($item) {
+            $totalAmount = collect($validated['items'])->sum(function ($item) {
                 return $item['unit_price'] * $item['quantity'];
             });
 
@@ -68,21 +69,21 @@ class POSController extends Controller
             $cardPayment = $validated['cardPayment'] ?? 0;
             $mpesaPayment = $validated['mpesaPayment'] ?? 0;
             $emolaPayment = $validated['emolaPayment'] ?? 0;
-            
+
             // Os pagamentos não em dinheiro devem corresponder exatamente ao valor cobrado
             $nonCashPayments = $cardPayment + $mpesaPayment + $emolaPayment;
-            
+
             // Verificar se os pagamentos não em dinheiro já ultrapassam o total
             if ($nonCashPayments > $totalAmount) {
                 throw new \Exception("Pagamentos sem dinheiro ($nonCashPayments) ultrapassam o valor total da venda ($totalAmount)");
             }
-            
+
             // Se houver pagamento em dinheiro, deve cobrir pelo menos o restante
             $remainingAmount = $totalAmount - $nonCashPayments;
             if ($cashPayment < $remainingAmount) {
                 throw new \Exception("Pagamento insuficiente. Faltam MZN " . number_format($remainingAmount - $cashPayment, 2));
             }
-            
+
             // Calcular o troco (apenas para pagamento em dinheiro)
             $change = $cashPayment > $remainingAmount ? $cashPayment - $remainingAmount : 0;
 
@@ -135,14 +136,14 @@ class POSController extends Controller
                 'message' => 'Erro de validação',
                 'errors' => $e->errors()
             ], 422);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Checkout Error: ' . $e->getMessage(), [
                 'exception' => $e,
                 'request' => $request->all()
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao processar venda: ' . $e->getMessage()
@@ -154,7 +155,7 @@ class POSController extends Controller
     {
         // Buscar os dados da venda
         $sale = DB::table('sales')->where('id', $saleId)->first();
-        
+
         if (!$sale) {
             abort(404, 'Venda não encontrada');
         }
@@ -175,6 +176,164 @@ class POSController extends Controller
     /**
      * Determina o método de pagamento principal
      */
+    public function hold(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|integer|exists:products,id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.unit_price' => 'required|numeric|min:0',
+                'customer_name' => 'nullable|string',
+                'table_id' => 'nullable|exists:tables,id',
+                'total_amount' => 'required|numeric'
+            ]);
+
+            DB::beginTransaction();
+
+            $tableId = $validated['table_id'] ?? null;
+            $createdTempTable = false;
+
+            // Create temporary table if no table selected
+            if (!$tableId) {
+                // Find next available temporary table number (starting from 9000)
+                $maxTempNumber = DB::table('tables')
+                    ->where('is_temporary', true)
+                    ->max('number');
+
+                $tempNumber = $maxTempNumber ? $maxTempNumber + 1 : 9000;
+
+                $tableId = DB::table('tables')->insertGetId([
+                    'number' => $tempNumber,
+                    'capacity' => 1,
+                    'status' => 'occupied',
+                    'is_temporary' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $createdTempTable = true;
+            } else {
+                // Mark selected table as occupied
+                DB::table('tables')->where('id', $tableId)->update([
+                    'status' => 'occupied',
+                    'updated_at' => now()
+                ]);
+            }
+
+            // Create order with table assignment
+            $orderId = DB::table('orders')->insertGetId([
+                'table_id' => $tableId,
+                'user_id' => auth()->id(),
+                'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
+                'total_amount' => $validated['total_amount'],
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Add items
+            foreach ($validated['items'] as $item) {
+                DB::table('order_items')->insert([
+                    'order_id' => $orderId,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['quantity'] * $item['unit_price'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pedido guardado com sucesso',
+                'order_id' => $orderId,
+                'table_id' => $tableId,
+                'is_temp_table' => $createdTempTable
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Hold Order Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao guardar pedido: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function printReceipt($saleId)
+    {
+        // Redirect to the sales receipt route which is already set up for printing
+        return redirect()->route('sales.receipt', $saleId);
+    }
+
+    public function getTables()
+    {
+        $tables = Table::where('is_temporary', false)
+            ->where('status', 'free')
+            ->orderBy('number')
+            ->select('id', 'number', 'capacity', 'status')
+            ->get();
+
+        return response()->json($tables);
+    }
+
+    public function getHeldOrders()
+    {
+        $orders = DB::table('orders')
+            ->leftJoin('tables', 'orders.table_id', '=', 'tables.id')
+            ->where('orders.status', 'active')
+            ->orderBy('orders.created_at', 'desc')
+            ->select(
+                'orders.id',
+                'orders.customer_name',
+                'orders.total_amount',
+                'orders.created_at',
+                'tables.number as table_number',
+                'tables.is_temporary'
+            )
+            ->get();
+
+        return response()->json($orders);
+    }
+
+    public function retrieveOrder($orderId)
+    {
+        $order = DB::table('orders')->where('id', $orderId)->first();
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Pedido não encontrado'], 404);
+        }
+
+        $items = DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('order_id', $orderId)
+            ->select('products.id', 'products.name', 'products.price', 'products.stock_quantity', 'order_items.quantity')
+            ->get();
+
+        // Format items for the cart
+        $cartItems = $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+                'stock' => $item->stock_quantity
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'cart' => $cartItems,
+            'customer_name' => $order->customer_name,
+            'order_id' => $order->id
+        ]);
+    }
+
     private function determinePaymentMethod($paymentData)
     {
         $methods = [
@@ -185,7 +344,7 @@ class POSController extends Controller
         ];
 
         // Se houver mais de um método, indica "multiple"
-        $usedMethods = array_filter($methods, function($amount) {
+        $usedMethods = array_filter($methods, function ($amount) {
             return $amount > 0;
         });
 

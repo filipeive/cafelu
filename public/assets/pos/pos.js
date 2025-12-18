@@ -1,5 +1,18 @@
+/**
+ * ========================================
+ * STATE MANAGEMENT
+ * ========================================
+ */
 let saleItems = [];
 let selectedPaymentMethod = null;
+let currentPage = 1;
+const itemsPerPage = 12;
+
+/**
+ * ========================================
+ * CART OPERATIONS
+ * ========================================
+ */
 
 // Função para adicionar item ao carrinho
 function addToCart(product) {
@@ -27,19 +40,33 @@ function updateCartDisplay() {
     const cartItems = document.getElementById('cartItems');
     cartItems.innerHTML = '';
 
+    if (saleItems.length === 0) {
+        cartItems.innerHTML = `
+            <div class="text-center py-8 text-gray-400 dark:text-gray-500">
+                <i class="mdi mdi-cart-outline text-4xl mb-2"></i>
+                <p>Seu carrinho está vazio</p>
+            </div>
+        `;
+        return;
+    }
+
     saleItems.forEach((item, index) => {
         const itemElement = document.createElement('div');
-        itemElement.className = 'cart-item';
+        itemElement.className = 'flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600 animate-fade-in';
         itemElement.innerHTML = `
-            <div class="cart-item-info">
-                <h6 class="mb-0">${item.name}</h6>
-                <small class="text-muted">MZN ${item.price.toFixed(2)} x ${item.quantity}</small>
+            <div class="flex-grow min-w-0 mr-3">
+                <h6 class="text-sm font-medium text-gray-800 dark:text-gray-100 truncate" title="${item.name}">${item.name}</h6>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    MZN ${item.price.toFixed(2)} x ${item.quantity}
+                </div>
             </div>
-            <div class="cart-item-controls">
-                <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${index}, -1)">-</button>
-                <span class="mx-2">${item.quantity}</span>
-                <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${index}, 1)">+</button>
-                <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeItem(${index})">
+            <div class="flex items-center gap-2">
+                <div class="flex items-center bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
+                    <button class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-l-md transition-colors" onclick="updateQuantity(${index}, -1)">-</button>
+                    <span class="px-2 text-sm font-medium text-gray-800 dark:text-gray-200 min-w-[1.5rem] text-center border-x border-gray-200 dark:border-gray-600">${item.quantity}</span>
+                    <button class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-r-md transition-colors" onclick="updateQuantity(${index}, 1)">+</button>
+                </div>
+                <button class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" onclick="removeItem(${index})">
                     <i class="mdi mdi-delete"></i>
                 </button>
             </div>
@@ -103,6 +130,11 @@ function calculateChange() {
     document.getElementById('btnFinalizeOrder').disabled = change < 0;
 }
 
+/**
+ * ========================================
+ * CHECKOUT & API
+ * ========================================
+ */
 // Função para processar a venda utilizando o controller Laravel
 async function processSale() {
     if (saleItems.length === 0) {
@@ -388,47 +420,34 @@ function resetSale() {
     });
 }
 
-// Função para mostrar notificações
-function showNotification(title, message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <i class="mdi mdi-${type === 'success' ? 'check-circle' : type === 'info' ? 'information' : 'alert-circle'}"></i>
-        <div>
-            <h6 class="mb-1">${title}</h6>
-            <p class="mb-0">${message}</p>
-        </div>
-    `;
+// [REMOVIDO: Função duplicada showNotification. Usando a versão integrada mais abaixo]
 
-    document.body.appendChild(notification);
-    setTimeout(() => notification.classList.add('show'), 100);
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Variáveis de paginação
-let currentPage = 1;
-const itemsPerPage = 12;
+/**
+ * ========================================
+ * FILTERING & PAGINATION
+ * ========================================
+ */
+// Variáveis de paginação (Moved to top)
+// let currentPage = 1;
+// const itemsPerPage = 12;
 
 // Função de debug para verificar categorias
 function debugCategories() {
     const productItems = document.querySelectorAll('.product-item');
     console.log('Total de produtos:', productItems.length);
-    
+
     const categoriesFound = new Set();
     productItems.forEach(item => {
         const category = item.dataset.category;
         categoriesFound.add(category);
         console.log('Produto:', item.querySelector('.card-title').textContent, 'Categoria ID:', category);
     });
-    
+
     console.log('Categorias encontradas:', Array.from(categoriesFound));
 }
 
 // NOVA FUNÇÃO: Filtrar produtos dinamicamente SEM recarregar a página
-function filterProducts() {
+function filterProducts(keepPage = false) {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const categoryId = document.getElementById('categorySelect').value;
 
@@ -450,23 +469,41 @@ function filterProducts() {
         }
     });
 
-    // Reset para primeira página quando filtrar
-    currentPage = 1;
+    // Reset para primeira página APENAS se não for manter a página (filtro novo)
+    if (!keepPage) {
+        currentPage = 1;
+    }
+
+    // Se não houver produtos visíveis, mostrar mensagem ou lidar com estado vazio
+    if (visibleProducts.length === 0) {
+        // Opcional: Mostrar mensagem de "Nenhum produto encontrado"
+    }
+
     paginateProducts(visibleProducts);
 }
 
 // Função para paginar produtos
 function paginateProducts(products) {
     const totalPages = Math.ceil(products.length / itemsPerPage);
+
+    // Garantir que a página atual é válida
+    if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+    }
+
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
 
-    // Esconder todos primeiro
+    // Esconder todos os produtos primeiro (apenas os que correspondem ao filtro)
+    // Nota: Os que não correspondem ao filtro já estão hidden pelo filterProducts
     products.forEach(item => item.style.display = 'none');
 
     // Mostrar apenas os da página atual
     products.slice(startIndex, endIndex).forEach(item => {
         item.style.display = 'block';
+        // Animação de entrada suave
+        item.style.opacity = '0';
+        setTimeout(() => item.style.opacity = '1', 50);
     });
 
     // Atualizar controles de paginação
@@ -476,13 +513,15 @@ function paginateProducts(products) {
 // Função para atualizar os controles de paginação
 function updatePaginationControls(totalPages, totalProducts) {
     let paginationContainer = document.getElementById('paginationControls');
-    
+
     if (!paginationContainer) {
         // Criar container de paginação se não existir
         paginationContainer = document.createElement('div');
         paginationContainer.id = 'paginationControls';
-        paginationContainer.className = 'pagination-controls mt-4';
+        paginationContainer.className = 'flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700';
         document.getElementById('productsGrid').parentElement.appendChild(paginationContainer);
+    } else {
+        paginationContainer.className = 'flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700';
     }
 
     if (totalPages <= 1) {
@@ -494,23 +533,21 @@ function updatePaginationControls(totalPages, totalProducts) {
     const endItem = Math.min(currentPage * itemsPerPage, totalProducts);
 
     paginationContainer.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="pagination-info">
-                Mostrando ${startItem}-${endItem} de ${totalProducts} produtos
-            </div>
-            <div class="pagination-buttons">
-                <button class="btn btn-outline-primary btn-sm" 
-                        onclick="changePage(${currentPage - 1})" 
-                        ${currentPage === 1 ? 'disabled' : ''}>
-                    <i class="mdi mdi-chevron-left"></i> Anterior
-                </button>
-                <span class="mx-3">Página ${currentPage} de ${totalPages}</span>
-                <button class="btn btn-outline-primary btn-sm" 
-                        onclick="changePage(${currentPage + 1})" 
-                        ${currentPage === totalPages ? 'disabled' : ''}>
-                    Próxima <i class="mdi mdi-chevron-right"></i>
-                </button>
-            </div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+            Mostrando ${startItem}-${endItem} de ${totalProducts}
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                    onclick="changePage(${currentPage - 1})" 
+                    ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="mdi mdi-chevron-left"></i>
+            </button>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Pág ${currentPage}/${totalPages}</span>
+            <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                    onclick="changePage(${currentPage + 1})" 
+                    ${currentPage === totalPages ? 'disabled' : ''}>
+                <i class="mdi mdi-chevron-right"></i>
+            </button>
         </div>
     `;
 }
@@ -518,8 +555,81 @@ function updatePaginationControls(totalPages, totalProducts) {
 // Função para mudar de página
 function changePage(newPage) {
     currentPage = newPage;
-    filterProducts();
+    filterProducts(true); // true para manter a página
 }
+
+// Função para mostrar notificações (Integrada com o sistema global)
+function showNotification(title, message, type) {
+    // Mapear tipos do POS para tipos do Toast
+    const toastType = type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info');
+
+    if (typeof showToast === 'function') {
+        showToast(message, toastType, title);
+    } else {
+        console.warn('showToast não definido, usando fallback');
+        alert(`${title}: ${message}`);
+    }
+}
+
+// Função para guardar pedido (Hold Order)
+function holdOrder() {
+    if (saleItems.length === 0) {
+        showNotification('Erro', 'Adicione itens ao carrinho antes de guardar o pedido.', 'error');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Guardar Pedido?',
+        text: "Deseja guardar este pedido para atender outro cliente?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sim, guardar!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading();
+
+            const customerName = document.getElementById('customerName') ? document.getElementById('customerName').value : 'Cliente Geral';
+
+            fetch('/pos/hold', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    items: saleItems,
+                    customer_name: customerName,
+                    total_amount: calculateTotalAmount()
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showNotification('Sucesso', 'Pedido guardado com sucesso!', 'success');
+                        resetSale();
+                        // Opcional: Atualizar lista de pedidos guardados se houver
+                        if (typeof loadHeldOrders === 'function') loadHeldOrders();
+                    } else {
+                        showNotification('Erro', data.message || 'Erro ao guardar pedido', 'error');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Erro:', error);
+                    showNotification('Erro', 'Erro ao processar requisição', 'error');
+                });
+        }
+    });
+}
+
+function calculateTotalAmount() {
+    return saleItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+}
+
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
@@ -534,10 +644,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
 
             const categoryId = btn.dataset.category === 'all' ? '' : btn.dataset.category;
-            
+
             // Atualizar o select de categoria
             document.getElementById('categorySelect').value = categoryId;
-            
+
             // Filtrar produtos dinamicamente
             filterProducts();
         });
@@ -545,26 +655,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listener para o campo de busca
     document.getElementById('searchInput').addEventListener('input', filterProducts);
-    
+
     // Listener para o select de categoria
     document.getElementById('categorySelect').addEventListener('change', () => {
         const categoryId = document.getElementById('categorySelect').value;
-        
+
         // Atualizar botões de categoria
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.classList.remove('active');
-            if ((categoryId === '' && btn.dataset.category === 'all') || 
+            if ((categoryId === '' && btn.dataset.category === 'all') ||
                 btn.dataset.category === categoryId) {
                 btn.classList.add('active');
             }
         });
-        
+
         filterProducts();
     });
 
     // Inicializar paginação na primeira carga
     filterProducts();
-    
+
     // Debug: verificar categorias carregadas
     debugCategories();
 });

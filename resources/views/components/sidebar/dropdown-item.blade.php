@@ -12,29 +12,23 @@
 $isActive = $route ? request()->routeIs($route) : false;
 $href = $external ? $route : ($route && Route::has($route) ? route($route) : '#');
 @endphp
-{{-- @php
-    $isActive = request()->routeIs($route);
-    $href = $external ? $route : ($route !== '#' ? route($route) : '#');
-@endphp
- --}}
-<li class="nav-item {{ $isActive ? 'active' : '' }}">
-    <a href="{{ $href }}" class="nav-link {{ $isActive ? 'active' : '' }}"
+
+<li>
+    <a href="{{ $href }}" class="flex items-center pl-11 pr-3 py-2 text-sm rounded-lg transition-colors {{ $isActive ? 'text-primary font-medium bg-orange-50/50 dark:bg-gray-800/50' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50' }}"
        @if($external) target="_blank" @endif>
         @if($icon)
-            <i class="menu-icon mdi {{ $icon }}"></i>
-        @else
-            <span class="menu-dot"></span>
+            <i class="mdi {{ $icon }} mr-2 text-lg"></i>
         @endif
-        <span class="menu-title">{{ $title }}</span>
+        <span class="flex-1">{{ $title }}</span>
         
         @if(isset($badge) && $showBadge && $badge)
-            <span class="badge {{ $badgeClass }} ml-auto">
+            <span class="{{ $badgeClass }} px-2 py-0.5 rounded text-xs font-semibold ml-2">
                 {{ $badgePrefix }}{{ $badge }}
             </span>
         @endif
         
         @if(isset($slot) && !empty(trim($slot->toHtml())))
-            <span class="status-indicator ml-auto">
+            <span class="ml-2">
                 {{ $slot }}
             </span>
         @endif

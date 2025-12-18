@@ -23,10 +23,10 @@ class OrderController extends Controller
         $search = request('search');
         $orders = Order::with('table')->orderBy('created_at', 'desc')->paginate(6);
         $total_orders = Order::count();
-         // Obtém o total de pedidos feitos hoje
-         $totalToday = $this->orderGetTotalToday();
-         // Obtém o total de pedidos abertos
-         $totalOpen = $this->order_get_open_count();
+        // Obtém o total de pedidos feitos hoje
+        $totalToday = $this->orderGetTotalToday();
+        // Obtém o total de pedidos abertos
+        $totalOpen = $this->order_get_open_count();
 
         return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalOpen', 'search'));
     }
@@ -44,6 +44,68 @@ class OrderController extends Controller
 
         return $total;
     }
+
+    /**
+     * Store a newly created order in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'table_id' => 'nullable|exists:tables,id',
+            'products' => 'required|array|min:1',
+            'products.*.id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $order = Order::create([
+                'table_id' => $request->table_id,
+                'user_id' => auth()->id(),
+                'status' => 'active',
+                'customer_name' => $request->customer_name ?? null,
+            ]);
+
+            $totalAmount = 0;
+
+            foreach ($request->products as $item) {
+                $product = Product::findOrFail($item['id']);
+                $totalPrice = $product->price * $item['quantity'];
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $product->price,
+                    'total_price' => $totalPrice,
+                ]);
+
+                $totalAmount += $totalPrice;
+            }
+
+            $order->total_amount = $totalAmount;
+            $order->save();
+
+            // Update table status if table_id is present
+            if ($request->table_id) {
+                $table = Table::find($request->table_id);
+                $table->status = 'occupied';
+                $table->save();
+            }
+
+            DB::commit();
+
+            return redirect()->route('orders.edit', $order->id)
+                ->with('success', 'Pedido criado com sucesso!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Erro ao criar pedido: ' . $e->getMessage());
+        }
+    }
+
     /**
      * Mostrar detalhes de um pedido específico
      */
@@ -58,17 +120,19 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        if ($order->status === 'paid' || $order->status === 'canceled' ) {
+        if ($order->status === 'paid' || $order->status === 'canceled') {
             return redirect()->route('orders.index', $order->id)
                 ->with('error', 'Não é possível editar um pedido que já foi pago ou cancelado.');
         }
 
         $order->load('items.product', 'table');
-        $categories = Category::with(['products' => function($query) {
-            $query->where('is_active', 1);
-        }])->get();
+        $categories = Category::with([
+            'products' => function ($query) {
+                $query->where('is_active', 1);
+            }
+        ])->get();
         $products = Product::where('is_active', 1)->get();
-        
+
         return view('orders.edit', compact('order', 'categories', 'products'));
     }
 
@@ -84,13 +148,13 @@ class OrderController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-        
+
         // Verificar se o produto já existe no pedido
         $existingItem = OrderItem::where('order_id', $order->id)
             ->where('product_id', $product->id)
             ->where('status', 'pending')
             ->first();
-            
+
         if ($existingItem) {
             $existingItem->quantity += $request->quantity;
             $existingItem->total_price = $existingItem->quantity * $existingItem->unit_price;
@@ -126,7 +190,7 @@ class OrderController extends Controller
         }
 
         $orderItem->delete();
-        
+
         // Atualizar valor total do pedido
         $this->updateOrderTotal($order);
 
@@ -209,8 +273,8 @@ class OrderController extends Controller
             return redirect()->back()->with('error', $message);
         }
     }    /**
-     * Registrar pagamento do pedido
-     */
+         * Registrar pagamento do pedido
+         */
     public function pay(Request $request, Order $order)
     {
         try {
@@ -238,14 +302,22 @@ class OrderController extends Controller
             $amountPaid = (float) $request->amount_paid;
             $cash = $card = $mpesa = $emola = 0.00;
             switch ($request->payment_method) {
-                case 'card': $card = $amountPaid; break;
-                case 'mpesa': $mpesa = $amountPaid; break;
-                case 'emola': $emola = $amountPaid; break;
-                default: $cash = $amountPaid; break; // cash, mkesh ou fallback
+                case 'card':
+                    $card = $amountPaid;
+                    break;
+                case 'mpesa':
+                    $mpesa = $amountPaid;
+                    break;
+                case 'emola':
+                    $emola = $amountPaid;
+                    break;
+                default:
+                    $cash = $amountPaid;
+                    break; // cash, mkesh ou fallback
             }
 
             // 1. Registrar a venda preenchendo total_amount e os campos de pagamento existentes na tabela
-           $sale = Sale::create([
+            $sale = Sale::create([
                 'order_id' => $order->id,
                 'user_id' => auth()->id(),
                 'customer_name' => $order->customer_name ?? 'Cliente Geral',
@@ -303,13 +375,31 @@ class OrderController extends Controller
 
             DB::commit();
 
+            $message = 'Pagamento registrado e venda finalizada com sucesso!';
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ]);
+            }
+
             return redirect()->route('orders.show', $order->id)
-                ->with('success', 'Pagamento registrado e venda finalizada com sucesso!');
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            $message = 'Erro ao processar pagamento: ' . $e->getMessage();
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
             return redirect()->back()
-                ->with('error', 'Erro ao processar pagamento: ' . $e->getMessage());
+                ->with('error', $message);
         }
     }
     /**
@@ -367,7 +457,7 @@ class OrderController extends Controller
             return redirect()->back()->with('error', $message);
         }
     }
-        /**
+    /**
      * Atualizar informações do pedido
      */
     public function update(Request $request, Order $order)
@@ -377,12 +467,12 @@ class OrderController extends Controller
                 'customer_name' => 'nullable|string|max:255',
                 'notes' => 'nullable|string'
             ]);
-    
+
             $order->update([
                 'customer_name' => $request->customer_name,
                 'notes' => $request->notes
             ]);
-    
+
             return redirect()->back()->with('success', 'Informações atualizadas com sucesso!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erro ao atualizar informações: ' . $e->getMessage());

@@ -16,7 +16,7 @@ class SaleController extends Controller
     {
         // Apply date filters if provided
         $salesQuery = Sale::query();
-        
+
         if ($request->has('filter')) {
             switch ($request->filter) {
                 case 'today':
@@ -33,7 +33,7 @@ class SaleController extends Controller
                     break;
             }
         }
-        
+
         if ($request->has('start_date') && $request->has('end_date')) {
             $salesQuery->whereBetween('sale_date', [
                 Carbon::parse($request->start_date)->startOfDay(),
@@ -96,7 +96,7 @@ class SaleController extends Controller
             }
 
             // Criar a venda
-               $sale = Sale::create([
+            $sale = Sale::create([
                 'user_id' => auth()->id(),
                 'sale_date' => now(),
                 'total_amount' => $total_amount,
@@ -149,91 +149,105 @@ class SaleController extends Controller
         return view('sales.receipt', compact('sale'));
     }
 
-    public function process(Request $request)
+    public function process_sale(Request $request)
     {
-        // Validação básica
         $validated = $request->validate([
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer',
+            'items.*.id' => 'required|integer',
             'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
-            'cashPayment' => 'nullable|numeric|min:0',
-            'cardPayment' => 'nullable|numeric|min:0',
-            'mpesaPayment' => 'nullable|numeric|min:0',
-            'emolaPayment' => 'nullable|numeric|min:0',
+            'items.*.price' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'amount_paid' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
+            'order_id' => 'nullable|integer',
+            // Validate breakdown
+            'cash_amount' => 'nullable|numeric|min:0',
+            'card_amount' => 'nullable|numeric|min:0',
+            'mpesa_amount' => 'nullable|numeric|min:0',
+            'emola_amount' => 'nullable|numeric|min:0',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Determinar método de pagamento principal
-            $paymentMethod = 'cash'; // Default
-            if ($validated['cardPayment'] > 0 && $validated['cashPayment'] == 0 && $validated['mpesaPayment'] == 0 && $validated['emolaPayment'] == 0) {
-                $paymentMethod = 'card';
-            } elseif ($validated['mpesaPayment'] > 0 && $validated['cashPayment'] == 0 && $validated['cardPayment'] == 0 && $validated['emolaPayment'] == 0) {
-                $paymentMethod = 'mpesa';
-            } elseif ($validated['emolaPayment'] > 0 && $validated['cashPayment'] == 0 && $validated['cardPayment'] == 0 && $validated['mpesaPayment'] == 0) {
-                $paymentMethod = 'emola';
-            } elseif (
-                ($validated['cashPayment'] > 0 && ($validated['cardPayment'] > 0 || $validated['mpesaPayment'] > 0 || $validated['emolaPayment'] > 0)) ||
-                ($validated['cardPayment'] > 0 && ($validated['mpesaPayment'] > 0 || $validated['emolaPayment'] > 0)) ||
-                ($validated['mpesaPayment'] > 0 && $validated['emolaPayment'] > 0)
-            ) {
-                $paymentMethod = 'mixed';
+            // Use provided breakdown or fallback to logic (though frontend should send it now)
+            $cash = $request->input('cash_amount', 0);
+            $card = $request->input('card_amount', 0);
+            $mpesa = $request->input('mpesa_amount', 0);
+            $emola = $request->input('emola_amount', 0);
+
+            // If no breakdown provided but method is single, assign amount_paid to that method
+            // This maintains backward compatibility if frontend didn't send breakdown
+            if ($cash == 0 && $card == 0 && $mpesa == 0 && $emola == 0) {
+                switch ($validated['payment_method']) {
+                    case 'cash':
+                        $cash = $validated['amount_paid'];
+                        break;
+                    case 'card':
+                        $card = $validated['amount_paid'];
+                        break;
+                    case 'mpesa':
+                        $mpesa = $validated['amount_paid'];
+                        break;
+                    case 'emola':
+                        $emola = $validated['amount_paid'];
+                        break;
+                }
             }
 
-            // Calcula o total da venda
-            $totalAmount = 0;
-            foreach ($validated['items'] as $item) {
-                $totalAmount += $item['unit_price'] * $item['quantity'];
-            }
-
-            // Criar a venda
             $sale = Sale::create([
+                'user_id' => auth()->id(),
                 'sale_date' => now(),
-                'total_amount' => $totalAmount,
-                'payment_method' => $paymentMethod,
+                'total_amount' => $validated['total_amount'],
+                'payment_method' => $validated['payment_method'],
                 'status' => 'completed',
-                'cash_amount' => $validated['cashPayment'] ?? 0,
-                'card_amount' => $validated['cardPayment'] ?? 0,
-                'mpesa_amount' => $validated['mpesaPayment'] ?? 0,
-                'emola_amount' => $validated['emolaPayment'] ?? 0,
+                'cash_amount' => $cash,
+                'card_amount' => $card,
+                'mpesa_amount' => $mpesa,
+                'emola_amount' => $emola,
+                'order_id' => $request->order_id, // Save order_id linkage
             ]);
 
-            // Criar os itens da venda e atualizar o estoque
             foreach ($validated['items'] as $item) {
-                // Encontrar produto
-                $product = Product::findOrFail($item['product_id']);
-                
-                // Criar item da venda
+                $product = Product::findOrFail($item['id']);
+
                 SaleItem::create([
                     'sale_id' => $sale->id,
-                    'product_id' => $item['product_id'],
+                    'product_id' => $item['id'],
                     'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price']
+                    'unit_price' => $item['price']
                 ]);
-                
-                // Atualizar estoque se necessário
-                if ($product->track_inventory) {
-                    $product->decrement('stock_quantity', $item['quantity']);
-                }
+
+                // Update stock
+                $product->decrement('stock_quantity', $item['quantity']);
             }
 
             DB::commit();
 
+            // Clean up temporary table if this sale came from a held order
+            if ($sale->order_id) {
+                $order = DB::table('orders')->where('id', $sale->order_id)->first();
+                if ($order && $order->table_id) {
+                    $table = DB::table('tables')->where('id', $order->table_id)->first();
+                    if ($table && $table->is_temporary) {
+                        // Delete temporary table
+                        DB::table('tables')->where('id', $table->id)->delete();
+                    }
+                }
+            }
+
             return response()->json([
-                'success' => true, 
-                'message' => 'Venda processada com sucesso!', 
-                'saleId' => $sale->id,
-                'receiptUrl' => route('sales.receipt', $sale->id)
+                'success' => true,
+                'message' => 'Venda realizada com sucesso!',
+                'sale_id' => $sale->id,
+                'receipt_url' => route('sales.receipt', $sale->id)
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'success' => false, 
-                'message' => 'Erro ao processar a venda.', 
-                'error' => $e->getMessage()
+                'success' => false,
+                'message' => 'Erro ao processar venda: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -247,9 +261,9 @@ class SaleController extends Controller
     public function exportPDF($id)
     {
         $sale = Sale::with('saleItems.product')->findOrFail($id);
-        
+
         $pdf = PDF::loadView('sales.export.pdf', compact('sale'));
-        
+
         return $pdf->download('Venda_' . str_pad($sale->id, 5, '0', STR_PAD_LEFT) . '.pdf');
     }
 
@@ -259,7 +273,7 @@ class SaleController extends Controller
         $products = Product::where('is_active', true)
             ->select('id', 'name', 'price', 'stock_quantity')
             ->get();
-            
+
         return response()->json($products);
     }
 }

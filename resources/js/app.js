@@ -1,4 +1,9 @@
 import './bootstrap';
+import Alpine from 'alpinejs';
+
+window.Alpine = Alpine;
+
+Alpine.start();
 // Require jQuery (já incluído no StarAdmin)
 window.$ = window.jQuery = require('jquery');
 
@@ -11,7 +16,7 @@ $(function () {
 $('.alert').delay(3000).fadeOut('slow');
 
 // Validação de formulários
-$('form.needs-validation').on('submit', function(event) {
+$('form.needs-validation').on('submit', function (event) {
     if (this.checkValidity() === false) {
         event.preventDefault();
         event.stopPropagation();

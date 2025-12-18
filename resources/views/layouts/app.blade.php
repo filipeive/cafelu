@@ -1,529 +1,367 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Sistema de Gestão de Restaurantes">
-    <meta name="author" content="Filipe dos Santos">
     <title>{{ config('app.name', 'Restaurant System') }} | @yield('title')</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
     <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
 
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/vertical-layout-light/style.css') }}">
+    <!-- TAILWIND CSS VIA CDN (APENAS PARA DESENVOLVIMENTO) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFA500',
+                        warning: '#FFA500',
+                        danger: '#EF4444',
+                        success: '#10B981',
+                        info: '#3B82F6',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
 
-    <!-- Plugins CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendors/select2/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendors/jquery-toast-plugin/jquery.toast.min.css') }}">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/pos/pos.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/orders.css') }}">
-  {{--}}  <link rel="stylesheet" href="{{ asset('assets/css/sidebar-custom.css') }}"> --}}
-    
-    
-    <!-- Page Specific CSS -->
-    @stack('styles')
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        /* ========================================
-           BASE THEME
-        ======================================== */
-        body,
-        .main-panel,
-        .content-wrapper {
-            background-color: #1C1C1C;
-            color: #F5F5F5;
-            position: relative;
+        [x-cloak] {
+            display: none !important;
         }
 
-        /* Background Image Overlay */
-        .main-panel::before,
-        .content-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('{{ asset('assets/images/restaurant-bg.jpeg') }}');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-attachment: fixed;
-            opacity: 0.1;
-            z-index: -2;
-            filter: brightness(0.9);
-            pointer-events: none;
+        /* Custom Scrollbar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
 
-        /* Quando sidebar está recolhida */
-        #sidebar.collapsed {
-            width: 70px;
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background-color: #f1f5f9;
         }
 
-        .main-panel {
-            margin-left: 250px;
-            width: calc(100% - 260px);
-            transition: all 0.3s ease;
-            min-height: 100vh;
+        .dark .scrollbar-thin::-webkit-scrollbar-track {
+            background-color: #1e293b;
         }
 
-        /* Quando sidebar está recolhida */
-        #sidebar.collapsed ~ .main-panel {
-            margin-left: 70px;
-            width: calc(100% - 70px);
-        }
-        /* Ajuste para navbar */
-    .navbar.fixed-top {
-        width: 100%;
-        transition: all 0.3s ease;
-        z-index: 999;
-    }
-
-    #sidebar.collapsed ~ .navbar.fixed-top {
-        left: 70px;
-        width: calc(100% - 70px);
-    }
-    /* Content wrapper dentro do main-panel */
-    .content-wrapper {
-        padding: 20px;
-        min-height: calc(100vh - 70px);
-    }
-
-    
-    /* Ajustes de z-index */
-    .main-panel {
-        position: relative;
-    }
-
-    /* Prevenir overflow horizontal */
-    body {
-        overflow-x: hidden;
-    }
-        /* ========================================
-           TOAST NOTIFICATIONS
-        ======================================== */
-        .toast-container {
-            position: fixed;
-            top: 90px;
-            right: 24px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: none;
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 9999px;
         }
 
-        .custom-toast {
-            background: rgba(26, 26, 46, 0.98);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px 20px;
-            min-width: 320px;
-            max-width: 400px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            pointer-events: auto;
-            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 3s forwards;
-            position: relative;
-            overflow: hidden;
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: #475569;
         }
 
-        .custom-toast::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
         }
 
-        .custom-toast.success::before { background: linear-gradient(180deg, #10b981 0%, #059669 100%); }
-        .custom-toast.error::before { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); }
-        .custom-toast.warning::before { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); }
-        .custom-toast.info::before { background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); }
-
-        .toast-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .custom-toast.success .toast-icon { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .custom-toast.error .toast-icon { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .custom-toast.warning .toast-icon { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .custom-toast.info .toast-icon { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
-
-        .toast-content { flex: 1; }
-        .toast-title { font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 4px; }
-        .toast-message { font-size: 13px; color: rgba(255, 255, 255, 0.7); line-height: 1.4; }
-
-        .toast-close {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-
-        .toast-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-        }
-
-        .toast-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, rgba(255, 165, 0, 0.5) 0%, #FFA500 100%);
-            animation: progressBar 3s linear;
-        }
-
+        /* Animações */
         @keyframes slideInRight {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translateX(400px); }
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
         }
 
         @keyframes progressBar {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-    /*CARDS DARK THEME*/
-    .card {
-        background-color: #2C2C2C;
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        color: #F5F5F5;
-    }
+            from {
+                width: 100%;
+            }
 
-    .card-header {
-        background-color: #3A3A3A;
-        border-bottom: none;
-        font-weight: 600;
-        font-size: 16px;
-    }
-        /* ========================================
-           SCROLLBAR
-        ======================================== */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 165, 0, 0.3); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 165, 0, 0.5); }
-
-        /* ========================================
-           LOADING OVERLAY
-        ======================================== */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 15, 30, 0.95);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
+            to {
+                width: 0%;
+            }
         }
 
-        .loading-overlay.active { display: flex; }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 165, 0, 0.2);
-            border-top-color: #FFA500;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .toast-enter {
+            animation: slideInRight 0.3s ease-out;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .toast-exit {
+            animation: slideOutRight 0.3s ease-in;
         }
-
-        /* ========================================
-           RESPONSIVE
-        ======================================== */
-        /* Responsividade para mobile */
-        xs@media (max-width: 768px) {
-        .main-panel { margin-left: 0; }
-            .main-panel::before { left: 0; }
-            .toast-container { right: 12px; left: 12px; }
-            .custom-toast { min-width: auto; width: 100%; }
-        #sidebar {
-            transform: translateX(-100%);
-            width: 280px;
-        }
-        
-        #sidebar.mobile-open {
-            transform: translateX(0);
-        }
-        
-        .main-panel {
-            margin-left: 0 !important;
-            width: 100% !important;
-        }
-        
-        .navbar.fixed-top {
-            left: 0 !important;
-            width: 100% !important;
-        }
-    }
-
     </style>
 
-    @yield('styles')
+    @stack('styles')
 </head>
 
-<body class="sidebar-dark">
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
+<body class="h-full bg-gray-50 dark:bg-gray-900 font-['Inter'] antialiased text-gray-900 dark:text-gray-100" x-data="{ 
+          sidebarOpen: false, 
+          sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' 
+      }" @resize.window="if (window.innerWidth >= 1024) sidebarOpen = false">
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[100] space-y-2 max-w-sm w-full pointer-events-none"
+        aria-live="polite">
     </div>
 
-    <div class="container-scroller">
-        <!-- Navbar -->
-        @include('layouts.navbar')
-
-        <!-- Page Body -->
-        <div class="container-fluid page-body-wrapper">
-            @include('layouts.sidebar')
-
-            <div class="main-panel">
-                <div class="content-wrapper">
-                    @yield('content')
-                </div>
-            </div>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[999] hidden items-center justify-center"
+        style="display: none;">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
         </div>
     </div>
 
-    <!-- Core Scripts -->
-    <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
-    <script src="{{ asset('assets/vendors/chart.js/Chart.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
-    <script src="{{ asset('assets/vendors/select2/select2.min.js') }}"></script>
-    <script src="{{ asset('assets/vendors/jquery-toast-plugin/jquery.toast.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <div class="h-full flex flex-col">
+        <!-- Navbar -->
+        @include('layouts.navbar')
 
-    <!-- StarAdmin Scripts -->
-    <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
-    <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
-    <script src="{{ asset('assets/js/settings.js') }}"></script>
-    <script src="{{ asset('assets/js/todolist.js') }}"></script>
-    <script src="{{ asset('assets/js/dashboard.js') }}"></script>
+        <div class="flex flex-1 pt-16 overflow-hidden">
+            <!-- Mobile Sidebar Backdrop -->
+            <div x-show="sidebarOpen" @click="sidebarOpen = false"
+                x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm lg:hidden z-30" x-cloak>
+            </div>
 
-    <!-- Custom Scripts -->
-    <script src="{{ asset('assets/js/app.js') }}"></script>
-    <script src="{{ asset('assets/js/sweetalert2.all.min.js') }}"></script>
-    <script src="{{ asset('assets/pos/pos.js') }}"></script>
-    <script src="{{ asset('assets/pos/printRecibo.js') }}"></script>
-{{--<script src="{{ asset('assets/js/sidebar/sidebar.js') }}"></script>--}}
+            <!-- Sidebar -->
+            @include('layouts.sidebar')
 
-    @livewireScripts
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-all duration-300"
+                :class="{ 'lg:ml-64': !sidebarCollapsed, 'lg:ml-20': sidebarCollapsed }">
+                <div class="w-full px-4 sm:px-6 lg:px-8 py-6">
+                    <!-- Page Header -->
+                    @hasSection('page-header')
+                        <div class="mb-6">
+                            @yield('page-header')
+                        </div>
+                    @endif
+
+                    <!-- Flash Messages -->
+                    {{-- @if(session('success') || session('error') || session('warning') || session('info'))
+                    <div class="mb-6 space-y-2" x-data="{ show: true }" x-show="show" x-transition>
+                        @if(session('success'))
+                        <div
+                            class="flex items-center p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                            <i class="mdi mdi-check-circle text-green-500 text-xl mr-3"></i>
+                            <span class="text-green-800 dark:text-green-200 flex-1">{{ session('success') }}</span>
+                            <button @click="show = false" class="text-green-500 hover:text-green-700">
+                                <i class="mdi mdi-close"></i>
+                            </button>
+                        </div>
+                        @endif
+
+                        @if(session('error'))
+                        <div
+                            class="flex items-center p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                            <i class="mdi mdi-alert-circle text-red-500 text-xl mr-3"></i>
+                            <span class="text-red-800 dark:text-red-200 flex-1">{{ session('error') }}</span>
+                            <button @click="show = false" class="text-red-500 hover:text-red-700">
+                                <i class="mdi mdi-close"></i>
+                            </button>
+                        </div>
+                        @endif
+
+                        @if(session('warning'))
+                        <div
+                            class="flex items-center p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                            <i class="mdi mdi-alert text-yellow-500 text-xl mr-3"></i>
+                            <span class="text-yellow-800 dark:text-yellow-200 flex-1">{{ session('warning') }}</span>
+                            <button @click="show = false" class="text-yellow-500 hover:text-yellow-700">
+                                <i class="mdi mdi-close"></i>
+                            </button>
+                        </div>
+                        @endif
+
+                        @if(session('info'))
+                        <div
+                            class="flex items-center p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                            <i class="mdi mdi-information text-blue-500 text-xl mr-3"></i>
+                            <span class="text-blue-800 dark:text-blue-200 flex-1">{{ session('info') }}</span>
+                            <button @click="show = false" class="text-blue-500 hover:text-blue-700">
+                                <i class="mdi mdi-close"></i>
+                            </button>
+                        </div>
+                        @endif
+                    </div>
+                    @endif --}}
+
+                    <!-- Main Content -->
+                    @yield('content')
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script>
         /**
-         * ========================================
-         * UTILITY FUNCTIONS
-         * ========================================
+         * Toast System
          */
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toastContainer');
+                this.toasts = new Map();
+            }
 
-        // Toast System
-        function showToast(message, type = 'info', title = null) {
-            const container = document.getElementById('toastContainer');
-            
-            const icons = {
-                success: 'mdi-check-circle',
-                error: 'mdi-alert-circle',
-                warning: 'mdi-alert',
-                info: 'mdi-information'
-            };
+            show(message, type = 'info', options = {}) {
+                const id = Date.now() + Math.random();
+                const duration = options.duration || 3500;
 
-            const titles = {
-                success: title || 'Sucesso',
-                error: title || 'Erro',
-                warning: title || 'Atenção',
-                info: title || 'Informação'
-            };
+                const config = {
+                    success: {
+                        icon: 'mdi-check-circle',
+                        title: 'Sucesso',
+                        classes: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
+                        iconColor: 'text-green-500'
+                    },
+                    error: {
+                        icon: 'mdi-alert-circle',
+                        title: 'Erro',
+                        classes: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
+                        iconColor: 'text-red-500'
+                    },
+                    warning: {
+                        icon: 'mdi-alert',
+                        title: 'Atenção',
+                        classes: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
+                        iconColor: 'text-yellow-500'
+                    },
+                    info: {
+                        icon: 'mdi-information',
+                        title: 'Informação',
+                        classes: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
+                        iconColor: 'text-blue-500'
+                    }
+                };
 
-            const toast = document.createElement('div');
-            toast.className = `custom-toast ${type}`;
-            toast.innerHTML = `
-                <div class="toast-icon">
-                    <i class="mdi ${icons[type]}"></i>
-                </div>
-                <div class="toast-content">
-                    <div class="toast-title">${titles[type]}</div>
-                    <div class="toast-message">${message}</div>
-                </div>
-                <button class="toast-close" onclick="this.parentElement.remove()">
-                    <i class="mdi mdi-close"></i>
-                </button>
-                <div class="toast-progress"></div>
-            `;
+                const settings = config[type] || config.info;
+                const title = options.title || settings.title;
 
-            container.appendChild(toast);
+                const toast = document.createElement('div');
+                toast.className = `${settings.classes} border rounded-lg shadow-lg p-4 mb-2 pointer-events-auto toast-enter max-w-sm`;
+                toast.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0">
+                            <i class="mdi ${settings.icon} ${settings.iconColor} text-xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm">${title}</p>
+                            <p class="text-sm mt-0.5 break-words">${message}</p>
+                        </div>
+                        <button onclick="window.toastManager.remove(${id})" class="${settings.iconColor} hover:opacity-70 transition-opacity">
+                            <i class="mdi mdi-close"></i>
+                        </button>
+                    </div>
+                `;
 
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.remove();
-                }
-            }, 3500);
-        }
+                this.container.appendChild(toast);
+                this.toasts.set(id, toast);
 
-        // Override jQuery Toast
-        if (typeof $ !== 'undefined' && $.toast) {
-            const originalToast = $.toast;
-            $.toast = function(options) {
-                if (typeof options === 'object') {
-                    showToast(
-                        options.text || options.message || '',
-                        options.icon || options.type || 'info',
-                        options.heading || options.title
-                    );
-                } else {
-                    showToast(options);
-                }
-            };
-        }
+                setTimeout(() => this.remove(id), duration);
 
-        // Loading Functions
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('active');
-        }
+                return id;
+            }
 
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-        }
-
-        // Fullscreen Functions
-        function isFullScreen() {
-            return !!(
-                document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                document.mozFullScreenElement ||
-                document.msFullscreenElement
-            );
-        }
-
-        function toggleFullscreen() {
-            if (isFullScreen()) {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            } else {
-                const element = document.documentElement;
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullscreen) {
-                    element.webkitRequestFullscreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.msRequestFullscreen) {
-                    element.msRequestFullscreen();
+            remove(id) {
+                const toast = this.toasts.get(id);
+                if (toast) {
+                    toast.classList.remove('toast-enter');
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => {
+                        toast.remove();
+                        this.toasts.delete(id);
+                    }, 300);
                 }
             }
         }
 
-        function updateFullscreenButton() {
-            const btn = document.getElementById('fullscreenBtn');
-            if (btn) {
-                const icon = btn.querySelector('i');
-                if (isFullScreen()) {
-                    icon.classList.remove('mdi-fullscreen');
-                    icon.classList.add('mdi-fullscreen-exit');
-                } else {
-                    icon.classList.remove('mdi-fullscreen-exit');
-                    icon.classList.add('mdi-fullscreen');
-                }
-            }
-        }
+        window.toastManager = new ToastManager();
+        window.showToast = (message, type, options) => window.toastManager.show(message, type, options);
 
         /**
-         * ========================================
-         * INITIALIZATION
-         * ========================================
+         * Loading Functions
          */
-        document.addEventListener('DOMContentLoaded', function() {
-            // Fullscreen button
-            const fullscreenBtn = document.getElementById('fullscreenBtn');
-            if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', toggleFullscreen);
+        window.showLoading = () => {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'flex';
+        };
+
+        window.hideLoading = () => {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'none';
+        };
+
+        /**
+         * Print Receipt
+         */
+        window.printRecibo = (id) => {
+            const url = `/orders/${id}/print`;
+            const printWindow = window.open(url, 'Print Receipt', 'height=600,width=400');
+            // Note: The print window should handle the printing itself (e.g. window.print() on load)
+        };
+
+        /**
+         * Print Sale Receipt
+         */
+        window.printSaleRecibo = (id) => {
+            const url = `/sales/${id}/receipt`;
+            const printWindow = window.open(url, 'Print Receipt', 'height=600,width=400');
+        };
+
+        /**
+         * Fullscreen
+         */
+        window.toggleFullscreen = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        };
+
+        /**
+         * Initialization
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theme
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
             }
 
-            // Fullscreen listeners
-            document.addEventListener('fullscreenchange', updateFullscreenButton);
-            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
-            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
-            document.addEventListener('MSFullscreenChange', updateFullscreenButton);
-
-          /*  // POS fullscreen prompt
-            if (window.location.pathname === '/pos') {
-                const hasChosenFullscreen = localStorage.getItem('hasChosenFullscreen');
-                if (!hasChosenFullscreen) {
-                    Swal.fire({
-                        title: 'Modo Tela Cheia',
-                        text: 'Deseja ativar o modo tela cheia para melhor experiência?',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sim',
-                        cancelButtonText: 'Não',
-                        confirmButtonColor: '#FFA500',
-                        cancelButtonColor: '#6b7280',
-                        background: '#1a1a2e',
-                        color: '#ffffff'
-                    }).then((result) => {
-                        localStorage.setItem('hasChosenFullscreen', 'true');
-                        if (result.isConfirmed) {
-                            toggleFullscreen();
-                        }
-                    });
-                }
-            }*/
-
-            // Session messages
+            // Show session messages
             @if(session('success'))
                 showToast('{{ session('success') }}', 'success');
             @endif
@@ -539,9 +377,12 @@
             @if(session('info'))
                 showToast('{{ session('info') }}', 'info');
             @endif
+
+            console.log('✅ Sistema inicializado com Tailwind CDN');
         });
     </script>
 
     @stack('scripts')
 </body>
+
 </html>

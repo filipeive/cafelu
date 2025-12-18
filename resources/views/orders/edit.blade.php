@@ -1,208 +1,182 @@
 @extends('layouts.app')
 
+@section('title', 'Editar Pedido')
+
 @section('content')
-    <div class="container-wrapper">
-        <!-- Order Header Card -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <!-- Order Title & Status -->
-                    <div class="d-flex align-items-center gap-3">
-                        <h4 class="mb-0">
-                            <i class="mdi mdi-receipt text-primary me-1"></i>
-                            Pedido #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
-                        </h4>
-                        <span class="badge {{ get_status_class_staradmins($order->status) }}">
-                            {{ ucfirst(trans($order->status)) }}
-                        </span>
+    <div class="w-full" x-data="{ 
+        activeTab: '{{ $categories->first()->id }}',
+        paymentModalOpen: false,
+        paymentMethod: '',
+        cashAmount: '',
+        changeAmount: '0.00',
+        totalAmount: {{ $order->total_amount }},
+        
+        calculateChange() {
+            const received = parseFloat(this.cashAmount) || 0;
+            const change = received - this.totalAmount;
+            this.changeAmount = change >= 0 ? change.toFixed(2) : '0.00';
+        }
+    }">
+        <!-- Header -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                        <i class="mdi mdi-receipt text-orange-500"></i>
+                        Pedido #{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}
+                    </h2>
+                    @php
+                        $statusClasses = [
+                            'active' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+                            'completed' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                            'paid' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                            'canceled' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                        ];
+                    @endphp
+                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $statusClasses[$order->status] ?? 'bg-gray-100 text-gray-800' }}">
+                        {{ ucfirst($order->status) }}
+                    </span>
+                </div>
 
-                        <!-- Payment Button -->
-                        @if ($order->status === 'completed' && !$order->is_paid)
-                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#paymentModal">
-                                <i class="mdi mdi-cash-multiple me-1"></i> Registrar Pagamento
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('tables.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
+                        <i class="mdi mdi-table"></i> Mesas
+                    </a>
+                    <a href="{{ route('orders.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
+                        <i class="mdi mdi-clipboard-list"></i> Pedidos
+                    </a>
+                    
+                    @if ($order->status === 'completed' && !$order->is_paid)
+                        <button @click="paymentModalOpen = true" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors flex items-center gap-2">
+                            <i class="mdi mdi-cash-multiple"></i> Pagamento
+                        </button>
+                    @endif
+
+                    @if ($order->status != 'active')
+                        <button onclick="printRecibo({{ $order->id }})" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white transition-colors flex items-center gap-2">
+                            <i class="mdi mdi-printer"></i> Imprimir
+                        </button>
+                    @endif
+
+                    @if ($order->status == 'active')
+                        <form action="{{ route('orders.cancel', $order) }}" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja cancelar este pedido?')">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors flex items-center gap-2">
+                                <i class="mdi mdi-delete"></i> Cancelar
                             </button>
-                        @endif
+                        </form>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Info Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center gap-2 mb-2 text-gray-600 dark:text-gray-400">
+                        <i class="mdi mdi-clock-outline"></i>
+                        <span>{{ $order->created_at->format('d/m/Y H:i') }}</span>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <div class="order-actions">
-                        <a href="{{ route('tables.index') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="mdi mdi-table me-1"></i> Mesas
-                        </a>
-                        <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary btn-sm ms-2">
-                            <i class="mdi mdi-clipboard-list me-1"></i> Pedidos
-                        </a>
-                        @if ($order->status != 'active')
-                            <button class="btn btn-info btn-icon btn-sm ms-2" data-bs-toggle="tooltip" title="Imprimir"
-                                onclick="printRecibo({{ $order->id }})">
-                                <i class="mdi mdi-printer"></i> Imprimir Conta
-                            </button>
-                        @endif {{-- @endif --}}
-                        {{-- botao de cancelar pedido --}}
-                        @if ($order->status == 'active')
-                            {{-- <button type="button" class="btn btn-danger btn-icon btn-sm ms-2" data-bs-toggle="modal"
-                                data-bs-target="#cancelOrderModal" title="Cancelar Pedido">
-                                <i class="mdi mdi-delete"></i> Cancelar Pedido
-                            </button> --}}
-                            <!-- Modal de Confirmação -->
-                            <div class="modal fade" id="cancelOrderModal" tabindex="-1"
-                                aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="cancelOrderModalLabel">Confirmar Cancelamento</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form action="{{ route('orders.cancel', $order) }}" method="POST"
-                                                id="cancelForm">
-                                                @csrf
-                                                @method('POST')
-                                                <div class="mb-3">
-                                                    <label for="cancel_reason" class="form-label">Motivo do
-                                                        Cancelamento</label>
-                                                    <textarea class="form-control" id="cancel_reason" name="notes" rows="3" required></textarea>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Não</button>
-                                            <button type="submit" form="cancelForm" class="btn btn-danger">Sim,
-                                                Cancelar</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
+                    <div class="flex items-center gap-2 mb-2 text-green-600 dark:text-green-400 font-bold text-lg">
+                        <i class="mdi mdi-cash"></i>
+                        <span>MZN {{ number_format($order->total_amount, 2, ',', '.') }}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <i class="mdi mdi-account"></i>
+                        <span>{{ $order->customer_name ?: 'Cliente não identificado' }}</span>
                     </div>
                 </div>
-                <!-- Order Info Cards -->
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body p-3">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="mdi mdi-clock-outline text-muted me-2"></i>
-                                    <span>{{ $order->created_at->format('d/m/Y H:i') }}</span>
-                                </div>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="mdi mdi-cash text-success me-2"></i>
-                                    <span class="fw-bold">MZN {{ number_format($order->total_amount, 2, ',', '.') }}</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="mdi mdi-account text-primary me-2"></i>
-                                    <span>{{ $order->customer_name ?: 'Cliente não identificado' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body p-3">
-                                @if ($order->table)
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="mdi mdi-table-furniture text-info me-2"></i>
-                                        <span>Mesa {{ $order->table->number }}
-                                            @if ($order->table->group_id)
-                                                <span class="badge bg-info ms-1">
-                                                    <i class="mdi mdi-link-variant"></i>
-                                                    {{ $order->table->groupedTablesNumbers ? 'Unida: ' . $order->table->groupedTablesNumbers : '' }}
-                                                </span>
-                                            @endif
-                                        </span>
-                                    </div>
+
+                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+                    @if ($order->table)
+                        <div class="flex items-center gap-2 mb-2 text-gray-700 dark:text-gray-300">
+                            <i class="mdi mdi-table-furniture text-orange-500"></i>
+                            <span>Mesa {{ $order->table->number }}
+                                @if ($order->table->group_id)
+                                    <span class="ml-2 px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                        <i class="mdi mdi-link-variant"></i>
+                                        {{ $order->table->groupedTablesNumbers ? 'Unida: ' . $order->table->groupedTablesNumbers : '' }}
+                                    </span>
                                 @endif
-                                @if ($order->notes)
-                                    <div class="d-flex align-items-center">
-                                        <i class="mdi mdi-note-text text-warning me-2"></i>
-                                        <span>{{ $order->notes }}</span>
-                                    </div>
-                                @endif
-                            </div>
+                            </span>
                         </div>
-                    </div>
+                    @endif
+                    @if ($order->notes)
+                        <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400 italic">
+                            <i class="mdi mdi-note-text text-yellow-500"></i>
+                            <span>{{ $order->notes }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <!-- Left Column - Order Details -->
-            <div class="col-lg-8">
-                <!-- Order Items Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="mdi mdi-format-list-bulleted text-primary me-2"></i>Itens do Pedido
-                        </h5>
-                        <span class="badge bg-primary">{{ $order->items->count() }} itens</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Order Items & Quick Menu -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Order Items -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-format-list-bulleted text-orange-500"></i> Itens do Pedido
+                        </h3>
+                        <span class="px-3 py-1 rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-bold">
+                            {{ $order->items->count() }} itens
+                        </span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Produto</th>
-                                    <th class="text-center" style="width: 80px">Qtd</th>
-                                    <th style="width: 120px">Preço</th>
-                                    <th style="width: 120px">Total</th>
-                                    <th style="width: 150px">Status</th>
-                                    <th style="width: 80px" class="text-center">Ações</th>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold">
+                                    <th class="px-6 py-3">Produto</th>
+                                    <th class="px-6 py-3 text-center">Qtd</th>
+                                    <th class="px-6 py-3 text-right">Total</th>
+                                    <th class="px-6 py-3 text-center">Status</th>
+                                    <th class="px-6 py-3 text-center">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse ($order->items as $item)
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <strong>{{ $item->product->name }}</strong>
-                                                @if ($item->notes)
-                                                    <div class="small text-muted">
-                                                        <i class="mdi mdi-note-text me-1"></i>{{ $item->notes }}
-                                                    </div>
-                                                @endif
-                                            </div>
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <div class="font-medium text-gray-900 dark:text-white">{{ $item->product->name }}</div>
+                                            @if ($item->notes)
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                                    <i class="mdi mdi-note-text"></i> {{ $item->notes }}
+                                                </div>
+                                            @endif
                                         </td>
-                                        <td class="text-center">{{ $item->quantity }}</td>
-                                        <td>{{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                                        <td>{{ number_format($item->total_price, 2, ',', '.') }}</td>
-                                        <td>
-                                            <form action="{{ route('orders.update-item-status', $item) }}"
-                                                method="POST">
+                                        <td class="px-6 py-4 text-center text-gray-600 dark:text-gray-300">{{ $item->quantity }}</td>
+                                        <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white">
+                                            {{ number_format($item->total_price, 2, ',', '.') }}
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <form action="{{ route('orders.update-item-status', $item) }}" method="POST">
                                                 @csrf
-                                                <select name="status" class="form-select form-select-sm status-select"
-                                                    onchange="this.form.submit()" style="min-width: 120px">
+                                                <select name="status" onchange="this.form.submit()" 
+                                                    class="text-xs rounded-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-orange-500 focus:border-orange-500 py-1 pl-2 pr-6">
                                                     <option value="pending" @selected($item->status === 'pending')>Pendente</option>
-                                                    <option value="preparing" @selected($item->status === 'preparing')>Preparando
-                                                    </option>
+                                                    <option value="preparing" @selected($item->status === 'preparing')>Preparando</option>
                                                     <option value="ready" @selected($item->status === 'ready')>Pronto</option>
-                                                    <option value="delivered" @selected($item->status === 'delivered')>Entregue
-                                                    </option>
-                                                    <option value="cancelled" @selected($item->status === 'cancelled')>Cancelado
-                                                    </option>
+                                                    <option value="delivered" @selected($item->status === 'delivered')>Entregue</option>
+                                                    <option value="cancelled" @selected($item->status === 'cancelled')>Cancelado</option>
                                                 </select>
                                             </form>
                                         </td>
-                                        <td class="text-center">
-                                            <form id="remove-item-{{ $item->id }}"
-                                                action="{{ route('orders.remove-item', $item->id) }}" method="POST"
-                                                class="d-inline">
+                                        <td class="px-6 py-4 text-center">
+                                            <form id="remove-item-{{ $item->id }}" action="{{ route('orders.remove-item', $item->id) }}" method="POST" class="inline-block">
                                                 @csrf
-                                                @method('POST')
                                             </form>
-                                            <button onclick="removeItem({{ $item->id }})"
-                                                class="btn btn-outline-danger btn-sm">
-                                                <i class="mdi mdi-delete"></i>
+                                            <button onclick="removeItem({{ $item->id }})" class="text-red-500 hover:text-red-700 transition-colors p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                <i class="mdi mdi-delete text-lg"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center p-4">
-                                            <div class="text-muted">
-                                                <i class="mdi mdi-cart-outline d-block mb-2" style="font-size: 2rem;"></i>
-                                                <p>Nenhum item adicionado ao pedido</p>
-                                            </div>
+                                        <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                            <i class="mdi mdi-cart-outline text-4xl mb-2 block"></i>
+                                            Nenhum item adicionado ao pedido
                                         </td>
                                     </tr>
                                 @endforelse
@@ -211,60 +185,53 @@
                     </div>
                 </div>
 
-                <!-- Quick Menu Card -->
-                <div class="card">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="mdi mdi-food text-primary me-2"></i>Menu Rápido</h5>
-                        <div class="input-group" style="max-width: 300px;">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="mdi mdi-magnify text-muted"></i>
+                <!-- Quick Menu -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-food text-orange-500"></i> Menu Rápido
+                        </h3>
+                        <div class="relative w-64">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="mdi mdi-magnify text-gray-400"></i>
                             </span>
-                            <input type="text" class="form-control border-start-0" id="quickMenuSearch"
+                            <input type="text" id="quickMenuSearch"
+                                class="w-full pl-10 pr-4 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-orange-500 focus:border-orange-500"
                                 placeholder="Buscar produtos...">
                         </div>
                     </div>
-                    <div class="card-body">
-                        <!-- Category Tabs -->
-                        <ul class="nav nav-tabs nav-tabs-bordered" id="categoryTabs" role="tablist">
-                            @foreach ($categories as $category)
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link {{ $loop->first ? 'active' : '' }}"
-                                        id="category-tab-{{ $category->id }}" data-bs-toggle="tab"
-                                        data-bs-target="#category-content-{{ $category->id }}" type="button"
-                                        role="tab">
-                                        {{ $category->name }}
-                                        <span class="badge bg-primary ms-1">{{ $category->products->count() }}</span>
-                                    </button>
-                                </li>
-                            @endforeach
-                        </ul>
 
-                        <!-- Category Content -->
-                        <div class="tab-content p-3" id="categoryTabsContent">
+                    <div class="p-4">
+                        <!-- Categories -->
+                        <div class="flex gap-2 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                             @foreach ($categories as $category)
-                                <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
-                                    id="category-content-{{ $category->id }}" role="tabpanel">
-                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 product-container">
-                                        @foreach ($category->products as $product)
-                                            <div class="col product-item">
-                                                <div class="card h-100 product-card"
-                                                    onclick="addProduct({{ $product->id }})">
-                                                    <div class="card-body d-flex flex-column">
-                                                        <h6 class="product-name">{{ $product->name }}</h6>
-                                                        <div
-                                                            class="mt-auto d-flex justify-content-between align-items-center">
-                                                            <span class="product-price fw-bold">
-                                                                MZN {{ number_format($product->price, 2, ',', '.') }}
-                                                            </span>
-                                                            <button class="btn btn-sm btn-primary">
-                                                                <i class="mdi mdi-plus me-1"></i>Adicionar
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                <button @click="activeTab = '{{ $category->id }}'"
+                                    :class="{ 'bg-orange-500 text-white shadow-md': activeTab === '{{ $category->id }}', 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600': activeTab !== '{{ $category->id }}' }"
+                                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-2">
+                                    {{ $category->name }}
+                                    <span class="bg-white/20 px-1.5 rounded text-xs">{{ $category->products->count() }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+
+                        <!-- Products Grid -->
+                        <div class="mt-2">
+                            @foreach ($categories as $category)
+                                <div x-show="activeTab === '{{ $category->id }}'" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 product-container">
+                                    @foreach ($category->products as $product)
+                                        <div class="product-item bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-3 hover:shadow-md transition-shadow cursor-pointer group"
+                                            onclick="addProduct({{ $product->id }})">
+                                            <h6 class="product-name font-medium text-gray-800 dark:text-white mb-2 line-clamp-2 text-sm h-10">{{ $product->name }}</h6>
+                                            <div class="flex justify-between items-center mt-auto">
+                                                <span class="text-orange-600 dark:text-orange-400 font-bold text-sm">
+                                                    MZN {{ number_format($product->price, 2, ',', '.') }}
+                                                </span>
+                                                <button class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                                                    <i class="mdi mdi-plus"></i>
+                                                </button>
                                             </div>
-                                        @endforeach
-                                    </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endforeach
                         </div>
@@ -272,104 +239,114 @@
                 </div>
             </div>
 
-            <!-- Right Column - Order Information -->
-            <div class="col-lg-4">
-                <!-- Customer Information Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="mdi mdi-account text-primary me-2"></i>Informações do Cliente</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ route('orders.update', $order) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="mdi mdi-account text-muted me-1"></i> Nome do Cliente
-                                </label>
-                                <input type="text" name="customer_name" class="form-control"
-                                    value="{{ $order->customer_name }}" placeholder="Nome do Cliente">
+            <!-- Right Column: Customer Info & Summary -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Customer Info -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                        <i class="mdi mdi-account text-blue-500"></i> Informações do Cliente
+                    </h3>
+                    <form action="{{ route('orders.update', $order) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome do Cliente</label>
+                                <input type="text" name="customer_name" value="{{ $order->customer_name }}"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500"
+                                    placeholder="Nome do Cliente">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="mdi mdi-note text-muted me-1"></i> Observações
-                                </label>
-                                <textarea name="notes" class="form-control" rows="3" placeholder="Observações">{{ $order->notes }}</textarea>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
+                                <textarea name="notes" rows="3"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500"
+                                    placeholder="Observações">{{ $order->notes }}</textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="mdi mdi-content-save me-1"></i> Salvar Alterações
+                            <button type="submit" class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="mdi mdi-content-save"></i> Salvar Alterações
                             </button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
 
-                <!-- Order Summary Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="mdi mdi-cash-register text-primary me-2"></i>Resumo do Pedido</h5>
+                <!-- Summary & Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                        <i class="mdi mdi-cash-register text-green-500"></i> Resumo
+                    </h3>
+                    
+                    <div class="flex justify-between items-center mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                        <span class="text-gray-600 dark:text-gray-400 font-medium">Total</span>
+                        <span class="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                            MZN {{ number_format($order->total_amount, 2, ',', '.') }}
+                        </span>
                     </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="h6 mb-0">Total</span>
-                            <span class="h3 mb-0 text-primary">MZN
-                                {{ number_format($order->total_amount, 2, ',', '.') }}</span>
-                        </div>
 
-                        <form action="{{ route('orders.complete', $order) }}" method="POST">
-                            @csrf
-                            @if ($order->status === 'completed' && !$order->is_paid)
-                                <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal"
-                                    data-bs-target="#paymentModal">
-                                    <i class="mdi mdi-cash-multiple me-1"></i> Registrar Pagamento
+                    <div class="space-y-3">
+                        @if ($order->status === 'completed' && !$order->is_paid)
+                            <button @click="paymentModalOpen = true" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                                <i class="mdi mdi-cash-multiple"></i> Registrar Pagamento
+                            </button>
+                        @endif
+
+                        @if ($order->status === 'active' && $order->items->count() > 0)
+                            <form action="{{ route('orders.complete', $order) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                                    <i class="mdi mdi-check-circle"></i> Finalizar Pedido
                                 </button>
-                            @endif
-                            @if ($order->status === 'active' && $order->items->count() > 0)
-                                <button type="submit" class="btn btn-success btn-lg w-100" style="margin-bottom: 10px;">
-                                    <i class="mdi mdi-check-circle me-1"></i> Finalizar Pedido
+                            </form>
+                        @endif
+
+                        @if ($order->status === 'completed' && $order->is_paid)
+                            <button disabled class="w-full py-3 px-4 bg-gray-400 text-white font-bold rounded-lg cursor-not-allowed flex items-center justify-center gap-2">
+                                <i class="mdi mdi-check-circle"></i> Pedido Pago
+                            </button>
+                        @endif
+
+                        @if ($order->status === 'active')
+                            <form action="{{ route('orders.cancel', $order) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja cancelar?')">
+                                @csrf
+                                <button type="submit" class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                                    <i class="mdi mdi-delete"></i> Cancelar Pedido
                                 </button>
-                            @endif                            @if ($order->status === 'completed' && $order->is_paid)
-                                <button type="button" class="btn btn-success btn-lg w-100" disabled>
-                                    <i class="mdi mdi-check-circle me-1"></i> Pedido Pago
-                                </button>
-                            @endif
-                            @if ($order->status === 'cancelled')
-                                <button type="button" class="btn btn-danger btn-lg w-100" disabled>
-                                    <i class="mdi mdi-alert-circle me-1"></i> Pedido Cancelado
-                                </button>
-                            @endif
-                            @if ($order->status === 'active')
-                                <button type="button" class="btn btn-danger btn-lg w-100" data-bs-toggle="modal"
-                                    data-bs-target="#cancelOrderModal">
-                                    <i class="mdi mdi-delete me-1"></i> Cancelar Pedido
-                                </button>
-                            @endif
-                        </form>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Payment Modal -->
-    @if ($order->status === 'completed' && !$order->is_paid)
-        <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
+        <!-- Payment Modal -->
+        <div x-show="paymentModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0">
+            
+            <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" @click="paymentModalOpen = false"></div>
+
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-200 dark:border-gray-700">
                     <form action="{{ route('orders.pay', $order) }}" method="POST">
                         @csrf
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="paymentModalLabel">
-                                <i class="mdi mdi-cash-multiple text-success me-1"></i>
-                                Registrar Pagamento #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <i class="mdi mdi-cash-multiple text-green-500"></i>
+                                Registrar Pagamento
+                            </h3>
+                            <button type="button" @click="paymentModalOpen = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                                <i class="mdi mdi-close text-xl"></i>
+                            </button>
                         </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="payment_method" class="form-label">Método de Pagamento</label>
-                                <select name="payment_method" id="payment_method" class="form-select" required>
+
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Método de Pagamento</label>
+                                <select name="payment_method" x-model="paymentMethod" required
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500">
                                     <option value="">Selecione um método</option>
                                     <option value="cash">Dinheiro</option>
                                     <option value="card">Cartão</option>
@@ -379,57 +356,55 @@
                                 </select>
                             </div>
 
-                            <!-- Cash payment fields -->
-                            <div id="cashFields" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="cash_amount" class="form-label">Valor Recebido</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">MZN</span>
-                                        <input type="number" class="form-control" id="cash_amount" name="cash_amount"
-                                            step="0.01" min="{{ $order->total_amount }}">
+                            <div x-show="paymentMethod === 'cash'" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor Recebido</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">MZN</span>
+                                        <input type="number" name="cash_amount" x-model="cashAmount" @input="calculateChange()" step="0.01" min="{{ $order->total_amount }}"
+                                            class="w-full pl-12 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500">
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Troco</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">MZN</span>
-                                        <input type="text" class="form-control" id="change_amount" readonly>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Troco</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">MZN</span>
+                                        <input type="text" x-model="changeAmount" readonly
+                                            class="w-full pl-12 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white cursor-not-allowed">
                                     </div>
                                 </div>
                             </div>
 
                             <input type="hidden" name="amount_paid" value="{{ $order->total_amount }}">
 
-                            <div class="mb-3">
-                                <label for="notes" class="form-label">Observações</label>
-                                <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
+                                <textarea name="notes" rows="2" class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500"></textarea>
                             </div>
 
-                            <div class="alert alert-info">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <strong>Total a Pagar:</strong>
-                                    <span class="h5 mb-0">MZN
-                                        {{ number_format($order->total_amount, 2, ',', '.') }}</span>
-                                </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg p-4 flex justify-between items-center">
+                                <span class="text-blue-800 dark:text-blue-200 font-medium">Total a Pagar:</span>
+                                <span class="text-xl font-bold text-blue-600 dark:text-blue-300">MZN {{ number_format($order->total_amount, 2, ',', '.') }}</span>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary"
-                                data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="mdi mdi-check-circle me-1"></i> Confirmar Pagamento
+
+                        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
+                            <button type="button" @click="paymentModalOpen = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center gap-2">
+                                <i class="mdi mdi-check-circle"></i> Confirmar Pagamento
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    @endif
-@endsection
+    </div>
 
-@push('scripts')
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Remove item with confirmation
         function removeItem(itemId) {
             Swal.fire({
                 title: 'Confirmar remoção',
@@ -438,7 +413,10 @@
                 showCancelButton: true,
                 confirmButtonText: 'Sim, remover',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#dc3545',
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937'
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById(`remove-item-${itemId}`).submit();
@@ -446,7 +424,6 @@
             });
         }
 
-        // Quick Menu Search
         document.getElementById('quickMenuSearch').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             document.querySelectorAll('.product-item').forEach(item => {
@@ -455,7 +432,6 @@
             });
         });
 
-        // Add Product Function
         function addProduct(productId) {
             const form = document.createElement('form');
             form.method = 'POST';
@@ -482,33 +458,6 @@
             document.body.appendChild(form);
             form.submit();
         }
-
-        // Toggle cash payment fields
-        document.getElementById('payment_method').addEventListener('change', function() {
-            const cashFields = document.getElementById('cashFields');
-            cashFields.style.display = this.value === 'cash' ? 'block' : 'none';
-        });
-
-        // Calculate change
-        document.getElementById('cash_amount').addEventListener('input', function() {
-            const received = parseFloat(this.value) || 0;
-            const total = {{ $order->total_amount }};
-            const change = received - total;
-            document.getElementById('change_amount').value = change >= 0 ? change.toFixed(2) : '0.00';
-        });
-
-        // Print Function
-        function printOrder() {
-            window.open("{{ route('orders.print', $order) }}", '_blank');
-        }
-
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
     </script>
-@endpush
+    @endpush
+@endsection

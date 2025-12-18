@@ -21,9 +21,9 @@ class ProductController extends Controller
             // Filtro de busca
             if ($request->filled('search')) {
                 $search = $request->get('search');
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             }
 
@@ -47,70 +47,71 @@ class ProductController extends Controller
     }
 
     public function store(Request $request)
-{
-    try {
-        // Validação - REMOVA 'price' da validação
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            // 'price' => 'required|numeric|min:0', // REMOVER
-            'purchase_price' => 'required|numeric|min:0', // Adicionar se necessário
-            'selling_price' => 'required|numeric|min:0', // Adicionar se necessário
-            'stock_quantity' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'type' => 'required|in:product,service',
-            'unit' => 'nullable|string|max:20',
-            'min_stock_level' => 'nullable|integer|min:0',
-        ]);
+    {
+        try {
+            // Validação - REMOVA 'price' da validação
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                // 'price' => 'required|numeric|min:0', // REMOVER
+                'purchase_price' => 'required|numeric|min:0', // Adicionar se necessário
+                'selling_price' => 'required|numeric|min:0', // Adicionar se necessário
+                'stock_quantity' => 'required|integer|min:0',
+                'category_id' => 'required|exists:categories,id',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'type' => 'required|in:product,service',
+                'unit' => 'nullable|string|max:20',
+                'min_stock_level' => 'nullable|integer|min:0',
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro de validação',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            DB::beginTransaction();
+
+            // Dados para criação - NÃO incluir 'price'
+            $data = $request->only([
+                'name',
+                'description',
+                'purchase_price', // Incluir
+                'selling_price', // Incluir
+                'stock_quantity',
+                'category_id',
+                'type',
+                'unit',
+                'min_stock_level'
+            ]);
+
+            $data['is_active'] = $request->has('is_active') ? 1 : 0;
+            $data['price'] = $request->selling_price; // Sync price with selling_price
+
+            // Upload de imagem
+            if ($request->hasFile('image')) {
+                $data['image_path'] = $request->file('image')->store('products', 'public');
+            }
+
+            Product::create($data);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produto adicionado com sucesso!'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erro de validação',
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'Erro ao adicionar produto: ' . $e->getMessage()
+            ], 500);
         }
-
-        DB::beginTransaction();
-
-        // Dados para criação - NÃO incluir 'price'
-        $data = $request->only([
-            'name', 
-            'description', 
-            'purchase_price', // Incluir
-            'selling_price', // Incluir
-            'stock_quantity', 
-            'category_id',
-            'type',
-            'unit',
-            'min_stock_level'
-        ]);
-        
-        $data['is_active'] = $request->has('is_active') ? 1 : 0;
-
-        // Upload de imagem
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('products', 'public');
-        }
-
-        Product::create($data);
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Produto adicionado com sucesso!'
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'success' => false,
-            'message' => 'Erro ao adicionar produto: ' . $e->getMessage()
-        ], 500);
     }
-}
 
     public function show($id)
     {
@@ -126,76 +127,77 @@ class ProductController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    try {
-        $product = Product::findOrFail($id);
+    {
+        try {
+            $product = Product::findOrFail($id);
 
-        // Validação - REMOVA 'price' da validação
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            // 'price' => 'required|numeric|min:0', // REMOVER
-            'purchase_price' => 'required|numeric|min:0',
-            'selling_price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'type' => 'required|in:product,service',
-            'unit' => 'nullable|string|max:20',
-            'min_stock_level' => 'nullable|integer|min:0',
-        ]);
+            // Validação - REMOVA 'price' da validação
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                // 'price' => 'required|numeric|min:0', // REMOVER
+                'purchase_price' => 'required|numeric|min:0',
+                'selling_price' => 'required|numeric|min:0',
+                'stock_quantity' => 'required|integer|min:0',
+                'category_id' => 'required|exists:categories,id',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'type' => 'required|in:product,service',
+                'unit' => 'nullable|string|max:20',
+                'min_stock_level' => 'nullable|integer|min:0',
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro de validação',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            DB::beginTransaction();
+
+            // Dados para atualização - NÃO incluir 'price'
+            $data = $request->only([
+                'name',
+                'description',
+                'purchase_price', // Incluir
+                'selling_price', // Incluir
+                'stock_quantity',
+                'category_id',
+                'type',
+                'unit',
+                'min_stock_level'
+            ]);
+
+            $data['is_active'] = $request->has('is_active') ? 1 : 0;
+            $data['price'] = $request->selling_price; // Sync price with selling_price
+
+            // Upload de nova imagem
+            if ($request->hasFile('image')) {
+                // Deletar imagem antiga
+                if ($product->image_path) {
+                    Storage::disk('public')->delete($product->image_path);
+                }
+                $data['image_path'] = $request->file('image')->store('products', 'public');
+            }
+
+            $product->update($data);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produto atualizado com sucesso!'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erro de validação',
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'Erro ao atualizar produto: ' . $e->getMessage()
+            ], 500);
         }
-
-        DB::beginTransaction();
-
-        // Dados para atualização - NÃO incluir 'price'
-        $data = $request->only([
-            'name', 
-            'description', 
-            'purchase_price', // Incluir
-            'selling_price', // Incluir
-            'stock_quantity', 
-            'category_id',
-            'type',
-            'unit',
-            'min_stock_level'
-        ]);
-        
-        $data['is_active'] = $request->has('is_active') ? 1 : 0;
-
-        // Upload de nova imagem
-        if ($request->hasFile('image')) {
-            // Deletar imagem antiga
-            if ($product->image_path) {
-                Storage::disk('public')->delete($product->image_path);
-            }
-            $data['image_path'] = $request->file('image')->store('products', 'public');
-        }
-
-        $product->update($data);
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Produto atualizado com sucesso!'
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'success' => false,
-            'message' => 'Erro ao atualizar produto: ' . $e->getMessage()
-        ], 500);
     }
-}
 
     public function destroy($id)
     {
@@ -265,7 +267,7 @@ class ProductController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
-            
+
             $history = StockMovement::where('product_id', $product->id)
                 ->orderBy('created_at', 'desc')
                 ->get()
@@ -294,7 +296,7 @@ class ProductController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
-            
+
             $sales = SaleItem::where('product_id', $product->id)
                 ->with('sale')
                 ->orderBy('created_at', 'desc')

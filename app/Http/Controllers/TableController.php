@@ -14,14 +14,16 @@ class TableController extends Controller
      * Exibe a visualização das mesas do restaurante
      */
     public function index()
-{
-    $tables = Table::with(['orders' => function($query) {
-        $query->whereIn('status', ['active', 'completed'])
-              ->latest();
-    }])->orderBy('number')->get();
+    {
+        $tables = Table::with([
+            'orders' => function ($query) {
+                $query->whereIn('status', ['active', 'completed'])
+                    ->latest();
+            }
+        ])->orderBy('number')->get();
 
-    return view('tables.index', compact('tables'));
-}
+        return view('tables.index', compact('tables'));
+    }
 
 
     /**
@@ -69,35 +71,35 @@ class TableController extends Controller
                 ->with('error', 'Erro ao criar pedido: ' . $e->getMessage());
         }
     }/* 
-    public function createOrder(Table $table)
-    {
-        // Verificar se a mesa já tem um pedido ativo
-        $activeOrder = Order::where('table_id', $table->id)
-            ->whereIn('status', ['active', 'completed'])
-            ->first();
+   public function createOrder(Table $table)
+   {
+       // Verificar se a mesa já tem um pedido ativo
+       $activeOrder = Order::where('table_id', $table->id)
+           ->whereIn('status', ['active', 'completed'])
+           ->first();
 
-        if ($activeOrder) {
-            return redirect()->route('orders.edit', $activeOrder->id);
-        }
+       if ($activeOrder) {
+           return redirect()->route('orders.edit', $activeOrder->id);
+       }
 
-        // Criar novo pedido
-        $order = new Order();
-        $order->table_id = $table->id;
-        $order->user_id = auth()->id();
-        $order->status = 'active';
-        $order->save();
+       // Criar novo pedido
+       $order = new Order();
+       $order->table_id = $table->id;
+       $order->user_id = auth()->id();
+       $order->status = 'active';
+       $order->save();
 
-        // Atualizar status da mesa
-        $table->status = 'occupied';
-        $table->save();
+       // Atualizar status da mesa
+       $table->status = 'occupied';
+       $table->save();
 
-        return redirect()->route('orders.edit', $order->id);
-    }
- */
+       return redirect()->route('orders.edit', $order->id);
+   }
+*/
     /**
      * Unir mesas (criar um grupo)
      */
-        public function mergeTables(Request $request)
+    public function mergeTables(Request $request)
     {
         try {
             $request->validate([
@@ -105,27 +107,27 @@ class TableController extends Controller
                 'table_ids.*' => 'exists:tables,id',
                 'main_table_id' => 'required|exists:tables,id|in:' . implode(',', $request->table_ids),
             ]);
-    
+
             DB::beginTransaction();
-    
+
             // Buscar todas as mesas com lock para atualização
             $tables = Table::whereIn('id', $request->table_ids)->lockForUpdate()->get();
             $mainTable = $tables->firstWhere('id', $request->main_table_id);
-    
+
             // Validações de negócio
             $invalidTables = $tables->filter(function ($table) {
                 // Removida a verificação de status, apenas verifica se já está em grupo
                 return $table->group_id !== null;
             });
-    
+
             if ($invalidTables->isNotEmpty()) {
                 throw new \Exception('Uma ou mais mesas já fazem parte de um grupo.');
             }
-    
+
             // Gerar ID único para o grupo
             $groupId = 'group_' . Str::random(16);
             $totalCapacity = $tables->sum('capacity');
-    
+
             // Atualizar todas as mesas do grupo
             foreach ($tables as $table) {
                 $updates = [
@@ -134,16 +136,16 @@ class TableController extends Controller
                     'status' => 'occupied', // Força o status para ocupado
                     'merged_capacity' => $table->id === $mainTable->id ? $totalCapacity : null
                 ];
-                
+
                 $table->fill($updates);
                 $table->save(); // Usar save() ao invés de update() para garantir eventos do modelo
             }
-    
+
             DB::commit();
-    
+
             return redirect()->route('tables.index')
                 ->with('success', 'Mesas unidas com sucesso! Todas as mesas do grupo estão ocupadas.');
-    
+
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('tables.index')
@@ -159,15 +161,15 @@ class TableController extends Controller
             DB::beginTransaction();
 
             $tables = Table::where('group_id', $request->group_id)
-                        ->lockForUpdate()
-                        ->get();
+                ->lockForUpdate()
+                ->get();
 
             if ($tables->isEmpty()) {
                 throw new \Exception('Grupo de mesas não encontrado.');
             }
 
             $mainTable = $tables->firstWhere('is_main', 1);
-            
+
             if ($mainTable && $mainTable->hasActiveOrder()) {
                 throw new \Exception('Não é possível separar mesas com pedido ativo.');
             }
@@ -187,6 +189,53 @@ class TableController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('tables.index')->with('error', 'Erro ao separar mesas: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Criar uma nova mesa (temporária ou permanente)
+     */
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'number' => 'required|integer|unique:tables,number',
+                'capacity' => 'required|integer|min:1',
+                'is_temporary' => 'boolean'
+            ]);
+
+            Table::create([
+                'number' => $request->number,
+                'capacity' => $request->capacity,
+                'status' => 'free',
+                'is_temporary' => $request->is_temporary ?? false
+            ]);
+
+            return redirect()->route('tables.index')->with('success', 'Mesa criada com sucesso!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao criar mesa: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Remover uma mesa
+     */
+    public function destroy($id)
+    {
+        try {
+            $table = Table::findOrFail($id);
+
+            if ($table->hasActiveOrder()) {
+                return redirect()->back()->with('error', 'Não é possível remover uma mesa com pedido ativo.');
+            }
+
+            $table->delete();
+
+            return redirect()->route('tables.index')->with('success', 'Mesa removida com sucesso!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao remover mesa: ' . $e->getMessage());
         }
     }
 }

@@ -7,20 +7,25 @@
       .navbar-brand-wrapper {
         width: $sidebar-width-mini;
         background: $sidebar-icon-only-bg;
+
         .navbar-brand {
           display: none;
         }
       }
+
       .navbar-menu-wrapper {
         width: calc(100% - #{$sidebar-width-mini});
       }
     }
+
     .sidebar {
       width: $sidebar-width-mini;
       background: $sidebar-icon-only-bg;
+
       .nav {
         .nav-item {
           padding: 0;
+
           .nav-link {
             @include display-flex;
             @include align-items(center);
@@ -31,21 +36,25 @@
             border-bottom: none;
             margin-bottom: .875rem;
             padding: 10px 24px;
+
             .menu-title {
               display: block;
               margin: auto;
             }
+
             .badge {
               margin-left: 5px;
               display: none;
             }
+
             i {
               &.menu-icon {
-                display:block;
+                display: block;
                 margin-right: auto;
                 margin-left: auto;
                 margin-bottom: .25rem;
               }
+
               &.menu-arrow {
                 display: inline-block;
                 margin-left: 5px;
@@ -56,10 +65,12 @@
               }
             }
           }
+
           &.nav-category {
             display: none;
           }
         }
+
         &.sub-menu {
           .nav-item {
             &::before {
@@ -73,13 +84,16 @@
     .main-panel {
       width: calc(100% - #{$sidebar-width-mini});
     }
+
     &:not(.sidebar-icon-only) {
+
       //Apply these styles only when sidebar-mini is not collapsed to icon-only mode
       .sidebar {
         .nav {
           &.sub-menu {
             padding: 0;
             border-top: none;
+
             .nav-item {
               .nav-link {
                 padding: .75rem 0 .75rem .15rem;
@@ -105,90 +119,113 @@
         width: $sidebar-width-icon;
         padding-left: 1.625rem;
         background: $sidebar-icon-only-bg;
+
         .navbar-toggler {
           @at-root #{selector-append(".sidebar-dark", &)} {
             color: $sidebar-light-menu-color;
           }
         }
+
         .brand-logo {
           display: none;
         }
+
         .brand-logo-mini {
           display: inline-block;
         }
       }
+
       .navbar-menu-wrapper {
         width: calc(100% - #{$sidebar-width-icon});
-       
+
       }
     }
+
     .sidebar {
       width: $sidebar-width-icon;
       background: $sidebar-icon-only-bg;
+
       .nav {
         overflow: visible;
         margin-left: 0;
         margin-right: 0;
+
         .nav-item {
           position: relative;
+
           .nav-link {
             display: block;
             padding-left: .5rem;
-            padding-right: .5rem;            
+            padding-right: .5rem;
             text-align: center;
             position: static;
+
             @at-root #{selector-append(".sidebar-dark", &)} {
               color: $sidebar-light-menu-color;
             }
+
             .menu-title,
-            .badge,.menu-sub-title {
+            .badge,
+            .menu-sub-title {
               display: none;
             }
+
             .menu-title {
               @include border-radius(0 5px 5px 0px);
               background: $sidebar-light-menu-hover-bg;
+
               @at-root #{selector-append(".rtl", &)} {
                 @include border-radius(5px 0 0 5px);
               }
+
               @at-root #{selector-append(".sidebar-dark", &)} {
                 background: $sidebar-light-menu-color;
               }
             }
+
             i {
               &.menu-icon {
                 margin-right: 0;
                 margin-left: 0;
                 margin-bottom: 0;
                 color: $sidebar-icon-only-light-color;
+
                 @at-root #{selector-append(".sidebar-dark", &)} {
                   color: $sidebar-icon-only-light-color;
                 }
               }
+
               &.menu-arrow {
                 display: none;
               }
             }
+
             &[aria-expanded] {
               .menu-title {
                 @include border-radius(0 5px 0 0px);
+
                 @at-root #{selector-append(".rtl", &)} {
                   @include border-radius(5px 0 0 0);
                 }
               }
             }
           }
+
           .collapse {
             display: none;
           }
+
           &.hover-open {
             .nav-link {
               .menu-title {
                 @include display-flex;
                 @include align-items(center);
                 background: $sidebar-light-menu-hover-bg;
+
                 @at-root #{selector-append(".sidebar-dark", &)} {
-                    background: $icon-only-menu-bg-light;
+                  background: $icon-only-menu-bg-dark;
                 }
+
                 padding: 0.5rem 1.4rem;
                 left: $sidebar-width-icon;
                 position: absolute;
@@ -199,55 +236,66 @@
                 z-index: 1;
                 line-height: 1.8;
                 -webkit-box-shadow: 4px 0px 7px 0px rgba(182, 185, 189, 0.25);
-                        box-shadow: 4px 0px 7px 0px rgba(182, 185, 189, 0.25);              
+                box-shadow: 4px 0px 7px 0px rgba(182, 185, 189, 0.25);
+
                 @at-root #{selector-append(".rtl", &)} {
                   left: auto;
                   right: $sidebar-width-icon;
                   text-align: left;
                   -webkit-box-shadow: -4px 0px 7px 0px rgba(182, 185, 189, 0.25);
-                          box-shadow: -4px 0px 7px 0px rgba(182, 185, 189, 0.25);                                
+                  box-shadow: -4px 0px 7px 0px rgba(182, 185, 189, 0.25);
                 }
+
                 @at-root #{selector-append(".sidebar-dark", &)} {
                   color: $sidebar-light-menu-color;
                 }
+
                 &:after {
                   display: none;
                 }
               }
+
               &:hover {
                 .menu-title {
                   background: $sidebar-light-menu-hover-bg;
+
                   @at-root #{selector-append(".sidebar-dark", &)} {
-                    background: $icon-only-menu-bg-light;
+                    background: $icon-only-menu-bg-dark;
                   }
                 }
               }
             }
+
             .collapse,
             .collapsing {
               display: block;
               background: $icon-only-menu-bg-light;
               @include border-radius(0 0 5px 0);
+
               @at-root #{selector-append(".sidebar-dark", &)} {
-                  background: $icon-only-menu-bg-dark;
+                background: $icon-only-menu-bg-dark;
               }
+
               position: absolute;
               left: $sidebar-width-icon;
               width: $icon-only-collapse-width;
               -webkit-box-shadow: 4px 4px 7px 0px rgba(182, 185, 189, 0.25);
-                      box-shadow: 4px 4px 7px 0px rgba(182, 185, 189, 0.25);
+              box-shadow: 4px 4px 7px 0px rgba(182, 185, 189, 0.25);
+
               @at-root #{selector-append(".rtl", &)} {
-                  left: auto;
-                  right:$sidebar-width-icon;
-                  @include border-radius(0 0 0 5px);
-                  -webkit-box-shadow: -4px 4px 7px 0px rgba(182, 185, 189, 0.25);
-                          box-shadow: -4px 4px 7px 0px rgba(182, 185, 189, 0.25);
+                left: auto;
+                right: $sidebar-width-icon;
+                @include border-radius(0 0 0 5px);
+                -webkit-box-shadow: -4px 4px 7px 0px rgba(182, 185, 189, 0.25);
+                box-shadow: -4px 4px 7px 0px rgba(182, 185, 189, 0.25);
               }
             }
           }
+
           &.nav-category {
             display: none;
           }
+
           &.active {
             .nav-link {
               &:before {
@@ -259,6 +307,7 @@
                 left: 0;
                 background: $primary;
               }
+
               i {
                 &.menu-icon {
                   color: $primary;
@@ -267,12 +316,14 @@
             }
           }
         }
+
         &:not(.sub-menu) {
           .nav-item {
             &.active {
               border-radius: 0;
               background: transparent;
             }
+
             &:hover {
               .nav-link {
                 border-radius: 0;
@@ -280,11 +331,14 @@
             }
           }
         }
+
         &.sub-menu {
           padding: $sidebar-icon-only-submenu-padding;
+
           @at-root #{selector-append(".sidebar-dark", &)} {
-            background: $icon-only-menu-bg-light;
+            background: $icon-only-menu-bg-dark;
           }
+
           .nav-item {
             .nav-link {
               text-align: left;
@@ -294,10 +348,11 @@
         }
       }
     }
+
     .main-panel {
       width: calc(100% - #{$sidebar-width-icon});
     }
-    
+
   }
 }
 
@@ -365,6 +420,7 @@
         &.sub-menu {
           max-height: none;
         }
+
         &:not(.sub-menu) {
           padding-bottom: 3rem;
         }
@@ -390,6 +446,7 @@
       background: $boxed-layout-bg;
       padding: 0 calc((100% - #{$boxed-container-width}) / 2);
     }
+
     .navbar {
       &.fixed-top {
         margin: auto;
@@ -407,14 +464,18 @@
   .sidebar {
     .nav {
       padding-right: 0;
+
       &.sub-menu {
         padding: $rtl-sidebar-submenu-padding;
+
         @at-root #{selector-append(".sidebar-icon-only", &)} {
           padding-right: 0rem;
+
           .nav-item {
             .nav-link {
               padding-right: 3rem;
               text-align: right;
+
               &:before {
                 right: 1.75rem;
               }
@@ -435,8 +496,8 @@
     }
 
     &::-webkit-scrollbar-track {
-      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-              box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     }
 
     &::-webkit-scrollbar-thumb {

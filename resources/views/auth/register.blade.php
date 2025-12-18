@@ -1,108 +1,92 @@
 @extends('layouts.auth')
 
+@section('title', 'Registro')
+
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Register') }}</div>
-
-                <div class="card-body">
-                    <form method="POST" action="{{ route('register') }}">
-                        @csrf
-
-                        <!-- Nome -->
-                        <div class="row mb-3">
-                            <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="name" type="text"
-                                    class="form-control @error('name') is-invalid @enderror"
-                                    name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
-
-                                @error('name')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Nome de usuário -->
-                        <div class="row mb-3">
-                            <label for="username" class="col-md-4 col-form-label text-md-end">{{ __('Username') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="username" type="text"
-                                    class="form-control @error('username') is-invalid @enderror"
-                                    name="username" value="{{ old('username') }}" required autocomplete="username">
-
-                                @error('username')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email"
-                                    class="form-control @error('email') is-invalid @enderror"
-                                    name="email" value="{{ old('email') }}" required autocomplete="email">
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Senha -->
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password"
-                                    class="form-control @error('password') is-invalid @enderror"
-                                    name="password" required autocomplete="new-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Confirmação de senha -->
-                        <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password"
-                                    class="form-control"
-                                    name="password_confirmation" required autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <!-- Botão de Registro -->
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Register') }}
-                                </button>
-                            </div>
-                        </div>
-                        
-                    </form>
-                </div>
+    <div class="flex justify-center">
+        <div
+            class="bg-white/90 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
+                    Criar Conta
+                </h2>
             </div>
+
+            <form method="POST" action="{{ route('register') }}" class="space-y-6">
+                @csrf
+
+                <!-- Nome -->
+                <div>
+                    <label for="name"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Name') }}</label>
+                    <input id="name" type="text"
+                        class="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 @error('name') border-red-500 @enderror"
+                        name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+                    @error('name')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Nome de usuário -->
+                <div>
+                    <label for="username"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Username') }}</label>
+                    <input id="username" type="text"
+                        class="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 @error('username') border-red-500 @enderror"
+                        name="username" value="{{ old('username') }}" required autocomplete="username">
+                    @error('username')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Email Address') }}</label>
+                    <input id="email" type="email"
+                        class="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 @error('email') border-red-500 @enderror"
+                        name="email" value="{{ old('email') }}" required autocomplete="email">
+                    @error('email')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Senha -->
+                <div>
+                    <label for="password"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Password') }}</label>
+                    <input id="password" type="password"
+                        class="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror"
+                        name="password" required autocomplete="new-password">
+                    @error('password')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Confirmação de senha -->
+                <div>
+                    <label for="password-confirm"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Confirm Password') }}</label>
+                    <input id="password-confirm" type="password"
+                        class="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
+                        name="password_confirmation" required autocomplete="new-password">
+                </div>
+
+                <!-- Botão de Registro -->
+                <div>
+                    <button type="submit"
+                        class="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 px-6 rounded-full transform hover:-translate-y-0.5 transition duration-200 shadow-lg">
+                        {{ __('Register') }}
+                    </button>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Já tem uma conta? <a href="{{ route('login') }}"
+                            class="text-primary hover:text-primary-hover font-medium">Faça login</a>
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 @endsection

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Table extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'number',
@@ -17,27 +18,28 @@ class Table extends Model
         'is_main',
         'merged_capacity',
         'position_x',
-        'position_y'
+        'position_y',
+        'is_temporary'
     ];
 
     /**
      * Verifica se a mesa tem pedidos ativos
      *
-     * @return bool
+     * @return \App\Models\Order|null
      */
     public function activeOrder()
     {
         return $this->orders()
-                    ->whereIn('status', ['active', 'completed'])
-                    ->latest()
-                    ->first();
+            ->whereIn('status', ['active', 'completed'])
+            ->latest()
+            ->first();
     }
 
     public function hasActiveOrder()
     {
         return $this->orders()
-                    ->whereIn('status', ['active', 'completed'])
-                    ->exists();
+            ->whereIn('status', ['active', 'completed'])
+            ->exists();
     }
 
     protected static function boot()
@@ -80,7 +82,7 @@ class Table extends Model
     public function groupedTables()
     {
         return $this->hasMany(Table::class, 'group_id', 'group_id')
-                    ->where('id', '!=', $this->id);
+            ->where('id', '!=', $this->id);
     }
 
     public function getGroupedTablesNumbersAttribute()
@@ -88,12 +90,12 @@ class Table extends Model
         if (!$this->group_id) {
             return null;
         }
-        
+
         return $this->groupedTables()
-                    ->pluck('number')
-                    ->sort()
-                    ->implode(', ');
-    }   
+            ->pluck('number')
+            ->sort()
+            ->implode(', ');
+    }
     /**
      * Scope para filtrar mesas por status
      */

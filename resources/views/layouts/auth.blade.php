@@ -1,60 +1,54 @@
-<!-- resources/views/layouts/auth.blade.php -->
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Restaurant System') }} - @yield('title')</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
 
-    <!-- StarAdmin2 CSS -->
-    <link href="{{ asset('assets/css/vertical-layout-light/style.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}" rel="stylesheet">
-
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FFA500',
+                        'primary-hover': '#e69500',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body {
-            background-color: #f4f5f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .auth-container {
-            background: #fff;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px;
-        }
-        .auth-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .auth-header h1 {
-            font-size: 1.5rem;
-            font-weight: bold;
+            background: url('{{ asset('assets/images/restaurant-bg.jpeg') }}') no-repeat center center fixed;
+            background-size: cover;
         }
     </style>
 </head>
-<body>
-    <div class="container">
+
+<body class="h-screen flex items-center justify-center text-gray-800 dark:text-gray-100">
+    <div class="w-full max-w-4xl px-4">
         @yield('content')
     </div>
 
-    <!-- StarAdmin2 JS -->
-    <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
-    <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
-    <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
-    <script src="{{ asset('assets/js/misc.js') }}"></script>
+    <script>
+        // Apply saved theme
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </body>
+
 </html>

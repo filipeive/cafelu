@@ -1,0 +1,34 @@
+[
+    {
+        "id": "1",
+        "email": "parysun@mailinator.com",
+        "username": "luadmin",
+        "password": "$2y$10$OfNV6oX\/BF6wrUHRQS48x.erCZbRk68ZpcLdx3TmzbGO.XWhgzfw.",
+        "name": "Bruno Richard",
+        "role": "admin"
+    },
+    {
+        "id": "2",
+        "email": "cyxulu@mailinator.com",
+        "username": "filipedomingos198@gmail.com",
+        "password": "$2y$10$GDSB4tjKhE5RLTsMiedRKOmmDXFomy2ld..lZPfmk7EXyYaSvxrEG",
+        "name": "Wing Rhodes",
+        "role": "manager"
+    },
+    {
+        "id": "4",
+        "email": "johile@mailinator.com",
+        "username": "luis@lifechurch.mz",
+        "password": "$2y$10$7GtSUt5QxwXqmnBQAomDm.Nd3jHK2AMOGmJMMUdaTtNm5vH24T9Uy",
+        "name": "Sophia Beach",
+        "role": "manager"
+    },
+    {
+        "id": "5",
+        "email": "leropy@mailinator.com",
+        "username": "lueyosh@llll.com",
+        "password": "$2y$12$MqTkH87miuU6H7wZikW.meYDwJIEMDNrONHAlvBzCqdJsN7pkW7oW",
+        "name": "Griffith Atkinson",
+        "role": "admin"
+    }
+]

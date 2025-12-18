@@ -6,15 +6,12 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
-class UsersTableSeeder extends Seeder
+class ClientsTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('users')->delete();
-        $json = File::get(database_path('seeders/json/users.json'));
+        DB::table('clients')->delete();
+        $json = File::get(database_path('seeders/json/clients.json'));
         $data = json_decode($json, true);
         foreach ($data as $item) {
             foreach ($item as $key => $value) {
@@ -22,7 +19,7 @@ class UsersTableSeeder extends Seeder
                     $item[$key] = null;
                 }
             }
-            DB::table('users')->insert($item);
+            DB::table('clients')->insert($item);
         }
     }
 }

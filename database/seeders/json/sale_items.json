@@ -1,0 +1,515 @@
+[
+    {
+        "id": "1",
+        "sale_id": "1",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "2",
+        "sale_id": "2",
+        "product_id": "15",
+        "quantity": "1",
+        "unit_price": "80.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "3",
+        "sale_id": "2",
+        "product_id": "16",
+        "quantity": "1",
+        "unit_price": "200.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "4",
+        "sale_id": "2",
+        "product_id": "13",
+        "quantity": "1",
+        "unit_price": "50.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "5",
+        "sale_id": "3",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "7",
+        "sale_id": "4",
+        "product_id": "16",
+        "quantity": "1",
+        "unit_price": "200.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "8",
+        "sale_id": "4",
+        "product_id": "13",
+        "quantity": "1",
+        "unit_price": "50.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "9",
+        "sale_id": "5",
+        "product_id": "16",
+        "quantity": "1",
+        "unit_price": "200.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "10",
+        "sale_id": "5",
+        "product_id": "13",
+        "quantity": "1",
+        "unit_price": "50.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "11",
+        "sale_id": "6",
+        "product_id": "3",
+        "quantity": "7",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "12",
+        "sale_id": "6",
+        "product_id": "3",
+        "quantity": "7",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "13",
+        "sale_id": "7",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "14",
+        "sale_id": "8",
+        "product_id": "10",
+        "quantity": "1",
+        "unit_price": "400.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "15",
+        "sale_id": "9",
+        "product_id": "10",
+        "quantity": "1",
+        "unit_price": "400.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "16",
+        "sale_id": "9",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "17",
+        "sale_id": "10",
+        "product_id": "14",
+        "quantity": "1",
+        "unit_price": "80.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "18",
+        "sale_id": "11",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "19",
+        "sale_id": "12",
+        "product_id": "10",
+        "quantity": "6",
+        "unit_price": "400.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "20",
+        "sale_id": "12",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "21",
+        "sale_id": "12",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "22",
+        "sale_id": "12",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "23",
+        "sale_id": "12",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "24",
+        "sale_id": "12",
+        "product_id": "1",
+        "quantity": "2",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "25",
+        "sale_id": "12",
+        "product_id": "3",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "26",
+        "sale_id": "13",
+        "product_id": "10",
+        "quantity": "6",
+        "unit_price": "400.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "27",
+        "sale_id": "13",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "28",
+        "sale_id": "13",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "29",
+        "sale_id": "13",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "30",
+        "sale_id": "13",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "31",
+        "sale_id": "13",
+        "product_id": "1",
+        "quantity": "2",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "32",
+        "sale_id": "13",
+        "product_id": "3",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "33",
+        "sale_id": "14",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "34",
+        "sale_id": "14",
+        "product_id": "2",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "35",
+        "sale_id": "15",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "36",
+        "sale_id": "15",
+        "product_id": "15",
+        "quantity": "1",
+        "unit_price": "80.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "37",
+        "sale_id": "15",
+        "product_id": "16",
+        "quantity": "1",
+        "unit_price": "200.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "38",
+        "sale_id": "16",
+        "product_id": "15",
+        "quantity": "1",
+        "unit_price": "80.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "39",
+        "sale_id": "16",
+        "product_id": "14",
+        "quantity": "1",
+        "unit_price": "80.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "40",
+        "sale_id": "17",
+        "product_id": "5",
+        "quantity": "4",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "41",
+        "sale_id": "17",
+        "product_id": "15",
+        "quantity": "3",
+        "unit_price": "80.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "42",
+        "sale_id": "18",
+        "product_id": "10",
+        "quantity": "1",
+        "unit_price": "400.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "43",
+        "sale_id": "18",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "30.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "44",
+        "sale_id": "18",
+        "product_id": "16",
+        "quantity": "1",
+        "unit_price": "200.00",
+        "created_at": "2025-04-12 19:27:50",
+        "updated_at": "2025-04-12 19:27:50"
+    },
+    {
+        "id": "45",
+        "sale_id": "21",
+        "product_id": "9",
+        "quantity": "1",
+        "unit_price": "220.00",
+        "created_at": "2025-04-12 17:28:00",
+        "updated_at": "2025-04-12 17:28:00"
+    },
+    {
+        "id": "46",
+        "sale_id": "22",
+        "product_id": "9",
+        "quantity": "1",
+        "unit_price": "220.00",
+        "created_at": "2025-04-12 17:31:01",
+        "updated_at": "2025-04-12 17:31:01"
+    },
+    {
+        "id": "47",
+        "sale_id": "23",
+        "product_id": "4",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 17:49:23",
+        "updated_at": "2025-04-12 17:49:23"
+    },
+    {
+        "id": "48",
+        "sale_id": "24",
+        "product_id": "9",
+        "quantity": "1",
+        "unit_price": "220.00",
+        "created_at": "2025-04-12 17:59:49",
+        "updated_at": "2025-04-12 17:59:49"
+    },
+    {
+        "id": "49",
+        "sale_id": "25",
+        "product_id": "3",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 18:09:46",
+        "updated_at": "2025-04-12 18:09:46"
+    },
+    {
+        "id": "50",
+        "sale_id": "26",
+        "product_id": "16",
+        "quantity": "1",
+        "unit_price": "200.00",
+        "created_at": "2025-04-12 18:53:55",
+        "updated_at": "2025-04-12 18:53:55"
+    },
+    {
+        "id": "51",
+        "sale_id": "27",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 18:59:51",
+        "updated_at": "2025-04-12 18:59:51"
+    },
+    {
+        "id": "52",
+        "sale_id": "27",
+        "product_id": "2",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 18:59:51",
+        "updated_at": "2025-04-12 18:59:51"
+    },
+    {
+        "id": "53",
+        "sale_id": "28",
+        "product_id": "1",
+        "quantity": "1",
+        "unit_price": "40.00",
+        "created_at": "2025-04-12 19:01:51",
+        "updated_at": "2025-04-12 19:01:51"
+    },
+    {
+        "id": "54",
+        "sale_id": "29",
+        "product_id": "3",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-12 19:05:08",
+        "updated_at": "2025-04-12 19:05:08"
+    },
+    {
+        "id": "55",
+        "sale_id": "30",
+        "product_id": "6",
+        "quantity": "1",
+        "unit_price": "200.00",
+        "created_at": "2025-04-12 19:07:18",
+        "updated_at": "2025-04-12 19:07:18"
+    },
+    {
+        "id": "56",
+        "sale_id": "31",
+        "product_id": "9",
+        "quantity": "1",
+        "unit_price": "220.00",
+        "created_at": "2025-04-13 16:07:26",
+        "updated_at": "2025-04-13 16:07:26"
+    },
+    {
+        "id": "57",
+        "sale_id": "32",
+        "product_id": "2",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-15 07:01:49",
+        "updated_at": "2025-04-15 07:01:49"
+    },
+    {
+        "id": "58",
+        "sale_id": "32",
+        "product_id": "3",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "created_at": "2025-04-15 07:01:49",
+        "updated_at": "2025-04-15 07:01:49"
+    }
+]

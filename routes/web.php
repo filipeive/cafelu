@@ -13,6 +13,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ExpenseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,32 +43,39 @@ Route::middleware(['auth'])->group(function () {
 
     // POS
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
-    Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.completeCheckout');
-    Route::get('/pos/receipt/{saleId}', [POSController::class, 'receipt'])->name('pos.receipt');
+    Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
+    Route::post('/pos/hold', [POSController::class, 'hold'])->name('pos.hold'); // Nova rota
+    Route::get('/pos/receipt/{sale}', [POSController::class, 'receipt'])->name('pos.receipt');
     Route::get('/pos/receipt/{saleId}/print', [POSController::class, 'printReceipt'])->name('pos.receipt.print');
+    Route::get('/pos/held-orders', [POSController::class, 'getHeldOrders'])->name('pos.held-orders');
+    Route::get('/pos/tables', [POSController::class, 'getTables'])->name('pos.tables');
+    Route::get('/pos/retrieve-order/{order}', [POSController::class, 'retrieveOrder'])->name('pos.retrieve-order');
 
     //menu management
     Route::get('menu', [DashboardController::class, 'menu'])->name('menu.index');
     Route::get('menu/{category}', [DashboardController::class, 'menuCategory'])->name('menu.category');
-     // Rotas para gerenciamento de mesas
-     Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
-     Route::get('/tables/create', [TableController::class, 'create'])->name('tables.create');
-     Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
-     Route::get('/tables/{table}/edit', [TableController::class, 'edit'])->name('tables.edit');
-     Route::put('/tables/{table}', [TableController::class, 'update'])->name('tables.update');
-     Route::delete('/tables/{table}', [TableController::class, 'destroy'])->name('tables.destroy');
-     
-     // Rotas das mesas
+    // Rotas para gerenciamento de mesas
+    Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
+    Route::get('/tables/create', [TableController::class, 'create'])->name('tables.create');
+    Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
+    Route::get('/tables/{table}/edit', [TableController::class, 'edit'])->name('tables.edit');
+    Route::put('/tables/{table}', [TableController::class, 'update'])->name('tables.update');
+    Route::delete('/tables/{table}', [TableController::class, 'destroy'])->name('tables.destroy');
+
+    // Rotas das mesas
     Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
     Route::post('/tables/{table}/update-status', [TableController::class, 'updateStatus'])->name('tables.update-status');
-     // Rota GET para mostrar o formulário de criação de pedido a partir da mesa
-    Route::get('/tables/{table}/create-order', [TableController::class, 'createOrder'])->name('tables.create-order');
-    // Rota POST que cria o pedido (mantém o comportamento existente) — renomeada
+    // Rota GET para mostrar o formulário de criação de pedido a partir da mesa
     Route::post('/tables/{table}/create-order', [TableController::class, 'createOrder'])->name('tables.create-order');
+    // Rota POST que cria o pedido (mantém o comportamento existente) — renomeada
+    Route::post('/tables/status/{table}', [TableController::class, 'updateStatus'])->name('tables.status');
+    Route::post('/tables/store', [TableController::class, 'store'])->name('tables.store');
+    Route::delete('/tables/{table}', [TableController::class, 'destroy'])->name('tables.destroy');
     Route::post('/tables/merge', [TableController::class, 'mergeTables'])->name('tables.merge');
     Route::post('/tables/split', [TableController::class, 'splitTables'])->name('tables.split');
 
     // Rotas dos pedidos
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
@@ -79,10 +87,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/{order}/print-receipt', [OrderController::class, 'printReceipt'])->name('orders.print-receipt');
-    Route::post('/orders/complete/{order}', [OrderController::class, 'complete'])->name('orders.complete');
+    Route::post('/orders/complete/{order}', [OrderController::class, 'complete'])->name('orders.complete.alt');
     Route::get('/orders/data/{order}', [OrderController::class, 'getOrderData'])->name('orders.data');
-    Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel.alt');
     Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
+    Route::get('/orders/{order}/print', [OrderController::class, 'print'])->name('orders.print.alt');
     Route::get('/orders/kitchen', [OrderController::class, 'kitchen'])->name('orders.kitchen');
 
     // Products & Categories
@@ -93,16 +102,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    
+
     // Rotas especiais de produtos
     Route::post('/products/{product}/stock', [ProductController::class, 'updateStock'])->name('products.stock.update');
     Route::get('/products/{product}/stock-history', [ProductController::class, 'stockHistory'])->name('products.stock-history');
     Route::get('/products/{product}/sales-data', [ProductController::class, 'salesData'])->name('products.sales-data');
     Route::get('/products/export', [ProductController::class, 'export'])->name('products.export');
-    
+
     // Categorias
     Route::resource('categories', CategoryController::class);
-    
+
     // Sales Management
     Route::resource('sales', SaleController::class);
     Route::get('sales/{sale}/receipt', [SaleController::class, 'receipt'])->name('sales.receipt');
@@ -113,9 +122,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Rota personalizada para processar venda (chamada pelo JavaScript)
     Route::post('/pos/process-sale', [SaleController::class, 'process_sale'])->name('sales.process');
+    // Expenses
+    Route::resource('expenses', ExpenseController::class);
+
     // Employees Management
     Route::resource('employees', EmployeeController::class);
-    
+
     // Clients Management
     //Route::resource('clients', ClientController::class);
     Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
@@ -134,17 +146,19 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('clients/{client}', [ClientController::class, 'destroy'])->name('client.destroy');
 
     //employes
-    Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
-    Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
-    Route::post('employees/store', [EmployeeController::class, 'store'])->name('employees.store');
-    Route::get('employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
-    Route::put('employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
-    Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-    Route::get('employees/{employee}/show', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+    Route::get('/employees/payroll', [EmployeeController::class, 'payroll'])->name('employees.payroll');
+    Route::post('/employees/{employee}/pay-salary', [EmployeeController::class, 'paySalary'])->name('employees.pay-salary');
     Route::get('employees/search', [EmployeeController::class, 'search'])->name('employees.search');
 
 
-    
+
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.save');
@@ -161,6 +175,6 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 // Restricted Routes with Throttling
-Route::middleware(['auth:web', 'throttle:6,1'])->group(function () {
-    Route::get('/restricted-page', 'RestrictedController@show')->name('restricted-page');
-});
+// Route::middleware(['auth:web', 'throttle:6,1'])->group(function () {
+//     Route::get('/restricted-page', 'RestrictedController@show')->name('restricted-page');
+// });

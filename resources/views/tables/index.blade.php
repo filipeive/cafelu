@@ -1,449 +1,162 @@
 @extends('layouts.app')
 @section('title', 'Mesas - Restaurante Pro')
 
-@section('styles')
-    <style>
-        /* Estilos Gerais */
-        .tables-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-            padding: 1rem;
-        }
-
-        /* Cards de Mesa - Design Moderno */
-        .table-card {
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            border: none;
-            color: white;
-            min-height: 220px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        }
-
-        .table-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-            transition: all 0.5s ease;
-            opacity: 0;
-        }
-
-        .table-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-        }
-
-        .table-card:hover::before {
-            opacity: 1;
-            transform: scale(0.8);
-        }
-
-        /* Cores dos Estados */
-        .table-free {
-            --primary-color: #4CAF50;
-            --secondary-color: #2E7D32;
-            --highlight-color: #81C784;
-        }
-
-        .table-occupied {
-            --primary-color: #F44336;
-            --secondary-color: #C62828;
-            --highlight-color: #EF5350;
-        }
-
-        .table-grouped {
-            --primary-color: #2196F3;
-            --secondary-color: #1565C0;
-            --highlight-color: #64B5F6;
-        }
-
-        /* Conteúdo do Card */
-        .table-content {
-            position: relative;
-            z-index: 2;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .table-number {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            color: white;
-        }
-
-        .table-status {
-            margin-bottom: 1rem;
-        }
-
-        .table-status .badge {
-            font-size: 0.75rem;
-            padding: 0.35rem 0.75rem;
-            border-radius: 50px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            background-color: rgba(255,255,255,0.2);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .table-capacity {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* Ícone de Mesa Agrupada */
-        .grouped-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255,255,255,0.2);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .grouped-icon i {
-            font-size: 1rem;
-            color: white;
-        }
-
-        /* Ações do Card */
-        .table-actions {
-            margin-top: auto;
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 3;
-        }
-
-        .table-card:hover .table-actions {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .btn-table-action {
-            padding: 0.5rem 1.25rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: none;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.9);
-            color: var(--primary-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-table-action:hover {
-            background: white;
-            color: var(--secondary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .btn-table-action i {
-            font-size: 1rem;
-        }
-
-        /* Modal de Unir Mesas */
-        .modal-content {
-            border-radius: 12px;
-            overflow: hidden;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            border-bottom: none;
-        }
-
-        .modal-title {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            border-top: none;
-            padding: 1rem 1.5rem;
-            background: #f8f9fa;
-        }
-
-        /* Checkboxes Estilizados */
-        .table-checkbox-label {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: 1px solid #e9ecef;
-            margin-bottom: 0.5rem;
-        }
-
-        .table-checkbox-label:hover {
-            background: #f8f9fa;
-            border-color: #dee2e6;
-            transform: translateY(-2px);
-        }
-
-        .table-checkbox-label i {
-            margin-right: 0.75rem;
-            font-size: 1.25rem;
-            color: #6c757d;
-        }
-
-        .form-check-input:checked ~ .table-checkbox-label {
-            background-color: #e3f2fd;
-            border-color: #bbdefb;
-        }
-
-        /* Legenda de Status */
-        .status-legend {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 0;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-        }
-
-        .color-free {
-            background: linear-gradient(135deg, #4CAF50, #2E7D32);
-        }
-
-        .color-occupied {
-            background: linear-gradient(135deg, #F44336, #C62828);
-        }
-
-        .color-grouped {
-            background: linear-gradient(135deg, #2196F3, #1565C0);
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .tables-grid {
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            }
-            
-            .status-legend {
-                flex-direction: column;
-                gap: 0.75rem;
-            }
-        }
-
-        /* Efeito de Destaque para Checkbox Selecionado */
-        .form-check-input:checked ~ .table-checkbox-label {
-            box-shadow: 0 0 0 2px var(--primary-color);
-        }
-
-        /* Botão de Merge */
-        #merge-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Animação de Carregamento */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .table-card {
-            animation: fadeIn 0.4s ease forwards;
-            opacity: 0;
-        }
-
-        .table-card:nth-child(1) { animation-delay: 0.1s; }
-        .table-card:nth-child(2) { animation-delay: 0.2s; }
-        .table-card:nth-child(3) { animation-delay: 0.3s; }
-        .table-card:nth-child(4) { animation-delay: 0.4s; }
-        .btn-table-action i {
-            margin-right: 0.35rem;
-        }
-
-        .table-checkbox-label {
-            cursor: pointer;
-        }
-    </style>
 @section('content')
-    <div class="container-fluid py-4">
+    <div x-data="tableManagement({{ $tables->toJson() }})" class="w-full">
         <!-- Page Header -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-                    <div>
-                        <h2 class="mb-0">
-                            <i class="mdi mdi-table-furniture text-primary me-2"></i>
-                            Gerenciamento de Mesas
-                        </h2>
-                        <p class="text-muted mb-md-0">Visualize, organize e gerencie as mesas do restaurante</p>
-                    </div>
-                    <div class="mt-3 mt-md-0">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mergeTables">
-                            <i class="mdi mdi-link me-1"></i> Unir Mesas
-                        </button>
-                    </div>
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                        <i class="mdi mdi-table-furniture text-blue-600 mr-2"></i>
+                        Gerenciamento de Mesas
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">Visualize, organize e gerencie as mesas do restaurante</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                <div class="mt-4 md:mt-0 flex gap-2">
+                    <button @click="openCreateModal()" type="button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-150 ease-in-out">
+                        <i class="mdi mdi-plus mr-2"></i> Criar Mesa
+                    </button>
+                    <button @click="openMergeModal()" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-150 ease-in-out">
+                        <i class="mdi mdi-link mr-2"></i> Unir Mesas
+                    </button>
+                </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Status Legend -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="status-legend">
-                    <div class="legend-item">
-                        <div class="legend-color color-free"></div>
-                        <span>Mesa Livre</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color color-occupied"></div>
-                        <span>Mesa Ocupada</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color color-grouped"></div>
-                        <span>Mesa Agrupada</span>
-                    </div>
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+            <div class="flex flex-wrap gap-6">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded bg-gradient-to-br from-green-500 to-green-700 mr-2"></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Mesa Livre</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded bg-gradient-to-br from-red-500 to-red-700 mr-2"></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Mesa Ocupada</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded bg-gradient-to-br from-blue-500 to-blue-700 mr-2"></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Mesa Agrupada</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded bg-gradient-to-br from-yellow-500 to-yellow-700 mr-2"></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Mesa Temporária</span>
                 </div>
             </div>
         </div>
 
         <!-- Tables Grid -->
-        <div class="card">
-            <div class="card-header bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="mdi mdi-view-grid me-1"></i>
-                        Mesas Disponíveis
-                    </h5>
-                    <span class="badge bg-primary">Total: {{ count($tables) }}</span>
-                </div>
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+                <h5 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                    <i class="mdi mdi-view-grid mr-2"></i>
+                    Mesas Disponíveis
+                </h5>
+                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">Total: {{ count($tables) }}</span>
             </div>
-            <div class="card-body">
-                <div class="tables-grid">
+            <div class="p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach ($tables as $table)
                         @php
                             $hasActiveOrder = $table->hasActiveOrder();
-                            $statusClass = $hasActiveOrder ? 'table-occupied' : 'table-free';
-                            $statusText = $hasActiveOrder ? 'Ocupada' : 'Livre';
                             $isGrouped = $table->group_id !== null;
                             $isMain = $table->is_main;
                             $activeOrder = $table->activeOrder();
+                            
+                            // Determine gradient based on status
+                            if ($hasActiveOrder) {
+                                $gradientClass = 'bg-gradient-to-br from-red-500 to-red-700';
+                            } elseif ($isGrouped) {
+                                $gradientClass = 'bg-gradient-to-br from-blue-500 to-blue-700';
+                            } elseif ($table->is_temporary) {
+                                $gradientClass = 'bg-gradient-to-br from-yellow-500 to-yellow-700';
+                            } else {
+                                $gradientClass = 'bg-gradient-to-br from-green-500 to-green-700';
+                            }
                         @endphp
 
-                        <div class="table-card {{ $statusClass }} {{ $isGrouped ? 'table-grouped' : '' }}">
+                        <div class="relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col min-h-[220px] text-white {{ $gradientClass }}">
+                            <!-- Background Pattern -->
+                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent pointer-events-none"></div>
+
                             @if ($isGrouped)
-                                <div class="grouped-icon">
-                                    <i class="mdi mdi-link-variant"></i>
+                                <div class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                                    <i class="mdi mdi-link-variant text-white"></i>
                                 </div>
                             @endif
 
-                            <div class="table-content">
-                                <h3 class="table-number">{{ $table->number }}</h3>
+                            @if ($table->is_temporary)
+                                <div class="absolute top-4 right-4 w-auto px-2 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20 text-xs font-bold">
+                                    TEMP
+                                </div>
+                                @if(!$hasActiveOrder)
+                                    <form action="{{ route('tables.destroy', $table->id) }}" method="POST" class="absolute top-4 left-4 z-50" onsubmit="return confirm('Tem certeza que deseja remover esta mesa temporária?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-600 backdrop-blur-sm flex items-center justify-center border border-white/20 transition-colors">
+                                            <i class="mdi mdi-delete text-white"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                            @endif
 
-                                <div class="table-status">
-                                    <span class="badge {{ $hasActiveOrder ? 'bg-danger' : 'bg-success' }} mb-2">
-                                        <i class="mdi {{ $hasActiveOrder ? 'mdi-lock' : 'mdi-lock-open' }} me-1"></i>
-                                        {{ $statusText }}
+                            <div class="relative z-10 flex-grow flex flex-col p-6">
+                                <h3 class="text-3xl font-bold mb-2 drop-shadow-md">{{ $table->number }}</h3>
+
+                                <div class="mb-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide bg-white/20 backdrop-blur-sm border border-white/20 shadow-sm mb-2">
+                                        <i class="mdi {{ $hasActiveOrder ? 'mdi-lock' : 'mdi-lock-open' }} mr-1"></i>
+                                        {{ $hasActiveOrder ? 'Ocupada' : 'Livre' }}
                                     </span>
 
-                                    <div class="mt-1">
-                                        <span class="table-capacity">
-                                            <i class="mdi mdi-account-multiple me-1"></i>
-                                            {{ $table->merged_capacity ?? $table->capacity }} lugares
-                                        </span>
+                                    <div class="mt-1 flex items-center opacity-90 text-sm font-medium">
+                                        <i class="mdi mdi-account-multiple mr-1"></i>
+                                        {{ $table->merged_capacity ?? $table->capacity }} lugares
                                     </div>
                                 </div>
 
                                 @if ($hasActiveOrder)
                                     <div class="mt-2">
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="mdi mdi-receipt me-1"></i>
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-400 text-yellow-900 shadow-sm">
+                                            <i class="mdi mdi-receipt mr-1"></i>
                                             Pedido #{{ $activeOrder->id }}
                                         </span>
-                                        <!--nome do cliente do pedido-->
                                         @if($activeOrder->customer_name)
-                                        <div class="mt-1">
-                                            <span class="badge bg-info text-dark" style="margin-top: 5px; font-size: 0.9em;">
-                                                <i class="mdi mdi-account me-1"></i>
-                                                {{ htmlspecialchars($activeOrder->customer_name) }}
-                                            </span>
-                                        </div>
+                                            <div class="mt-2">
+                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-blue-400 text-blue-900 shadow-sm">
+                                                    <i class="mdi mdi-account mr-1"></i>
+                                                    {{ $activeOrder->customer_name }}
+                                                </span>
+                                            </div>
                                         @endif
                                     </div>
                                 @endif
                             </div>
 
-                            <div class="table-actions">
+                            <!-- Actions -->
+                            <div class="relative z-20 p-4 mt-auto flex flex-wrap gap-2 justify-center bg-black/10 backdrop-blur-sm transition-opacity duration-300">
                                 @if (!$hasActiveOrder && (!$isGrouped || $isMain))
-                                    <form action="{{ route('tables.create-order', $table) }}" method="POST"
-                                        class="d-inline">
+                                    <form action="{{ route('tables.create-order', $table) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-table-action">
-                                            <i class="mdi mdi-plus-circle"></i>Novo Pedido
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-full shadow-sm text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                                            <i class="mdi mdi-plus-circle mr-1"></i>Novo Pedido
                                         </button>
                                     </form>
                                 @elseif($hasActiveOrder && (!$isGrouped || $isMain))
-                                    <a href="{{ route('orders.edit', $activeOrder->id) }}" class="btn btn-table-action ">
-                                        <i class="mdi mdi-pencil"></i>Editar Pedido
+                                    <a href="{{ route('orders.edit', $activeOrder->id) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-full shadow-sm text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                        <i class="mdi mdi-pencil mr-1"></i>Editar Pedido
                                     </a>
                                 @endif
 
                                 @if ($isGrouped && $isMain)
-                                    <form action="{{ route('tables.split') }}" method="POST" class="d-inline">
+                                    <form action="{{ route('tables.split') }}" method="POST" class="inline">
                                         @csrf
                                         <input type="hidden" name="group_id" value="{{ $table->group_id }}">
-                                        <button type="submit" class="btn btn-table-action">
-                                            <i class="mdi mdi-link-off"></i>Separar
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-full shadow-sm text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                                            <i class="mdi mdi-link-off mr-1"></i>Separar
                                         </button>
                                     </form>
                                 @endif
@@ -453,69 +166,124 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Merge Tables Modal -->
-    <div class="modal fade" id="mergeTables" tabindex="-1" aria-labelledby="mergeTablesLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form action="{{ route('tables.merge') }}" method="POST">
-                    @csrf
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="mergeTablesLabel">
-                            <i class="mdi mdi-link me-2"></i>Unir Mesas
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            <i class="mdi mdi-information-outline me-2"></i>
-                            Selecione pelo menos duas mesas livres para uni-las. Depois escolha qual será a mesa principal
-                            onde os pedidos serão registrados.
+        <!-- Merge Tables Modal -->
+        <div x-show="showMergeModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div x-show="showMergeModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75" @click="showMergeModal = false"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div x-show="showMergeModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl w-full">
+                    <form action="{{ route('tables.merge') }}" method="POST">
+                        @csrf
+                        <div class="bg-blue-600 px-4 py-3 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-white flex items-center" id="modal-title">
+                                <i class="mdi mdi-link mr-2"></i> Unir Mesas
+                            </h3>
                         </div>
+                        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="mb-4 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="mdi mdi-information-outline text-blue-500"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-blue-700 dark:text-blue-200">
+                                            Selecione pelo menos duas mesas livres para uni-las. Depois escolha qual será a mesa principal onde os pedidos serão registrados.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Selecione as mesas para unir</label>
-                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-                                @foreach ($tables as $table)
-                                    @if ($table->status === 'free' && !$table->group_id)
-                                        <div class="col">
-                                            <div class="form-check">
-                                                <input type="checkbox" class="form-check-input table-checkbox"
-                                                    id="table-{{ $table->id }}" name="table_ids[]"
-                                                    value="{{ $table->id }}">
-                                                <label class="form-check-label table-checkbox-label"
-                                                    for="table-{{ $table->id }}">
-                                                    <i class="mdi mdi-table-furniture"></i>
-                                                    Mesa {{ $table->number }} ({{ $table->capacity }} lugares)
+                            <div class="mb-6">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Selecione as mesas para unir</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    @foreach ($tables as $table)
+                                        @if ($table->status === 'free' && !$table->group_id)
+                                            <div class="relative">
+                                                <input type="checkbox" id="table-{{ $table->id }}" value="{{ $table->id }}" x-model="selectedTables" class="peer sr-only">
+                                                <label for="table-{{ $table->id }}" class="flex items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900 peer-checked:text-blue-600 dark:peer-checked:text-blue-300 transition-all">
+                                                    <i class="mdi mdi-table-furniture text-lg mr-3 text-gray-400 peer-checked:text-blue-500"></i>
+                                                    <span class="text-sm font-medium">Mesa {{ $table->number }} ({{ $table->capacity }} lug.)</span>
                                                 </label>
                                             </div>
-                                        </div>
-                                    @endif
-                                @endforeach
+                                        @endif
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="main_table_id" class="form-label fw-bold">Mesa Principal</label>
-                            <select class="form-select" id="main_table_id" name="main_table_id" required>
-                                <option value="">Selecione uma mesa principal</option>
-                            </select>
-                            <div class="form-text">
-                                <i class="mdi mdi-information-outline me-1 text-primary"></i>
-                                A mesa principal será onde os pedidos serão registrados
+                            <div class="mb-3">
+                                <label for="main_table_id" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Mesa Principal</label>
+                                <select id="main_table_id" name="main_table_id" x-model="mainTable" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                    <option value="">Selecione uma mesa principal</option>
+                                    <template x-for="table in getSelectedTableObjects()" :key="table.id">
+                                        <option :value="table.id" x-text="`Mesa ${table.number} (${table.capacity} lugares)`"></option>
+                                    </template>
+                                </select>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <i class="mdi mdi-information-outline mr-1 text-blue-500"></i>
+                                    A mesa principal será onde os pedidos serão registrados
+                                </p>
                             </div>
+                            
+                            <!-- Hidden inputs for selected tables -->
+                            <template x-for="tableId in selectedTables" :key="tableId">
+                                <input type="hidden" name="table_ids[]" :value="tableId">
+                            </template>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="submit" :disabled="!canMerge" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                Unir Mesas
+                            </button>
+                            <button @click="showMergeModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Create Table Modal -->
+    <div x-show="showCreateModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="closeCreateModal()">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                <form action="{{ route('tables.store') }}" method="POST">
+                    @csrf
+                    <div class="bg-green-600 px-4 py-3 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-white flex items-center">
+                            <i class="mdi mdi-plus-circle mr-2"></i> Criar Nova Mesa
+                        </h3>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="mb-4">
+                            <label for="number" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Número da Mesa</label>
+                            <input type="number" name="number" id="number" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="capacity" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Capacidade (Lugares)</label>
+                            <input type="number" name="capacity" id="capacity" required min="1" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="is_temporary" value="1" class="form-checkbox h-5 w-5 text-green-600">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Mesa Temporária?</span>
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1">Mesas temporárias podem ser removidas facilmente.</p>
                         </div>
                     </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                            <i class="mdi mdi-close me-1"></i>Cancelar
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                            Criar
                         </button>
-                        <button type="submit" class="btn btn-primary" id="merge-btn" disabled>
-                            <i class="mdi mdi-link me-1"></i>Unir Mesas
+                        <button @click="closeCreateModal()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancelar
                         </button>
                     </div>
                 </form>
@@ -523,60 +291,50 @@
         </div>
     </div>
 
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const tableCheckboxes = document.querySelectorAll('.table-checkbox');
-                const mainTableSelect = document.getElementById('main_table_id');
-                const mergeBtn = document.getElementById('merge-btn');
+    </div>
+@push('scripts')
+    <script>
+        function tableManagement(tablesData) {
+            return {
+                showMergeModal: false,
+                showCreateModal: false,
+                selectedTables: [],
+                mainTable: '',
+                tables: tablesData,
 
-                // Update main table select options based on checkbox selection
-                function updateMainTableSelect() {
-                    const selectedTables = Array.from(tableCheckboxes)
-                        .filter(cb => cb.checked)
-                        .map(cb => ({
-                            id: cb.value,
-                            label: cb.nextElementSibling.textContent.trim()
-                        }));
+                init() {
+                    console.log('Table Management Initialized', this.tables);
+                },
 
-                    // Reset and update options
-                    mainTableSelect.innerHTML = '<option value="">Selecione uma mesa principal</option>';
-                    selectedTables.forEach(table => {
-                        const option = document.createElement('option');
-                        option.value = table.id;
-                        option.textContent = table.label;
-                        mainTableSelect.appendChild(option);
-                    });
+                openMergeModal() {
+                    console.log('Opening Merge Modal');
+                    this.selectedTables = [];
+                    this.mainTable = '';
+                    this.showMergeModal = true;
+                },
 
-                    // Update button state
-                    updateMergeButtonState(selectedTables.length);
+                openCreateModal() {
+                    console.log('Opening Create Modal');
+                    this.showCreateModal = true;
+                },
+
+                closeCreateModal() {
+                    this.showCreateModal = false;
+                },
+
+                closeMergeModal() {
+                    this.showMergeModal = false;
+                },
+
+                getSelectedTableObjects() {
+                    return this.tables.filter(t => this.selectedTables.includes(t.id.toString()));
+                },
+
+                get canMerge() {
+                    return this.selectedTables.length >= 2 && this.mainTable !== '';
                 }
-
-                // Enable/disable merge button based on selections
-                function updateMergeButtonState(selectedCount) {
-                    const hasMainTable = mainTableSelect.value !== '';
-                    mergeBtn.disabled = selectedCount < 2 || !hasMainTable;
-                }
-
-                // Event listeners
-                tableCheckboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', updateMainTableSelect);
-                });
-
-                mainTableSelect.addEventListener('change', function() {
-                    const selectedCount = Array.from(tableCheckboxes).filter(cb => cb.checked).length;
-                    updateMergeButtonState(selectedCount);
-                });
-
-                // Auto-hide alerts after 5 seconds
-                setTimeout(function() {
-                    const alerts = document.querySelectorAll('.alert-dismissible');
-                    alerts.forEach(alert => {
-                        const bsAlert = new bootstrap.Alert(alert);
-                        bsAlert.close();
-                    });
-                }, 5000);
-            });
-        </script>
-    @endpush
+            }
+        }
+    </script>
+@endpush
 @endsection

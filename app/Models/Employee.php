@@ -12,6 +12,8 @@ class Employee extends Model
     protected $fillable = [
         'name',
         'role',
+        'salary',
+        'phone',
         'hire_date',
     ];
 
@@ -22,6 +24,11 @@ class Employee extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where('name', 'like', "%{$search}%")
-                     ->orWhere('role', 'like', "%{$search}%");
+            ->orWhere('role', 'like', "%{$search}%");
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(SalaryPayment::class);
     }
 }

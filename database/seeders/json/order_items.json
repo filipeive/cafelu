@@ -1,0 +1,74 @@
+[
+    {
+        "id": "4",
+        "order_id": "2",
+        "product_id": "5",
+        "quantity": "1",
+        "unit_price": "0.00",
+        "total_price": "0.00",
+        "status": "delivered",
+        "notes": "NULL",
+        "created_at": "2025-04-14 16:43:51",
+        "updated_at": "2025-04-14 17:30:27"
+    },
+    {
+        "id": "5",
+        "order_id": "2",
+        "product_id": "15",
+        "quantity": "1",
+        "unit_price": "0.00",
+        "total_price": "0.00",
+        "status": "delivered",
+        "notes": "NULL",
+        "created_at": "2025-04-14 16:43:51",
+        "updated_at": "2025-04-14 17:31:22"
+    },
+    {
+        "id": "22",
+        "order_id": "10",
+        "product_id": "3",
+        "quantity": "1",
+        "unit_price": "250.00",
+        "total_price": "250.00",
+        "status": "pending",
+        "notes": "NULL",
+        "created_at": "2025-04-14 18:34:43",
+        "updated_at": "2025-04-14 18:34:43"
+    },
+    {
+        "id": "23",
+        "order_id": "10",
+        "product_id": "7",
+        "quantity": "1",
+        "unit_price": "60.00",
+        "total_price": "60.00",
+        "status": "pending",
+        "notes": "NULL",
+        "created_at": "2025-04-14 18:34:52",
+        "updated_at": "2025-04-14 18:34:52"
+    },
+    {
+        "id": "25",
+        "order_id": "5",
+        "product_id": "15",
+        "quantity": "1",
+        "unit_price": "80.00",
+        "total_price": "80.00",
+        "status": "pending",
+        "notes": "NULL",
+        "created_at": "2025-04-15 07:21:51",
+        "updated_at": "2025-04-15 07:21:51"
+    },
+    {
+        "id": "26",
+        "order_id": "5",
+        "product_id": "2",
+        "quantity": "2",
+        "unit_price": "250.00",
+        "total_price": "500.00",
+        "status": "pending",
+        "notes": "NULL",
+        "created_at": "2025-04-15 07:21:58",
+        "updated_at": "2025-04-15 07:22:05"
+    }
+]

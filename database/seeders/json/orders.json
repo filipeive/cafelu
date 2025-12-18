@@ -1,0 +1,122 @@
+[
+    {
+        "id": "1",
+        "table_id": "1",
+        "user_id": "0",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "0.00",
+        "created_at": "2024-11-01 19:41:22",
+        "updated_at": "2025-04-14 16:10:25",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "2",
+        "table_id": "1",
+        "user_id": "0",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "110.00",
+        "created_at": "2024-11-02 21:26:56",
+        "updated_at": "2025-04-14 16:23:21",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "3",
+        "table_id": "1",
+        "user_id": "0",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "0.00",
+        "created_at": "2024-11-03 17:02:12",
+        "updated_at": "2025-04-14 16:41:32",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "4",
+        "table_id": "1",
+        "user_id": "0",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "0.00",
+        "created_at": "2024-12-15 19:54:24",
+        "updated_at": "2025-04-14 18:31:49",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "5",
+        "table_id": "1",
+        "user_id": "0",
+        "customer_name": "Filipe e Esposa",
+        "status": "completed",
+        "total_amount": "580.00",
+        "created_at": "2025-04-08 12:28:32",
+        "updated_at": "2025-04-15 07:22:05",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "6",
+        "table_id": "2",
+        "user_id": "5",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "0.00",
+        "created_at": "2025-04-14 14:23:26",
+        "updated_at": "2025-04-14 15:49:19",
+        "payment_method": "cash",
+        "notes": "NULL"
+    },
+    {
+        "id": "7",
+        "table_id": "3",
+        "user_id": "5",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "0.00",
+        "created_at": "2025-04-14 15:50:00",
+        "updated_at": "2025-04-14 16:39:00",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "8",
+        "table_id": "2",
+        "user_id": "5",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "0.00",
+        "created_at": "2025-04-14 16:09:00",
+        "updated_at": "2025-04-14 16:09:04",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "9",
+        "table_id": "4",
+        "user_id": "5",
+        "customer_name": "NULL",
+        "status": "canceled",
+        "total_amount": "0.00",
+        "created_at": "2025-04-14 16:52:38",
+        "updated_at": "2025-04-14 18:22:29",
+        "payment_method": "NULL",
+        "notes": "NULL"
+    },
+    {
+        "id": "10",
+        "table_id": "5",
+        "user_id": "5",
+        "customer_name": "NULL",
+        "status": "paid",
+        "total_amount": "310.00",
+        "created_at": "2025-04-14 18:32:09",
+        "updated_at": "2025-04-14 19:08:40",
+        "payment_method": "cash",
+        "notes": "NULL"
+    }
+]

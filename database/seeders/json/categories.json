@@ -1,0 +1,22 @@
+[
+    {
+        "id": "1",
+        "name": "Sumos"
+    },
+    {
+        "id": "2",
+        "name": "Refrescos"
+    },
+    {
+        "id": "3",
+        "name": "Comidas"
+    },
+    {
+        "id": "4",
+        "name": "Bebidas"
+    },
+    {
+        "id": "5",
+        "name": "Doces e Salgados"
+    }
+]

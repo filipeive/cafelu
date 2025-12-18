@@ -1,0 +1,30 @@
+[
+    {
+        "id": "1",
+        "name": "Holmes Mclean",
+        "email": "netavude@mailinator.com",
+        "phone": "+1 (194) 178-4965",
+        "address": "Deserunt dolorem ven"
+    },
+    {
+        "id": "2",
+        "name": "Brody Wooten",
+        "email": "mofolili@mailinator.com",
+        "phone": "+1 (203) 131-6782",
+        "address": "Deserunt libero face"
+    },
+    {
+        "id": "3",
+        "name": "Gregory Dillon",
+        "email": "hoxyrehyla@mailinator.com",
+        "phone": "+1 (676) 351-8373",
+        "address": "Saepe harum id libe"
+    },
+    {
+        "id": "4",
+        "name": "Macey Pickett",
+        "email": "wixuwop@mailinator.com",
+        "phone": "+1 (758) 129-7795",
+        "address": "Ex voluptatem ut ma"
+    }
+]

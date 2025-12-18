@@ -1,67 +1,107 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <h4 class="mb-4">{{ isset($employee) ? 'Editar' : 'Novo' }} Funcionário</h4>
+    <div class="max-w-4xl mx-auto">
+        <!-- Page Header -->
+        <div class="flex items-center gap-4 mb-8">
+            <a href="{{ route('employees.index') }}"
+                class="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-orange-500 transition-colors shadow-sm">
+                <i class="mdi mdi-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Editar Funcionário</h1>
+                <p class="text-gray-500 dark:text-gray-400">Atualize os dados de {{ $employee->name }}</p>
+            </div>
+        </div>
 
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
-            <div class="alert alert-info">
-                {{ isset($employee) ? 'Você está editando o funcionário: ' . $employee->name : 'Preencha os dados do novo funcionário' }}
-            </div>
-            <div class="alert alert-warning">
-                {{ isset($employee) ? 'Atenção: Você está editando um funcionário existente.' : 'Atenção: Você está criando um novo funcionário.' }}
-            </div>
-            <div class="alert alert-secondary">
-                {{ isset($employee) ? 'ID do Funcionário: ' . $employee->id : 'Novo Funcionário' }}
-            </div>
-            <form action="{{ isset($employee) ? route('employees.update', $employee) : route('employees.store') }}"
-                method="POST">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <form action="{{ route('employees.update', $employee) }}" method="POST" class="p-8">
                 @csrf
-                @if (isset($employee))
-                    @method('PUT')
-                @endif
+                @method('PUT')
 
-                <div class="mb-3">
-                    <label for="name" class="form-label">Nome</label>
-                    <input type="text" name="name" class="form-control"
-                        value="{{ old('name', $employee->name ?? '') }}" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Name -->
+                    <div class="md:col-span-2">
+                        <label for="name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Nome
+                            Completo *</label>
+                        <div class="relative">
+                            <i class="mdi mdi-account absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" name="name" id="name" value="{{ old('name', $employee->name) }}" required
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                placeholder="Ex: João Silva">
+                        </div>
+                    </div>
+
+                    <!-- Role -->
+                    <div>
+                        <label for="role" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Cargo
+                            *</label>
+                        <div class="relative">
+                            <i class="mdi mdi-briefcase absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <select name="role" id="role" required
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all appearance-none">
+                                <option value="waiter" {{ old('role', $employee->role) == 'waiter' ? 'selected' : '' }}>
+                                    Garçom</option>
+                                <option value="chef" {{ old('role', $employee->role) == 'chef' ? 'selected' : '' }}>Chef
+                                </option>
+                                <option value="manager" {{ old('role', $employee->role) == 'manager' ? 'selected' : '' }}>
+                                    Gerente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label for="phone"
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Telefone
+                            de Contato</label>
+                        <div class="relative">
+                            <i class="mdi mdi-phone absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" name="phone" id="phone" value="{{ old('phone', $employee->phone) }}"
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                placeholder="Ex: +258 84 000 0000">
+                        </div>
+                    </div>
+
+                    <!-- Salary -->
+                    <div>
+                        <label for="salary"
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Salário
+                            Mensal (MZN)</label>
+                        <div class="relative">
+                            <i class="mdi mdi-cash absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="number" name="salary" id="salary" value="{{ old('salary', $employee->salary) }}"
+                                step="0.01" min="0"
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Hire Date -->
+                    <div>
+                        <label for="hire_date"
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Data
+                            de Contratação *</label>
+                        <div class="relative">
+                            <i class="mdi mdi-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="date" name="hire_date" id="hire_date"
+                                value="{{ old('hire_date', $employee->hire_date->format('Y-m-d')) }}" required
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="role" class="form-label">Cargo</label>
-                    <select name="role" class="form-select" required>
-                        <option value="chef" {{ old('role', $employee->role ?? '') == 'chef' ? 'selected' : '' }}>Chef
-                        </option>
-                        <option value="waiter" {{ old('role', $employee->role ?? '') == 'waiter' ? 'selected' : '' }}>
-                            Garçom</option>
-                        <option value="manager" {{ old('role', $employee->role ?? '') == 'manager' ? 'selected' : '' }}>
-                            Gerente</option>
-                    </select>
+                <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-700">
+                    <a href="{{ route('employees.index') }}"
+                        class="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold hover:bg-gray-50 dark:hover:bg-gray-900 transition-all">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                        class="px-10 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all transform hover:-translate-y-0.5">
+                        Atualizar Funcionário
+                    </button>
                 </div>
-
-                <div class="mb-3">
-                    <label for="hire_date" class="form-label">Data de Contratação</label>
-                    <input type="date" name="hire_date" class="form-control"
-                        value="{{ old('hire_date', $employee->hire_date ?? '') }}" required>
-                </div>
-
-                <button type="submit" class="btn btn-success">{{ isset($employee) ? 'Atualizar' : 'Salvar' }}</button>
-                <a href="{{ route('employees.index') }}" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>

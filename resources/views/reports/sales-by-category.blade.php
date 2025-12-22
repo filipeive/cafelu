@@ -1,223 +1,117 @@
 @extends('layouts.app')
 
-@section('title', __('messages.sales_by_category'))
+@section('title', 'Vendas por Categoria')
 
 @section('content')
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-                <h4 class="text-2xl font-bold text-gray-800 dark:text-white mb-2 md:mb-0">{{ __('messages.sales_by_category_title') }}
-                </h4>
+    <div class="p-6 space-y-6">
+        <!-- Header -->
+        <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
                 <a href="{{ route('reports.index') }}"
-                    class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-md transition duration-150 ease-in-out">
-                    <i class="mdi mdi-arrow-left mr-2"></i> {{ __('messages.back') }}
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 hover:text-blue-600 transition-colors">
+                    <i class="mdi mdi-arrow-left text-xl"></i>
                 </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Vendas por Categoria</h1>
+                    <p class="text-gray-500 dark:text-gray-400">Distribuição de vendas entre as categorias do menu.</p>
+                </div>
             </div>
 
-            <form action="{{ route('reports.salesByCategory') }}" method="GET" class="mb-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date_initial') }}</label>
-                        <input type="date"
-                            class="form-input w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            id="start_date" name="start_date" value="{{ $startDate->format('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date_final') }}</label>
-                        <input type="date"
-                            class="form-input w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            id="end_date" name="end_date" value="{{ $endDate->format('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <button type="submit"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">
-                            <i class="mdi mdi-filter mr-2"></i> {{ __('messages.filter') }}
-                        </button>
-                    </div>
+            <form action="{{ route('reports.salesByCategory') }}" method="GET" class="flex flex-wrap items-center gap-3">
+                <div
+                    class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}"
+                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
+                    <span class="text-gray-400">até</span>
+                    <input type="date" name="date_to" value="{{ $dateTo }}"
+                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
                 </div>
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all">
+                    Filtrar
+                </button>
             </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.category_performance') }}</h5>
-                <div class="relative h-72">
-                    <canvas id="categorySalesChart"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Category Chart -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Participação por Categoria</h3>
+                <div class="h-80">
+                    <canvas id="categoryChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.sales_distribution') }}</h5>
-                <div class="relative h-72">
-                    <canvas id="categoryDistributionChart"></canvas>
+            <!-- Detailed Table -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Ranking de Categorias</h3>
                 </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="bg-red-500 text-white shadow-md rounded-lg p-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="mb-2 text-sm font-medium opacity-90">{{ __('messages.total_categories') }}</p>
-                        <h3 class="text-3xl font-bold">{{ $salesByCategory->count() }}</h3>
-                    </div>
-                    <i class="mdi mdi-tag-multiple text-4xl opacity-80"></i>
-                </div>
-            </div>
-
-            <div class="bg-green-500 text-white shadow-md rounded-lg p-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="mb-2 text-sm font-medium opacity-90">{{ __('messages.total_sales_value') }}</p>
-                        <h3 class="text-3xl font-bold">{{ number_format($salesByCategory->sum('total'), 2) }} {{ __('messages.currency_symbol') }}
-                        </h3>
-                    </div>
-                    <i class="mdi mdi-cash-multiple text-4xl opacity-80"></i>
-                </div>
-            </div>
-
-            <div class="bg-blue-600 text-white shadow-md rounded-lg p-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="mb-2 text-sm font-medium opacity-90">{{ __('messages.average_per_category') }}</p>
-                        <h3 class="text-3xl font-bold">{{ number_format($salesByCategory->avg('total'), 2) }} {{ __('messages.currency_symbol') }}
-                        </h3>
-                    </div>
-                    <i class="mdi mdi-chart-pie text-4xl opacity-80"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.category') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.quantity_sold_plural') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.total') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.percentage_of_total') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @php $totalSales = $salesByCategory->sum('total'); @endphp
-                        @foreach($salesByCategory as $category)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $category->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $category->quantity }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ number_format($category->total, 2) }} {{ __('messages.currency_symbol') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-middle">
-                                    @php $percentage = $totalSales > 0 ? ($category->total / $totalSales) * 100 : 0; @endphp
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-1">
-                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $percentage }}%"></div>
-                                    </div>
-                                    <small class="text-gray-500 dark:text-gray-400">{{ number_format($percentage, 2) }}%</small>
-                                </td>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
+                                <th class="py-4 px-6">Categoria</th>
+                                <th class="py-4 px-6">Qtd Itens</th>
+                                <th class="py-4 px-6">Receita Total</th>
+                                <th class="py-4 px-6">% do Total</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                            @php $totalRevenue = $sales->sum('total_revenue'); @endphp
+                            @foreach($sales as $category)
+                                <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                    <td class="py-4 px-6 font-bold text-gray-800 dark:text-white">{{ $category->name }}</td>
+                                    <td class="py-4 px-6 text-gray-600 dark:text-gray-400">{{ $category->quantity_sold }}</td>
+                                    <td class="py-4 px-6 font-medium text-gray-800 dark:text-white">MT
+                                        {{ number_format($category->total_revenue, 2) }}</td>
+                                    <td class="py-4 px-6">
+                                        @php $percentage = $totalRevenue > 0 ? ($category->total_revenue / $totalRevenue) * 100 : 0; @endphp
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="flex-1 h-1.5 w-16 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                <div class="h-full bg-blue-500 rounded-full" style="width: {{ $percentage }}%">
+                                                </div>
+                                            </div>
+                                            <span
+                                                class="text-xs font-bold text-gray-500">{{ number_format($percentage, 1) }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-@endsection
 
-@section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const categoryLabels = [
-                @foreach($salesByCategory as $category)
-                    "{{ $category->name }}",
-                @endforeach
-            ];
-
-            const categoryQuantities = [
-                @foreach($salesByCategory as $category)
-                    {{ $category->quantity }},
-                @endforeach
-            ];
-
-            const categoryTotals = [
-                @foreach($salesByCategory as $category)
-                    {{ $category->total }},
-                @endforeach
-            ];
-
-            // Category Sales Chart
-            const categorySalesCtx = document.getElementById('categorySalesChart').getContext('2d');
-            const categorySalesChart = new Chart(categorySalesCtx, {
-                type: 'bar',
-                data: {
-                    labels: categoryLabels,
-                    datasets: [{
-                        label: 'Valor Total (MZN)',
-                        data: categoryTotals,
-                        backgroundColor: '#4B49AC',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const ctx = document.getElementById('categoryChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: @json($sales->pluck('name')),
+                        datasets: [{
+                            data: @json($sales->pluck('total_revenue')),
+                            backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { legend: { position: 'bottom' } }
                     }
-                }
+                });
             });
-
-            // Category Distribution Chart
-            const categoryDistributionCtx = document.getElementById('categoryDistributionChart').getContext('2d');
-            const categoryDistributionChart = new Chart(categoryDistributionCtx, {
-                type: 'pie',
-                data: {
-                    labels: categoryLabels,
-                    datasets: [{
-                        data: categoryTotals,
-                        backgroundColor: [
-                            '#4B49AC',
-                            '#FFC100',
-                            '#248AFD',
-                            '#FF4747',
-                            '#57B657',
-                            '#7978E9',
-                            '#F3797E',
-                            '#F89F9F',
-                            '#7DA0FA',
-                            '#FF8F00'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        });
-    </script>
+        </script>
+    @endpush
 @endsection

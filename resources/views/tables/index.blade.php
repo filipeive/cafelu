@@ -21,6 +21,10 @@
                     <button @click="openMergeModal()" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-150 ease-in-out">
                         <i class="mdi mdi-link mr-2"></i> Unir Mesas
                     </button>
+                    <!-- ver pedidos -->
+                    <a href="{{ route('orders.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-150 ease-in-out">
+                        <i class="mdi mdi-table-furniture mr-2"></i> Ver Pedidos
+                    </a>
                 </div>
                 </div>
             </div>
@@ -245,7 +249,7 @@
             </div>
         </div>
 
-
+    
     <!-- Create Table Modal -->
     <div x-show="showCreateModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -290,7 +294,7 @@
             </div>
         </div>
     </div>
-
+    <!-- Modal Pedidos -->
     </div>
 @push('scripts')
     <script>

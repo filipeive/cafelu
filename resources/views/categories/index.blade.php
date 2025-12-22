@@ -21,15 +21,15 @@
         <!-- Categories Table -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden"
             x-data="{ 
-                    showCreateModal: false,
-                    showEditModal: false,
-                    editCategory: { id: '', name: '' },
-                    openCreateModal() { this.showCreateModal = true; },
-                    openEditModal(id, name) { 
-                        this.editCategory = { id, name };
-                        this.showEditModal = true;
-                    }
-                 }">
+                        showCreateModal: false,
+                        showEditModal: false,
+                        editCategory: { id: '', name: '' },
+                        openCreateModal() { this.showCreateModal = true; },
+                        openEditModal(id, name) { 
+                            this.editCategory = { id, name };
+                            this.showEditModal = true;
+                        }
+                     }">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -100,7 +100,8 @@
                                     <div class="flex flex-col items-center">
                                         <i class="mdi mdi-folder-open-outline text-6xl text-gray-200 dark:text-gray-700"></i>
                                         <p class="text-gray-500 dark:text-gray-400 mt-4">
-                                            {{ __('messages.no_categories_found') }}</p>
+                                            {{ __('messages.no_categories_found') }}
+                                        </p>
                                     </div>
                                 </td>
                             </tr>
@@ -131,7 +132,8 @@
                             @csrf
                             <div class="px-8 py-6 border-b border-gray-100 dark:border-gray-700">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                    {{ __('messages.new_category') }}</h3>
+                                    {{ __('messages.new_category') }}
+                                </h3>
                             </div>
                             <div class="p-8">
                                 <div class="space-y-4">
@@ -182,7 +184,8 @@
                             @method('PUT')
                             <div class="px-8 py-6 border-b border-gray-100 dark:border-gray-700">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                    {{ __('messages.edit_category') }}</h3>
+                                    {{ __('messages.edit_category') }}
+                                </h3>
                             </div>
                             <div class="p-8">
                                 <div class="space-y-4">
@@ -235,6 +238,4 @@
             }
         </script>
     @endpush
-@endsection
-
 @endsection

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ \App\Models\Setting::get('company_name', 'Café Lufamina') }} - Lu & Yosh Catering</title>
+    <title>{{ \App\Models\Setting::get('company_name', 'Zalala Beach Bar') }} - Zalala Beach Bar</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,7 +75,7 @@
                     <i class="mdi mdi-coffee text-white text-xl"></i>
                 </div>
                 <span class="text-xl font-extrabold tracking-tight" :class="scrolled ? 'text-gray-900' : 'text-white'">
-                    {{ \App\Models\Setting::get('company_name', 'Café Lufamina') }}
+                    {{ \App\Models\Setting::get('company_name', 'Zalala Beach Bar') }}
                 </span>
             </div>
 
@@ -92,7 +92,7 @@
                     </a>
                     <a href="{{ route('register') }}" class="px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg"
                         :class="scrolled ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/20' : 'bg-white text-gray-900 hover:bg-orange-50 shadow-black/10'">
-                        Começar Agora
+                        Criar Conta
                     </a>
                 @endauth
             </div>
@@ -111,7 +111,7 @@
         <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
             <span
                 class="inline-block px-4 py-1.5 mb-6 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-sm font-bold tracking-widest uppercase animate-fade-in-down">
-                Lu & Yosh Catering
+                Zalala Beach Bar
             </span>
             <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight animate-fade-in-up">
                 Sabores que <span
@@ -143,7 +143,50 @@
     </header>
 
     <!-- Menu Section -->
-    <section id="menu" class="py-24 px-6 bg-white">
+    <section id="menu" class="py-24 px-6 bg-white" x-data="{ 
+        cart: [],
+        addToCart(product) {
+            let item = this.cart.find(i => i.id === product.id);
+            if (item) {
+                item.quantity++;
+            } else {
+                this.cart.push({ ...product, quantity: 1 });
+            }
+        },
+        get cartTotal() {
+            return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        },
+        get cartCount() {
+            return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+        },
+        placeOrder() {
+            if (this.cart.length === 0) return;
+            
+            fetch('{{ route('customer.order.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ items: this.cart })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Pedido realizado com sucesso!');
+                    this.cart = [];
+                    window.location.href = '{{ route('customer.dashboard') }}';
+                } else {
+                    alert('Erro ao realizar pedido: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erro ao processar o pedido.');
+            });
+        }
+    }" @place-order.window="placeOrder()">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4">Nosso Menu Especial</h2>
@@ -153,99 +196,167 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Item 1 -->
-                <div
-                    class="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/10">
-                    <div class="relative h-64 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=800"
-                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            alt="Café Especial">
-                        <div
-                            class="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur rounded-full text-xs font-bold text-orange-600 shadow-sm">
-                            Popular</div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors">
-                            Café Especial</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed mb-4">Desfrute do nosso café especial, feito com
-                            grãos selecionados e torrados na perfeição.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-orange-500 font-extrabold">A partir de 50 MT</span>
-                            <div
-                                class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                                <i class="mdi mdi-plus"></i>
-                            </div>
+            @foreach($categories as $category)
+                @if($category->products->count() > 0)
+                    <div class="mb-16">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+                            <span class="w-2 h-8 bg-orange-500 rounded-full"></span>
+                            {{ $category->name }}
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            @foreach($category->products as $product)
+                                <div
+                                    class="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/10">
+                                    <div class="relative h-64 overflow-hidden">
+                                        @if($product->image)
+                                            <img src="{{ asset('storage/' . $product->image) }}"
+                                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                alt="{{ $product->name }}">
+                                        @else
+                                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                <i class="mdi mdi-food text-4xl text-gray-400"></i>
+                                            </div>
+                                        @endif
+                                        @if($product->created_at > now()->subDays(7))
+                                            <div
+                                                class="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur rounded-full text-xs font-bold text-orange-600 shadow-sm">
+                                                Novo
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="p-6">
+                                        <h3
+                                            class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors">
+                                            {{ $product->name }}
+                                        </h3>
+                                        <p class="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-2">
+                                            {{ $product->description ?? 'Sem descrição disponível.' }}
+                                        </p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-orange-500 font-extrabold">{{ number_format($product->price, 2) }}
+                                                MT</span>
+                                            <button
+                                                @click="addToCart({ id: {{ $product->id }}, name: '{{ $product->name }}', price: {{ $product->price }} })"
+                                                class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                                                <i class="mdi mdi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
+                @endif
+            @endforeach
+        </div>
+
+        <!-- Floating Cart Button -->
+        <div x-show="cartCount > 0" x-transition class="fixed bottom-8 right-8 z-50">
+            <button @click="$dispatch('open-cart')"
+                class="bg-orange-500 text-white p-4 rounded-2xl shadow-2xl shadow-orange-500/40 flex items-center gap-3 hover:bg-orange-600 transition-all transform hover:scale-105">
+                <div class="relative">
+                    <i class="mdi mdi-cart text-2xl"></i>
+                    <span
+                        class="absolute -top-2 -right-2 bg-white text-orange-500 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-orange-500"
+                        x-text="cartCount"></span>
+                </div>
+                <div class="text-left">
+                    <p class="text-[10px] uppercase font-bold opacity-80 leading-none">Seu Pedido</p>
+                    <p class="font-bold leading-none" x-text="cartTotal.toFixed(2) + ' MT'"></p>
+                </div>
+            </button>
+        </div>
+
+        <!-- Cart Modal -->
+        <div x-data="{ open: false }" @open-cart.window="open = true" x-show="open"
+            class="fixed inset-0 z-[60] overflow-y-auto" style="display: none;">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" @click="open = false">
                 </div>
 
-                <!-- Item 2 -->
-                <div
-                    class="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/10">
-                    <div class="relative h-64 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800"
-                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            alt="Hamburguer Gourmet">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors">
-                            Hamburguer Gourmet</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed mb-4">Saboreie nossos hamburgueres artesanais,
-                            preparados com carne suculenta e ingredientes frescos.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-orange-500 font-extrabold">A partir de 250 MT</span>
-                            <div
-                                class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                                <i class="mdi mdi-plus"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div x-show="open" x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
 
-                <!-- Item 3 -->
-                <div
-                    class="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/10">
-                    <div class="relative h-64 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&q=80&w=800"
-                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            alt="Pequeno-almoço">
+                    <div
+                        class="px-6 py-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-cart-outline text-orange-500"></i>
+                            Seu Pedido
+                        </h3>
+                        <button @click="open = false" class="text-gray-400 hover:text-gray-500 transition-colors">
+                            <i class="mdi mdi-close text-2xl"></i>
+                        </button>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors">
-                            Pequeno-almoço</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed mb-4">Comece o dia com um pequeno-almoço
-                            nutritivo e saboroso, com opções para todos os gostos.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-orange-500 font-extrabold">A partir de 150 MT</span>
-                            <div
-                                class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                                <i class="mdi mdi-plus"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Item 4 -->
-                <div
-                    class="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/10">
-                    <div class="relative h-64 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800"
-                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            alt="Pizzas Artesanais">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors">
-                            Pizzas Artesanais</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed mb-4">Experimente nossas pizzas de massa fina e
-                            crocante, com coberturas deliciosas e queijo derretido.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-orange-500 font-extrabold">A partir de 400 MT</span>
-                            <div
-                                class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                                <i class="mdi mdi-plus"></i>
+                    <div class="px-6 py-6 max-h-[60vh] overflow-y-auto">
+                        <template x-if="cart.length === 0">
+                            <div class="text-center py-12">
+                                <div
+                                    class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="mdi mdi-cart-off text-4xl text-gray-400"></i>
+                                </div>
+                                <p class="text-gray-500 dark:text-gray-400">Seu carrinho está vazio.</p>
                             </div>
+                        </template>
+
+                        <div class="space-y-4">
+                            <template x-for="(item, index) in cart" :key="item.id">
+                                <div
+                                    class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl">
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-gray-900 dark:text-white" x-text="item.name"></h4>
+                                        <p class="text-sm text-orange-500 font-bold"
+                                            x-text="item.price.toFixed(2) + ' MT'"></p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button
+                                            @click="if(item.quantity > 1) item.quantity--; else cart.splice(index, 1)"
+                                            class="w-8 h-8 rounded-lg bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100">
+                                            <i class="mdi mdi-minus"></i>
+                                        </button>
+                                        <span class="font-bold text-gray-900 dark:text-white w-4 text-center"
+                                            x-text="item.quantity"></span>
+                                        <button @click="item.quantity++"
+                                            class="w-8 h-8 rounded-lg bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100">
+                                            <i class="mdi mdi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
+                    </div>
+
+                    <div class="px-6 py-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-6">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">Total do Pedido</span>
+                            <span class="text-2xl font-extrabold text-gray-900 dark:text-white"
+                                x-text="cartTotal.toFixed(2) + ' MT'"></span>
+                        </div>
+
+                        @auth
+                            <button @click="$dispatch('place-order')"
+                                class="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-xl shadow-orange-500/20 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                                <i class="mdi mdi-check-circle"></i>
+                                Finalizar Pedido
+                            </button>
+                        @else
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500 mb-4">Faça login para finalizar seu pedido.</p>
+                                <a href="{{ route('login') }}"
+                                    class="w-full py-4 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2">
+                                    <i class="mdi mdi-login"></i>
+                                    Fazer Login
+                                </a>
+                            </div>
+                        @endauth
                     </div>
                 </div>
             </div>

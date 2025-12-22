@@ -1,125 +1,113 @@
 @extends('layouts.app')
 
-@section('title', __('messages.inventory_report'))
+@section('title', 'Relatório de Estoque')
 
 @section('content')
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-                <h4 class="text-2xl font-bold text-gray-800 dark:text-white mb-2 md:mb-0">{{ __('messages.inventory_report_title') }}</h4>
+    <div class="p-6 space-y-6">
+        <!-- Header -->
+        <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
                 <a href="{{ route('reports.index') }}"
-                    class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-md transition duration-150 ease-in-out">
-                    <i class="mdi mdi-arrow-left mr-2"></i> {{ __('messages.back') }}
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 hover:text-blue-600 transition-colors">
+                    <i class="mdi mdi-arrow-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Relatório de Estoque</h1>
+                    <p class="text-gray-500 dark:text-gray-400">Controle de níveis de estoque e valor total investido.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="window.print()"
+                    class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-6 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2">
+                    <i class="mdi mdi-printer"></i> Imprimir
+                </button>
+                <a href="{{ route('reports.export', ['report_type' => 'products', 'format' => 'excel']) }}"
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2">
+                    <i class="mdi mdi-file-excel"></i> Exportar
                 </a>
             </div>
-
-            <form action="{{ route('reports.inventory') }}" method="GET" class="mb-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                    <div>
-                        <label for="low_stock_threshold"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.low_stock_threshold') }}</label>
-                        <input type="number"
-                            class="form-input w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            id="low_stock_threshold" name="low_stock_threshold" min="1" value="{{ $lowStockThreshold }}">
-                    </div>
-                    <div>
-                        <button type="submit"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">
-                            <i class="mdi mdi-filter mr-2"></i> {{ __('messages.filter') }}
-                        </button>
-                    </div>
-                </div>
-            </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="bg-red-500 text-white shadow-md rounded-lg p-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="mb-2 text-sm font-medium opacity-90">{{ __('messages.critical_stock_products') }}</p>
-                        <h3 class="text-3xl font-bold">{{ $lowStockProducts->where('stock_quantity', '<', 5)->count() }}
-                        </h3>
-                    </div>
-                    <i class="mdi mdi-alert-circle-outline text-4xl opacity-80"></i>
-                </div>
+        <!-- Inventory Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total de Itens</p>
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-white mt-1">{{ $products->count() }}</h3>
+                <p class="text-xs text-gray-400 mt-4">{{ $products->sum('stock_quantity') }} unidades em estoque</p>
             </div>
 
-            <div class="bg-yellow-400 text-gray-900 shadow-md rounded-lg p-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="mb-2 text-sm font-medium opacity-90">{{ __('messages.total_low_stock_products') }}</p>
-                        <h3 class="text-3xl font-bold">{{ $lowStockProducts->count() }}</h3>
-                    </div>
-                    <i class="mdi mdi-alert text-4xl opacity-80"></i>
-                </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Valor em Estoque (Custo)</p>
+                <h3 class="text-2xl font-bold text-blue-600 mt-1">MT
+                    {{ number_format($products->sum(fn($p) => $p->stock_quantity * $p->purchase_price), 2) }}</h3>
+                <p class="text-xs text-gray-400 mt-4">Baseado no preço de compra</p>
             </div>
 
-            <div class="bg-cyan-500 text-white shadow-md rounded-lg p-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="mb-2 text-sm font-medium opacity-90">{{ __('messages.defined_limit') }}</p>
-                        <h3 class="text-3xl font-bold">{{ $lowStockThreshold }} {{ __('messages.units') }}</h3>
-                    </div>
-                    <i class="mdi mdi-format-list-bulleted text-4xl opacity-80"></i>
-                </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Alertas de Reposição</p>
+                <h3 class="text-2xl font-bold text-red-600 mt-1">
+                    {{ $products->where('stock_quantity', '<=', 'min_stock_level')->count() }}</h3>
+                <p class="text-xs text-gray-400 mt-4">Itens abaixo do nível mínimo</p>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+        <!-- Detailed Table -->
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Posição de Estoque</h3>
+            </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.product') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.category') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.current_stock') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.status') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.actions') }}</th>
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
+                            <th class="py-4 px-6">Produto</th>
+                            <th class="py-4 px-6">Categoria</th>
+                            <th class="py-4 px-6">Preço Custo</th>
+                            <th class="py-4 px-6">Preço Venda</th>
+                            <th class="py-4 px-6">Estoque</th>
+                            <th class="py-4 px-6">Status</th>
+                            <th class="py-4 px-6">Valor Total</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($lowStockProducts as $product)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $product->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $product->category->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $product->stock_quantity }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if ($product->stock_quantity <= 0)
+                    <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                        @foreach($products as $product)
+                            <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="py-4 px-6">
+                                    <span class="font-bold text-gray-800 dark:text-white">{{ $product->name }}</span>
+                                </td>
+                                <td class="py-4 px-6 text-gray-500 dark:text-gray-400">
+                                    {{ $product->category->name ?? 'Sem Categoria' }}</td>
+                                <td class="py-4 px-6 text-gray-600 dark:text-gray-400">MT
+                                    {{ number_format($product->purchase_price, 2) }}</td>
+                                <td class="py-4 px-6 text-gray-600 dark:text-gray-400">MT
+                                    {{ number_format($product->selling_price, 2) }}</td>
+                                <td class="py-4 px-6">
+                                    <span
+                                        class="font-bold {{ $product->stock_quantity <= $product->min_stock_level ? 'text-red-600' : 'text-gray-800 dark:text-white' }}">
+                                        {{ $product->stock_quantity }}
+                                    </span>
+                                    <span class="text-[10px] text-gray-400 ml-1">/ {{ $product->min_stock_level }}</span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    @if($product->stock_quantity <= 0)
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">{{ __('messages.out_of_stock') }}</span>
-                                    @elseif ($product->stock_quantity < 5)
+                                            class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold uppercase">Esgotado</span>
+                                    @elseif($product->stock_quantity <= $product->min_stock_level)
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">{{ __('messages.critical') }}</span>
+                                            class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-bold uppercase">Baixo</span>
                                     @else
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">{{ __('messages.low_stock') }}</span>
+                                            class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase">Normal</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('products.index') }}"
-                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">{{ __('messages.restock') }}</a>
+                                <td class="py-4 px-6 font-bold text-gray-800 dark:text-white">
+                                    MT {{ number_format($product->stock_quantity * $product->purchase_price, 2) }}
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5"
-                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
-                                    {{ __('messages.no_low_stock_found') }}</td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>

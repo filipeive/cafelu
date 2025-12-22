@@ -27,6 +27,26 @@ class NotificationController extends Controller
         return back()->with('success', __('messages.all_notifications_marked_as_read'));
     }
 
+    public function unread()
+    {
+        $user = Auth::user();
+        $unreadNotifications = $user->unreadNotifications->take(5)->map(function ($n) {
+            return [
+                'id' => $n->id,
+                'message' => $n->data['message'] ?? '',
+                'icon' => $n->data['icon'] ?? 'mdi-bell',
+                'color' => $n->data['color'] ?? 'text-primary',
+                'link' => $n->data['link'] ?? '#',
+                'time' => $n->created_at->diffForHumans(),
+            ];
+        });
+
+        return response()->json([
+            'unreadCount' => $user->unreadNotifications->count(),
+            'notifications' => $unreadNotifications,
+        ]);
+    }
+
     public function destroy($id)
     {
         $notification = Auth::user()->notifications()->findOrFail($id);

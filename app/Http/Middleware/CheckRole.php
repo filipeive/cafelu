@@ -35,6 +35,10 @@ class CheckRole
             }
         }
 
+        if ($userRole === 'customer') {
+            return redirect()->route('customer.dashboard')->with('error', 'Você não tem permissão para acessar esta área administrativa.');
+        }
+
         return redirect('/')->with('error', 'Você não tem permissão para acessar esta área.');
     }
 }

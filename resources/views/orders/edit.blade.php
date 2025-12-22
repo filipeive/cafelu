@@ -58,7 +58,7 @@
                         </button>
                     @endif
 
-                    @if ($order->status == 'active')
+                    @if ($order->status == 'active' || $order->status == 'completed')
                         <form action="{{ route('orders.cancel', $order) }}" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja cancelar este pedido?')">
                             @csrf
                             <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors flex items-center gap-2">

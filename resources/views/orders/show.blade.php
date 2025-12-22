@@ -22,9 +22,17 @@
                             'paid' => 'Pago',
                             'canceled' => 'Cancelado',
                         ];
+
+                        if ($order->payment_status === 'awaiting_confirmation') {
+                            $currentStatusClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+                            $currentStatusLabel = 'Aguardando Confirmação';
+                        } else {
+                            $currentStatusClass = $statusClasses[$order->status] ?? 'bg-gray-100 text-gray-800';
+                            $currentStatusLabel = $statusLabel[$order->status] ?? ucfirst($order->status);
+                        }
                     @endphp
-                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $statusClasses[$order->status] ?? 'bg-gray-100 text-gray-800' }}">
-                        {{ $statusLabel[$order->status] ?? ucfirst($order->status) }}
+                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $currentStatusClass }}">
+                        {{ $currentStatusLabel }}
                     </span>
                 </h2>
                 <p class="text-gray-500 dark:text-gray-400 mt-1">Detalhes completos do pedido e itens associados.</p>
@@ -52,7 +60,16 @@
                     </form>
                 @endif
 
-                @if ($order->status === 'completed')
+                @if ($order->payment_status === 'awaiting_confirmation')
+                    <form action="{{ route('orders.confirm-payment', $order->id) }}" method="POST" class="inline-block">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors flex items-center gap-2">
+                            <i class="mdi mdi-check-decagram"></i> Confirmar Pagamento
+                        </button>
+                    </form>
+                @endif
+
+                @if ($order->status === 'completed' && $order->payment_status !== 'awaiting_confirmation')
                     <button type="button" onclick="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, total: {{ $order->total_amount }} })"
                             class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors flex items-center gap-2">
                         <i class="mdi mdi-cash"></i> Pagamento

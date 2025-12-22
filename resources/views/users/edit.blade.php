@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="w-full">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <i class="mdi mdi-account-edit text-orange-500"></i>

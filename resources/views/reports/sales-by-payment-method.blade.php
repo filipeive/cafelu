@@ -1,226 +1,110 @@
 @extends('layouts.app')
 
-@section('title', __('messages.sales_by_payment_method'))
+@section('title', 'Vendas por Método de Pagamento')
 
 @section('content')
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-                <h4 class="text-2xl font-bold text-gray-800 dark:text-white mb-2 md:mb-0">{{ __('messages.sales_by_payment_method_title') }}</h4>
+    <div class="p-6 space-y-6">
+        <!-- Header -->
+        <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
                 <a href="{{ route('reports.index') }}"
-                    class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-md transition duration-150 ease-in-out">
-                    <i class="mdi mdi-arrow-left mr-2"></i> {{ __('messages.back') }}
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 hover:text-blue-600 transition-colors">
+                    <i class="mdi mdi-arrow-left text-xl"></i>
                 </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Vendas por Método de Pagamento</h1>
+                    <p class="text-gray-500 dark:text-gray-400">Análise da preferência de pagamento dos clientes.</p>
+                </div>
             </div>
 
-            <form action="{{ route('reports.salesByPaymentMethod') }}" method="GET" class="mb-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date_initial') }}</label>
-                        <input type="date"
-                            class="form-input w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            id="start_date" name="start_date" value="{{ $startDate->format('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date_final') }}</label>
-                        <input type="date"
-                            class="form-input w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            id="end_date" name="end_date" value="{{ $endDate->format('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <button type="submit"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">
-                            <i class="mdi mdi-filter mr-2"></i> {{ __('messages.filter') }}
-                        </button>
-                    </div>
+            <form action="{{ route('reports.salesByPaymentMethod') }}" method="GET"
+                class="flex flex-wrap items-center gap-3">
+                <div
+                    class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}"
+                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
+                    <span class="text-gray-400">até</span>
+                    <input type="date" name="date_to" value="{{ $dateTo }}"
+                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
                 </div>
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all">
+                    Filtrar
+                </button>
             </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.payment_method_distribution') }}
-                </h5>
-                <div class="relative h-72">
-                    <canvas id="paymentMethodChart"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Payment Chart -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Distribuição de Pagamentos</h3>
+                <div class="h-80">
+                    <canvas id="paymentChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.transaction_count') }}</h5>
-                <div class="relative h-72">
-                    <canvas id="transactionCountChart"></canvas>
+            <!-- Detailed Table -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Resumo por Método</h3>
                 </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            @foreach($salesByPaymentMethod as $index => $method)
-                @php
-                    $colors = ['bg-blue-600', 'bg-green-500', 'bg-yellow-400', 'bg-red-500', 'bg-cyan-500'];
-                    $color = $colors[$index % count($colors)];
-                    $icons = ['mdi-credit-card', 'mdi-cash', 'mdi-cash-multiple', 'mdi-cellphone', 'mdi-bank'];
-                    $icon = $icons[$index % count($icons)];
-                    $textColor = ($color == 'bg-yellow-400') ? 'text-gray-900' : 'text-white';
-                @endphp
-                <div class="{{ $color }} {{ $textColor }} shadow-md rounded-lg p-6">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="mb-2 text-sm font-medium opacity-90">{{ $method->payment_method }}</p>
-                            <h3 class="text-3xl font-bold">{{ number_format($method->total, 2) }} {{ __('messages.currency_symbol') }}</h3>
-                            <small class="opacity-80">{{ $method->count }} {{ __('messages.transactions') }}</small>
-                        </div>
-                        <i class="mdi {{ $icon }} text-4xl opacity-80"></i>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.payment_method') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.number_of_transactions') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.total_amount') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.average_per_transaction') }}</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('messages.percentage_of_total') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @php $totalSales = $salesByPaymentMethod->sum('total'); @endphp
-                        @foreach($salesByPaymentMethod as $method)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    @if($method->payment_method == 'Dinheiro')
-                                        <i class="mdi mdi-cash text-green-500 mr-2"></i>
-                                    @elseif($method->payment_method == 'Cartão de Crédito')
-                                        <i class="mdi mdi-credit-card text-blue-600 mr-2"></i>
-                                    @elseif($method->payment_method == 'Cartão de Débito')
-                                        <i class="mdi mdi-credit-card-outline text-cyan-500 mr-2"></i>
-                                    @elseif($method->payment_method == 'Pix')
-                                        <i class="mdi mdi-cellphone text-yellow-500 mr-2"></i>
-                                    @elseif($method->payment_method == 'Transferência')
-                                        <i class="mdi mdi-bank text-red-500 mr-2"></i>
-                                    @else
-                                        <i class="mdi mdi-cash-multiple mr-2"></i>
-                                    @endif
-                                    {{ $method->payment_method }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $method->count }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ number_format($method->total, 2) }} {{ __('messages.currency_symbol') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ number_format($method->total / $method->count, 2) }} {{ __('messages.currency_symbol') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 align-middle">
-                                    @php $percentage = $totalSales > 0 ? ($method->total / $totalSales) * 100 : 0; @endphp
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-1">
-                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $percentage }}%"></div>
-                                    </div>
-                                    <small class="text-gray-500 dark:text-gray-400">{{ number_format($percentage, 2) }}%</small>
-                                </td>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
+                                <th class="py-4 px-6">Método</th>
+                                <th class="py-4 px-6">Qtd Vendas</th>
+                                <th class="py-4 px-6">Receita Total</th>
+                                <th class="py-4 px-6">Ticket Médio</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                            @foreach($sales as $method)
+                                <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                    <td class="py-4 px-6">
+                                        <span
+                                            class="font-bold text-gray-800 dark:text-white">{{ ucfirst($method->payment_method) }}</span>
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-600 dark:text-gray-400">{{ $method->sales_count }}</td>
+                                    <td class="py-4 px-6 font-medium text-gray-800 dark:text-white">MT
+                                        {{ number_format($method->total_revenue, 2) }}</td>
+                                    <td class="py-4 px-6 text-gray-500">
+                                        MT {{ number_format($method->total_revenue / $method->sales_count, 2) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-@endsection
 
-@section('scripts')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const paymentLabels = [
-                @foreach($salesByPaymentMethod as $method)
-                    "{{ $method->payment_method }}",
-                @endforeach
-            ];
-
-            const paymentTotals = [
-                @foreach($salesByPaymentMethod as $method)
-                    {{ $method->total }},
-                @endforeach
-            ];
-
-            const transactionCounts = [
-                @foreach($salesByPaymentMethod as $method)
-                    {{ $method->count }},
-                @endforeach
-            ];
-
-            // Payment Method Distribution Chart
-            const paymentMethodCtx = document.getElementById('paymentMethodChart').getContext('2d');
-            const paymentMethodChart = new Chart(paymentMethodCtx, {
-                type: 'pie',
-                data: {
-                    labels: paymentLabels,
-                    datasets: [{
-                        data: paymentTotals,
-                        backgroundColor: [
-                            '#4B49AC',
-                            '#FFC100',
-                            '#248AFD',
-                            '#FF4747',
-                            '#57B657'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const ctx = document.getElementById('paymentChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: @json($sales->pluck('payment_method')->map(fn($m) => ucfirst($m))),
+                        datasets: [{
+                            data: @json($sales->pluck('total_revenue')),
+                            backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
                     }
-                }
+                });
             });
-
-            // Transaction Count Chart
-            const transactionCountCtx = document.getElementById('transactionCountChart').getContext('2d');
-            const transactionCountChart = new Chart(transactionCountCtx, {
-                type: 'bar',
-                data: {
-                    labels: paymentLabels,
-                    datasets: [{
-                        label: 'Quantidade de Transações',
-                        data: transactionCounts,
-                        backgroundColor: '#FFC100',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    </script>
+        </script>
+    @endpush
 @endsection

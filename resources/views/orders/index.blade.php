@@ -4,8 +4,12 @@
     @php
         $pageTitle = 'Pedidos';
 
-        function get_status_class_tailwind($status)
+        function get_status_class_tailwind($status, $payment_status = null)
         {
+            if ($payment_status === 'awaiting_confirmation') {
+                return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+            }
+
             $classes = [
                 'completed' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
                 'active' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -109,14 +113,33 @@
                     </span>
                 </div>
 
-                <!-- Search -->
-                <div class="relative w-full md:w-64">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="mdi mdi-magnify text-gray-400"></i>
-                    </span>
-                    <input type="text" x-model="search" @keydown.enter="performSearch()"
-                        class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                        placeholder="Pesquisar pedidos...">
+                <!-- Search and Filters -->
+                <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                    <!-- Filter Tabs -->
+                    <div class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                        <a href="{{ route('orders.index', ['filter' => '', 'search' => $search]) }}" 
+                           class="px-4 py-1.5 text-xs font-medium rounded-md transition-colors {{ !$filter ? 'bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                            Todos
+                        </a>
+                        <a href="{{ route('orders.index', ['filter' => 'in-house', 'search' => $search]) }}" 
+                           class="px-4 py-1.5 text-xs font-medium rounded-md transition-colors {{ $filter === 'in-house' ? 'bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                            Presencial
+                        </a>
+                        <a href="{{ route('orders.index', ['filter' => 'online', 'search' => $search]) }}" 
+                           class="px-4 py-1.5 text-xs font-medium rounded-md transition-colors {{ $filter === 'online' ? 'bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                            Online
+                        </a>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="relative w-full md:w-64">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="mdi mdi-magnify text-gray-400"></i>
+                        </span>
+                        <input type="text" x-model="search" @keydown.enter="performSearch()"
+                            class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                            placeholder="Pesquisar pedidos...">
+                    </div>
                 </div>
             </div>
 
@@ -129,7 +152,7 @@
                             <th class="px-6 py-4">ID</th>
                             <th class="px-6 py-4">Cliente</th>
                             <th class="px-6 py-4">Data</th>
-                            <th class="px-6 py-4">Mesa</th>
+                            <th class="px-6 py-4">Origem</th>
                             <th class="px-6 py-4">Total</th>
                             <th class="px-6 py-4">Status</th>
                             <th class="px-6 py-4 text-center">Ações</th>
@@ -178,10 +201,17 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                        Mesa {{ $order->table_id }}
-                                    </span>
+                                    @if($order->table_id)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                            <i class="mdi mdi-table-furniture mr-1"></i>
+                                            Mesa {{ $order->table_id }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                                            <i class="mdi mdi-web mr-1"></i>
+                                            Online
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="text-sm font-bold text-gray-900 dark:text-white">
@@ -190,9 +220,9 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ get_status_class_tailwind($order->status) }}">
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ get_status_class_tailwind($order->status, $order->payment_status) }}">
                                         <i class="mdi mdi-circle-medium mr-1"></i>
-                                        {{ ucfirst($order->status) }}
+                                        {{ $order->payment_status === 'awaiting_confirmation' ? 'Aguardando Confirmação' : ucfirst($order->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
@@ -203,7 +233,18 @@
                                             <i class="mdi mdi-eye"></i>
                                         </a>
 
-                                        @if ($order->status == 'completed')
+                                        @if ($order->payment_status == 'awaiting_confirmation')
+                                            <form action="{{ route('orders.confirm-payment', $order->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40 transition-colors"
+                                                    title="Confirmar Pagamento">
+                                                    <i class="mdi mdi-check-decagram"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        @if ($order->status == 'completed' && $order->payment_status != 'awaiting_confirmation')
                                             <!-- Payment Button (Triggers Modal) -->
                                             <button type="button"
                                                 @click="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, total: {{ $order->total_amount }} })"

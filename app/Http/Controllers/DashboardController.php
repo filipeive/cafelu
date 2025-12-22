@@ -14,110 +14,114 @@ use DB;
 class DashboardController extends Controller
 {
     public function index()
-{
-    $data = cache()->remember('dashboard_data_' . auth()->id(), now()->addMinutes(5), function () {
-        $today = Carbon::today();
-        $yesterday = Carbon::yesterday();
-        $startOfWeek = Carbon::now()->startOfWeek();
+    {
+        if (auth()->user()->isCustomer()) {
+            return redirect()->route('customer.dashboard');
+        }
 
-        // ✅ Vendas — queries simples e seguras
-        $todaySales = Sale::whereDate('created_at', $today)->sum('total_amount') ?? 0;
-        $yesterdaySales = Sale::whereDate('created_at', $yesterday)->sum('total_amount') ?? 0;
-        $weekSales = Sale::whereBetween('created_at', [$startOfWeek, Carbon::now()])->sum('total_amount') ?? 0;
+        $data = cache()->remember('dashboard_data_' . auth()->id(), now()->addMinutes(5), function () {
+            $today = Carbon::today();
+            $yesterday = Carbon::yesterday();
+            $startOfWeek = Carbon::now()->startOfWeek();
 
-        // Pedidos — uma query só com `selectRaw`
-        $orderStats = Order::selectRaw("
+            // ✅ Vendas — queries simples e seguras
+            $todaySales = Sale::whereDate('created_at', $today)->sum('total_amount') ?? 0;
+            $yesterdaySales = Sale::whereDate('created_at', $yesterday)->sum('total_amount') ?? 0;
+            $weekSales = Sale::whereBetween('created_at', [$startOfWeek, Carbon::now()])->sum('total_amount') ?? 0;
+
+            // Pedidos — uma query só com `selectRaw`
+            $orderStats = Order::selectRaw("
             SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as open_orders,
             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_orders,
             SUM(CASE WHEN status = 'completed' AND DATE(created_at) = ? THEN 1 ELSE 0 END) as completed_today
         ", [$today->toDateString()])->first();
 
-        $openOrders = $orderStats->open_orders ?? 0;
-        $pendingOrders = $orderStats->pending_orders ?? 0;
-        $completedOrdersToday = $orderStats->completed_today ?? 0;
+            $openOrders = $orderStats->open_orders ?? 0;
+            $pendingOrders = $orderStats->pending_orders ?? 0;
+            $completedOrdersToday = $orderStats->completed_today ?? 0;
 
-        //  Estoque baixo
-        $lowStockProducts = Product::with('category')
-            ->whereBetween('stock_quantity', [1, 9])
-            ->orderBy('stock_quantity')
-            ->take(5)
-            ->get();
+            //  Estoque baixo
+            $lowStockProducts = Product::with('category')
+                ->whereBetween('stock_quantity', [1, 9])
+                ->orderBy('stock_quantity')
+                ->take(5)
+                ->get();
 
-        //  Mesas
-        $tables = Table::select('id', 'number', 'capacity', 'status')->get();
-        $occupiedTables = $tables->where('status', 'occupied')->count();
-        $availableTables = $tables->where('status', 'available')->count();
+            //  Mesas
+            $tables = Table::select('id', 'number', 'capacity', 'status')->get();
+            $occupiedTables = $tables->where('status', 'occupied')->count();
+            $availableTables = $tables->where('status', 'available')->count();
 
-        //  Clientes
-        $newClientsToday = Client::whereDate('created_at', $today)->count();
-        
-        // Total de produtos (usado na view)
-        $totalProducts = Product::count();
+            //  Clientes
+            $newClientsToday = Client::whereDate('created_at', $today)->count();
 
-        //  Crescimento
+            // Total de produtos (usado na view)
+            $totalProducts = Product::count();
+
+            //  Crescimento
+            $salesGrowth = $yesterdaySales > 0
+                ? round((($todaySales - $yesterdaySales) / $yesterdaySales) * 100, 1)
+                : ($todaySales > 0 ? 100 : 0);
+
+            //  Dados para gráficos e listas
+            $hourlySales = $this->getHourlySalesData();
+            $dailySales = $this->getDailySalesData();
+            $topProducts = $this->getTopProducts();
+            $recentOrders = $this->getRecentOrders();
+
+            return compact(
+                'todaySales',
+                'yesterdaySales',
+                'weekSales',
+                'openOrders',
+                'pendingOrders',
+                'completedOrdersToday',
+                'lowStockProducts',
+                'tables',
+                'occupiedTables',
+                'availableTables',
+                'newClientsToday',
+                'totalProducts',
+                'salesGrowth',
+                'hourlySales',
+                'dailySales',
+                'topProducts',
+                'recentOrders'
+            );
+        });
+
+        return view('dashboard.index', $data);
+    }
+
+    // 🔹 Nova rota para refresh via AJAX
+    public function stats()
+    {
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+
+        $todaySales = Sale::whereDate('created_at', $today)->sum('total_amount') ?? 0;
+        $yesterdaySales = Sale::whereDate('created_at', $yesterday)->sum('total_amount') ?? 0;
+
+        $openOrders = Order::where('status', 'active')->count();
+        $lowStockCount = Product::whereBetween('stock_quantity', [1, 9])->count();
+        $availableTables = Table::where('status', 'available')->count();
+        $totalTables = Table::count();
+
         $salesGrowth = $yesterdaySales > 0
             ? round((($todaySales - $yesterdaySales) / $yesterdaySales) * 100, 1)
             : ($todaySales > 0 ? 100 : 0);
 
-        //  Dados para gráficos e listas
-        $hourlySales = $this->getHourlySalesData();
-        $dailySales = $this->getDailySalesData();
-        $topProducts = $this->getTopProducts();
-        $recentOrders = $this->getRecentOrders();
-
-        return compact(
-            'todaySales',
-            'yesterdaySales',
-            'weekSales',
-            'openOrders',
-            'pendingOrders',
-            'completedOrdersToday',
-            'lowStockProducts',
-            'tables',
-            'occupiedTables',
-            'availableTables',
-            'newClientsToday',
-            'totalProducts',
-            'salesGrowth',
-            'hourlySales',
-            'dailySales',
-            'topProducts',
-            'recentOrders'
-        );
-    });
-
-    return view('dashboard.index', $data);
-}
-
-    // 🔹 Nova rota para refresh via AJAX
-    public function stats()
-{
-    $today = Carbon::today();
-    $yesterday = Carbon::yesterday();
-
-    $todaySales = Sale::whereDate('created_at', $today)->sum('total_amount') ?? 0;
-    $yesterdaySales = Sale::whereDate('created_at', $yesterday)->sum('total_amount') ?? 0;
-
-    $openOrders = Order::where('status', 'active')->count();
-    $lowStockCount = Product::whereBetween('stock_quantity', [1, 9])->count();
-    $availableTables = Table::where('status', 'available')->count();
-    $totalTables = Table::count();
-
-    $salesGrowth = $yesterdaySales > 0
-        ? round((($todaySales - $yesterdaySales) / $yesterdaySales) * 100, 1)
-        : ($todaySales > 0 ? 100 : 0);
-
-    return response()->json([
-        'success' => true,
-        'todaySales' => (float) $todaySales,
-        'openOrders' => $openOrders,
-        'lowStockCount' => $lowStockCount,
-        'availableTables' => $availableTables,
-        'totalTables' => $totalTables,
-        'salesGrowth' => $salesGrowth,
-        'timestamp' => now()->format('H:i:s'),
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'todaySales' => (float) $todaySales,
+            'openOrders' => $openOrders,
+            'lowStockCount' => $lowStockCount,
+            'availableTables' => $availableTables,
+            'totalTables' => $totalTables,
+            'salesGrowth' => $salesGrowth,
+            'timestamp' => now()->format('H:i:s'),
+        ]);
+    }
 
     private function getHourlySalesData()
     {
@@ -126,10 +130,10 @@ class DashboardController extends Controller
             DB::raw('HOUR(created_at) as hour'),
             DB::raw('SUM(total_amount) as sales')
         )
-        ->whereDate('created_at', $today)
-        ->groupBy('hour')
-        ->orderBy('hour')
-        ->pluck('sales', 'hour');
+            ->whereDate('created_at', $today)
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->pluck('sales', 'hour');
 
         $data = [];
         for ($h = 0; $h < 24; $h++) {
@@ -153,9 +157,9 @@ class DashboardController extends Controller
             DB::raw('DATE(created_at) as date'),
             DB::raw('SUM(total_amount) as sales')
         )
-        ->whereIn(DB::raw('DATE(created_at)'), $dates)
-        ->groupBy('date')
-        ->pluck('sales', 'date');
+            ->whereIn(DB::raw('DATE(created_at)'), $dates)
+            ->groupBy('date')
+            ->pluck('sales', 'date');
 
         $data = [];
         foreach ($dates as $date) {
@@ -180,7 +184,7 @@ class DashboardController extends Controller
             ->groupBy('products.id', 'products.name', 'products.stock_quantity')
             ->orderByDesc('total_sold')
             ->limit($limit)
-            ->with('category:id,name') 
+            ->with('category:id,name')
             ->get();
     }
 

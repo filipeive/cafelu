@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Vendas por Data')
+@section('title', 'Vendas Mensais')
 
 @section('content')
     <div class="p-6 space-y-6">
@@ -13,62 +13,56 @@
                     <i class="mdi mdi-arrow-left text-xl"></i>
                 </a>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Vendas por Data</h1>
-                    <p class="text-gray-500 dark:text-gray-400">Evolução temporal do faturamento.</p>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Vendas Mensais</h1>
+                    <p class="text-gray-500 dark:text-gray-400">Visão histórica do faturamento mês a mês.</p>
                 </div>
             </div>
-
-            <form action="{{ route('reports.salesByDate') }}" method="GET" class="flex flex-wrap items-center gap-3">
-                <div
-                    class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-xl border border-gray-200 dark:border-gray-600">
-                    <input type="date" name="date_from" value="{{ $dateFrom }}"
-                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
-                    <span class="text-gray-400">até</span>
-                    <input type="date" name="date_to" value="{{ $dateTo }}"
-                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
-                </div>
-                <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all">
-                    Filtrar
-                </button>
-            </form>
         </div>
 
-        <!-- Trend Chart -->
+        <!-- Chart -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Tendência de Faturamento</h3>
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Evolução Mensal</h3>
             <div class="h-80">
-                <canvas id="dateTrendChart"></canvas>
+                <canvas id="monthlySalesChart"></canvas>
             </div>
         </div>
 
-        <!-- Detailed Table -->
+        <!-- Table -->
         <div
             class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Detalhamento Diário</h3>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Histórico de Faturamento</h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
                         <tr class="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
-                            <th class="py-4 px-6">Data</th>
-                            <th class="py-4 px-6">Qtd Vendas</th>
-                            <th class="py-4 px-6">Receita Total</th>
-                            <th class="py-4 px-6">Ticket Médio</th>
+                            <th class="py-4 px-6">Mês/Ano</th>
+                            <th class="py-4 px-6">Total Faturado</th>
+                            <th class="py-4 px-6">Crescimento</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                        @foreach($sales as $day)
+                        @foreach($sales as $index => $sale)
                             <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                 <td class="py-4 px-6 font-medium text-gray-800 dark:text-white">
-                                    {{ \Carbon\Carbon::parse($day->date)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($sale->month . '-01')->format('F Y') }}
                                 </td>
-                                <td class="py-4 px-6 text-gray-600 dark:text-gray-400">{{ $day->sales_count }}</td>
-                                <td class="py-4 px-6 font-bold text-blue-600">MT {{ number_format($day->total_revenue, 2) }}
-                                </td>
-                                <td class="py-4 px-6 text-gray-500">
-                                    MT {{ number_format($day->total_revenue / $day->sales_count, 2) }}
+                                <td class="py-4 px-6 font-bold text-gray-800 dark:text-white">MT
+                                    {{ number_format($sale->total, 2) }}</td>
+                                <td class="py-4 px-6">
+                                    @if(isset($sales[$index + 1]))
+                                        @php 
+                                                                        $prevTotal = $sales[$index + 1]->total;
+                                            $growth = $prevTotal > 0 ? (($sale->total - $prevTotal) / $prevTotal) * 100 : 0;
+                                        @endphp
+                                        <span class="flex items-center gap-1 font-bold {{ $growth >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                <i class="mdi {{ $growth >= 0 ? 'mdi-arrow-up' : 'mdi-arrow-down' }}"></i>
+                                            {{ abs(number_format($growth, 1)) }}%
+                                            </span>
+                                    @else
+                                        <span class="text-gray-400">---</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -79,17 +73,18 @@
     </div>
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const ctx = document.getElementById('dateTrendChart').getContext('2d');
+            document.addEventListener('DOMContentLoaded', function() {
+                const ctx = document.getElementById('monthlySalesChart').getContext('2d');
+                const data = @json($sales->reverse()->values());
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: @json($sales->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m'))),
+                        labels: data.map(s => s.month),
                         datasets: [{
-                            label: 'Receita (MT)',
-                            data: @json($sales->pluck('total_revenue')),
+                            label: 'Faturamento (MT)',
+                            data: data.map(s => s.total),
                             borderColor: '#3B82F6',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             fill: true,

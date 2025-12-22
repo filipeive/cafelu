@@ -1,85 +1,82 @@
 @extends('layouts.app')
 
-@section('title', __('messages.sales_report'))
+@section('title', 'Relatório de Vendas')
 
 @section('content')
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-                <h4 class="text-2xl font-bold text-gray-800 dark:text-white mb-2 md:mb-0">{{ __('messages.sales_report') }}</h4>
+    <div class="p-6 space-y-6">
+        <!-- Header -->
+        <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
                 <a href="{{ route('reports.index') }}"
-                    class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-md transition duration-150 ease-in-out">
-                    <i class="mdi mdi-arrow-left mr-2"></i> {{ __('messages.back') }}
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 hover:text-blue-600 transition-colors">
+                    <i class="mdi mdi-arrow-left text-xl"></i>
                 </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Relatório de Vendas</h1>
+                    <p class="text-gray-500 dark:text-gray-400">Visão geral do desempenho de vendas no período.</p>
+                </div>
             </div>
 
-            <form action="{{ route('reports.sales') }}" method="GET" class="mb-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date_initial') }}</label>
-                        <input type="date"
-                            class="form-input w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            id="start_date" name="start_date" value="{{ $startDate->format('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date_final') }}</label>
-                        <input type="date"
-                            class="form-input w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                            id="end_date" name="end_date" value="{{ $endDate->format('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <button type="submit"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">
-                            <i class="mdi mdi-filter mr-2"></i> {{ __('messages.filter') }}
-                        </button>
-                    </div>
+            <form action="{{ route('reports.sales') }}" method="GET" class="flex flex-wrap items-center gap-3">
+                <div
+                    class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-xl border border-gray-200 dark:border-gray-600">
+                    <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}"
+                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
+                    <span class="text-gray-400">até</span>
+                    <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}"
+                        class="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200">
                 </div>
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all">
+                    Filtrar
+                </button>
             </form>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div class="lg:col-span-2 bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.daily_sales') }}</h5>
-                <div class="relative h-64">
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div
+                class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Vendas Diárias</h3>
+                <div class="h-64">
                     <canvas id="dailySalesChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.payment_methods') }}</h5>
-                <div class="relative h-64">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Métodos de Pagamento</h3>
+                <div class="h-64">
                     <canvas id="paymentMethodsChart"></canvas>
                 </div>
             </div>
         </div>
 
+        <!-- Tables Row -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.top_products') }}</h5>
+            <!-- Top Products -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Top Produtos</h3>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    {{ __('messages.product') }}</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    {{ __('messages.quantity') }}</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    {{ __('messages.total') }}</th>
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
+                                <th class="py-4 px-6">Produto</th>
+                                <th class="py-4 px-6">Qtd</th>
+                                <th class="py-4 px-6 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                             @foreach($topProducts as $product)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $product->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $product->quantity }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ number_format($product->total, 2) }} {{ __('messages.currency_symbol') }}</td>
+                                <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                    <td class="py-4 px-6 font-medium text-gray-800 dark:text-white">{{ $product->name }}</td>
+                                    <td class="py-4 px-6 text-gray-500">{{ $product->quantity }}</td>
+                                    <td class="py-4 px-6 text-right font-bold text-gray-800 dark:text-white">MT
+                                        {{ number_format($product->total, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -87,32 +84,29 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-                <h5 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ __('messages.sales_by_category') }}</h5>
+            <!-- Sales by Category -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Vendas por Categoria</h3>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    {{ __('messages.category') }}</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    {{ __('messages.quantity') }}</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    {{ __('messages.total') }}</th>
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
+                                <th class="py-4 px-6">Categoria</th>
+                                <th class="py-4 px-6">Qtd</th>
+                                <th class="py-4 px-6 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                             @foreach($salesByCategory as $category)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $category->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $category->quantity }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ number_format($category->total, 2) }} {{ __('messages.currency_symbol') }}</td>
+                                <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                    <td class="py-4 px-6 font-medium text-gray-800 dark:text-white">{{ $category->name }}</td>
+                                    <td class="py-4 px-6 text-gray-500">{{ $category->quantity }}</td>
+                                    <td class="py-4 px-6 text-right font-bold text-gray-800 dark:text-white">MT
+                                        {{ number_format($category->total, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -121,88 +115,57 @@
             </div>
         </div>
     </div>
-@endsection
 
-@section('scripts')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Daily Sales Chart
-            const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
-            const dailySalesChart = new Chart(dailySalesCtx, {
-                type: 'line',
-                data: {
-                    labels: [
-                        @foreach($dailySales as $sale)
-                            '{{ \Carbon\Carbon::parse($sale->date)->format("d/m") }}',
-                        @endforeach
-                    ],
-                    datasets: [{
-                        label: 'Vendas Diárias (MZN)',
-                        data: [
-                            @foreach($dailySales as $sale)
-                                {{ $sale->total }},
-                            @endforeach
-                        ],
-                        borderColor: '#4B49AC',
-                        tension: 0.1,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Daily Sales Chart
+                const dailyCtx = document.getElementById('dailySalesChart').getContext('2d');
+                new Chart(dailyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @json(collect($dailySales)->map(fn($s) => \Carbon\Carbon::parse($s->date)->format('d/m'))),
+                        datasets: [{
+                            label: 'Vendas',
+                            data: @json(collect($dailySales)->pluck('total')),
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: v => 'MT ' + v.toLocaleString() } },
+                            x: { grid: { display: false } }
                         }
                     }
-                }
-            });
+                });
 
-            // Payment Methods Chart
-            const paymentMethodsCtx = document.getElementById('paymentMethodsChart').getContext('2d');
-            const paymentMethodsChart = new Chart(paymentMethodsCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: [
-                        @foreach($paymentMethods as $method)
-                            '{{ $method->payment_method }}',
-                        @endforeach
-                    ],
-                    datasets: [{
-                        data: [
-                            @foreach($paymentMethods as $method)
-                                {{ $method->total }},
-                            @endforeach
-                        ],
-                        backgroundColor: [
-                            '#4B49AC',
-                            '#FFC100',
-                            '#248AFD',
-                            '#FF4747',
-                            '#57B657'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
+                // Payment Methods Chart
+                const paymentCtx = document.getElementById('paymentMethodsChart').getContext('2d');
+                new Chart(paymentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: @json(collect($paymentMethods)->pluck('payment_method')),
+                        datasets: [{
+                            data: @json(collect($paymentMethods)->pluck('total')),
+                            backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { legend: { position: 'bottom' } }
                     }
-                }
+                });
             });
-        });
-    </script>
+        </script>
+    @endpush
 @endsection

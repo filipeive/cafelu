@@ -1,5 +1,6 @@
 @props([
-    'route', 
+    'route' => null, 
+    'url' => null,
     'icon' => null, 
     'title', 
     'badge' => null, 
@@ -9,8 +10,8 @@
     'external' => false
 ])
 @php
-$isActive = $route ? request()->routeIs($route) : false;
-$href = $external ? $route : ($route && Route::has($route) ? route($route) : '#');
+$isActive = $route ? request()->routeIs($route) : ($url ? request()->fullUrlIs($url) : false);
+$href = $url ?? ($external ? $route : ($route && Route::has($route) ? route($route) : '#'));
 @endphp
 
 <li>

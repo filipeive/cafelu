@@ -48,17 +48,37 @@
                     @endif
 
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                        <button @click="showAddModal = true"
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-150 ease-in-out">
-                            <i class="mdi mdi-plus-circle-outline mr-2"></i> Novo Cliente
-                        </button>
-                        <form method="GET" action="{{ route('client.search') }}" class="flex w-full sm:w-auto">
-                            <input type="text" name="query"
+                        <div class="flex items-center gap-4 w-full sm:w-auto">
+                            <button @click="showAddModal = true"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-150 ease-in-out">
+                                <i class="mdi mdi-plus-circle-outline mr-2"></i> Novo Cliente
+                            </button>
+                            
+                            <!-- Filter Tabs -->
+                            <div class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                                <a href="{{ route('clients.index', ['filter' => 'all', 'search' => $search]) }}" 
+                                   class="px-4 py-1.5 text-xs font-medium rounded-md transition-colors {{ $filter === 'all' ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                                    Todos
+                                </a>
+                                <a href="{{ route('clients.index', ['filter' => 'online', 'search' => $search]) }}" 
+                                   class="px-4 py-1.5 text-xs font-medium rounded-md transition-colors {{ $filter === 'online' ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                                    Online
+                                </a>
+                                <a href="{{ route('clients.index', ['filter' => 'offline', 'search' => $search]) }}" 
+                                   class="px-4 py-1.5 text-xs font-medium rounded-md transition-colors {{ $filter === 'offline' ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                                    Presencial
+                                </a>
+                            </div>
+                        </div>
+
+                        <form method="GET" action="{{ route('clients.index') }}" class="flex w-full sm:w-auto">
+                            <input type="hidden" name="filter" value="{{ $filter }}">
+                            <input type="text" name="search" value="{{ $search }}"
                                 class="form-input rounded-l-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-full sm:w-64"
-                                placeholder="Search clients...">
+                                placeholder="Pesquisar clientes...">
                             <button type="submit"
                                 class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2 px-4 rounded-r-md inline-flex items-center transition duration-150 ease-in-out">
-                                <i class="mdi mdi-magnify mr-2"></i> Search
+                                <i class="mdi mdi-magnify mr-2"></i> Buscar
                             </button>
                         </form>
                     </div>
@@ -73,16 +93,19 @@
                                             #</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Name</th>
+                                            Nome</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            Tipo</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                             Email</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Phone</th>
+                                            Telefone</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Actions</th>
+                                            Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -91,27 +114,45 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                 {{ $client->id }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $client->name }}</td>
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-3">
+                                                        <i class="mdi {{ $client->type === 'online' ? 'mdi-account-network text-blue-500' : 'mdi-account' }}"></i>
+                                                    </div>
+                                                    {{ $client->name }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {{ $client->type === 'online' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
+                                                    {{ $client->type === 'online' ? 'Online' : 'Presencial' }}
+                                                </span>
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                 {{ $client->email }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                 {{ $client->phone }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <button
-                                                    @click="openEditModal({{ $client->toJson() }}, '{{ route('client.update', $client->id) }}')"
-                                                    class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3">
-                                                    <i class="mdi mdi-pencil"></i> Edit
-                                                </button>
-                                                <form action="{{ route('client.destroy', $client->id) }}" method="POST"
-                                                    class="inline-block">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                        onclick="return confirm('Are you sure?')">
-                                                        <i class="mdi mdi-delete"></i> Delete
+                                                @if($client->type === 'online')
+                                                    <a href="{{ route('orders.index', ['search' => $client->name]) }}"
+                                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">
+                                                        <i class="mdi mdi-receipt"></i> Pedidos
+                                                    </a>
+                                                @else
+                                                    <button
+                                                        @click="openEditModal({{ $client->toJson() }}, '{{ route('client.update', $client->id) }}')"
+                                                        class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3">
+                                                        <i class="mdi mdi-pencil"></i> Editar
                                                     </button>
-                                                </form>
+                                                    <form action="{{ route('client.destroy', $client->id) }}" method="POST"
+                                                        class="inline-block">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                            onclick="return confirm('Tem certeza?')">
+                                                            <i class="mdi mdi-delete"></i> Excluir
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

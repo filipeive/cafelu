@@ -18,7 +18,10 @@ class Order extends Model
         'total_amount',
         'payment_status',
         'payment_method',
-        'notes'
+        'notes',
+        'preparing_at',
+        'ready_at',
+        'delivered_at'
     ];
 
     public function table()
@@ -55,6 +58,7 @@ class Order extends Model
     {
         return [
             'pending' => 'Pendente',
+            'awaiting_confirmation' => 'Aguardando Confirmação',
             'paid' => 'Pago',
             'cancelled' => 'Cancelado',
             'refunded' => 'Reembolsado'

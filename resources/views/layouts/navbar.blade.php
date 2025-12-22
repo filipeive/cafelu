@@ -45,31 +45,33 @@
 
         <!-- Right Side: Actions & Profile -->
         <ul class="flex items-center gap-3">
-            <!-- Quick Actions Dropdown -->
-            <li class="relative" x-data="{ open: false }">
-                <button @click="open = !open" @click.outside="open = false"
-                    class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium text-warning hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors">
-                    <i class="mdi mdi-plus-circle-outline text-lg"></i>
-                    <span>{{ __('messages.quick_actions') }}</span>
-                </button>
+            @if(auth()->user()->role !== 'customer')
+                <!-- Quick Actions Dropdown -->
+                <li class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" @click.outside="open = false"
+                        class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium text-warning hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors">
+                        <i class="mdi mdi-plus-circle-outline text-lg"></i>
+                        <span>{{ __('messages.quick_actions') }}</span>
+                    </button>
 
-                <div x-show="open" x-transition
-                    class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
-                    style="display: none;">
-                    <a href="{{ route('orders.index') }}"
-                        class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <i class="mdi mdi-cart-plus text-success"></i> {{ __('messages.orders') }}
-                    </a>
-                    <a href="{{ route('tables.index') }}"
-                        class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <i class="mdi mdi-calendar-plus text-info"></i> {{ __('messages.tables') }}
-                    </a>
-                    <a href="{{ route('products.index', ['create' => 1]) }}"
-                        class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <i class="mdi mdi-food-variant text-warning"></i> {{ __('messages.add_product') }}
-                    </a>
-                </div>
-            </li>
+                    <div x-show="open" x-transition
+                        class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+                        style="display: none;">
+                        <a href="{{ route('orders.index') }}"
+                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <i class="mdi mdi-cart-plus text-success"></i> {{ __('messages.orders') }}
+                        </a>
+                        <a href="{{ route('tables.index') }}"
+                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <i class="mdi mdi-calendar-plus text-info"></i> {{ __('messages.tables') }}
+                        </a>
+                        <a href="{{ route('products.index', ['create' => 1]) }}"
+                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <i class="mdi mdi-food-variant text-warning"></i> {{ __('messages.add_product') }}
+                        </a>
+                    </div>
+                </li>
+            @endif
 
             <!-- Language Switcher -->
             <li class="relative" x-data="{ open: false }">
@@ -121,16 +123,40 @@
                 unreadCount: {{ Auth::user()->unreadNotifications->count() }},
                 notifications: [
                     @foreach(Auth::user()->unreadNotifications->take(5) as $notification)
-                    {
-                        id: '{{ $notification->id }}',
-                        message: '{{ $notification->data['message'] }}',
-                        icon: '{{ $notification->data['icon'] }}',
-                        color: '{{ $notification->data['color'] }}',
-                        link: '{{ $notification->data['link'] }}',
-                        time: '{{ $notification->created_at->diffForHumans() }}'
-                    },
+                        {
+                            id: '{{ $notification->id }}',
+                            message: '{{ $notification->data['message'] }}',
+                            icon: '{{ $notification->data['icon'] }}',
+                            color: '{{ $notification->data['color'] }}',
+                            link: '{{ $notification->data['link'] }}',
+                            time: '{{ $notification->created_at->diffForHumans() }}'
+                        },
                     @endforeach
                 ],
+                init() {
+                    // Poll for new notifications every 30 seconds
+                    setInterval(() => {
+                        this.fetchNotifications();
+                    }, 30000);
+                },
+                fetchNotifications() {
+                    fetch('{{ route('notifications.unread') }}', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.unreadCount > this.unreadCount) {
+                            // Optional: Show a toast or play a sound
+                            console.log('New notification received!');
+                        }
+                        this.unreadCount = data.unreadCount;
+                        this.notifications = data.notifications;
+                    })
+                    .catch(error => console.error('Error fetching notifications:', error));
+                },
                 markAsRead(id, link) {
                     fetch(`/notifications/${id}/read`, {
                         method: 'POST',
@@ -162,25 +188,27 @@
                         <span x-text="unreadCount + ' {{ __('messages.new_plural') }}'"
                             class="px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"></span>
                     </div>
-                    
+
                     <div class="max-h-96 overflow-y-auto">
                         <template x-if="notifications.length > 0">
                             <div class="divide-y divide-gray-100 dark:divide-gray-700">
                                 <template x-for="notification in notifications" :key="notification.id">
-                                    <button @click="markAsRead(notification.id, notification.link)" 
+                                    <button @click="markAsRead(notification.id, notification.link)"
                                         class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex gap-3">
                                         <div :class="notification.color + ' mt-1'">
                                             <i :class="'mdi ' + notification.icon + ' text-xl'"></i>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm text-gray-800 dark:text-gray-200 leading-snug" x-text="notification.message"></p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-text="notification.time"></p>
+                                            <p class="text-sm text-gray-800 dark:text-gray-200 leading-snug"
+                                                x-text="notification.message"></p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                                                x-text="notification.time"></p>
                                         </div>
                                     </button>
                                 </template>
                             </div>
                         </template>
-                        
+
                         <template x-if="notifications.length === 0">
                             <div class="p-8 text-center text-gray-500 dark:text-gray-400">
                                 <i class="mdi mdi-bell-off-outline text-3xl mb-2 block"></i>
@@ -189,8 +217,10 @@
                         </template>
                     </div>
 
-                    <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center bg-gray-50 dark:bg-gray-900/50 rounded-b-lg">
-                        <a href="{{ route('notifications.index') }}" class="text-xs font-semibold text-warning hover:text-orange-600">
+                    <div
+                        class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center bg-gray-50 dark:bg-gray-900/50 rounded-b-lg">
+                        <a href="{{ route('notifications.index') }}"
+                            class="text-xs font-semibold text-warning hover:text-orange-600">
                             {{ __('messages.view_all_notifications') }}
                         </a>
                     </div>
@@ -232,10 +262,12 @@
                             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <i class="mdi mdi-account-edit-outline text-primary"></i> {{ __('messages.edit_profile') }}
                         </a>
-                        <a href="{{ route('settings.index') }}"
-                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-cog-outline text-primary"></i> {{ __('messages.system_settings') }}
-                        </a>
+                        @if(auth()->user()->role !== 'customer')
+                            <a href="{{ route('settings.index') }}"
+                                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <i class="mdi mdi-cog-outline text-primary"></i> {{ __('messages.system_settings') }}
+                            </a>
+                        @endif
                         <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                         <a href="{{ route('logout') }}"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

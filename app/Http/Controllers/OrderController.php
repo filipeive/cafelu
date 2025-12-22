@@ -21,20 +21,35 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    /**
-     * Listagem de todos os pedidos
-     */
     public function index()
     {
         $search = request('search');
-        $orders = Order::with('table')->orderBy('created_at', 'desc')->paginate(6);
+        $filter = request('filter'); // 'online' or 'in-house'
+
+        $query = Order::with('table');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($filter === 'online') {
+            $query->whereNull('table_id');
+        } elseif ($filter === 'in-house') {
+            $query->whereNotNull('table_id');
+        }
+
+        $orders = $query->orderBy('created_at', 'desc')->paginate(10);
         $total_orders = Order::count();
+
         // Obtém o total de pedidos feitos hoje
         $totalToday = $this->orderGetTotalToday();
         // Obtém o total de pedidos abertos
         $totalOpen = $this->order_get_open_count();
 
-        return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalOpen', 'search'));
+        return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalOpen', 'search', 'filter'));
     }
     public function orderGetTotalToday()
     {
@@ -224,67 +239,64 @@ class OrderController extends Controller
     }
 
     /**
+     * Atualizar status do pedido e registrar timestamps
+     */
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:active,preparing,ready,completed,canceled',
+        ]);
+
+        $status = $request->status;
+        $order->status = $status;
+
+        if ($status === 'preparing') {
+            $order->preparing_at = now();
+        } elseif ($status === 'ready') {
+            $order->ready_at = now();
+            // Notificar cliente
+            if ($order->user) {
+                $order->user->notify(new \App\Notifications\OrderReadyNotification($order));
+            }
+        } elseif ($status === 'completed') {
+            $order->delivered_at = now();
+        }
+
+        $order->save();
+
+        return redirect()->back()->with('success', 'Status do pedido atualizado para ' . $status);
+    }
+
+    /**
      * Finalizar pedido (mudar status para 'completed')
      */
     public function complete(Order $order)
     {
-        if ($order->status !== 'active') {
-            $message = 'Apenas pedidos ativos podem ser finalizados.';
-
-            if (request()->wantsJson() || request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $message
-                ], 400);
-            }
-
-            return redirect()->back()->with('error', $message);
+        if ($order->status === 'paid' || $order->status === 'canceled') {
+            $message = 'Não é possível finalizar um pedido já pago ou cancelado.';
+            return request()->wantsJson() ? response()->json(['success' => false, 'message' => $message], 400) : redirect()->back()->with('error', $message);
         }
 
         if ($order->items->isEmpty()) {
-            $message = 'Não é possível finalizar um pedido vazio. Por favor, cancele o pedido.';
-
-            if (request()->wantsJson() || request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $message
-                ], 400);
-            }
-
-            return redirect()->back()->with('error', $message);
+            $message = 'Não é possível finalizar um pedido vazio.';
+            return request()->wantsJson() ? response()->json(['success' => false, 'message' => $message], 400) : redirect()->back()->with('error', $message);
         }
 
         try {
-            // Atualizar o status do pedido para 'completed'
             $order->status = 'completed';
+            $order->delivered_at = now();
             $order->save();
 
-            $message = 'Pedido finalizado com sucesso, Por favor Registe o Pagamento para Fechar o Pedido.';
-
-            if (request()->wantsJson() || request()->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $message
-                ]);
-            }
-
-            return redirect()->route('orders.edit', $order)->with('success', $message);
-
+            $message = 'Pedido finalizado com sucesso!';
+            return request()->wantsJson() ? response()->json(['success' => true, 'message' => $message]) : redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             $message = 'Erro ao finalizar pedido: ' . $e->getMessage();
-
-            if (request()->wantsJson() || request()->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $message
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', $message);
+            return request()->wantsJson() ? response()->json(['success' => false, 'message' => $message], 500) : redirect()->back()->with('error', $message);
         }
-    }    /**
-         * Registrar pagamento do pedido
-         */
+    }
+    /**
+     * Registrar pagamento do pedido
+     */
     public function pay(Request $request, Order $order)
     {
         try {
@@ -408,7 +420,7 @@ class OrderController extends Controller
 
             $message = 'Pagamento registrado e venda finalizada com sucesso!';
 
-            if (request()->wantsJson() || request()->ajax()) {
+            if (request()->wantsJson()) {
                 return response()->json([
                     'success' => true,
                     'message' => $message
@@ -422,15 +434,14 @@ class OrderController extends Controller
             DB::rollBack();
             $message = 'Erro ao processar pagamento: ' . $e->getMessage();
 
-            if (request()->wantsJson() || request()->ajax()) {
+            if (request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => $message
                 ], 500);
             }
 
-            return redirect()->back()
-                ->with('error', $message);
+            return redirect()->back()->with('error', $message);
         }
     }
     /**
@@ -573,6 +584,109 @@ class OrderController extends Controller
         $order->load('items.product', 'table', 'user');
         return view('orders.receipt', compact('order'));
     }
+    /**
+     * Confirmar pagamento enviado pelo cliente
+     */
+    public function confirmPayment(Order $order)
+    {
+        if ($order->payment_status !== 'awaiting_confirmation') {
+            return redirect()->back()->with('error', 'Este pedido não possui um pagamento aguardando confirmação.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $total = $order->total_amount;
+            if (is_null($total) || $total == 0) {
+                $total = $order->items->sum('total_price');
+                $order->total_amount = $total;
+            }
+
+            // Determine payment method amounts
+            $cash = $card = $mpesa = $emola = 0.00;
+            switch ($order->payment_method) {
+                case 'card':
+                    $card = $total;
+                    break;
+                case 'mpesa':
+                    $mpesa = $total;
+                    break;
+                case 'emola':
+                    $emola = $total;
+                    break;
+                default:
+                    $cash = $total;
+                    break;
+            }
+
+            // 1. Registrar a venda
+            $sale = Sale::create([
+                'order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'customer_name' => $order->customer_name ?? 'Cliente Online',
+                'total_amount' => $total,
+                'payment_method' => $order->payment_method ?? 'cash',
+                'cash_amount' => $cash,
+                'card_amount' => $card,
+                'mpesa_amount' => $mpesa,
+                'emola_amount' => $emola,
+                'notes' => 'Pagamento confirmado pelo administrador. ' . $order->notes,
+                'status' => 'completed'
+            ]);
+
+            // 2. Registrar os itens da venda e atualizar estoque
+            foreach ($order->items as $item) {
+                SaleItem::create([
+                    'sale_id' => $sale->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'total_price' => $item->total_price,
+                    'notes' => $item->notes
+                ]);
+
+                $product = $item->product;
+                $product->stock_quantity -= $item->quantity;
+                $product->save();
+
+                StockMovement::create([
+                    'product_id' => $item->product_id,
+                    'user_id' => auth()->id(),
+                    'quantity' => -$item->quantity,
+                    'type' => 'sale',
+                    'reference_type' => 'Sale',
+                    'reference_id' => $sale->id,
+                    'notes' => 'Venda via Pedido Online #' . $order->id
+                ]);
+
+                if ($product->stock_quantity <= $product->min_stock_level) {
+                    $users = User::all();
+                    Notification::send($users, new LowStockNotification($product));
+                }
+            }
+
+            // 3. Atualizar o status do pedido
+            $order->update([
+                'status' => 'paid',
+                'payment_status' => 'paid',
+                'paid_at' => now()
+            ]);
+
+            // 4. Notificar cliente se houver usuário associado
+            if ($order->user) {
+                $order->user->notify(new \App\Notifications\SaleCompletedNotification($sale));
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Pagamento confirmado com sucesso!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Erro ao confirmar pagamento: ' . $e->getMessage());
+        }
+    }
+
     /**
      * Método para atualizar o valor total do pedido
      */

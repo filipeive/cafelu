@@ -1,0 +1,29 @@
+
+   INFO  Running migrations.  
+
+  2025_12_22_111503_create_customer_debts_table  2ms FAIL
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'customer_debts' already exists (Connection: mysql, SQL: create table `customer_debts` (`id` bigint unsigned not null auto_increment primary key, `sale_id` int null, `order_id` int null, `user_id` int null, `customer_name` varchar(255) not null, `total_amount` decimal(10, 2) not null, `remaining_amount` decimal(10, 2) not null, `status` enum('pending', 'partial', 'paid') not null default 'pending', `due_date` date null, `notes` text null, `created_at` timestamp null, `updated_at` timestamp null) default character set utf8mb4 collate 'utf8mb4_unicode_ci')
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+      [2m+9 vendor frames [22m
+
+  10  database/migrations/2025_12_22_111503_create_customer_debts_table.php:13
+      Illuminate\Support\Facades\Facade::__callStatic()
+      [2m+24 vendor frames [22m
+
+  35  artisan:35
+      Illuminate\Foundation\Console\Kernel::handle()
+

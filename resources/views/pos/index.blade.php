@@ -4,10 +4,10 @@
 
 @section('content')
     <div class="h-[calc(100vh-6rem)] flex flex-col lg:flex-row gap-6" x-data="posSystem({ 
-                                                            products: {{ json_encode($products) }}, 
-                                                            categories: {{ json_encode($categories) }},
-                                                            csrfToken: '{{ csrf_token() }}'
-                                                        })">
+                                                                                                products: {{ json_encode($products) }}, 
+                                                                                                categories: {{ json_encode($categories) }},
+                                                                                                csrfToken: '{{ csrf_token() }}'
+                                                                                            })">
 
         <!-- Products Area -->
         <div class="w-full lg:w-2/3 flex flex-col h-full">
@@ -79,10 +79,10 @@
                                     <div class="absolute top-2 right-2">
                                         <span class="px-1.5 py-0.5 rounded text-[10px] font-bold shadow-sm backdrop-blur-sm"
                                             :class="{
-                                                                                                'bg-green-100/90 text-green-700': product.stock_quantity > 10,
-                                                                                                'bg-yellow-100/90 text-yellow-700': product.stock_quantity <= 10 && product.stock_quantity > 5,
-                                                                                                'bg-red-100/90 text-red-700': product.stock_quantity <= 5
-                                                                                            }">
+                                                                                                                                    'bg-green-100/90 text-green-700': product.stock_quantity > 10,
+                                                                                                                                    'bg-yellow-100/90 text-yellow-700': product.stock_quantity <= 10 && product.stock_quantity > 5,
+                                                                                                                                    'bg-red-100/90 text-red-700': product.stock_quantity <= 5
+                                                                                                                                }">
                                             <span x-text="product.stock_quantity"></span>
                                         </span>
                                     </div>
@@ -183,6 +183,21 @@
                     </div>
                 </div>
 
+                <!-- Customer Name -->
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                        {{ __('messages.customer_name') }}
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="mdi mdi-account text-gray-400"></i>
+                        </span>
+                        <input type="text" x-model="customerName"
+                            class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="Nome do Cliente (opcional)">
+                    </div>
+                </div>
+
                 <!-- Payment Methods -->
                 <div class="mb-4">
                     <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
@@ -232,10 +247,10 @@
                     </button>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <button @click="printLastReceipt()" :disabled="!lastSaleId || isLoading"
-                        class="flex flex-col items-center justify-center p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="mdi mdi-printer text-xl mb-1"></i>
-                        <span class="text-xs font-medium">{{ __('messages.receipt') }}</span>
+                    <button @click="registerAsDebt()" :disabled="cart.length === 0 || isLoading"
+                        class="flex flex-col items-center justify-center p-2 rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="mdi mdi-account-cash text-xl mb-1"></i>
+                        <span class="text-xs font-medium">Registar Dívida</span>
                     </button>
                     <button @click="processSale()" :disabled="cart.length === 0 || isLoading"
                         class="flex flex-col items-center justify-center p-2 rounded-lg bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
@@ -370,9 +385,8 @@
                     csrfToken: config.csrfToken,
 
                     searchQuery: '',
+                    customerName: '',
                     selectedCategory: 'all',
-                    cart: [],
-                    paymentMethod: 'cash',
                     cart: [],
                     paymentMethod: 'cash',
                     payments: {
@@ -499,7 +513,7 @@
                         };
                     },
 
-                    processSale() {
+                    async processSale() {
                         if (this.cart.length === 0) return;
 
                         // Calculate total paid across all methods
@@ -512,8 +526,52 @@
 
                         // Validation
                         if (totalPaid < this.cartTotal) {
-                            showToast('{{ __('messages.insufficient_amount_paid') }}: ' + this.formatMoney(totalPaid), 'error');
-                            return;
+                            const userRole = "{{ auth()->user()->role }}";
+                            if (userRole !== 'admin' && userRole !== 'manager') {
+                                showToast('Apenas administradores e gerentes podem registrar vendas com pagamento parcial (dívidas).', 'error');
+                                return;
+                            }
+
+                            // If customer name is empty, prompt for it
+                            if (!this.customerName || this.customerName.trim() === '') {
+                                const { value: name } = await Swal.fire({
+                                    title: 'Nome do Cliente',
+                                    text: 'Para registrar uma dívida, é necessário informar o nome do cliente.',
+                                    input: 'text',
+                                    inputPlaceholder: 'Digite o nome do cliente...',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Confirmar',
+                                    cancelButtonText: 'Cancelar',
+                                    confirmButtonColor: '#F97316',
+                                    background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                                    color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937',
+                                    inputValidator: (value) => {
+                                        if (!value) {
+                                            return 'Você precisa digitar um nome!';
+                                        }
+                                    }
+                                });
+
+                                if (name) {
+                                    this.customerName = name;
+                                } else {
+                                    return; // User cancelled
+                                }
+                            }
+
+                            const confirmed = await Swal.fire({
+                                title: 'Pagamento Parcial',
+                                text: `O valor pago (MZN ${this.formatMoney(totalPaid)}) é menor que o total (MZN ${this.formatMoney(this.cartTotal)}). Deseja registrar o restante como dívida para ${this.customerName}?`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Sim, registrar dívida',
+                                cancelButtonText: 'Não, corrigir valor',
+                                confirmButtonColor: '#F97316',
+                                background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937',
+                            });
+
+                            if (!confirmed.isConfirmed) return;
                         }
 
                         // Determine payment method string
@@ -536,6 +594,23 @@
 
                         this.isLoading = true;
 
+                        const payload = {
+                            items: this.cart.map(item => ({
+                                id: item.id,
+                                quantity: item.quantity,
+                                price: item.price
+                            })),
+                            payment_method: method,
+                            amount_paid: totalPaid,
+                            total_amount: this.cartTotal,
+                            customer_name: this.customerName || 'Cliente Geral',
+                            order_id: this.lastOrderId,
+                            cash_amount: cash,
+                            card_amount: card,
+                            mpesa_amount: mpesa,
+                            emola_amount: emola
+                        };
+
                         fetch("{{ route('sales.process') }}", {
                             method: 'POST',
                             headers: {
@@ -543,22 +618,7 @@
                                 'X-CSRF-TOKEN': this.csrfToken,
                                 'Accept': 'application/json'
                             },
-                            body: JSON.stringify({
-                                items: this.cart.map(item => ({
-                                    id: item.id,
-                                    quantity: item.quantity,
-                                    price: item.price
-                                })),
-                                payment_method: method,
-                                amount_paid: totalPaid,
-                                total_amount: this.cartTotal,
-                                order_id: this.lastOrderId, // Include order_id for cleanup
-                                // Send breakdown
-                                cash_amount: cash,
-                                card_amount: card,
-                                mpesa_amount: mpesa,
-                                emola_amount: emola
-                            })
+                            body: JSON.stringify(payload)
                         })
                             .then(res => res.json())
                             .then(data => {
@@ -571,6 +631,7 @@
                                     this.paymentMethod = 'cash'; // Reset payment method
                                     this.lastSaleId = data.sale_id;
                                     this.lastOrderId = null; // Clear last order since it's now a sale
+                                    this.customerName = ''; // Clear customer name
 
                                     // Auto print receipt
                                     if (data.sale_id) {
@@ -606,19 +667,19 @@
                                 Swal.fire({
                                     title: '{{ __('messages.hold_order') }}',
                                     html: `
-                                                                                                                <div class="text-left space-y-4">
-                                                                                                                    <div>
-                                                                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.customer_name') }}</label>
-                                                                                                                        <input id="swal-customer-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors" placeholder="{{ __('messages.customer_name') }}">
-                                                                                                                    </div>
-                                                                                                                    <div>
-                                                                                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.select_table') }}</label>
-                                                                                                                        <select id="swal-table-select" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors">
-                                                                                                                            ${Object.entries(tableOptions).map(([id, label]) => `<option value="${id}">${label}</option>`).join('')}
-                                                                                                                        </select>
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                            `,
+                                                                                                                                                                                        <div class="text-left space-y-4">
+                                                                                                                                                                                            <div>
+                                                                                                                                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.customer_name') }}</label>
+                                                                                                                                                                                                <input id="swal-customer-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors" placeholder="{{ __('messages.customer_name') }}">
+                                                                                                                                                                                            </div>
+                                                                                                                                                                                            <div>
+                                                                                                                                                                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.select_table') }}</label>
+                                                                                                                                                                                                <select id="swal-table-select" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors">
+                                                                                                                                                                                                    ${Object.entries(tableOptions).map(([id, label]) => `<option value="${id}">${label}</option>`).join('')}
+                                                                                                                                                                                                </select>
+                                                                                                                                                                                            </div>
+                                                                                                                                                                                        </div>
+                                                                                                                                                                                    `,
                                     showCancelButton: true,
                                     confirmButtonText: '{{ __('messages.hold') }}',
                                     cancelButtonText: '{{ __('messages.cancel') }}',
@@ -723,6 +784,99 @@
                                 console.error(err);
                                 this.isLoading = false;
                                 showToast('{{ __('messages.error_retrieving_order') }}', 'error');
+                            });
+                    },
+
+                    async registerAsDebt() {
+                        if (this.cart.length === 0) return;
+
+                        const userRole = "{{ auth()->user()->role }}";
+                        if (userRole !== 'admin' && userRole !== 'manager') {
+                            showToast('Apenas administradores e gerentes podem registrar dívidas.', 'error');
+                            return;
+                        }
+
+                        // Ensure customer name is provided
+                        if (!this.customerName || this.customerName.trim() === '') {
+                            const { value: name } = await Swal.fire({
+                                title: 'Nome do Cliente',
+                                text: 'Para registrar uma dívida, é necessário informar o nome do cliente.',
+                                input: 'text',
+                                inputPlaceholder: 'Digite o nome do cliente...',
+                                showCancelButton: true,
+                                confirmButtonText: 'Confirmar',
+                                cancelButtonText: 'Cancelar',
+                                confirmButtonColor: '#F97316',
+                                background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937',
+                                inputValidator: (value) => {
+                                    if (!value) {
+                                        return 'Você precisa digitar um nome!';
+                                    }
+                                }
+                            });
+
+                            if (name) {
+                                this.customerName = name;
+                            } else {
+                                return; // User cancelled
+                            }
+                        }
+
+                        // Confirm debt registration
+                        const confirmed = await Swal.fire({
+                            title: 'Registrar Dívida',
+                            text: `Deseja registrar uma dívida de MZN ${this.formatMoney(this.cartTotal)} para ${this.customerName}?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sim, registrar',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#F97316',
+                            background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937',
+                        });
+
+                        if (!confirmed.isConfirmed) return;
+
+                        this.isLoading = true;
+
+                        const payload = {
+                            items: this.cart.map(item => ({
+                                id: item.id,
+                                name: item.name,
+                                quantity: item.quantity,
+                                price: item.price
+                            })),
+                            customer_name: this.customerName,
+                            total_amount: this.cartTotal,
+                            notes: `Dívida registrada via POS em ${new Date().toLocaleString('pt-BR')}`
+                        };
+
+                        fetch('{{ route('debts.register') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': this.csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.isLoading = false;
+                                if (data.success) {
+                                    showToast('Dívida registrada com sucesso!', 'success');
+                                    this.cart = [];
+                                    this.saveCart();
+                                    this.customerName = '';
+                                } else {
+                                    showToast(data.message || 'Erro ao registrar dívida', 'error');
+                                }
+                            })
+                            .catch(err => {
+                                this.isLoading = false;
+                                console.error(err);
+                                showToast('Erro de conexão ao registrar dívida', 'error');
                             });
                     },
 

@@ -79,19 +79,14 @@ class POSController extends Controller
             // Os pagamentos não em dinheiro devem corresponder exatamente ao valor cobrado
             $nonCashPayments = $cardPayment + $mpesaPayment + $emolaPayment;
 
-            // Verificar se os pagamentos não em dinheiro já ultrapassam o total
-            if ($nonCashPayments > $totalAmount) {
-                throw new \Exception("Pagamentos sem dinheiro ($nonCashPayments) ultrapassam o valor total da venda ($totalAmount)");
-            }
+            // Calcular o total pago
+            $totalPaid = $cashPayment + $cardPayment + $mpesaPayment + $emolaPayment;
 
-            // Se houver pagamento em dinheiro, deve cobrir pelo menos o restante
-            $remainingAmount = $totalAmount - $nonCashPayments;
-            if ($cashPayment < $remainingAmount) {
-                throw new \Exception("Pagamento insuficiente. Faltam MZN " . number_format($remainingAmount - $cashPayment, 2));
+            // Calcular o troco (apenas para pagamento em dinheiro e se o total pago for maior que o total da venda)
+            $change = 0;
+            if ($totalPaid > $totalAmount && $cashPayment > 0) {
+                $change = $totalPaid - $totalAmount;
             }
-
-            // Calcular o troco (apenas para pagamento em dinheiro)
-            $change = $cashPayment > $remainingAmount ? $cashPayment - $remainingAmount : 0;
 
             // Criação da venda
             $saleId = DB::table('sales')->insertGetId([
@@ -108,6 +103,24 @@ class POSController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            // Se o valor pago for menor que o total, criar uma dívida (apenas para admin e manager)
+            if ($totalPaid < $totalAmount) {
+                if (!in_array(auth()->user()->role, ['admin', 'manager'])) {
+                    throw new \Exception("Apenas administradores e gerentes podem registrar vendas com pagamento parcial (dívidas).");
+                }
+
+                $remainingAmount = $totalAmount - $totalPaid;
+                \App\Models\CustomerDebt::create([
+                    'sale_id' => $saleId,
+                    'user_id' => auth()->user()->id,
+                    'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
+                    'total_amount' => $totalAmount,
+                    'remaining_amount' => $remainingAmount,
+                    'status' => 'pending',
+                    'notes' => 'Dívida originada de venda via POS. Valor total: ' . $totalAmount . ', Valor pago: ' . $totalPaid
+                ]);
+            }
 
             // Itens da venda
             foreach ($validated['items'] as $item) {

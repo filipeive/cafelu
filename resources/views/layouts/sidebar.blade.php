@@ -150,6 +150,14 @@
                         title="{{ __('messages.expenses') }}" 
                     />
 
+                    <x-sidebar.dropdown-item 
+                        route="debts.index" 
+                        icon="mdi-account-cash" 
+                        title="Contas a Receber" 
+                        :badge="\App\Models\CustomerDebt::where('status', '!=', 'paid')->count() ?: null"
+                        badgeClass="bg-danger text-white"
+                    />
+
                     @if(Auth::user()->role == 'admin')
                         <x-sidebar.dropdown-item 
                             route="reports.index" 

@@ -313,7 +313,7 @@ class OrderController extends Controller
             $request->validate([
                 'payment_method' => 'required|in:cash,card,mpesa,emola,mkesh',
                 'notes' => 'nullable|string',
-                'amount_paid' => 'required|numeric|min:' . $total,
+                'amount_paid' => 'required|numeric|min:0',
             ]);
 
             if ($order->status !== 'completed') {
@@ -391,13 +391,38 @@ class OrderController extends Controller
             $users = User::all();
             Notification::send($users, new SaleCompletedNotification($sale));
 
-            // 5. Atualizar o status do pedido
+            // 5. Atualizar o status do pedido e criar dívida se necessário
+            $remainingBalance = $total - $amountPaid;
+
+            if ($remainingBalance > 0) {
+                if (!in_array(auth()->user()->role, ['admin', 'manager'])) {
+                    throw new \Exception('Apenas administradores e gerentes podem registrar pagamentos parciais (dívidas).');
+                }
+                $paymentStatus = 'partial';
+            } else {
+                $paymentStatus = 'paid';
+            }
+
             $order->update([
                 'status' => 'paid',
+                'payment_status' => $paymentStatus,
                 'payment_method' => $request->payment_method,
                 'notes' => $request->notes,
                 'paid_at' => now()
             ]);
+
+            if ($remainingBalance > 0) {
+                \App\Models\CustomerDebt::create([
+                    'sale_id' => $sale->id,
+                    'order_id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'customer_name' => $order->customer_name ?? 'Cliente Geral',
+                    'total_amount' => $total,
+                    'remaining_amount' => $remainingBalance,
+                    'status' => 'pending',
+                    'notes' => 'Dívida originada do pedido #' . $order->id . '. Valor total: ' . $total . ', Valor pago: ' . $amountPaid
+                ]);
+            }
 
             // 5. Liberar mesas (mantém seu código existente)
             if ($order->table) {

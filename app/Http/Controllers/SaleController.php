@@ -186,6 +186,7 @@ class SaleController extends Controller
             'amount_paid' => 'required|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'order_id' => 'nullable|integer',
+            'customer_name' => 'nullable|string|max:255',
             // Validate breakdown
             'cash_amount' => 'nullable|numeric|min:0',
             'card_amount' => 'nullable|numeric|min:0',
@@ -196,6 +197,9 @@ class SaleController extends Controller
         try {
             DB::beginTransaction();
 
+            $amountPaid = $validated['amount_paid'];
+            $totalAmount = $validated['total_amount'];
+
             // Use provided breakdown or fallback to logic (though frontend should send it now)
             $cash = $request->input('cash_amount', 0);
             $card = $request->input('card_amount', 0);
@@ -203,20 +207,19 @@ class SaleController extends Controller
             $emola = $request->input('emola_amount', 0);
 
             // If no breakdown provided but method is single, assign amount_paid to that method
-            // This maintains backward compatibility if frontend didn't send breakdown
             if ($cash == 0 && $card == 0 && $mpesa == 0 && $emola == 0) {
                 switch ($validated['payment_method']) {
                     case 'cash':
-                        $cash = $validated['amount_paid'];
+                        $cash = $amountPaid;
                         break;
                     case 'card':
-                        $card = $validated['amount_paid'];
+                        $card = $amountPaid;
                         break;
                     case 'mpesa':
-                        $mpesa = $validated['amount_paid'];
+                        $mpesa = $amountPaid;
                         break;
                     case 'emola':
-                        $emola = $validated['amount_paid'];
+                        $emola = $amountPaid;
                         break;
                 }
             }
@@ -224,15 +227,33 @@ class SaleController extends Controller
             $sale = Sale::create([
                 'user_id' => auth()->id(),
                 'sale_date' => now(),
-                'total_amount' => $validated['total_amount'],
+                'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
+                'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
                 'status' => 'completed',
                 'cash_amount' => $cash,
                 'card_amount' => $card,
                 'mpesa_amount' => $mpesa,
                 'emola_amount' => $emola,
-                'order_id' => $request->order_id, // Save order_id linkage
+                'order_id' => $request->order_id,
             ]);
+
+            // Create Debt if amount paid is less than total
+            if ($amountPaid < $totalAmount) {
+                if (!in_array(auth()->user()->role, ['admin', 'manager'])) {
+                    throw new \Exception("Apenas administradores e gerentes podem registrar vendas com pagamento parcial (dívidas).");
+                }
+
+                \App\Models\CustomerDebt::create([
+                    'sale_id' => $sale->id,
+                    'user_id' => auth()->id(),
+                    'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
+                    'total_amount' => $totalAmount,
+                    'remaining_amount' => $totalAmount - $amountPaid,
+                    'status' => 'pending',
+                    'notes' => 'Dívida originada de venda via POS. Valor total: ' . $totalAmount . ', Valor pago: ' . $amountPaid
+                ]);
+            }
 
             foreach ($validated['items'] as $item) {
                 $product = Product::findOrFail($item['id']);

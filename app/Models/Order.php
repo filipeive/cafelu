@@ -60,6 +60,7 @@ class Order extends Model
             'pending' => 'Pendente',
             'awaiting_confirmation' => 'Aguardando Confirmação',
             'paid' => 'Pago',
+            'partial' => 'Parcial',
             'cancelled' => 'Cancelado',
             'refunded' => 'Reembolsado'
         ];

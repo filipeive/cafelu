@@ -14,6 +14,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\DebtController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SettingController;
@@ -96,6 +97,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports/comparison', [ReportController::class, 'comparisonReport'])->name('reports.comparisonReport');
         Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
         Route::get('reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
+
+        // Debts
+        Route::resource('debts', DebtController::class);
+        Route::post('debts/{debt}/pay', [DebtController::class, 'pay'])->name('debts.pay');
+        Route::post('debts/register', [DebtController::class, 'registerDebt'])->name('debts.register');
     });
 
     // Staff Routes (Admin, Manager, Waiter)

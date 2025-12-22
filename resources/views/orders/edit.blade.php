@@ -5,10 +5,6 @@
 @section('content')
     <div class="w-full" x-data="{ 
         activeTab: '{{ $categories->first()->id }}',
-        paymentModalOpen: false,
-        paymentMethod: '',
-        cashAmount: '',
-        changeAmount: '0.00',
         totalAmount: {{ $order->total_amount }},
         
         calculateChange() {
@@ -47,7 +43,7 @@
                     </a>
                     
                     @if ($order->status === 'completed' && !$order->is_paid)
-                        <button @click="paymentModalOpen = true" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors flex items-center gap-2">
+                        <button @click="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, total: {{ $order->total_amount }} })" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors flex items-center gap-2">
                             <i class="mdi mdi-cash-multiple"></i> Pagamento
                         </button>
                     @endif
@@ -284,7 +280,7 @@
 
                     <div class="space-y-3">
                         @if ($order->status === 'completed' && !$order->is_paid)
-                            <button @click="paymentModalOpen = true" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                            <button @click="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, total: {{ $order->total_amount }} })" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
                                 <i class="mdi mdi-cash-multiple"></i> Registrar Pagamento
                             </button>
                         @endif
@@ -317,89 +313,8 @@
             </div>
         </div>
 
-        <!-- Payment Modal -->
-        <div x-show="paymentModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0">
-            
-            <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" @click="paymentModalOpen = false"></div>
-
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-200 dark:border-gray-700">
-                    <form action="{{ route('orders.pay', $order) }}" method="POST">
-                        @csrf
-                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <i class="mdi mdi-cash-multiple text-green-500"></i>
-                                Registrar Pagamento
-                            </h3>
-                            <button type="button" @click="paymentModalOpen = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
-                                <i class="mdi mdi-close text-xl"></i>
-                            </button>
-                        </div>
-
-                        <div class="p-6 space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Método de Pagamento</label>
-                                <select name="payment_method" x-model="paymentMethod" required
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500">
-                                    <option value="">Selecione um método</option>
-                                    <option value="cash">Dinheiro</option>
-                                    <option value="card">Cartão</option>
-                                    <option value="mpesa">M-Pesa</option>
-                                    <option value="emola">E-Mola</option>
-                                    <option value="mkesh">M-Kesh</option>
-                                </select>
-                            </div>
-
-                            <div x-show="paymentMethod === 'cash'" class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor Recebido</label>
-                                    <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">MZN</span>
-                                        <input type="number" name="cash_amount" x-model="cashAmount" @input="calculateChange()" step="0.01" min="{{ $order->total_amount }}"
-                                            class="w-full pl-12 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Troco</label>
-                                    <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">MZN</span>
-                                        <input type="text" x-model="changeAmount" readonly
-                                            class="w-full pl-12 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white cursor-not-allowed">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="amount_paid" value="{{ $order->total_amount }}">
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
-                                <textarea name="notes" rows="2" class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-orange-500 focus:border-orange-500"></textarea>
-                            </div>
-
-                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg p-4 flex justify-between items-center">
-                                <span class="text-blue-800 dark:text-blue-200 font-medium">Total a Pagar:</span>
-                                <span class="text-xl font-bold text-blue-600 dark:text-blue-300">MZN {{ number_format($order->total_amount, 2, ',', '.') }}</span>
-                            </div>
-                        </div>
-
-                        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
-                            <button type="button" @click="paymentModalOpen = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
-                                Cancelar
-                            </button>
-                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center gap-2">
-                                <i class="mdi mdi-check-circle"></i> Confirmar Pagamento
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <!-- Payment Modal -->
+    @include('orders._payment_modal')
     </div>
 
     @push('scripts')

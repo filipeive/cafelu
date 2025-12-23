@@ -152,7 +152,7 @@ class POSController extends Controller
                 // Verificar estoque baixo
                 $product = Product::find($item['product_id']);
                 if ($product && $product->stock_quantity <= $product->min_stock_level) {
-                    $users = User::all();
+                    $users = User::whereIn('role', ['admin', 'manager', 'chef', 'waiter'])->get();
                     Notification::send($users, new LowStockNotification($product));
                 }
             }
@@ -162,7 +162,7 @@ class POSController extends Controller
             // Notificar venda concluída
             $sale = Sale::find($saleId);
             if ($sale) {
-                $users = User::all();
+                $users = User::whereIn('role', ['admin', 'manager'])->get();
                 Notification::send($users, new SaleCompletedNotification($sale));
             }
 

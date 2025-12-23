@@ -139,13 +139,13 @@ class SaleController extends Controller
 
                 // Verificar estoque baixo
                 if ($product->stock_quantity <= $product->min_stock_level) {
-                    $users = User::all();
+                    $users = User::whereIn('role', ['admin', 'manager', 'chef', 'waiter'])->get();
                     Notification::send($users, new LowStockNotification($product));
                 }
             }
 
             // Notificar venda concluída
-            $users = User::all();
+            $users = User::whereIn('role', ['admin', 'manager'])->get();
             Notification::send($users, new SaleCompletedNotification($sale));
 
             // Commit da transação

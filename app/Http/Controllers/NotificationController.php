@@ -18,7 +18,7 @@ class NotificationController extends Controller
         $notification = Auth::user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 
-        return response()->json(['success' => true]);
+        return back()->with('success', __('messages.notification_marked_as_read'));
     }
 
     public function markAllAsRead()

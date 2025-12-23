@@ -172,56 +172,6 @@
                             @yield('page-header')
                         </div>
                     @endif
-
-                    <!-- Flash Messages -->
-                    {{-- @if(session('success') || session('error') || session('warning') || session('info'))
-                    <div class="mb-6 space-y-2" x-data="{ show: true }" x-show="show" x-transition>
-                        @if(session('success'))
-                        <div
-                            class="flex items-center p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                            <i class="mdi mdi-check-circle text-green-500 text-xl mr-3"></i>
-                            <span class="text-green-800 dark:text-green-200 flex-1">{{ session('success') }}</span>
-                            <button @click="show = false" class="text-green-500 hover:text-green-700">
-                                <i class="mdi mdi-close"></i>
-                            </button>
-                        </div>
-                        @endif
-
-                        @if(session('error'))
-                        <div
-                            class="flex items-center p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                            <i class="mdi mdi-alert-circle text-red-500 text-xl mr-3"></i>
-                            <span class="text-red-800 dark:text-red-200 flex-1">{{ session('error') }}</span>
-                            <button @click="show = false" class="text-red-500 hover:text-red-700">
-                                <i class="mdi mdi-close"></i>
-                            </button>
-                        </div>
-                        @endif
-
-                        @if(session('warning'))
-                        <div
-                            class="flex items-center p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-                            <i class="mdi mdi-alert text-yellow-500 text-xl mr-3"></i>
-                            <span class="text-yellow-800 dark:text-yellow-200 flex-1">{{ session('warning') }}</span>
-                            <button @click="show = false" class="text-yellow-500 hover:text-yellow-700">
-                                <i class="mdi mdi-close"></i>
-                            </button>
-                        </div>
-                        @endif
-
-                        @if(session('info'))
-                        <div
-                            class="flex items-center p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                            <i class="mdi mdi-information text-blue-500 text-xl mr-3"></i>
-                            <span class="text-blue-800 dark:text-blue-200 flex-1">{{ session('info') }}</span>
-                            <button @click="show = false" class="text-blue-500 hover:text-blue-700">
-                                <i class="mdi mdi-close"></i>
-                            </button>
-                        </div>
-                        @endif
-                    </div>
-                    @endif --}}
-
                     <!-- Main Content -->
                     @yield('content')
                 </div>

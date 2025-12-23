@@ -27,14 +27,16 @@
                 <i class="mdi mdi-menu text-2xl"></i>
             </button>
 
-            <!-- Global Search -->
-            <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="mdi mdi-magnify text-gray-400 group-focus-within:text-warning transition-colors"></i>
-                </div>
-                <input type="text" name="q" placeholder="{{ __('messages.search_placeholder') }}"
-                    class="block w-64 pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-full leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-warning/50 focus:border-warning sm:text-sm transition-all duration-300 focus:w-80">
-            </form>
+            @if(auth()->user()->role !== 'customer')
+                <!-- Global Search -->
+                <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="mdi mdi-magnify text-gray-400 group-focus-within:text-warning transition-colors"></i>
+                    </div>
+                    <input type="text" name="q" placeholder="{{ __('messages.search_placeholder') }}"
+                        class="block w-64 pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-full leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-warning/50 focus:border-warning sm:text-sm transition-all duration-300 focus:w-80">
+                </form>
+            @endif
 
             <div class="hidden xl:block">
                 <h1 class="text-lg font-semibold text-gray-700 dark:text-gray-200">

@@ -387,7 +387,11 @@ return [
     'notification_deleted' => 'Notificação removida',
     'manage_your_notifications' => 'Gerencie suas notificações do sistema',
     'mark_all_as_read' => 'Marcar todas como lidas',
+    'mark_as_read' => 'Marcar como lida',
+    'notification_marked_as_read' => 'Notificação marcada como lida',
+    'delete' => 'Excluir',
     'confirm_delete_notification' => 'Tem certeza que deseja excluir esta notificação?',
     'no_notifications' => 'Nenhuma notificação',
+    'no_results_found' => 'Nenhum resultado encontrado',
     'you_are_all_caught_up' => 'Você está em dia com tudo!',
 ];

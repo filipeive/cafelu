@@ -391,7 +391,11 @@ return [
     'notification_deleted' => 'Notification deleted',
     'manage_your_notifications' => 'Manage your system notifications',
     'mark_all_as_read' => 'Mark all as read',
+    'mark_as_read' => 'Mark as read',
+    'notification_marked_as_read' => 'Notification marked as read',
+    'delete' => 'Delete',
     'confirm_delete_notification' => 'Are you sure you want to delete this notification?',
     'no_notifications' => 'No notifications',
+    'no_results_found' => 'No results found',
     'you_are_all_caught_up' => 'You are all caught up!',
 ];

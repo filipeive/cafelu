@@ -112,13 +112,15 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                                                <span class="font-bold">{{ class_basename($log->auditable_type) }}</span>
+                                                <span class="font-bold">{{ __('messages.' . strtolower(class_basename($log->auditable_type))) }}</span>
                                                 <span class="text-gray-500">#{{ $log->auditable_id }}</span>
                                             </td>
                                             <td class="px-6 py-4">
                                                 @if($log->action === 'updated' && $log->new_values)
                                                     <div class="text-xs text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                                                        {{ __('messages.changed') }}: {{ implode(', ', array_keys($log->new_values)) }}
+                                                        {{ __('messages.changed') }}: {{ implode(', ', array_map(function($key) {
+                                                            return __('messages.' . $key);
+                                                        }, array_keys($log->new_values))) }}
                                                     </div>
                                                 @elseif($log->action === 'created')
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.new_record_created') }}</div>

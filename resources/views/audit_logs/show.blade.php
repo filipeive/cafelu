@@ -55,7 +55,7 @@
                         <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
                             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">{{ __('messages.affected_model') }}</p>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                <span class="font-bold">{{ class_basename($auditLog->auditable_type) }}</span>
+                                <span class="font-bold">{{ __('messages.' . strtolower(class_basename($auditLog->auditable_type))) }}</span>
                                 <span class="text-gray-500">#{{ $auditLog->auditable_id }}</span>
                             </p>
                         </div>
@@ -119,7 +119,7 @@
                                     @foreach($auditLog->new_values as $key => $newValue)
                                         @php $oldValue = $auditLog->old_values[$key] ?? null; @endphp
                                         <tr>
-                                            <td class="px-6 py-4 text-sm font-bold text-gray-700 dark:text-gray-300">{{ $key }}</td>
+                                            <td class="px-6 py-4 text-sm font-bold text-gray-700 dark:text-gray-300">{{ __('messages.' . $key) }}</td>
                                             <td
                                                 class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 bg-red-50/10 dark:bg-red-900/5 line-through decoration-red-300">
                                                 {{ is_array($oldValue) ? json_encode($oldValue) : ($oldValue ?? 'null') }}
@@ -148,7 +148,7 @@
                                 @foreach($values as $key => $value)
                                     <div
                                         class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-600">
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">{{ $key }}</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">{{ __('messages.' . $key) }}</p>
                                         <p class="text-sm font-medium text-gray-900 dark:text-white break-all">
                                             {{ is_array($value) ? json_encode($value) : ($value ?? 'null') }}
                                         </p>

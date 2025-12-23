@@ -141,14 +141,22 @@
                                                     <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                                                         <div>
                                                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                                                {{ ucfirst($log->action) }} 
-                                                                <span class="font-bold text-gray-900 dark:text-white">
-                                                                    {{ class_basename($log->auditable_type) }}
-                                                                </span>
-                                                                @if($log->action === 'updated' && $log->new_values)
-                                                                    <span class="text-xs italic">
-                                                                        ({{ implode(', ', array_keys($log->new_values)) }})
+                                                                @if($log->action === 'login')
+                                                                    {{ __('messages.login') }}
+                                                                @elseif($log->action === 'logout')
+                                                                    {{ __('messages.logout_activity') }}
+                                                                @else
+                                                                    {{ __('messages.' . $log->action) }} 
+                                                                    <span class="font-bold text-gray-900 dark:text-white">
+                                                                        {{ __('messages.' . strtolower(class_basename($log->auditable_type))) }}
                                                                     </span>
+                                                                    @if($log->action === 'updated' && $log->new_values)
+                                                                        <span class="text-xs italic">
+                                                                            ({{ implode(', ', array_map(function($key) {
+                                                                                return __('messages.' . $key);
+                                                                            }, array_keys($log->new_values))) }})
+                                                                        </span>
+                                                                    @endif
                                                                 @endif
                                                             </p>
                                                         </div>

@@ -21,17 +21,22 @@
             async submitPayment() {
                 this.processing = true;
                 try {
+                    const formData = new FormData();
+                    formData.append('payment_method', this.method);
+                    formData.append('phone', this.phone);
+                    
+                    const fileInput = document.getElementById('payment_proof');
+                    if (fileInput.files.length > 0) {
+                        formData.append('payment_proof', fileInput.files[0]);
+                    }
+
                     const response = await fetch(`/customer/order/${this.orderId}/pay`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({
-                            payment_method: this.method,
-                            phone: this.phone
-                        })
+                        body: formData
                     });
 
                     const data = await response.json();
@@ -142,6 +147,14 @@
                         <input type="text" x-model="phone"
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                             placeholder="84XXXXXXX">
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Comprovativo de
+                            Pagamento (Opcional)</label>
+                        <input type="file" id="payment_proof"
+                            class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                        <p class="text-[10px] text-gray-500 mt-1">Formatos aceitos: JPG, PNG, PDF. Tamanho máx: 2MB.</p>
                     </div>
                 </div>
             </div>

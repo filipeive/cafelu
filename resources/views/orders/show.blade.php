@@ -242,12 +242,47 @@
                     </h3>
                     <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-sm italic">
                         @if ($order->notes)
-                            {{ $order->notes }}
+                            {!! nl2br(e($order->notes)) !!}
                         @else
                             <span class="text-gray-400 not-italic">Nenhuma observação registrada.</span>
                         @endif
                     </div>
                 </div>
+
+                <!-- Payment Proof -->
+                @if ($order->payment_proof)
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                            <i class="mdi mdi-file-document-check-outline text-green-500"></i> Comprovativo de Pagamento
+                        </h3>
+                        <div class="space-y-4">
+                            @php
+                                $extension = pathinfo($order->payment_proof, PATHINFO_EXTENSION);
+                                $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif']);
+                            @endphp
+
+                            @if ($isImage)
+                                <div class="relative group cursor-pointer" @click="$dispatch('open-image-modal', { src: '{{ asset('storage/' . $order->payment_proof) }}' })">
+                                    <img src="{{ asset('storage/' . $order->payment_proof) }}" alt="Comprovativo" class="w-full h-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center rounded-lg">
+                                        <i class="mdi mdi-magnify-plus text-white opacity-0 group-hover:opacity-100 text-3xl transition-all"></i>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700">
+                                    <i class="mdi mdi-file-pdf-box text-3xl text-red-500"></i>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">Documento PDF</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Clique para visualizar ou baixar</p>
+                                    </div>
+                                    <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors">
+                                        <i class="mdi mdi-download text-xl"></i>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Table Group Info -->
                 @if ($order->table && $order->table->group_id)

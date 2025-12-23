@@ -9,7 +9,15 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Auth::user()->notifications()->paginate(20);
+        $query = Auth::user()->notifications();
+
+        // Extra safety: if customer, ensure they only see relevant types if any leaked
+        if (Auth::user()->role === 'customer') {
+            $query->whereIn('data->type', ['order_ready', 'sale_completed', 'new_order']);
+            // Note: sale_completed and new_order are only sent to them if it's THEIR order
+        }
+
+        $notifications = $query->paginate(20);
         return view('notifications.index', compact('notifications'));
     }
 
@@ -30,7 +38,13 @@ class NotificationController extends Controller
     public function unread()
     {
         $user = Auth::user();
-        $unreadNotifications = $user->unreadNotifications->take(5)->map(function ($n) {
+        $query = $user->unreadNotifications();
+
+        if ($user->role === 'customer') {
+            $query->whereIn('data->type', ['order_ready', 'sale_completed', 'new_order']);
+        }
+
+        $unreadNotifications = $query->take(5)->get()->map(function ($n) {
             return [
                 'id' => $n->id,
                 'message' => $n->data['message'] ?? '',
@@ -42,7 +56,9 @@ class NotificationController extends Controller
         });
 
         return response()->json([
-            'unreadCount' => $user->unreadNotifications->count(),
+            'unreadCount' => $user->role === 'customer'
+                ? $user->unreadNotifications()->whereIn('data->type', ['order_ready', 'sale_completed', 'new_order'])->count()
+                : $user->unreadNotifications->count(),
             'notifications' => $unreadNotifications,
         ]);
     }

@@ -168,14 +168,21 @@ class CustomerController extends Controller
         $request->validate([
             'payment_method' => 'required|string',
             'phone' => 'nullable|string',
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         try {
+            $paymentProofPath = null;
+            if ($request->hasFile('payment_proof')) {
+                $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
+            }
+
             // Update order with payment details but keep it as 'awaiting_confirmation'
             $order->update([
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'awaiting_confirmation',
-                'notes' => ($order->notes ? $order->notes . "\n" : "") . "Pagamento via " . strtoupper($request->payment_method) . ($request->phone ? " (Tel: " . $request->phone . ")" : ""),
+                'payment_proof' => $paymentProofPath,
+                'notes' => ($order->notes ? $order->notes . "\n" : "") . "Pagamento via " . strtoupper($request->payment_method) . ($request->phone ? " (Tel: " . $request->phone . ")" : "") . ($paymentProofPath ? " [Comprovativo anexado]" : ""),
             ]);
 
             return response()->json([

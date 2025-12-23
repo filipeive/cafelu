@@ -135,11 +135,18 @@
                                                         @if($order->status === 'completed') Entregue @endif
                                                     </span>
 
-                                                    <button
-                                                        onclick="window.openPaymentModal({{ $order->id }}, {{ $order->total_amount }})"
-                                                        class="mt-2 w-full py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
-                                                        Pagar Agora
-                                                    </button>
+                                                    @if($order->payment_status === 'awaiting_confirmation')
+                                                        <div
+                                                            class="mt-2 w-full py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[10px] font-black uppercase rounded-lg flex items-center justify-center gap-1 border border-purple-200 dark:border-purple-800">
+                                                            <i class="mdi mdi-clock-outline"></i> Aguardando Confirmação
+                                                        </div>
+                                                    @else
+                                                        <button
+                                                            onclick="window.openPaymentModal({{ $order->id }}, {{ $order->total_amount }})"
+                                                            class="mt-2 w-full py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
+                                                            Pagar Agora
+                                                        </button>
+                                                    @endif
                                                 @else
                                                     <div class="flex items-center gap-1 text-green-500">
                                                         <i class="mdi mdi-check-circle text-sm"></i>

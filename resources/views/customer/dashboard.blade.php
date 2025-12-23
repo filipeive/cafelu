@@ -109,50 +109,61 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="flex flex-col gap-2">
+                                            <div class="flex flex-col gap-3">
                                                 @if(!in_array($order->status, ['paid', 'completed', 'canceled']))
-                                                    <div class="flex items-center gap-1">
-                                                        <div
-                                                            class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden flex">
-                                                            <div class="h-full bg-blue-500 {{ $order->status === 'active' ? 'animate-pulse' : '' }}"
-                                                                style="width: 25%"></div>
-                                                            <div class="h-full bg-yellow-500 {{ $order->status === 'preparing' ? 'animate-pulse' : '' }}"
-                                                                style="width: {{ in_array($order->status, ['preparing', 'ready', 'completed']) ? '25%' : '0%' }}">
-                                                            </div>
-                                                            <div class="h-full bg-purple-500 {{ $order->status === 'ready' ? 'animate-pulse' : '' }}"
-                                                                style="width: {{ in_array($order->status, ['ready', 'completed']) ? '25%' : '0%' }}">
-                                                            </div>
-                                                            <div class="h-full bg-indigo-500 {{ $order->status === 'completed' ? 'animate-pulse' : '' }}"
-                                                                style="width: {{ $order->status === 'completed' ? '25%' : '0%' }}">
-                                                            </div>
+                                                    <!-- Tracking Bar -->
+                                                    <div class="flex flex-col gap-1.5">
+                                                        <div class="flex justify-between text-[9px] font-black uppercase tracking-tighter text-gray-400">
+                                                            <span class="{{ $order->status === 'active' ? 'text-blue-500' : '' }}">Recebido</span>
+                                                            <span class="{{ $order->status === 'preparing' ? 'text-yellow-500' : '' }}">Preparo</span>
+                                                            <span class="{{ $order->status === 'ready' ? 'text-purple-500' : '' }}">Pronto</span>
+                                                        </div>
+                                                        <div class="h-1.5 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden flex gap-0.5">
+                                                            <div class="h-full bg-blue-500 {{ $order->status === 'active' ? 'animate-pulse' : '' }}" style="width: 33.33%"></div>
+                                                            <div class="h-full bg-yellow-500 {{ $order->status === 'preparing' ? 'animate-pulse' : '' }}" style="width: {{ in_array($order->status, ['preparing', 'ready', 'completed']) ? '33.33%' : '0%' }}"></div>
+                                                            <div class="h-full bg-purple-500 {{ $order->status === 'ready' ? 'animate-pulse' : '' }}" style="width: {{ in_array($order->status, ['ready', 'completed']) ? '33.33%' : '0%' }}"></div>
                                                         </div>
                                                     </div>
-                                                    <span
-                                                        class="text-[10px] font-bold uppercase {{ $order->status === 'ready' ? 'text-purple-500 animate-bounce' : 'text-gray-500' }}">
-                                                        @if($order->status === 'active') Aguardando Início @endif
-                                                        @if($order->status === 'preparing') Na Cozinha @endif
-                                                        @if($order->status === 'ready') Pronto! @endif
-                                                        @if($order->status === 'completed') Entregue @endif
-                                                    </span>
 
-                                                    @if($order->payment_status === 'awaiting_confirmation')
-                                                        <div
-                                                            class="mt-2 w-full py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[10px] font-black uppercase rounded-lg flex items-center justify-center gap-1 border border-purple-200 dark:border-purple-800">
-                                                            <i class="mdi mdi-clock-outline"></i> Aguardando Confirmação
-                                                        </div>
-                                                    @else
-                                                        <button
-                                                            onclick="window.openPaymentModal({{ $order->id }}, {{ $order->total_amount }})"
-                                                            class="mt-2 w-full py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
-                                                            Pagar Agora
-                                                        </button>
-                                                    @endif
+                                                    <!-- Action Buttons -->
+                                                    <div class="flex gap-2">
+                                                        @if($order->payment_status === 'awaiting_confirmation')
+                                                            <div class="flex-1 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-[9px] font-black uppercase rounded-lg flex items-center justify-center gap-1 border border-purple-100 dark:border-purple-800/50">
+                                                                <i class="mdi mdi-clock-outline"></i> Aguardando
+                                                            </div>
+                                                        @else
+                                                            <button onclick="window.openPaymentModal({{ $order->id }}, {{ $order->total_amount }})"
+                                                                class="flex-1 py-1.5 bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold rounded-lg transition-all shadow-sm">
+                                                                Pagar
+                                                            </button>
+                                                        @endif
+
+                                                        @if($order->status === 'active')
+                                                            <button onclick="confirmCancel({{ $order->id }})"
+                                                                class="px-2 py-1.5 bg-white dark:bg-gray-800 border border-red-100 dark:border-red-900/30 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all">
+                                                                <i class="mdi mdi-close"></i>
+                                                            </button>
+                                                            <form id="cancel-form-{{ $order->id }}" action="{{ route('customer.order.cancel', $order) }}" method="POST" class="hidden">
+                                                                @csrf
+                                                            </form>
+                                                        @endif
+                                                    </div>
                                                 @else
-                                                    <div class="flex items-center gap-1 text-green-500">
-                                                        <i class="mdi mdi-check-circle text-sm"></i>
-                                                        <span class="text-[10px] font-bold uppercase">
-                                                            {{ $order->status === 'canceled' ? 'Cancelado' : 'Finalizado' }}
-                                                        </span>
+                                                    <div class="flex items-center justify-between gap-2">
+                                                        <div class="flex items-center gap-1.5 {{ $order->status === 'canceled' ? 'text-red-500' : 'text-green-500' }}">
+                                                            <i class="mdi {{ $order->status === 'canceled' ? 'mdi-close-circle' : 'mdi-check-circle' }} text-base"></i>
+                                                            <span class="text-[10px] font-black uppercase tracking-wider">
+                                                                {{ $order->status === 'canceled' ? 'Cancelado' : 'Finalizado' }}
+                                                            </span>
+                                                        </div>
+                                                        <button onclick="confirmReorder({{ $order->id }})"
+                                                            class="p-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition-all"
+                                                            title="Repetir Pedido">
+                                                            <i class="mdi mdi-refresh"></i>
+                                                        </button>
+                                                        <form id="reorder-form-{{ $order->id }}" action="{{ route('customer.order.reorder', $order) }}" method="POST" class="hidden">
+                                                            @csrf
+                                                        </form>
                                                     </div>
                                                 @endif
                                             </div>
@@ -237,4 +248,48 @@
     </div>
 
     @include('customer.partials.payment-modal')
+
+    @push('scripts')
+    <script>
+        function confirmCancel(orderId) {
+            Swal.fire({
+                title: '{{ __('messages.confirm_cancel_order') }}',
+                text: '{{ __('messages.cancel_order_warning') }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#9CA3AF',
+                confirmButtonText: '{{ __('messages.yes_cancel') }}',
+                cancelButtonText: '{{ __('messages.cancel') }}',
+                background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#111827',
+                borderRadius: '1.5rem'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('cancel-form-' + orderId).submit();
+                }
+            });
+        }
+
+        function confirmReorder(orderId) {
+            Swal.fire({
+                title: '{{ __('messages.confirm_reorder') }}',
+                text: '{{ __('messages.reorder_warning') }}',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3B82F6',
+                cancelButtonColor: '#9CA3AF',
+                confirmButtonText: '{{ __('messages.yes_reorder') }}',
+                cancelButtonText: '{{ __('messages.cancel') }}',
+                background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#111827',
+                borderRadius: '1.5rem'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('reorder-form-' + orderId).submit();
+                }
+            });
+        }
+    </script>
+    @endpush
 @endsection

@@ -156,13 +156,12 @@ class CustomerController extends Controller
 
     public function pay(Request $request, Order $order)
     {
-        // Ensure the order belongs to the user
         if ($order->user_id !== Auth::id()) {
-            return response()->json(['success' => false, 'message' => 'Não autorizado'], 403);
+            return response()->json(['success' => false, 'message' => __('messages.unauthorized')], 403);
         }
 
         if ($order->status === 'paid') {
-            return response()->json(['success' => false, 'message' => 'Pedido já pago'], 400);
+            return response()->json(['success' => false, 'message' => __('messages.order_already_paid')], 400);
         }
 
         $request->validate([
@@ -187,12 +186,12 @@ class CustomerController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Pagamento enviado para confirmação administrativa.'
+                'message' => __('messages.payment_sent_for_confirmation')
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao processar pagamento: ' . $e->getMessage()
+                'message' => __('messages.error_processing_payment') . ': ' . $e->getMessage()
             ], 500);
         }
     }
@@ -200,7 +199,7 @@ class CustomerController extends Controller
     public function cancelOrder(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            return back()->with('error', 'Não autorizado');
+            return back()->with('error', __('messages.unauthorized'));
         }
 
         if ($order->status !== 'active') {
@@ -209,13 +208,13 @@ class CustomerController extends Controller
 
         $order->update(['status' => 'canceled']);
 
-        return back()->with('success', 'Pedido cancelado com sucesso.');
+        return back()->with('success', __('messages.order_canceled'));
     }
 
     public function reorder(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            return back()->with('error', 'Não autorizado');
+            return back()->with('error', __('messages.unauthorized'));
         }
 
         try {
@@ -244,7 +243,7 @@ class CustomerController extends Controller
             $admins = User::whereIn('role', ['admin', 'manager'])->get();
             Notification::send($admins, new NewOrderNotification($newOrder));
 
-            return redirect()->route('customer.dashboard')->with('success', 'Pedido repetido com sucesso!');
+            return redirect()->route('customer.dashboard')->with('success', __('messages.order_reordered'));
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 
+use App\Models\Category;
+
 class CustomerController extends Controller
 {
     public function __construct()
@@ -63,6 +65,17 @@ class CustomerController extends Controller
         $orders = $query->paginate(10);
 
         return view('customer.orders', compact('orders'));
+    }
+
+    public function createOrder()
+    {
+        $categories = Category::with([
+            'products' => function ($q) {
+                $q->where('is_active', true)->where('stock_quantity', '>', 0);
+            }
+        ])->get();
+
+        return view('customer.create_order', compact('categories'));
     }
 
     public function profile()
@@ -196,19 +209,33 @@ class CustomerController extends Controller
         }
     }
 
-    public function cancelOrder(Order $order)
+    public function cancelOrder(Request $request, Order $order)
     {
         if ($order->user_id !== Auth::id()) {
             return back()->with('error', __('messages.unauthorized'));
         }
 
-        if ($order->status !== 'active') {
-            return back()->with('error', 'Este pedido não pode mais ser cancelado.');
+        if (!$order->canBeCanceled()) {
+            return back()->with('error', 'Este pedido não pode mais ser cancelado ou já possui uma solicitação pendente.');
         }
 
-        $order->update(['status' => 'canceled']);
+        $request->validate([
+            'cancellation_reason' => 'required|string|min:5|max:255',
+        ]);
 
-        return back()->with('success', __('messages.order_canceled'));
+        $order->update([
+            'status' => 'pending_cancel',
+            'cancellation_status' => 'pending',
+            'cancel_requested_at' => now(),
+            'cancellation_reason' => $request->cancellation_reason,
+        ]);
+
+        // Notify admins
+        $admins = User::whereIn('role', ['admin', 'manager'])->get();
+        // You might want to create a new notification for this
+        // Notification::send($admins, new CancellationRequestedNotification($order));
+
+        return back()->with('success', 'Solicitação de cancelamento enviada com sucesso. Aguarde a aprovação administrativa.');
     }
 
     public function reorder(Order $order)

@@ -10,7 +10,7 @@
                 <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Meus Pedidos 📦</h1>
                 <p class="text-gray-500 dark:text-gray-400 mt-1">Gerencie e acompanhe todos os seus pedidos realizados.</p>
             </div>
-            <a href="{{ route('welcome') }}#menu"
+            <a href="{{ route('customer.order.create') }}"
                 class="inline-flex items-center justify-center px-6 py-3 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/30">
                 <i class="mdi mdi-plus-circle mr-2"></i> Novo Pedido
             </a>
@@ -115,24 +115,29 @@
 
                     <!-- Card Footer -->
                     <div class="p-5 bg-gray-50/50 dark:bg-gray-900/20 border-t border-gray-50 dark:border-gray-700/50 grid grid-cols-2 gap-3">
-                        @if($order->status === 'active')
-                            <button onclick="confirmCancel({{ $order->id }})" 
+                        @if($order->canBeCanceled())
+                            <button onclick="requestCancel({{ $order->id }})" 
                                 class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-red-100 dark:border-red-900/30 text-red-500 rounded-2xl text-xs font-bold hover:bg-red-500 hover:text-white transition-all">
-                                <i class="mdi mdi-close-circle-outline text-base"></i> Cancelar
+                                <i class="mdi mdi-close-circle-outline text-base"></i> Solicitar Cancelamento
                             </button>
                             <form id="cancel-form-{{ $order->id }}" action="{{ route('customer.order.cancel', $order) }}" method="POST" class="hidden">
                                 @csrf
+                                <input type="hidden" name="cancellation_reason" id="reason-{{ $order->id }}">
                             </form>
+                        @elseif($order->cancellation_status === 'pending')
+                            <div class="col-span-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 rounded-2xl text-[10px] font-black uppercase border border-yellow-100 dark:border-yellow-800/50">
+                                <i class="mdi mdi-clock-outline"></i> Cancelamento Pendente
+                            </div>
                         @endif
 
-                        @if(!in_array($order->status, ['paid', 'completed', 'canceled']) && $order->payment_status !== 'awaiting_confirmation')
+                        @if($order->status === 'completed' && !in_array($order->payment_status, ['paid', 'awaiting_confirmation']))
                             <button onclick="window.openPaymentModal({{ $order->id }}, {{ $order->total_amount }})"
-                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 text-white rounded-2xl text-xs font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-500/20 {{ $order->status !== 'active' ? 'col-span-2' : '' }}">
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 text-white rounded-2xl text-xs font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-500/20 col-span-2">
                                 <i class="mdi mdi-cash-multiple text-base"></i> Pagar Agora
                             </button>
                         @endif
 
-                        @if(in_array($order->status, ['paid', 'completed', 'canceled']))
+                        @if(in_array($order->status, ['paid', 'canceled']) || $order->payment_status === 'paid')
                             <button onclick="confirmReorder({{ $order->id }})" 
                                 class="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-2xl text-xs font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20">
                                 <i class="mdi mdi-refresh text-base"></i> Repetir Pedido
@@ -150,7 +155,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Nenhum pedido encontrado</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-8">Parece que você ainda não realizou nenhum pedido com este status.</p>
-                    <a href="{{ route('welcome') }}#menu"
+                    <a href="{{ route('customer.order.create') }}"
                         class="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-2xl font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/30">
                         Explorar Cardápio
                     </a>
@@ -167,21 +172,29 @@
 
     @push('scripts')
     <script>
-        function confirmCancel(orderId) {
+        function requestCancel(orderId) {
             Swal.fire({
-                title: '{{ __('messages.confirm_cancel_order') }}',
-                text: '{{ __('messages.cancel_order_warning') }}',
+                title: 'Solicitar Cancelamento',
+                text: 'Por favor, informe o motivo do cancelamento:',
+                input: 'textarea',
+                inputPlaceholder: 'Ex: Fiz o pedido errado...',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#EF4444',
                 cancelButtonColor: '#9CA3AF',
-                confirmButtonText: '{{ __('messages.yes_cancel') }}',
+                confirmButtonText: 'Enviar Solicitação',
                 cancelButtonText: '{{ __('messages.cancel') }}',
                 background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
                 color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#111827',
-                borderRadius: '1.5rem'
+                borderRadius: '1.5rem',
+                inputValidator: (value) => {
+                    if (!value || value.length < 5) {
+                        return 'Por favor, insira um motivo válido (mínimo 5 caracteres).'
+                    }
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
+                    document.getElementById('reason-' + orderId).value = result.value;
                     document.getElementById('cancel-form-' + orderId).submit();
                 }
             });

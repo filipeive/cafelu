@@ -46,10 +46,11 @@ class OrderController extends Controller
 
         // Obtém o total de pedidos feitos hoje
         $totalToday = $this->orderGetTotalToday();
+        $totalTodayCount = $this->orderGetTotalTodayCount();
         // Obtém o total de pedidos abertos
         $totalOpen = $this->order_get_open_count();
 
-        return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalOpen', 'search', 'filter'));
+        return view('orders.index', compact('orders', 'total_orders', 'totalToday', 'totalTodayCount', 'totalOpen', 'search', 'filter'));
     }
     public function orderGetTotalToday()
     {
@@ -57,6 +58,10 @@ class OrderController extends Controller
         $total = Order::whereDate('created_at', today())->sum('total_amount'); // Ou qualquer campo que represente o valor total
 
         return $total;
+    }
+    public function orderGetTotalTodayCount()
+    {
+        return Order::whereDate('created_at', today())->count();
     }
     public function order_get_open_count()
     {
@@ -710,6 +715,77 @@ class OrderController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Erro ao confirmar pagamento: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Aprovar solicitação de cancelamento
+     */
+    public function approveCancellation(Order $order)
+    {
+        if ($order->cancellation_status !== 'pending') {
+            return redirect()->back()->with('error', 'Esta solicitação não está pendente.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Se o pedido já foi pago, reverter o estoque (mesma lógica do cancel normal)
+            if ($order->status === 'paid') {
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    $product->stock_quantity += $item->quantity;
+                    $product->save();
+
+                    StockMovement::create([
+                        'product_id' => $item->product_id,
+                        'user_id' => auth()->id(),
+                        'quantity' => $item->quantity,
+                        'type' => 'return',
+                        'reference_type' => 'Order',
+                        'reference_id' => $order->id,
+                        'notes' => 'Estorno por cancelamento aprovado #' . $order->id
+                    ]);
+                }
+
+                $sale = Sale::where('order_id', $order->id)->first();
+                if ($sale) {
+                    $sale->update(['status' => 'canceled']);
+                }
+            }
+
+            $order->update([
+                'status' => 'canceled',
+                'cancellation_status' => 'approved'
+            ]);
+
+            if ($order->table) {
+                $order->table->update(['status' => 'free']);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Solicitação de cancelamento aprovada com sucesso.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Erro ao aprovar cancelamento: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Rejeitar solicitação de cancelamento
+     */
+    public function rejectCancellation(Order $order)
+    {
+        if ($order->cancellation_status !== 'pending') {
+            return redirect()->back()->with('error', 'Esta solicitação não está pendente.');
+        }
+
+        $order->update([
+            'status' => 'active', // Volta para ativo
+            'cancellation_status' => 'rejected'
+        ]);
+
+        return redirect()->back()->with('success', 'Solicitação de cancelamento rejeitada. O pedido continua ativo.');
     }
 
     /**

@@ -424,4 +424,8 @@ return [
     'order_already_paid' => 'Pedido já pago',
     'payment_sent_for_confirmation' => 'Pagamento enviado para confirmação administrativa.',
     'error_processing_payment' => 'Erro ao processar pagamento',
+    'cancellation_requested' => 'Solicitação de cancelamento enviada com sucesso.',
+    'cancellation_approved' => 'Cancelamento aprovado com sucesso.',
+    'cancellation_rejected' => 'Solicitação de cancelamento rejeitada.',
+    'cancellation_time_limit_reached' => 'O limite de tempo para cancelamento foi atingido.',
 ];

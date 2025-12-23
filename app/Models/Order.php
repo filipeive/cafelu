@@ -21,8 +21,28 @@ class Order extends Model
         'notes',
         'preparing_at',
         'ready_at',
-        'delivered_at'
+        'delivered_at',
+        'cancel_requested_at',
+        'cancellation_reason',
+        'cancellation_status'
     ];
+
+    public function canBeCanceled()
+    {
+        // Only active orders can be canceled
+        if ($this->status !== 'active') {
+            return false;
+        }
+
+        // Check if cancellation was already requested
+        if ($this->cancellation_status !== 'none') {
+            return false;
+        }
+
+        // Check time limit (e.g., 5 minutes)
+        $timeLimit = 5;
+        return $this->created_at->diffInMinutes(now()) <= $timeLimit;
+    }
 
     public function table()
     {
@@ -44,12 +64,14 @@ class Order extends Model
     public static function statuses()
     {
         return [
-            'pending' => 'Pendente',
+            'active' => 'Ativo',
             'preparing' => 'Preparando',
             'ready' => 'Pronto',
             'delivered' => 'Entregue',
-            'cancelled' => 'Cancelado',
-            'completed' => 'Concluído'
+            'canceled' => 'Cancelado',
+            'completed' => 'Concluído',
+            'paid' => 'Pago',
+            'pending_cancel' => 'Cancelamento Pendente'
         ];
     }
 

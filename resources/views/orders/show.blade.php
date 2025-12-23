@@ -140,6 +140,7 @@
                             <div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Atendente</p>
                                 <p class="font-medium text-gray-900 dark:text-white">{{ $order->user->name ?? 'Sistema' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $order->user->email ?? 'Sistema' }}</p>
                             </div>
                         </div>
                     </div>

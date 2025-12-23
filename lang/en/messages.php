@@ -427,4 +427,8 @@ return [
     'order_already_paid' => 'Order already paid',
     'payment_sent_for_confirmation' => 'Payment sent for administrative confirmation.',
     'error_processing_payment' => 'Error processing payment',
+    'cancellation_requested' => 'Cancellation request sent successfully.',
+    'cancellation_approved' => 'Cancellation approved successfully.',
+    'cancellation_rejected' => 'Cancellation request rejected.',
+    'cancellation_time_limit_reached' => 'The time limit for cancellation has been reached.',
 ];

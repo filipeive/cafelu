@@ -123,14 +123,32 @@
                 profissional para uma experiência gastronómica superior.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-200">
-                <a href="{{ route('login') }}"
-                    class="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-2xl shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-                    <i class="mdi mdi-rocket-launch"></i> Acessar o Sistema
-                </a>
-                <a href="#menu"
-                    class="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl backdrop-blur-md border border-white/20 transition-all flex items-center justify-center gap-2">
-                    Ver Nosso Menu
-                </a>
+                @auth
+                    @if(auth()->user()->role === 'customer')
+                        <a href="{{ route('customer.order.create') }}"
+                            class="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-2xl shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                            <i class="mdi mdi-plus-circle"></i> Fazer Novo Pedido
+                        </a>
+                        <a href="{{ route('customer.dashboard') }}"
+                            class="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl backdrop-blur-md border border-white/20 transition-all flex items-center justify-center gap-2">
+                            <i class="mdi mdi-view-dashboard"></i> Meu Painel
+                        </a>
+                    @else
+                        <a href="{{ url('/home') }}"
+                            class="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-2xl shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                            <i class="mdi mdi-view-dashboard"></i> Painel Administrativo
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}"
+                        class="w-full sm:w-auto px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-2xl shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                        <i class="mdi mdi-rocket-launch"></i> Acessar o Sistema
+                    </a>
+                    <a href="#menu"
+                        class="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl backdrop-blur-md border border-white/20 transition-all flex items-center justify-center gap-2">
+                        Ver Nosso Menu
+                    </a>
+                @endauth
             </div>
         </div>
 

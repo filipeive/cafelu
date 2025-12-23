@@ -35,6 +35,7 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/customer/dashboard', [CustomerController::class, 'index'])->name('customer.dashboard');
     Route::get('/customer/orders', [CustomerController::class, 'orders'])->name('customer.orders');
+    Route::get('/customer/order/create', [CustomerController::class, 'createOrder'])->name('customer.order.create');
     Route::post('/customer/order', [CustomerController::class, 'storeOrder'])->name('customer.order.store');
     Route::get('/customer/profile', [CustomerController::class, 'profile'])->name('customer.profile');
     Route::put('/customer/profile', [CustomerController::class, 'updateProfile'])->name('customer.profile.update');
@@ -159,6 +160,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
         Route::get('/orders/{order}/print', [OrderController::class, 'print'])->name('orders.print.alt');
         Route::get('/orders/kitchen', [OrderController::class, 'kitchen'])->name('orders.kitchen');
+        Route::post('/orders/{order}/approve-cancellation', [OrderController::class, 'approveCancellation'])->name('orders.approve-cancellation');
+        Route::post('/orders/{order}/reject-cancellation', [OrderController::class, 'rejectCancellation'])->name('orders.reject-cancellation');
 
         // Products & Categories
         Route::resource('products', ProductController::class);

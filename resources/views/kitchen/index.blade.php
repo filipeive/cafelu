@@ -125,7 +125,21 @@
                                 #<span x-text="order.id"></span>
                             </span>
                             <div>
-                                <h3 class="text-base font-black text-gray-900 dark:text-white" x-text="order.table_name || 'Balcão'"></h3>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="text-base font-black text-gray-900 dark:text-white" x-text="order.table_name || 'Balcão'"></h3>
+                                    <template x-if="order.is_self_service">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800" title="Pedido feito pelo Cardápio Digital">
+                                            <i class="mdi mdi-cellphone"></i>
+                                            <span>Digital</span>
+                                        </span>
+                                    </template>
+                                    <template x-if="order.has_additions">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-200 border border-amber-300 dark:border-amber-700 animate-pulse" title="Itens adicionados à comanda">
+                                            <i class="mdi mdi-bell-ring text-xs"></i>
+                                            <span>+Itens Novos</span>
+                                        </span>
+                                    </template>
+                                </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
                                     <i class="mdi mdi-account-outline"></i>
                                     <span x-text="order.customer_name"></span>
@@ -155,13 +169,22 @@
                     <!-- Items List -->
                     <div class="space-y-2.5 my-3 max-h-72 overflow-y-auto pr-1">
                         <template x-for="item in order.items" :key="item.id">
-                            <div class="bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/80 rounded-2xl p-3 flex items-start justify-between gap-3">
+                            <div class="border rounded-2xl p-3 flex items-start justify-between gap-3 transition-colors"
+                                 :class="item.is_new ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700/80' : 'bg-gray-50 dark:bg-gray-900/60 border-gray-100 dark:border-gray-700/80'">
                                 <div class="flex items-start gap-3">
-                                    <span class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5"
+                                    <span class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5"
+                                          :class="item.is_new ? 'bg-amber-500 text-white shadow-xs' : 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20'"
                                           x-text="item.quantity + 'x'">
                                     </span>
                                     <div>
-                                        <h4 class="text-xs font-bold text-gray-900 dark:text-white" x-text="item.name"></h4>
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <h4 class="text-xs font-bold text-gray-900 dark:text-white" x-text="item.name"></h4>
+                                            <template x-if="item.is_new">
+                                                <span class="px-1.5 py-0.5 rounded-md bg-amber-500 text-white text-[9px] font-black uppercase tracking-wider">
+                                                    Adicionado
+                                                </span>
+                                            </template>
+                                        </div>
                                         <template x-if="item.notes">
                                             <p class="text-[11px] text-amber-600 dark:text-amber-400 italic mt-0.5 flex items-center gap-1 font-medium">
                                                 <i class="mdi mdi-note-text-outline"></i>
@@ -259,6 +282,8 @@ function kitchenDisplay() {
                 customer_name: '{{ addslashes($order->customer_name ?: ($order->user?->name ?? "Consumo Local")) }}',
                 table_name: '{{ addslashes($order->table ? $order->table->name : "Balcão / Viagem") }}',
                 notes: '{{ addslashes($order->notes ?? "") }}',
+                is_self_service: {{ (str_contains($order->notes ?? '', '[Digital') || ($order->user && $order->user->role === 'customer')) ? 'true' : 'false' }},
+                has_additions: {{ (str_contains($order->notes ?? '', '[Item Adicional]') || $order->items->contains(fn($i) => str_contains($i->notes ?? '', '[Novo'))) ? 'true' : 'false' }},
                 elapsed_min: {{ $order->created_at ? $order->created_at->diffInMinutes(now()) : 0 }},
                 created_at_fmt: '{{ $order->created_at ? $order->created_at->format("H:i") : "--:--" }}',
                 items: [
@@ -268,6 +293,7 @@ function kitchenDisplay() {
                         name: '{{ addslashes($item->product ? $item->product->name : ($item->notes ?? "Item")) }}',
                         quantity: {{ $item->quantity }},
                         notes: '{{ addslashes($item->notes ?? "") }}',
+                        is_new: {{ str_contains($item->notes ?? '', '[Novo') ? 'true' : 'false' }},
                     },
                     @endforeach
                 ]

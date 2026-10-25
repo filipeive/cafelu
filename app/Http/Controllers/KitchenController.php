@@ -61,20 +61,26 @@ class KitchenController extends Controller
         ];
 
         $formattedOrders = $orders->map(function ($order) {
+            $isSelfService = str_contains($order->notes ?? '', '[Digital') || ($order->user && $order->user->role === 'customer');
+            $hasAdditions = str_contains($order->notes ?? '', '[Item Adicional]') || $order->items->contains(fn($i) => str_contains($i->notes ?? '', '[Novo'));
+
             return [
-                'id'            => $order->id,
-                'status'        => $order->status,
-                'customer_name' => $order->customer_name ?: ($order->user?->name ?? 'Consumo Local'),
-                'table_name'    => $order->table ? $order->table->name : 'Balcão / Viagem',
-                'notes'         => $order->notes,
-                'elapsed_min'   => $order->created_at ? $order->created_at->diffInMinutes(now()) : 0,
-                'created_at_fmt'=> $order->created_at ? $order->created_at->format('H:i') : '--:--',
-                'items'         => $order->items->map(function ($item) {
+                'id'             => $order->id,
+                'status'         => $order->status,
+                'customer_name'  => $order->customer_name ?: ($order->user?->name ?? 'Consumo Local'),
+                'table_name'     => $order->table ? $order->table->name : 'Balcão / Viagem',
+                'notes'          => $order->notes,
+                'is_self_service'=> $isSelfService,
+                'has_additions'  => $hasAdditions,
+                'elapsed_min'    => $order->created_at ? $order->created_at->diffInMinutes(now()) : 0,
+                'created_at_fmt' => $order->created_at ? $order->created_at->format('H:i') : '--:--',
+                'items'          => $order->items->map(function ($item) {
                     return [
                         'id'         => $item->id,
                         'name'       => $item->product ? $item->product->name : ($item->notes ?? 'Item'),
                         'quantity'   => $item->quantity,
                         'notes'      => $item->notes,
+                        'is_new'     => str_contains($item->notes ?? '', '[Novo'),
                         'image_url'  => $item->product?->image_url,
                     ];
                 }),

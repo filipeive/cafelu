@@ -33,6 +33,7 @@ use App\Http\Controllers\KitchenController;
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::post('/self-service/order', [WelcomeController::class, 'storeSelfServiceOrder'])->name('self-service.order');
 Route::post('/call-waiter', [WelcomeController::class, 'callWaiter'])->name('welcome.call-waiter');
+Route::get('/order-status/{order}', [WelcomeController::class, 'orderStatus'])->name('welcome.order-status')->whereNumber('order');
 
 // Customer Routes
 Route::middleware(['auth', 'role:customer'])->group(function () {

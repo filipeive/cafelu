@@ -33,6 +33,54 @@ class Product extends Model
         'min_stock_level' => 'integer'
     ];
 
+    protected $appends = [
+        'image_url',
+    ];
+
+    public function getImageUrlAttribute()
+    {
+        $path = $this->image_path ?: $this->image;
+        if (!$path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $cleanPath = ltrim($path, '/');
+
+        if (str_starts_with($cleanPath, 'storage/')) {
+            $subPath = substr($cleanPath, 8);
+            if (file_exists(public_path('storage/' . $subPath))) {
+                return asset('storage/' . $subPath);
+            }
+        }
+
+        if (file_exists(public_path('storage/' . $cleanPath))) {
+            return asset('storage/' . $cleanPath);
+        }
+
+        if (!str_starts_with($cleanPath, 'products/') && file_exists(public_path('storage/products/' . $cleanPath))) {
+            return asset('storage/products/' . $cleanPath);
+        }
+
+        if (file_exists(public_path($cleanPath))) {
+            return asset($cleanPath);
+        }
+
+        if (file_exists(public_path('assets/images/' . $cleanPath))) {
+            return asset('assets/images/' . $cleanPath);
+        }
+
+        if (file_exists(storage_path('app/public/' . $cleanPath))) {
+            return asset('storage/' . $cleanPath);
+        }
+
+        // Return standard storage URL
+        return asset('storage/' . (str_starts_with($cleanPath, 'products/') ? $cleanPath : $cleanPath));
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

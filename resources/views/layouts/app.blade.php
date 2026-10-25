@@ -32,6 +32,7 @@
                 extend: {
                     colors: {
                         primary: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
+                        secondary: '{{ \App\Models\Setting::get('secondary_color', '#10B981') }}',
                         warning: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
                         danger: '#EF4444',
                         success: '#10B981',
@@ -45,7 +46,8 @@
         }
     </script>
 
-    <!-- Alpine.js -->
+    <!-- Alpine.js Plugins & Core -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- SweetAlert2 -->

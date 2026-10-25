@@ -4,30 +4,43 @@
     'icon' => null, 
     'title', 
     'badge' => null, 
-    'badgeClass' => 'badge-primary',
+    'badgeClass' => 'bg-gray-100 text-gray-700',
     'badgePrefix' => '',
     'showBadge' => true,
     'external' => false
 ])
+
 @php
-$isActive = $route ? request()->routeIs($route) : ($url ? request()->fullUrlIs($url) : false);
-$href = $url ?? ($external ? $route : ($route && Route::has($route) ? route($route) : '#'));
+    $isActive = false;
+    if ($url) {
+        $isActive = request()->fullUrlIs($url);
+    } elseif ($route && Route::has($route)) {
+        $isActive = request()->routeIs($route) || request()->routeIs($route . '.*');
+    }
+    $href = $url ?? ($external ? $route : ($route && Route::has($route) ? route($route) : '#'));
 @endphp
 
 <li>
-    <a href="{{ $href }}" class="flex items-center pl-11 pr-3 py-2 text-sm rounded-lg transition-colors {{ $isActive ? 'text-primary font-medium bg-orange-50/50 dark:bg-gray-800/50' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50' }}"
-       @if($external) target="_blank" @endif>
-        @if($icon)
-            <i class="mdi {{ $icon }} mr-2 text-lg"></i>
-        @endif
-        <span class="flex-1">{{ $title }}</span>
+    <a href="{{ $href }}"
+       @if($external) target="_blank" @endif
+       class="group flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 {{ $isActive 
+            ? 'text-orange-600 dark:text-orange-400 font-semibold bg-orange-500/10' 
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-gray-800/50' }}">
         
-        @if(isset($badge) && $showBadge && $badge)
-            <span class="{{ $badgeClass }} px-2 py-0.5 rounded text-xs font-semibold ml-2">
+        @if($icon)
+            <i class="mdi {{ $icon }} mr-2 text-base {{ $isActive ? 'text-orange-500' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300' }}"></i>
+        @else
+            <span class="w-1.5 h-1.5 rounded-full mr-2 transition-colors {{ $isActive ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600 group-hover:bg-gray-500' }}"></span>
+        @endif
+
+        <span class="flex-1 truncate">{{ $title }}</span>
+
+        @if(isset($badge) && $showBadge && $badge !== null && $badge !== '')
+            <span class="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full {{ $badgeClass }}">
                 {{ $badgePrefix }}{{ $badge }}
             </span>
         @endif
-        
+
         @if(isset($slot) && !empty(trim($slot->toHtml())))
             <span class="ml-2">
                 {{ $slot }}

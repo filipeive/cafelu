@@ -24,6 +24,15 @@ class Table extends Model
         'is_temporary'
     ];
 
+    protected $appends = [
+        'name',
+    ];
+
+    public function getNameAttribute()
+    {
+        return 'Mesa ' . $this->number;
+    }
+
     /**
      * Verifica se a mesa tem pedidos ativos
      *
@@ -31,6 +40,12 @@ class Table extends Model
      */
     public function activeOrder()
     {
+        if ($this->relationLoaded('orders')) {
+            return $this->orders->first(function ($order) {
+                return in_array($order->status, ['active', 'completed']);
+            });
+        }
+
         return $this->orders()
             ->whereIn('status', ['active', 'completed'])
             ->latest()
@@ -39,6 +54,12 @@ class Table extends Model
 
     public function hasActiveOrder()
     {
+        if ($this->relationLoaded('orders')) {
+            return $this->orders->contains(function ($order) {
+                return in_array($order->status, ['active', 'completed']);
+            });
+        }
+
         return $this->orders()
             ->whereIn('status', ['active', 'completed'])
             ->exists();

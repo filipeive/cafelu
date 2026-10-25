@@ -592,12 +592,12 @@ class OrderController extends Controller
                     'total_price' => $item->total_price,
                 ];
             }),
-            'logo' => asset('assets/images/logo.png'),
-            'companyName' => 'ZALALA BEACH BAR',
-            'address' => 'Bairro de Zalala, ER470, Cidade de Quelimane',
-            'phone' => 'Tel: (+258) 846 885 214',
-            'nuit' => '110735901',
-            'email' => 'zalalabeachbar@gmail.com',
+            'logo' => \App\Models\Setting::get('system_logo') ? asset('storage/' . \App\Models\Setting::get('system_logo')) : asset('assets/images/logo.png'),
+            'companyName' => \App\Models\Setting::get('company_name', 'ZALALA BEACH BAR'),
+            'address' => \App\Models\Setting::get('company_address', 'Bairro de Zalala, ER470, Cidade de Quelimane'),
+            'phone' => 'Tel: ' . \App\Models\Setting::get('company_phone', '(+258) 846 885 214'),
+            'nuit' => \App\Models\Setting::get('company_nuit', '110735901'),
+            'email' => \App\Models\Setting::get('company_email', 'zalalabeachbar@gmail.com'),
         ]);
     }
     /**

@@ -11,7 +11,7 @@
                 </div>
                 <div class="relative z-10 text-center">
                     <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2">
-                        {{ __('messages.welcome_to') }} {{ \App\Models\Setting::get('company_name', 'Café Lufamina') }}
+                        {{ __('messages.welcome_to') }} {{ \App\Models\Setting::get('company_name', 'Zalala Beach Bar') }}
                     </h1>
                     <p class="text-orange-100 text-lg">
                         {{ __('messages.professional_management') }}

@@ -1,5 +1,5 @@
 <div 
-    class="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 z-40 flex flex-col"
+    class="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 border-r border-gray-200/80 dark:border-gray-800 transition-all duration-300 z-40 flex flex-col shadow-xs"
     :class="{ 
         'w-64': !sidebarCollapsed, 
         'w-20': sidebarCollapsed,
@@ -8,279 +8,255 @@
     }"
 >
     <!-- Menu de Navegação Principal -->
-    <ul class="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 overflow-x-hidden">
-        <!-- Dashboard Principal -->
-        <div class="mb-4">
-            @if(Auth::user()->role == 'customer')
-                <x-sidebar.nav-item route="customer.dashboard" icon="mdi-view-dashboard" title="Início" />
-                <x-sidebar.nav-item route="customer.orders" icon="mdi-shopping" title="Meus Pedidos" />
-                <x-sidebar.nav-item route="welcome" icon="mdi-food" title="Fazer Pedido" />
-                <x-sidebar.nav-item route="customer.profile" icon="mdi-account-circle" title="Meu Perfil" />
-            @else
-                <x-sidebar.nav-item route="dashboard" icon="mdi-view-dashboard" title="{{ __('messages.dashboard') }}" />
-                <x-sidebar.nav-item route="pos.index" icon="mdi-point-of-sale" title="{{ __('messages.pos') }}" badge="Novo" badgeClass="bg-warning text-white" />
-            @endif
-        </div>
-
-        @if(Auth::user()->role != 'customer')
-            <!-- OPERACIONAL -->
-            <div class="mb-4">
-                <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity duration-200"
-                     x-show="!sidebarCollapsed" x-transition>
-                    <span>{{ __('messages.operational') }}</span>
-                </div>
-                <!-- Separator for collapsed mode -->
-                <div class="h-px bg-gray-200 dark:bg-gray-700 mx-2 mb-2" x-show="sidebarCollapsed"></div>
-                
-                <x-sidebar.dropdown 
-                    icon="mdi-store" 
-                    title="{{ __('messages.operational') }}" 
-                    id="operational-menu"
-                    :badge="\App\Models\Order::where('status', 'active')->count() > 0 ? \App\Models\Order::where('status', 'active')->count() : null"
-                    badgeClass="bg-danger text-white"
-                >
-                    @php
-                        $pendingOrdersCount = \App\Models\Order::where('status', 'active')->count();
-                    @endphp
-                    
-                    <x-sidebar.dropdown-item 
-                        route="orders.index" 
-                        icon="mdi-cart" 
-                        title="{{ __('messages.orders') }}" 
-                        :badge="$pendingOrdersCount"
-                        badgeClass="bg-danger text-white" 
-                        :showBadge="$pendingOrdersCount > 0"
-                    />
-
-                    @php
-                        $onlineOrdersCount = \App\Models\Order::where('status', 'active')->whereNull('table_id')->count();
-                    @endphp
-
-                    <x-sidebar.dropdown-item 
-                        url="{{ route('orders.index', ['filter' => 'online']) }}" 
-                        icon="mdi-web" 
-                        title="Pedidos Online" 
-                        :badge="$onlineOrdersCount"
-                        badgeClass="bg-purple-500 text-white" 
-                        :showBadge="$onlineOrdersCount > 0"
-                    />
-
-                    @php
-                        $tablesAvailable = \App\Models\Table::where('status', 'free')->count();
-                        $totalTables = \App\Models\Table::count();
-                    @endphp
-
-                    <x-sidebar.dropdown-item route="tables.index" icon="mdi-table-furniture" title="{{ __('messages.tables') }}">
-                        <span class="px-2 py-0.5 rounded text-xs {{ $tablesAvailable > 0 ? 'bg-success text-white' : 'bg-gray-500 text-white' }}">
-                            {{ $tablesAvailable }}/{{ $totalTables }}
-                        </span>
-                    </x-sidebar.dropdown-item>
-                </x-sidebar.dropdown>
+    <ul class="flex-1 overflow-y-auto py-3 px-3 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 overflow-x-hidden">
+        
+        @if(Auth::user()->role == 'customer')
+            <!-- ÁREA DO CLIENTE -->
+            <div class="mb-2">
+                <x-sidebar.nav-item route="customer.dashboard" icon="mdi-view-dashboard-outline" title="Início" />
+                <x-sidebar.nav-item route="customer.orders" icon="mdi-shopping-outline" title="Meus Pedidos" />
+                <x-sidebar.nav-item route="welcome" icon="mdi-silverware-fork-knife" title="Fazer Pedido" />
+                <x-sidebar.nav-item route="customer.profile" icon="mdi-account-circle-outline" title="Meu Perfil" />
+            </div>
+        @else
+            <!-- PRINCIPAL -->
+            <div class="mb-2">
+                <x-sidebar.nav-item route="dashboard" icon="mdi-view-dashboard-outline" title="{{ __('messages.dashboard') }}" />
+                <x-sidebar.nav-item route="pos.index" icon="mdi-point-of-sale" title="{{ __('messages.pos') }}" badge="PDV" badgeClass="bg-orange-500 text-white font-bold" />
             </div>
 
-            <!-- PRODUTOS -->
-            <div class="mb-4">
-                <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity duration-200"
-                     x-show="!sidebarCollapsed" x-transition>
-                    <span>{{ __('messages.menu') }}</span>
+            <!-- OPERACIONAL -->
+            <div class="pt-3 pb-1">
+                <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        {{ __('messages.operational') }}
+                    </span>
                 </div>
-                <div class="h-px bg-gray-200 dark:bg-gray-700 mx-2 mb-2" x-show="sidebarCollapsed"></div>
-                
-                <x-sidebar.dropdown 
-                    icon="mdi-food-variant" 
-                    title="{{ __('messages.menu') }}" 
-                    id="menu-items"
-                >
-                    @php
-                        $lowStockProductsCount = \App\Models\Product::where('stock_quantity', '<', 10)->count();
-                    @endphp
-                    
-                    <x-sidebar.dropdown-item 
-                        route="products.index" 
-                        icon="mdi-food" 
-                        title="{{ __('messages.products') }}" 
-                        :badge="$lowStockProductsCount"
-                        badgeClass="bg-danger text-white" 
-                        :showBadge="$lowStockProductsCount > 0"
-                    />
+                <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
 
-                    <x-sidebar.dropdown-item 
-                        route="categories.index" 
-                        icon="mdi-shape" 
-                        title="{{ __('messages.categories') }}" 
-                    />
+                @php
+                    $pendingOrdersCount = \App\Models\Order::where('status', 'active')->count();
+                    $onlineOrdersCount = \App\Models\Order::where('status', 'active')->whereNull('table_id')->count();
+                    $tablesAvailable = \App\Models\Table::where('status', 'free')->count();
+                    $totalTables = \App\Models\Table::count();
+                @endphp
 
-                    <x-sidebar.dropdown-item 
-                        route="stock.index" 
-                        icon="mdi-box" 
-                        title="{{ __('messages.stock_management') }}" 
-                    />
-                </x-sidebar.dropdown>
+                <x-sidebar.nav-item 
+                    route="orders.index" 
+                    icon="mdi-clipboard-text-clock-outline" 
+                    title="{{ __('messages.orders') }}" 
+                    :badge="$pendingOrdersCount"
+                    badgeClass="bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200/60"
+                    :showBadge="$pendingOrdersCount > 0"
+                />
+
+                <x-sidebar.nav-item 
+                    url="{{ route('orders.index', ['filter' => 'online']) }}" 
+                    icon="mdi-earth" 
+                    title="Pedidos Online" 
+                    :badge="$onlineOrdersCount"
+                    badgeClass="bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 border border-purple-200/60"
+                    :showBadge="$onlineOrdersCount > 0"
+                />
+
+                @php
+                    $kitchenOrdersCount = \App\Models\Order::whereIn('status', ['active', 'preparing'])->count();
+                @endphp
+
+                <x-sidebar.nav-item 
+                    route="orders.kitchen" 
+                    icon="mdi-chef-hat" 
+                    title="Ordem de Cozinha (KDS)" 
+                    :badge="$kitchenOrdersCount"
+                    badgeClass="bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200/60"
+                    :showBadge="$kitchenOrdersCount > 0"
+                />
+
+                <x-sidebar.nav-item 
+                    route="tables.index" 
+                    icon="mdi-table-furniture" 
+                    title="{{ __('messages.tables') }}"
+                    :badge="$tablesAvailable . '/' . $totalTables"
+                    :badgeClass="$tablesAvailable > 0 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'"
+                />
+            </div>
+
+            <!-- CARDÁPIO & ESTOQUE -->
+            <div class="pt-3 pb-1">
+                <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        {{ __('messages.menu') }}
+                    </span>
+                </div>
+                <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
+
+                @php
+                    $lowStockProductsCount = \App\Models\Product::where('stock_quantity', '<', 10)->count();
+                @endphp
+
+                <x-sidebar.nav-item 
+                    route="products.index" 
+                    icon="mdi-food-fork-drink" 
+                    title="{{ __('messages.products') }}" 
+                    :badge="$lowStockProductsCount"
+                    badgeClass="bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200/60"
+                    :showBadge="$lowStockProductsCount > 0"
+                />
+
+                <x-sidebar.nav-item 
+                    route="categories.index" 
+                    icon="mdi-shape-outline" 
+                    title="{{ __('messages.categories') }}" 
+                />
+
+                <x-sidebar.nav-item 
+                    route="stock.index" 
+                    icon="mdi-package-variant-closed" 
+                    title="{{ __('messages.stock_management') }}" 
+                />
             </div>
 
             <!-- FINANCEIRO -->
-            <div class="mb-4">
-                <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity duration-200"
-                     x-show="!sidebarCollapsed" x-transition>
-                    <span>{{ __('messages.financial') }}</span>
+            <div class="pt-3 pb-1">
+                <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        {{ __('messages.financial') }}
+                    </span>
                 </div>
-                <div class="h-px bg-gray-200 dark:bg-gray-700 mx-2 mb-2" x-show="sidebarCollapsed"></div>
-                
-                <x-sidebar.dropdown 
-                    icon="mdi-currency-usd" 
-                    title="{{ __('messages.financial') }}" 
-                    id="financial-menu"
-                >
-                    @php
-                        $todaySales = \App\Models\Sale::whereDate('created_at', today())->sum('total_amount') ?? 0;
-                        $formattedSales = number_format($todaySales, 2, ',', '.');
-                    @endphp
+                <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
 
-                    <x-sidebar.dropdown-item 
-                        route="sales.index" 
-                        icon="mdi-cash-multiple" 
-                        title="{{ __('messages.sales') }}"
-                    >
-                        <span class="px-2 py-0.5 rounded text-xs bg-success text-white">MZN {{ $formattedSales }}</span>
-                    </x-sidebar.dropdown-item>
+                @php
+                    $todaySales = \App\Models\Sale::whereDate('created_at', today())->sum('total_amount') ?? 0;
+                    $formattedSales = number_format($todaySales, 0, ',', '.');
+                    $debtsCount = \App\Models\CustomerDebt::where('status', '!=', 'paid')->count();
+                @endphp
 
-                    <x-sidebar.dropdown-item 
-                        route="expenses.index" 
-                        icon="mdi-cash-minus" 
-                        title="{{ __('messages.expenses') }}" 
+                <x-sidebar.nav-item 
+                    route="sales.index" 
+                    icon="mdi-cash-register" 
+                    title="{{ __('messages.sales') }}"
+                    :badge="'MZN ' . $formattedSales"
+                    badgeClass="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 text-[10px]"
+                />
+
+                <x-sidebar.nav-item 
+                    route="expenses.index" 
+                    icon="mdi-cash-minus" 
+                    title="{{ __('messages.expenses') }}" 
+                />
+
+                <x-sidebar.nav-item 
+                    route="debts.index" 
+                    icon="mdi-account-cash-outline" 
+                    title="Contas a Receber" 
+                    :badge="$debtsCount"
+                    badgeClass="bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200/60"
+                    :showBadge="$debtsCount > 0"
+                />
+
+                @if(Auth::user()->role == 'admin')
+                    <x-sidebar.nav-item 
+                        route="reports.index" 
+                        icon="mdi-chart-box-outline" 
+                        title="{{ __('messages.reports') }}" 
                     />
-
-                    <x-sidebar.dropdown-item 
-                        route="debts.index" 
-                        icon="mdi-account-cash" 
-                        title="Contas a Receber" 
-                        :badge="\App\Models\CustomerDebt::where('status', '!=', 'paid')->count() ?: null"
-                        badgeClass="bg-danger text-white"
-                    />
-
-                    @if(Auth::user()->role == 'admin')
-                        <x-sidebar.dropdown-item 
-                            route="reports.index" 
-                            icon="mdi-chart-bar" 
-                            title="{{ __('messages.reports') }}" 
-                        />
-                    @endif
-                </x-sidebar.dropdown>
+                @endif
             </div>
 
-            <!-- CLIENTES -->
-            <div class="mb-4">
-                <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity duration-200"
-                     x-show="!sidebarCollapsed" x-transition>
-                    <span>{{ __('messages.clients') }}</span>
+            <!-- PESSOAS & EQUIPE -->
+            <div class="pt-3 pb-1">
+                <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        {{ __('messages.clients') }}
+                    </span>
                 </div>
-                <div class="h-px bg-gray-200 dark:bg-gray-700 mx-2 mb-2" x-show="sidebarCollapsed"></div>
-                
-                <x-sidebar.dropdown 
-                    icon="mdi-account-group" 
-                    title="{{ __('messages.relationship') }}" 
-                    id="clients-menu"
-                >
-                    @php
-                        $newClientsCount = \App\Models\Client::whereDate('created_at', today())->count();
-                    @endphp
-                    
-                    <x-sidebar.dropdown-item 
-                        route="clients.index" 
-                        icon="mdi-account-multiple" 
-                        title="{{ __('messages.clients') }}" 
-                        :badge="$newClientsCount"
-                        badgePrefix="+"
-                        badgeClass="bg-info text-white"
-                        :showBadge="$newClientsCount > 0"
-                    />
-                    <!--funcionarios-->
-                    <x-sidebar.dropdown-item 
-                        route="employees.index" 
-                        icon="mdi-account-tie" 
-                        title="{{ __('messages.employees') }}" 
-                    />
-                </x-sidebar.dropdown>
+                <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
+
+                @php
+                    $newClientsCount = \App\Models\Client::whereDate('created_at', today())->count();
+                @endphp
+
+                <x-sidebar.nav-item 
+                    route="clients.index" 
+                    icon="mdi-account-group-outline" 
+                    title="{{ __('messages.clients') }}" 
+                    :badge="$newClientsCount"
+                    badgePrefix="+"
+                    badgeClass="bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-200/60"
+                    :showBadge="$newClientsCount > 0"
+                />
+
+                <x-sidebar.nav-item 
+                    route="employees.index" 
+                    icon="mdi-badge-account-outline" 
+                    title="{{ __('messages.employees') }}" 
+                />
             </div>
 
-            <!-- CONFIGURAÇÕES (Admin Only) -->
-            @if(Auth::user()->role == 'admin')
-                <div class="mb-4">
-                    <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider transition-opacity duration-200"
-                         x-show="!sidebarCollapsed" x-transition>
-                        <span>{{ __('messages.settings') }}</span>
+            <!-- ADMINISTRAÇÃO (Admin Only) -->
+            @if(Auth::user()->role == 'admin' || Auth::user()->role == 'super_admin')
+                <div class="pt-3 pb-1">
+                    <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                        <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                            {{ __('messages.settings') }}
+                        </span>
                     </div>
-                    <div class="h-px bg-gray-200 dark:bg-gray-700 mx-2 mb-2" x-show="sidebarCollapsed"></div>
-                    
-                    <x-sidebar.dropdown 
-                        icon="mdi-shield-account" 
-                        title="{{ __('messages.administration') }}" 
-                        id="admin-menu"
-                    >
-                        <x-sidebar.dropdown-item 
-                            route="users.index" 
-                            icon="mdi-account-key" 
-                            title="{{ __('messages.users') }}" 
-                        />
-                        
-                        <x-sidebar.dropdown-item 
-                            route="settings.index" 
-                            icon="mdi-cog" 
-                            title="{{ __('messages.system_settings') }}" 
-                        />
+                    <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
 
-                        <x-sidebar.dropdown-item 
-                            route="audit_logs.index" 
-                            icon="mdi-history" 
-                            title="{{ __('messages.audit') }}" 
-                        />
-                        
-                        @if(Auth::user()->role == 'super_admin')
-                            <x-sidebar.dropdown-item 
-                                route="employees.index" 
-                                icon="mdi-account-tie" 
-                                title="{{ __('messages.employees') }}" 
-                            />
-                        @endif
-                    </x-sidebar.dropdown>
+                    <x-sidebar.nav-item 
+                        route="users.index" 
+                        icon="mdi-account-cog-outline" 
+                        title="{{ __('messages.users') }}" 
+                    />
+                    
+                    <x-sidebar.nav-item 
+                        route="settings.index" 
+                        icon="mdi-cog-outline" 
+                        title="{{ __('messages.system_settings') }}" 
+                    />
+
+                    <x-sidebar.nav-item 
+                        route="audit_logs.index" 
+                        icon="mdi-history" 
+                        title="{{ __('messages.audit') }}" 
+                    />
                 </div>
             @endif
         @endif
     </ul>
 
-    <!-- Controles da Sidebar -->
-    <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
-        <button type="button" 
-                class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-500 transition-colors hidden lg:block" 
-                @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)" 
-                title="Minimizar menu">
-            <i class="mdi text-xl" :class="sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'"></i>
-        </button>
-        
-        @if(Auth::user()->role == 'admin')
-            <button type="button" 
-                    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-500 transition-colors" 
-                    onclick="toggleSystemStats()" 
-                    title="Status do Sistema"
-                    x-show="!sidebarCollapsed">
-                <i class="mdi mdi-monitor-dashboard text-xl"></i>
-            </button>
-        @endif
-    </div>
-
-    <!-- Rodapé do Sidebar -->
-    <div class="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800" x-show="!sidebarCollapsed" x-transition>
-        <div class="text-center">
-            <small class="text-gray-400 block text-xs">{{ __('messages.system_status') }}</small>
-            <span class="text-warning font-bold text-sm">{{ __('messages.version') }} v1.0.0</span>
-            <small class="text-gray-400 block mt-1 text-xs">&copy; {{ date('Y') }} {{ \App\Models\Setting::get('company_name', 'Zalala Beach Bar') }}</small>
+    <!-- Rodapé Unificado da Sidebar -->
+    <div class="p-3 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/60 flex items-center justify-between transition-all">
+        <!-- Status Online com pulso suave -->
+        <div class="flex items-center gap-2 pl-1" x-show="!sidebarCollapsed" x-transition>
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <div class="leading-none">
+                <span class="text-[11px] font-medium text-gray-600 dark:text-gray-300 block">Online</span>
+                <span class="text-[9px] text-gray-400 dark:text-gray-500 block mt-0.5">v1.0.0</span>
+            </div>
         </div>
 
-        <!-- Status do sistema -->
-        <div class="mt-2 text-center">
-            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                <i class="mdi mdi-check-circle mr-1"></i> {{ __('messages.online') }}
-            </span>
+        <!-- Ações do rodapé -->
+        <div class="flex items-center gap-1" :class="{ 'w-full justify-center': sidebarCollapsed }">
+            @if(Auth::user()->role == 'admin')
+                <button type="button" 
+                        class="p-2 rounded-xl hover:bg-gray-200/80 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" 
+                        onclick="toggleSystemStats()" 
+                        title="Status do Sistema"
+                        x-show="!sidebarCollapsed">
+                    <i class="mdi mdi-information-outline text-lg"></i>
+                </button>
+            @endif
+
+            <button type="button" 
+                    class="p-2 rounded-xl hover:bg-gray-200/80 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors hidden lg:flex items-center justify-center" 
+                    @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)" 
+                    :title="sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'">
+                <i class="mdi text-lg transition-transform duration-200" :class="sidebarCollapsed ? 'mdi-chevron-double-right' : 'mdi-chevron-double-left'"></i>
+            </button>
         </div>
     </div>
 </div>
@@ -290,25 +266,30 @@ function toggleSystemStats() {
     Swal.fire({
         title: '{{ __('messages.system_status') }}',
         html: `
-            <div class="text-start">
-                <div class="mb-3">
-                    <small class="text-muted d-block">Usuário Online</small>
-                    <strong>${document.querySelector('.navbar-brand') ? document.querySelector('.navbar-brand').innerText : '{{ Auth::user()->name }}'}</strong>
+            <div class="text-left space-y-3 p-2">
+                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl">
+                    <small class="text-gray-500 dark:text-gray-400 block text-xs">Utilizador Conectado</small>
+                    <strong class="text-gray-800 dark:text-white text-sm">{{ Auth::user()->name }} ({{ Auth::user()->role }})</strong>
                 </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Última Atualização</small>
-                    <strong>${new Date().toLocaleTimeString('{{ app()->getLocale() }}')}</strong>
+                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl">
+                    <small class="text-gray-500 dark:text-gray-400 block text-xs">Estabelecimento</small>
+                    <strong class="text-gray-800 dark:text-white text-sm">{{ \App\Models\Setting::get('company_name', 'Zalala Beach Bar') }}</strong>
                 </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Status</small>
-                    <span class="badge badge-success">Operacional</span>
+                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl flex items-center justify-between">
+                    <div>
+                        <small class="text-gray-500 dark:text-gray-400 block text-xs">Status do Servidor</small>
+                        <strong class="text-emerald-500 text-sm">Operacional</strong>
+                    </div>
+                    <span class="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 </div>
             </div>
         `,
         icon: 'info',
         confirmButtonColor: '#FFA500',
-        background: '#1a1a2e',
-        color: '#ffffff'
+        confirmButtonText: 'Fechar',
+        customClass: {
+            popup: 'rounded-2xl'
+        }
     });
 }
 </script>

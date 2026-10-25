@@ -23,6 +23,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\KitchenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,7 @@ use App\Http\Controllers\CustomerController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+Route::post('/self-service/order', [WelcomeController::class, 'storeSelfServiceOrder'])->name('self-service.order');
 
 // Customer Routes
 Route::middleware(['auth', 'role:customer'])->group(function () {
@@ -148,7 +150,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/orders/{order}/add-item', [OrderController::class, 'addItem'])->name('orders.add-item');
         Route::post('/orders/items/{orderItem}/remove', [OrderController::class, 'removeItem'])->name('orders.remove-item');
         Route::post('/orders/items/{orderItem}/update-status', [OrderController::class, 'updateItemStatus'])->name('orders.update-item-status');
-        Route::post('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+        Route::post('/orders/{order}/update-status', [KitchenController::class, 'updateStatus'])->name('orders.update-status');
+        Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen.index');
+        Route::get('/orders/kitchen', [KitchenController::class, 'index'])->name('orders.kitchen');
+        Route::get('/orders/kitchen/live', [KitchenController::class, 'liveData'])->name('orders.kitchen.live');
         Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('orders.complete');
         Route::post('/orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
         Route::post('/orders/{order}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('orders.confirm-payment');
@@ -159,7 +164,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel.alt');
         Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
         Route::get('/orders/{order}/print', [OrderController::class, 'print'])->name('orders.print.alt');
-        Route::get('/orders/kitchen', [OrderController::class, 'kitchen'])->name('orders.kitchen');
+        Route::get('/orders/kitchen', [KitchenController::class, 'index'])->name('orders.kitchen');
+        Route::get('/orders/kitchen/live', [KitchenController::class, 'liveData'])->name('orders.kitchen.live');
         Route::post('/orders/{order}/approve-cancellation', [OrderController::class, 'approveCancellation'])->name('orders.approve-cancellation');
         Route::post('/orders/{order}/reject-cancellation', [OrderController::class, 'rejectCancellation'])->name('orders.reject-cancellation');
 
@@ -204,6 +210,8 @@ Route::middleware(['auth'])->group(function () {
         // Settings
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/name', [SettingController::class, 'updateName'])->name('settings.update-name');
+        Route::post('settings/colors', [SettingController::class, 'updateColors'])->name('settings.update-colors');
     });
 
     // Profile Management (All authenticated users)

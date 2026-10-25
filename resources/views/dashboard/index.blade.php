@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - Zalala Beach Bar')
+@section('title', 'Dashboard - ' . \App\Models\Setting::get('company_name', 'POS'))
 @section('icon', 'view-dashboard')
 
 @section('content')

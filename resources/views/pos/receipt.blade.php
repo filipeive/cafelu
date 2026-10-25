@@ -159,14 +159,30 @@
 <body>
     <div class="receipt">
         <div class="header">
-            <img src="/assets/images/Logo.png" alt="Lu & Yosh Catering Logo" class="logo">
-            <h2 class="company-name">ZALALA BEACH BAR</h2>
-            <h3 class="company-subtitle">BEACH BAR & RESTAURANT</h3>
-            <p class="company-info">Bairro de Zalala, ER470</p>
-            <p class="company-info">Quelimane, Zambézia</p>
-            <p class="company-info">Tel: (+258) 846 885 214</p>
-            <p class="company-info">NUIT: 110735901</p>
-            <p class="company-info">Email: zalalabeachbar@gmail.com</p>
+            @if($logo = \App\Models\Setting::get('system_logo'))
+                <img src="{{ asset('storage/' . $logo) }}" alt="Logo" class="logo">
+            @else
+                <img src="/assets/images/Logo.png" alt="Logo" class="logo">
+            @endif
+            <h2 class="company-name">{{ \App\Models\Setting::get('company_name', 'ZALALA BEACH BAR') }}</h2>
+            @if($subtitle = \App\Models\Setting::get('company_subtitle'))
+                <h3 class="company-subtitle">{{ $subtitle }}</h3>
+            @endif
+            @if($addr = \App\Models\Setting::get('company_address'))
+                <p class="company-info">{{ $addr }}</p>
+            @endif
+            @if($city = \App\Models\Setting::get('company_city'))
+                <p class="company-info">{{ $city }}</p>
+            @endif
+            @if($phone = \App\Models\Setting::get('company_phone'))
+                <p class="company-info">Tel: {{ $phone }}</p>
+            @endif
+            @if($nuit = \App\Models\Setting::get('company_nuit'))
+                <p class="company-info">NUIT: {{ $nuit }}</p>
+            @endif
+            @if($email = \App\Models\Setting::get('company_email'))
+                <p class="company-info">Email: {{ $email }}</p>
+            @endif
             <p>Data: {{ date('d/m/Y H:i', strtotime($sale->sale_date)) }}</p>
         </div>
 

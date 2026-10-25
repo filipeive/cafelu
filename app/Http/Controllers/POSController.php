@@ -34,8 +34,11 @@ class POSController extends Controller
             $query->where('name', 'LIKE', "%$searchTerm%");
         }
 
-        // Carregar TODOS os produtos para filtrar no front-end (Otimizado)
-        $products = $query->select('id', 'name', 'price', 'category_id', 'stock_quantity', 'image')->get();
+        // Carregar produtos ativos para o POS com suporte a imagens
+        $products = $query->select('id', 'name', 'price', 'selling_price', 'category_id', 'stock_quantity', 'image_path', 'image')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
         return view('pos.index', [
             'categories' => $categories,

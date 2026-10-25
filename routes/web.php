@@ -32,6 +32,7 @@ use App\Http\Controllers\KitchenController;
 */
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::post('/self-service/order', [WelcomeController::class, 'storeSelfServiceOrder'])->name('self-service.order');
+Route::post('/call-waiter', [WelcomeController::class, 'callWaiter'])->name('welcome.call-waiter');
 
 // Customer Routes
 Route::middleware(['auth', 'role:customer'])->group(function () {
@@ -142,32 +143,30 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tables/split', [TableController::class, 'splitTables'])->name('tables.split');
 
         // Orders
-        Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
-        Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
-        Route::post('/orders/{order}/add-item', [OrderController::class, 'addItem'])->name('orders.add-item');
-        Route::post('/orders/items/{orderItem}/remove', [OrderController::class, 'removeItem'])->name('orders.remove-item');
-        Route::post('/orders/items/{orderItem}/update-status', [OrderController::class, 'updateItemStatus'])->name('orders.update-item-status');
-        Route::post('/orders/{order}/update-status', [KitchenController::class, 'updateStatus'])->name('orders.update-status');
         Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen.index');
         Route::get('/orders/kitchen', [KitchenController::class, 'index'])->name('orders.kitchen');
         Route::get('/orders/kitchen/live', [KitchenController::class, 'liveData'])->name('orders.kitchen.live');
-        Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('orders.complete');
-        Route::post('/orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
-        Route::post('/orders/{order}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('orders.confirm-payment');
-        Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-        Route::get('/orders/{order}/print-receipt', [OrderController::class, 'printReceipt'])->name('orders.print-receipt');
-        Route::post('/orders/complete/{order}', [OrderController::class, 'complete'])->name('orders.complete.alt');
-        Route::get('/orders/data/{order}', [OrderController::class, 'getOrderData'])->name('orders.data');
-        Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel.alt');
-        Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print');
-        Route::get('/orders/{order}/print', [OrderController::class, 'print'])->name('orders.print.alt');
-        Route::get('/orders/kitchen', [KitchenController::class, 'index'])->name('orders.kitchen');
-        Route::get('/orders/kitchen/live', [KitchenController::class, 'liveData'])->name('orders.kitchen.live');
-        Route::post('/orders/{order}/approve-cancellation', [OrderController::class, 'approveCancellation'])->name('orders.approve-cancellation');
-        Route::post('/orders/{order}/reject-cancellation', [OrderController::class, 'rejectCancellation'])->name('orders.reject-cancellation');
+        Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::post('/orders/{order}/update-status', [KitchenController::class, 'updateStatus'])->name('orders.update-status')->whereNumber('order');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show')->whereNumber('order');
+        Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit')->whereNumber('order');
+        Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update')->whereNumber('order');
+        Route::post('/orders/{order}/add-item', [OrderController::class, 'addItem'])->name('orders.add-item')->whereNumber('order');
+        Route::post('/orders/items/{orderItem}/remove', [OrderController::class, 'removeItem'])->name('orders.remove-item');
+        Route::post('/orders/items/{orderItem}/update-status', [OrderController::class, 'updateItemStatus'])->name('orders.update-item-status');
+        Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('orders.complete')->whereNumber('order');
+        Route::post('/orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay')->whereNumber('order');
+        Route::post('/orders/{order}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('orders.confirm-payment')->whereNumber('order');
+        Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel')->whereNumber('order');
+        Route::get('/orders/{order}/print-receipt', [OrderController::class, 'printReceipt'])->name('orders.print-receipt')->whereNumber('order');
+        Route::post('/orders/complete/{order}', [OrderController::class, 'complete'])->name('orders.complete.alt')->whereNumber('order');
+        Route::get('/orders/data/{order}', [OrderController::class, 'getOrderData'])->name('orders.data')->whereNumber('order');
+        Route::post('/orders/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel.alt')->whereNumber('order');
+        Route::get('/orders/print/{order}', [OrderController::class, 'print'])->name('orders.print')->whereNumber('order');
+        Route::get('/orders/{order}/print', [OrderController::class, 'print'])->name('orders.print.alt')->whereNumber('order');
+        Route::post('/orders/{order}/approve-cancellation', [OrderController::class, 'approveCancellation'])->name('orders.approve-cancellation')->whereNumber('order');
+        Route::post('/orders/{order}/reject-cancellation', [OrderController::class, 'rejectCancellation'])->name('orders.reject-cancellation')->whereNumber('order');
 
         // Products & Categories
         Route::resource('products', ProductController::class);

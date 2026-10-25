@@ -141,3 +141,4 @@ class KitchenController extends Controller
         return back()->with('success', 'Status do pedido #' . $order->id . ' atualizado.');
     }
 }
+

@@ -133,10 +133,10 @@
                     @foreach(Auth::user()->unreadNotifications->take(5) as $notification)
                         {
                             id: '{{ $notification->id }}',
-                            message: '{{ $notification->data['message'] }}',
-                            icon: '{{ $notification->data['icon'] }}',
-                            color: '{{ $notification->data['color'] }}',
-                            link: '{{ $notification->data['link'] }}',
+                            message: '{{ addslashes($notification->data['message'] ?? 'Notificação') }}',
+                            icon: '{{ $notification->data['icon'] ?? 'mdi-bell-outline' }}',
+                            color: '{{ $notification->data['color'] ?? 'orange' }}',
+                            link: '{{ $notification->data['link'] ?? '#' }}',
                             time: '{{ $notification->created_at->diffForHumans() }}'
                         },
                     @endforeach

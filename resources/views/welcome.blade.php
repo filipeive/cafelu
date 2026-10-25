@@ -593,13 +593,13 @@
                             <template x-if="!submitting">
                                 <span class="flex items-center gap-2">
                                     <i class="mdi mdi-check-circle-outline text-lg"></i>
-                                    <span>ENVIAR PEDIDO PARA A COZINHA</span>
+                                    <span>Enviar Meu Pedido para a Cozinha</span>
                                 </span>
                             </template>
                             <template x-if="submitting">
                                 <span class="flex items-center gap-2">
                                     <i class="mdi mdi-loading animate-spin text-lg"></i>
-                                    <span>Enviando...</span>
+                                    <span>Transmitindo Pedido...</span>
                                 </span>
                             </template>
                         </button>
@@ -905,10 +905,10 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        customer_name: this.customerName,
+                        customer_name: this.customerName || null,
                         table_id: this.selectedTableId || null,
-                        table_number: this.tableNumber || null,
-                        notes: this.orderNotes,
+                        table_number: this.tableNumber ? String(this.tableNumber) : null,
+                        notes: this.orderNotes || null,
                         items: this.cart.map(i => ({
                             id: i.id,
                             quantity: i.quantity,
@@ -916,16 +916,20 @@
                         }))
                     })
                 })
-                .then(res => res.json())
-                .then(data => {
+                .then(async res => {
+                    const data = await res.json();
                     this.submitting = false;
-                    if (data.success) {
+                    if (res.ok && data.success) {
                         this.confirmedOrder = data;
                         this.cart = [];
                         this.cartOpen = false;
                         this.orderSuccessModal = true;
                     } else {
-                        alert(data.message || 'Erro ao processar o pedido.');
+                        let errMsg = data.message || 'Erro ao processar o pedido.';
+                        if (data.errors) {
+                            errMsg = Object.values(data.errors).flat().join('\n');
+                        }
+                        alert(errMsg);
                     }
                 })
                 .catch(err => {

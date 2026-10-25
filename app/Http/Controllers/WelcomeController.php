@@ -51,7 +51,7 @@ class WelcomeController extends Controller
         $request->validate([
             'customer_name' => 'nullable|string|max:100',
             'table_id'      => 'nullable',
-            'table_number'  => 'nullable|string|max:50',
+            'table_number'  => 'nullable',
             'notes'         => 'nullable|string|max:500',
             'items'         => 'required|array|min:1',
             'items.*.id'    => 'required|exists:products,id',

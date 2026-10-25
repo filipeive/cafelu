@@ -42,12 +42,19 @@ class Table extends Model
     {
         if ($this->relationLoaded('orders')) {
             return $this->orders->first(function ($order) {
-                return in_array($order->status, ['active', 'completed']);
+                return in_array($order->status, ['active', 'preparing', 'ready', 'delivered'])
+                    || ($order->status === 'completed' && $order->payment_status !== 'paid');
             });
         }
 
         return $this->orders()
-            ->whereIn('status', ['active', 'completed'])
+            ->where(function ($query) {
+                $query->whereIn('status', ['active', 'preparing', 'ready', 'delivered'])
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'completed')
+                          ->where('payment_status', '!=', 'paid');
+                    });
+            })
             ->latest()
             ->first();
     }
@@ -56,12 +63,19 @@ class Table extends Model
     {
         if ($this->relationLoaded('orders')) {
             return $this->orders->contains(function ($order) {
-                return in_array($order->status, ['active', 'completed']);
+                return in_array($order->status, ['active', 'preparing', 'ready', 'delivered'])
+                    || ($order->status === 'completed' && $order->payment_status !== 'paid');
             });
         }
 
         return $this->orders()
-            ->whereIn('status', ['active', 'completed'])
+            ->where(function ($query) {
+                $query->whereIn('status', ['active', 'preparing', 'ready', 'delivered'])
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'completed')
+                          ->where('payment_status', '!=', 'paid');
+                    });
+            })
             ->exists();
     }
 

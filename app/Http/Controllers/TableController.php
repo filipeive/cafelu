@@ -17,9 +17,15 @@ class TableController extends Controller
     {
         $tables = Table::with([
             'orders' => function ($query) {
-                $query->whereIn('status', ['active', 'completed'])
-                    ->with(['items.product', 'user'])
-                    ->latest();
+                $query->where(function ($q) {
+                    $q->whereIn('status', ['active', 'preparing', 'ready', 'delivered'])
+                      ->orWhere(function ($sq) {
+                          $sq->where('status', 'completed')
+                             ->where('payment_status', '!=', 'paid');
+                      });
+                })
+                ->with(['items.product', 'user'])
+                ->latest();
             }
         ])->orderBy('number')->get();
 

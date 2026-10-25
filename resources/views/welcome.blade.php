@@ -512,19 +512,30 @@
                         <div class="space-y-3.5 pt-4 border-t border-gray-200">
                             <h4 class="text-xs font-black uppercase tracking-wider text-gray-400">Onde você está?</h4>
 
-                            <!-- Número da Mesa ou Balcão -->
+                            <!-- Localização: Mesa Real do Restaurante ou Balcão -->
                             <div>
-                                <label class="block text-[11px] font-bold text-gray-700 mb-1">
-                                    Número da Mesa <span class="text-gray-400 font-normal">(deixe vazio se for no balcão / viagem)</span>
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1 flex items-center justify-between">
+                                    <span>Mesa de Atendimento</span>
+                                    <template x-if="selectedTableId">
+                                        <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                            Mesa Selecionada
+                                        </span>
+                                    </template>
                                 </label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                                         <i class="mdi mdi-table-chair text-lg"></i>
                                     </span>
-                                    <input type="text"
-                                           x-model="tableNumber"
-                                           placeholder="Ex: 5, Mesa 3, Esplanada 2..."
-                                           class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                    <select x-model="selectedTableId"
+                                            @change="onTableChange($event.target.value)"
+                                            class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <option value="">Balcão / Pedido para Viagem</option>
+                                        @foreach($tables as $table)
+                                            <option value="{{ $table->id }}">
+                                                Mesa {{ $table->number }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
 
@@ -657,10 +668,19 @@
 
             <div class="text-left space-y-2">
                 <label class="block text-[11px] font-bold text-gray-700">Onde você está sentado?</label>
-                <input type="text"
-                       x-model="tableNumber"
-                       placeholder="Ex: Mesa 3, Balcão..."
-                       class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold focus:ring-2 focus:ring-orange-500">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <i class="mdi mdi-table-chair text-lg"></i>
+                    </span>
+                    <select x-model="selectedTableId"
+                            @change="onTableChange($event.target.value)"
+                            class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold focus:ring-2 focus:ring-orange-500">
+                        <option value="">Balcão / Salão Geral</option>
+                        @foreach($tables as $table)
+                            <option value="{{ $table->id }}">Mesa {{ $table->number }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <div class="pt-2 flex gap-2">
@@ -734,6 +754,7 @@
         return {
             selectedCategory: 'all',
             searchQuery: '',
+            selectedTableId: '{{ $detectedTableId ?? "" }}',
             tableNumber: '{{ $tableNumber ?? "" }}',
             customerName: '{{ Auth::check() ? Auth::user()->name : "" }}',
             orderNotes: '',
@@ -749,7 +770,18 @@
 
             waiterModalOpen: false,
 
+            systemTables: @json($tables->map(fn($t) => ['id' => $t->id, 'number' => $t->number])),
             products: @json($allProducts),
+
+            onTableChange(tableId) {
+                this.selectedTableId = tableId;
+                const matched = this.systemTables.find(t => t.id == tableId);
+                if (matched) {
+                    this.tableNumber = matched.number;
+                } else {
+                    this.tableNumber = '';
+                }
+            },
 
             get filteredProducts() {
                 return this.products.filter(p => {
@@ -874,7 +906,8 @@
                     },
                     body: JSON.stringify({
                         customer_name: this.customerName,
-                        table_number: this.tableNumber,
+                        table_id: this.selectedTableId || null,
+                        table_number: this.tableNumber || null,
                         notes: this.orderNotes,
                         items: this.cart.map(i => ({
                             id: i.id,

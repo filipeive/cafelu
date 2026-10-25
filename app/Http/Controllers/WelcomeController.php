@@ -28,17 +28,29 @@ class WelcomeController extends Controller
             ->take(6)
             ->get();
 
+        // Tables
+        $tables = Table::orderBy('number', 'asc')->get();
+
         // Detected table from QR code query parameter (e.g., ?mesa=4 or ?table=4)
         $detectedTable = $request->get('mesa', $request->get('table', ''));
         $tableNumber = preg_replace('/[^0-9]/', '', $detectedTable);
 
-        return view('welcome', compact('categories', 'featuredProducts', 'tableNumber'));
+        $detectedTableId = '';
+        if (!empty($tableNumber)) {
+            $matched = $tables->firstWhere('number', (int)$tableNumber);
+            if ($matched) {
+                $detectedTableId = $matched->id;
+            }
+        }
+
+        return view('welcome', compact('categories', 'featuredProducts', 'tables', 'tableNumber', 'detectedTableId'));
     }
 
     public function storeSelfServiceOrder(Request $request)
     {
         $request->validate([
             'customer_name' => 'nullable|string|max:100',
+            'table_id'      => 'nullable',
             'table_number'  => 'nullable|string|max:50',
             'notes'         => 'nullable|string|max:500',
             'items'         => 'required|array|min:1',
@@ -53,19 +65,27 @@ class WelcomeController extends Controller
             $adminId = User::where('role', 'admin')->value('id') ?? 1;
             $userId = auth()->id() ?? $adminId;
 
-            // Resolve table by number if provided
+            // Resolve real table
             $tableId = null;
             $tableDisplay = 'Balcão / Salão';
-            if ($request->filled('table_number')) {
+
+            // 1. If explicit table_id provided
+            if ($request->filled('table_id') && is_numeric($request->table_id)) {
+                $table = Table::find($request->table_id);
+                if ($table) {
+                    $tableId = $table->id;
+                    $tableDisplay = 'Mesa ' . $table->number;
+                }
+            }
+
+            // 2. If table_number was provided (e.g. "1" or "Mesa 1")
+            if (!$tableId && $request->filled('table_number')) {
                 $cleanNum = preg_replace('/[^0-9]/', '', $request->table_number);
                 if (!empty($cleanNum)) {
-                    $table = Table::where('number', $cleanNum)->first();
+                    $table = Table::where('number', (int)$cleanNum)->first();
                     if ($table) {
                         $tableId = $table->id;
                         $tableDisplay = 'Mesa ' . $table->number;
-                        if ($table->status === 'free') {
-                            $table->update(['status' => 'occupied']);
-                        }
                     } else {
                         $tableDisplay = 'Mesa ' . $cleanNum;
                     }
@@ -74,9 +94,18 @@ class WelcomeController extends Controller
                 }
             }
 
+            // Ensure the real table in DB is marked as occupied
+            if ($tableId) {
+                $table = Table::find($tableId);
+                if ($table) {
+                    $table->status = 'occupied';
+                    $table->save();
+                }
+            }
+
             $customerName = trim($request->customer_name ?: '');
             if (empty($customerName)) {
-                $customerName = auth()->check() ? auth()->user()->name : ($tableId ? $tableDisplay : 'Cliente no Restaurante');
+                $customerName = auth()->check() ? auth()->user()->name : ($tableId ? $tableDisplay : 'Cliente no Salão');
             }
 
             $order = Order::create([

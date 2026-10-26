@@ -244,32 +244,63 @@
                 </div>
 
                 <!-- Dynamic Payment Details -->
-                <div x-show="paymentMethod === 'cash'" class="space-y-1.5">
-                    <div class="flex items-center gap-2">
-                        <div class="relative flex-1">
-                            <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">MZN</span>
-                            <input type="number" x-model="payments.cash" step="any"
-                                class="w-full pl-10 pr-2.5 py-1 text-xs font-bold border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-orange-500"
-                                placeholder="Valor recebido...">
+                <div x-show="paymentMethod === 'cash'" class="space-y-2">
+                    <div>
+                        <div class="flex items-center justify-between mb-1 px-0.5">
+                            <label class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                Valor Recebido
+                            </label>
+                            <template x-if="payments.cash && parseFloat(payments.cash) > 0">
+                                <button type="button" @click="payments.cash = ''" class="text-[10px] font-bold text-gray-400 hover:text-rose-500 transition-colors cursor-pointer">
+                                    Limpar
+                                </button>
+                            </template>
                         </div>
-                        <template x-if="changeAmount > 0">
-                            <div class="px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 text-emerald-700 dark:text-emerald-300 text-xs font-black flex items-center gap-1 whitespace-nowrap">
-                                <i class="mdi mdi-cash-refund text-sm"></i>
-                                <span>Troco: MZN <span x-text="formatMoney(changeAmount)"></span></span>
-                            </div>
-                        </template>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400 dark:text-gray-500">MZN</span>
+                            <input type="number" x-model="payments.cash" step="any" min="0"
+                                class="w-full pl-12 pr-8 py-2 text-sm font-black border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all shadow-xs"
+                                placeholder="0,00">
+                            <button type="button" x-show="payments.cash" @click="payments.cash = ''"
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
+                                <i class="mdi mdi-close-circle text-base"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Quick Cash Tender Chips -->
-                    <div x-show="cartTotal > 0" class="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-thin">
+                    <!-- Troco Display (quando troco > 0) -->
+                    <template x-if="changeAmount > 0">
+                        <div class="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-black flex items-center justify-between">
+                            <span class="flex items-center gap-1.5">
+                                <i class="mdi mdi-cash-refund text-base text-emerald-600"></i>
+                                <span>Troco a devolver:</span>
+                            </span>
+                            <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">MZN <span x-text="formatMoney(changeAmount)"></span></span>
+                        </div>
+                    </template>
+
+                    <!-- Alerta se valor recebido for menor que o total -->
+                    <template x-if="payments.cash && parseFloat(payments.cash) < cartTotal && parseFloat(payments.cash) > 0">
+                        <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-bold flex items-center justify-between">
+                            <span class="flex items-center gap-1">
+                                <i class="mdi mdi-alert-circle text-base text-amber-600"></i>
+                                <span>Falta Pagar:</span>
+                            </span>
+                            <span class="text-xs font-black text-rose-600 dark:text-rose-400">MZN <span x-text="formatMoney(cartTotal - parseFloat(payments.cash))"></span></span>
+                        </div>
+                    </template>
+
+                    <!-- Quick Cash Tender Chips (Atalhos de Cédulas) -->
+                    <div x-show="cartTotal > 0" class="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
                         <button type="button" @click="setCashAmount('exact')"
-                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-200 transition-colors cursor-pointer">
+                            class="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-200 transition-colors cursor-pointer whitespace-nowrap shadow-2xs">
                             Exato
                         </button>
                         <template x-for="amt in [50, 100, 200, 500, 1000]" :key="amt">
                             <button type="button" @click="setCashAmount(amt)"
-                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-gray-200/80 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer">
-                                <span x-text="'+' + amt"></span>
+                                :class="parseFloat(payments.cash) === amt ? 'bg-orange-500 text-white font-black' : 'bg-gray-200/90 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-300 dark:hover:bg-gray-600'"
+                                class="px-2 py-1 rounded-lg text-[11px] transition-colors cursor-pointer whitespace-nowrap shadow-2xs">
+                                <span x-text="'MZN ' + amt"></span>
                             </button>
                         </template>
                     </div>
@@ -507,9 +538,11 @@
                     setCashAmount(amount) {
                         if (amount === 'exact') {
                             this.payments.cash = this.cartTotal;
+                        } else if (typeof amount === 'number') {
+                            this.payments.cash = amount;
                         } else {
                             const current = parseFloat(this.payments.cash) || 0;
-                            this.payments.cash = current + amount;
+                            this.payments.cash = current + parseFloat(amount);
                         }
                     },
 

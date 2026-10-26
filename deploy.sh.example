@@ -3,9 +3,8 @@
 set -euo pipefail
 
 # ==============================================================================
-# Script de Deploy de Producao - RestPOS Cloud Suite
-# Desenvolvido por Fdsmultiservices
-# Suporte: (+258) 86 213 4230 | fdsmultiservices@gmail.com
+# Script de Deploy de Producao - RestPOS Cloud Suite (Exemplo)
+# Copie este ficheiro para 'deploy.sh' e configure as variaveis ou crie '.deploy.env'
 # ==============================================================================
 
 if [ -f .deploy.env ]; then
@@ -13,8 +12,8 @@ if [ -f .deploy.env ]; then
     source .deploy.env
 fi
 
-SERVER="${SERVER:-ubuntu@146.235.224.99}"
-KEY="${KEY:-/home/fdev-ms/.ssh/oracle-2025}"
+SERVER="${SERVER:-user@your-server-ip}"
+KEY="${KEY:-~/.ssh/id_rsa}"
 PROJECT_DIR="${PROJECT_DIR:-/var/www/html/RestPOS}"
 BRANCH="${BRANCH:-v1.3}"
 
@@ -49,25 +48,23 @@ ssh -i "$KEY" "$SERVER" "
     cd '$PROJECT_DIR' && \
     echo '[INFO] Ajustando permissoes de trabalho...' && \
     sudo chown -R ubuntu:ubuntu . && \
-    echo '[INFO] Sincronizando codigo-fonte (git fetch & reset)...' && \
-    git fetch origin $BRANCH && \
-    git reset --hard origin/$BRANCH && \
-    echo '[INFO] Instalando dependencias PHP otimizadas...' && \
-    composer install --optimize-autoloader --no-dev --no-interaction && \
-    echo '[INFO] Executando migracoes de base de dados...' && \
+    echo '[INFO] Atualizando repositorio ($BRANCH)...' && \
+    git fetch origin '$BRANCH' && \
+    git checkout '$BRANCH' && \
+    git pull origin '$BRANCH' && \
+    echo '[INFO] Instalando dependencias do Composer...' && \
+    composer install --no-dev --optimize-autoloader --no-interaction && \
+    echo '[INFO] Executando migracoes do banco de dados...' && \
     php artisan migrate --force && \
-    echo '[INFO] Assegurando link simbolico de storage/public...' && \
-    php artisan storage:link || true && \
-    echo '[INFO] Limpando caches obsoletos...' && \
+    echo '[INFO] Otimizando caches da aplicacao...' && \
     php artisan optimize:clear && \
-    echo '[INFO] Regerando caches de producao (config, route, view)...' && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
-    echo '[INFO] Protegendo permissoes de storage e bootstrap/cache...' && \
+    echo '[INFO] Criando link de storage...' && \
+    php artisan storage:link --force || true && \
+    echo '[INFO] Aplicando permissoes seguras para o Nginx...' && \
     sudo chown -R ubuntu:www-data storage bootstrap/cache && \
     sudo chmod -R 775 storage bootstrap/cache && \
-    echo '[INFO] Recarregando PHP-FPM e Nginx...' && \
-    sudo systemctl reload php8.3-fpm nginx || sudo systemctl reload php8.2-fpm nginx && \
-    echo '[OK] Deploy do RestPOS concluido com sucesso!'
+    echo '[SUCESSO] Deploy do RestPOS concluido com exito em $PROJECT_DIR!'
 "

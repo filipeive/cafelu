@@ -462,4 +462,10 @@ return [
     'search' => 'Pesquisar',
     'name' => 'Nome',
     'suspended' => 'Suspenso',
+    'grid_view' => 'Grade',
+    'list_view' => 'Lista',
+    'all_status' => 'Todos os Estados',
+    'out_of_stock' => 'Esgotado',
+    'in_stock' => 'Em Estoque',
+    'low_stock' => 'Estoque Baixo',
 ];

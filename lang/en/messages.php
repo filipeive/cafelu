@@ -465,4 +465,10 @@ return [
     'search' => 'Search',
     'name' => 'Name',
     'suspended' => 'Suspended',
+    'grid_view' => 'Grid',
+    'list_view' => 'List',
+    'all_status' => 'All Status',
+    'out_of_stock' => 'Out of Stock',
+    'in_stock' => 'In Stock',
+    'low_stock' => 'Low Stock',
 ];

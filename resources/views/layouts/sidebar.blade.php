@@ -222,15 +222,34 @@
                     />
 
                     <x-sidebar.nav-item 
-                        route="admin.licenses.index" 
+                        route="license.status" 
                         icon="mdi-certificate-outline" 
-                        title="Licenças do Sistema" 
+                        title="Minha Licença" 
                     />
 
                     <x-sidebar.nav-item 
                         route="audit_logs.index" 
                         icon="mdi-history" 
                         title="{{ __('messages.audit') }}" 
+                    />
+                </div>
+            @endif
+
+            <!-- PAINEL DO DONO DO SISTEMA (SuperAdmin Only) -->
+            @if(Auth::user()->role === 'superadmin')
+                <div class="pt-3 pb-1">
+                    <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                        <span class="text-[10px] font-bold text-orange-500 uppercase tracking-wider flex items-center gap-1">
+                            <i class="mdi mdi-shield-crown"></i>
+                            <span>Dono da Plataforma</span>
+                        </span>
+                    </div>
+                    <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
+
+                    <x-sidebar.nav-item 
+                        route="admin.licenses.index" 
+                        icon="mdi-key-chain" 
+                        title="Gestão de Licenças" 
                     />
                 </div>
             @endif

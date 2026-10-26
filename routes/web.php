@@ -111,8 +111,10 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('debts', DebtController::class);
         Route::post('debts/{debt}/pay', [DebtController::class, 'pay'])->name('debts.pay');
         Route::post('debts/register', [DebtController::class, 'registerDebt'])->name('debts.register');
+    });
 
-        // Licensing Control Center (Owner / Dono do Sistema)
+    // SuperAdmin ONLY (Dono do Sistema / Plataforma)
+    Route::middleware(['role:superadmin'])->group(function () {
         Route::get('admin/licenses', [LicenseController::class, 'adminIndex'])->name('admin.licenses.index');
         Route::post('admin/licenses', [LicenseController::class, 'store'])->name('admin.licenses.store');
         Route::post('admin/licenses/{license}/extend', [LicenseController::class, 'extend'])->name('admin.licenses.extend');

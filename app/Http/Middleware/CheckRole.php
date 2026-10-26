@@ -30,7 +30,12 @@ class CheckRole
 
         // Check if user has any of the required roles
         foreach ($roles as $role) {
-            if ($userRole === strtolower(trim($role))) {
+            $expected = strtolower(trim($role));
+            if ($userRole === $expected) {
+                return $next($request);
+            }
+            // Superadmin has automatic access to staff and restaurant admin areas
+            if ($userRole === 'superadmin' && in_array($expected, ['admin', 'manager', 'waiter', 'cashier'])) {
                 return $next($request);
             }
         }

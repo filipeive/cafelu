@@ -169,3 +169,4 @@ class LicenseController extends Controller
         return back()->with('success', $result['message']);
     }
 }
+

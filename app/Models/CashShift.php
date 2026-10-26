@@ -78,3 +78,4 @@ class CashShift extends Model
         $this->saveQuietly();
     }
 }
+

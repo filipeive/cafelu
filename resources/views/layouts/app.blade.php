@@ -16,6 +16,14 @@
         <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
     @endif
 
+    <!-- PWA Manifest & Mobile Meta -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#f97316">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RestPOS">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
+
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -356,8 +364,17 @@
                 showToast('{{ session('info') }}', 'info');
             @endif
 
-            console.log('✅ {{ __('messages.system_initialized') }}');
+            console.log('Sistema inicializado com sucesso');
         });
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.warn('SW registration skipped/failed:', err);
+                });
+            });
+        }
     </script>
 
     @stack('scripts')

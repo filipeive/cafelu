@@ -129,3 +129,4 @@ class LicenseKey extends Model
         return $query->where('is_current', true);
     }
 }
+

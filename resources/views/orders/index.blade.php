@@ -22,7 +22,7 @@
     @endphp
 
     <div class="w-full" x-data="{ 
-                search: '{{ addslashes(old('search', $search)) }}',
+                search: '{{ addslashes((string)old('search', $search ?? '')) }}',
                 performSearch() {
                     window.location.href = '{{ route('orders.index') }}?search=' + encodeURIComponent(this.search);
                 }

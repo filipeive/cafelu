@@ -12,34 +12,49 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Cache;
 
 class WelcomeController extends Controller
 {
+    public function tableEntry(string $table)
+    {
+        $cleanNumber = preg_replace('/[^0-9]/', '', $table);
+        if (!empty($cleanNumber)) {
+            session(['self_service_table_number' => $cleanNumber]);
+        }
+        return redirect()->route('welcome', ['mesa' => $cleanNumber]);
+    }
+
     public function index(Request $request)
     {
-        $categories = Category::with([
-            'products' => function ($query) {
-                $query->where('is_active', true);
-            }
-        ])->get();
+        $categories = Cache::remember('self_service_categories', 600, function () {
+            return Category::with([
+                'products' => function ($query) {
+                    $query->where('is_active', true);
+                }
+            ])->get();
+        });
 
-        $featuredProducts = Product::where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->take(6)
-            ->get();
+        $featuredProducts = Cache::remember('self_service_featured', 600, function () {
+            return Product::where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->take(6)
+                ->get();
+        });
 
         // Tables
         $tables = Table::orderBy('number', 'asc')->get();
 
-        // Detected table from QR code query parameter (e.g., ?mesa=4 or ?table=4)
-        $detectedTable = $request->get('mesa', $request->get('table', ''));
-        $tableNumber = preg_replace('/[^0-9]/', '', $detectedTable);
+        // Detected table from QR code query parameter or session
+        $detectedTable = $request->get('mesa', $request->get('table', session('self_service_table_number', '')));
+        $tableNumber = preg_replace('/[^0-9]/', '', (string)$detectedTable);
 
         $detectedTableId = '';
         if (!empty($tableNumber)) {
             $matched = $tables->firstWhere('number', (int)$tableNumber);
             if ($matched) {
                 $detectedTableId = $matched->id;
+                session(['self_service_table_number' => $tableNumber, 'self_service_table_id' => $matched->id]);
             }
         }
 
@@ -254,11 +269,11 @@ class WelcomeController extends Controller
 
         $statusLabel = match ($order->status) {
             'active'    => 'Recebido na Cozinha',
-            'preparing' => 'Em Preparação 🔥',
-            'ready'     => 'Pronto para Servir / Retirada 🛎️',
-            'delivered' => 'Entregue na Mesa ✅',
-            'completed' => 'Finalizado ✅',
-            'canceled'  => 'Cancelado ❌',
+            'preparing' => 'Em Preparação',
+            'ready'     => 'Pronto para Servir',
+            'delivered' => 'Entregue na Mesa',
+            'completed' => 'Finalizado',
+            'canceled'  => 'Cancelado',
             default     => ucfirst($order->status)
         };
 

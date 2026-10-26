@@ -144,9 +144,10 @@
                     
                     <!-- Mesa Detectada se veio via QR Code -->
                     <template x-if="tableNumber">
-                        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 font-bold text-xs border border-orange-200">
-                            <i class="mdi mdi-map-marker-radius"></i>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 text-orange-800 font-black text-xs border border-orange-200 shadow-2xs">
+                            <i class="mdi mdi-table-chair text-orange-600 text-sm"></i>
                             <span x-text="'Mesa ' + tableNumber"></span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5"></span>
                         </div>
                     </template>
 
@@ -560,6 +561,12 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        <template x-if="tableNumber">
+                                            <div class="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                                                <i class="mdi mdi-qrcode-scan text-emerald-600"></i>
+                                                <span>Identificada via QR Code da Mesa <span x-text="tableNumber"></span></span>
+                                            </div>
+                                        </template>
                                     </div>
 
                                     <!-- Alerta de Comanda Cumulativa se houver pedido ativo -->
@@ -958,19 +965,28 @@
                                  'bg-purple-100/70 text-purple-900 border border-purple-200': trackedOrder.status_step >= 4
                              }">
                             <template x-if="trackedOrder.status_step === 1">
-                                <span>📝 Pedido recebido! A cozinha está organizando os preparativos.</span>
+                                <span class="flex items-center justify-center gap-1.5">
+                                    <i class="mdi mdi-clipboard-text-clock-outline text-amber-700 text-base"></i>
+                                    <span>Pedido recebido! A cozinha está organizando os preparativos.</span>
+                                </span>
                             </template>
                             <template x-if="trackedOrder.status_step === 2">
-                                <span>🔥 Os cozinheiros estão preparando seus pratos com todo carinho.</span>
+                                <span class="flex items-center justify-center gap-1.5">
+                                    <i class="mdi mdi-fire text-sky-600 text-base"></i>
+                                    <span>Os cozinheiros estão preparando seus pratos com todo cuidado.</span>
+                                </span>
                             </template>
                             <template x-if="trackedOrder.status_step === 3">
                                 <span class="text-emerald-800 text-sm font-black flex items-center justify-center gap-1.5">
-                                    <i class="mdi mdi-bell-ring animate-bounce"></i>
-                                    SEU PEDIDO ESTÁ PRONTO! Aguarde na mesa ou dirija-se ao balcão.
+                                    <i class="mdi mdi-bell-ring animate-bounce text-base"></i>
+                                    <span>SEU PEDIDO ESTÁ PRONTO! Aguarde na mesa ou dirija-se ao balcão.</span>
                                 </span>
                             </template>
                             <template x-if="trackedOrder.status_step >= 4">
-                                <span>✅ Pedido entregue! Esperamos que aprecie sua refeição.</span>
+                                <span class="flex items-center justify-center gap-1.5">
+                                    <i class="mdi mdi-check-decagram text-purple-600 text-base"></i>
+                                    <span>Pedido entregue! Esperamos que aprecie sua refeição.</span>
+                                </span>
                             </template>
                         </div>
                     </div>

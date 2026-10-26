@@ -31,6 +31,8 @@ use App\Http\Controllers\KitchenController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+Route::get('/m/{table}', [WelcomeController::class, 'tableEntry'])->name('welcome.table.short');
+Route::get('/mesa/{table}', [WelcomeController::class, 'tableEntry'])->name('welcome.table');
 Route::post('/self-service/order', [WelcomeController::class, 'storeSelfServiceOrder'])->name('self-service.order');
 Route::post('/call-waiter', [WelcomeController::class, 'callWaiter'])->name('welcome.call-waiter');
 Route::get('/order-status/{order}', [WelcomeController::class, 'orderStatus'])->name('welcome.order-status')->whereNumber('order');

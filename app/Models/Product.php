@@ -37,6 +37,19 @@ class Product extends Model
         'image_url',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('self_service_categories');
+            \Illuminate\Support\Facades\Cache::forget('self_service_featured');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('self_service_categories');
+            \Illuminate\Support\Facades\Cache::forget('self_service_featured');
+        });
+    }
+
     public function getImageUrlAttribute()
     {
         $path = $this->image_path ?: $this->image;

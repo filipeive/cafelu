@@ -19,7 +19,7 @@
             </button>
         </div>
 
-        @if ($errors->any())
+        @if (isset($errors) && $errors->any())
             <div class="mb-6 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
                 <div class="flex items-center gap-2 font-bold mb-1">
                     <i class="mdi mdi-alert-circle text-lg"></i>
@@ -278,7 +278,7 @@
             modal.classList.add('hidden');
         }
 
-        @if ($errors->any())
+        @if (isset($errors) && $errors->any())
             document.addEventListener('DOMContentLoaded', function() {
                 modal.classList.remove('hidden');
             });

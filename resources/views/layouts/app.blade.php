@@ -373,7 +373,7 @@
                 showToast('{{ session('error') }}', 'error');
             @endif
 
-            @if($errors->any())
+            @if(isset($errors) && $errors->any())
                 @foreach($errors->all() as $error)
                     showToast('{{ addslashes($error) }}', 'error');
                 @endforeach

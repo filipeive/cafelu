@@ -201,6 +201,10 @@
                                 <span class="text-[10px] text-gray-400 font-mono">
                                     {{ $tenant->max_tables }} mesas • {{ $tenant->max_users }} operadores
                                 </span>
+                                <span class="text-[9px] font-semibold flex items-center gap-1 {{ $tenant->isOnline() ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $tenant->isOnline() ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400' }}"></span>
+                                    Sync: {{ $tenant->last_sync_human }}
+                                </span>
                             </div>
                         </td>
 

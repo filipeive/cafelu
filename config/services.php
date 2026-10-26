@@ -31,4 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'sync' => [
+        'enabled'     => env('SYNC_ENABLED', false),
+        'cloud_url'   => env('SYNC_CLOUD_URL', 'http://146.235.224.99/RestPOS/api/sync/ingest'),
+        'verify_url'  => env('SYNC_VERIFY_URL', 'http://146.235.224.99/RestPOS/api/sync/verify-license'),
+        'token'       => env('SYNC_TOKEN', env('LICENSE_KEY', 'restpos_sync_default_token')),
+        'tenant_slug' => env('SYNC_TENANT_SLUG', null),
+    ],
+
 ];

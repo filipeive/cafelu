@@ -13,6 +13,7 @@ class Order extends Model
     protected $table = 'orders'; // Specify the table name if different from the model name
     protected $fillable = [
         'tenant_id',
+        'offline_id',
         'table_id',
         'user_id',
         'customer_name',
@@ -26,7 +27,8 @@ class Order extends Model
         'delivered_at',
         'cancel_requested_at',
         'cancellation_reason',
-        'cancellation_status'
+        'cancellation_status',
+        'synced_at',
     ];
 
     public function canBeCanceled()

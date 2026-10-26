@@ -13,6 +13,7 @@ class Sale extends Model
 
     protected $fillable = [
         'tenant_id',
+        'offline_id',
         'order_id',
         'user_id',
         'cash_shift_id',
@@ -25,6 +26,7 @@ class Sale extends Model
         'emola_amount',
         'notes',
         'status',
+        'synced_at',
     ];
 
     protected $casts = [

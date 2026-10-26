@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToTenant;
 
 class StockMovement extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
+        'offline_id',
         'product_id',
         'user_id',
         'quantity',
@@ -17,6 +20,7 @@ class StockMovement extends Model
         'reference_type',
         'reference_id',
         'notes',
+        'synced_at',
     ];
 
     public function product()

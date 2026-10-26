@@ -168,5 +168,18 @@ class LicenseController extends Controller
 
         return back()->with('success', $result['message']);
     }
+
+    /**
+     * Disparo manual de sincronização com a nuvem pelo cliente.
+     */
+    public function syncNow(Request $request)
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('restpos:sync-push');
+            return back()->with('success', 'Sincronização com o servidor central na nuvem concluída com sucesso!');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Falha na comunicação com a nuvem: ' . $e->getMessage());
+        }
+    }
 }
 

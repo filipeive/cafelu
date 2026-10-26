@@ -161,9 +161,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pos/shift/{shift}/close', [CashShiftController::class, 'close'])->name('pos.shift.close');
         Route::post('/pos/switch-operator', [CashShiftController::class, 'quickSwitchUser'])->name('pos.switch-operator');
 
-        // License status & activation
+        // License status & activation & cloud sync
         Route::get('/license/status', [LicenseController::class, 'clientStatus'])->name('license.status');
         Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate');
+        Route::post('/license/sync-now', [LicenseController::class, 'syncNow'])->name('license.sync-now');
 
         // Menu management
         Route::get('menu', [DashboardController::class, 'menu'])->name('menu.index');

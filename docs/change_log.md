@@ -130,7 +130,10 @@ Instalação RestPOS:
 ### Arquitetura de Sincronização Nuvem / Restaurantes Locais:
 - **Nuvem Central**: Hospeda o banco de dados principal, controle de licenças e painel central do SuperAdmin.
 - **Nós Locais dos Restaurantes**: Instalações nos computadores locais para tolerância a falhas de internet.
-- **Sincronização via API**:
-  1. *Pull de Cardápio*: O nó local baixa produtos e categorias atualizados da nuvem.
-  2. *Push de Fecho Z*: Ao fechar o turno, o nó local envia o balanço diário e as vendas para a nuvem.
-  3. *Verificação de Licença*: Validação de dias restantes com tolerância de até 7 dias offline.
+- **Sincronização via API Implementada (`v1.3`)**:
+  1. *Comando de Push Assíncrono*: `php artisan restpos:sync-push` com suporte a execução periódica via cron ou agendador.
+  2. *Ingestão Idempotente*: Endpoint `/api/sync/ingest` autenticado por Token/Serial com mapeamento automático de Tenant via `offline_id`.
+  3. *Verificação Central de Licença*: Endpoint `/api/sync/verify-license` para ativação remota e heartbeat.
+  4. *Disparo Manual na UI*: Botão "Sincronizar Agora com a Nuvem" no menu Minha Licença (`/license/status`).
+  5. *Monitoramento pelo Dono*: Painel SaaS com indicador em tempo real da última sincronização de cada restaurante.
+  6. *Guia Completo*: Disponível em `docs/CLOUD_SYNC_GUIDE.md`.

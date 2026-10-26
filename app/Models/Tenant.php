@@ -30,12 +30,15 @@ class Tenant extends Model
         'max_users',
         'trial_ends_at',
         'license_expires_at',
+        'last_synced_at',
+        'sync_token',
         'settings',
     ];
 
     protected $casts = [
         'trial_ends_at' => 'datetime',
         'license_expires_at' => 'datetime',
+        'last_synced_at' => 'datetime',
         'settings' => 'array',
         'max_tables' => 'integer',
         'max_users' => 'integer',
@@ -130,6 +133,25 @@ class Tenant extends Model
         }
 
         return max(0, (int) now()->diffInDays($expiry, false));
+    }
+
+    public function isOnline(): bool
+    {
+        if ($this->installation_mode === 'cloud') {
+            return true;
+        }
+        return $this->last_synced_at && $this->last_synced_at->diffInMinutes(now()) <= 15;
+    }
+
+    public function getLastSyncHumanAttribute(): string
+    {
+        if ($this->installation_mode === 'cloud') {
+            return 'Nuvem Nativa';
+        }
+        if (!$this->last_synced_at) {
+            return 'Nunca sincronizou';
+        }
+        return $this->last_synced_at->diffForHumans();
     }
 }
 

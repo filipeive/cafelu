@@ -99,6 +99,74 @@
         </div>
     </div>
 
+    <!-- Cloud Sync Status Card -->
+    @php
+        $tenant = current_tenant();
+    @endphp
+    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-xs p-6 space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700/60 pb-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-sky-50 dark:bg-sky-950/40 text-sky-500 flex items-center justify-center text-xl">
+                    <i class="mdi mdi-cloud-sync"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>Sincronização em Nuvem & Acesso Remoto</span>
+                        @if($tenant && $tenant->isOnline())
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Conectado
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                <i class="mdi mdi-cloud-off-outline"></i>
+                                Aguardando Sync
+                            </span>
+                        @endif
+                    </h3>
+                    <p class="text-xs text-gray-500">Transmite vendas do caixa local e permite ao dono acompanhar o faturamento pelo telemóvel.</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('license.sync-now') }}">
+                @csrf
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm shadow-sky-500/25 cursor-pointer">
+                    <i class="mdi mdi-sync text-base animate-spin-hover"></i>
+                    <span>Sincronizar Agora com a Nuvem</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
+            <div class="space-y-1">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Modo de Operação</span>
+                <p class="text-sm font-black text-gray-900 dark:text-white uppercase">
+                    {{ $tenant->installation_mode ?? 'Local com Sincronização' }}
+                </p>
+                <span class="text-gray-500">Vendas offline seguras com upload automático</span>
+            </div>
+
+            <div class="space-y-1">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Última Sincronização</span>
+                <p class="text-sm font-black text-gray-900 dark:text-white">
+                    {{ $tenant ? $tenant->last_sync_human : 'Nunca sincronizou' }}
+                </p>
+                <span class="text-gray-500">
+                    {{ $tenant && $tenant->last_synced_at ? $tenant->last_synced_at->format('d/m/Y H:i:s') : 'Configure o cron ou envie manualmente' }}
+                </span>
+            </div>
+
+            <div class="space-y-1">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Servidor Nuvem Central</span>
+                <p class="text-xs font-mono font-bold text-gray-800 dark:text-gray-200 truncate" title="{{ config('services.sync.cloud_url') }}">
+                    {{ config('services.sync.cloud_url') }}
+                </p>
+                <span class="text-gray-500">Endpoint oficial de ingestão idempotente</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Activation Form Card -->
     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-xs p-6 space-y-4">
         <div class="flex items-center gap-3">

@@ -461,4 +461,5 @@ return [
     'no_items_found' => 'Nenhum item encontrado',
     'search' => 'Pesquisar',
     'name' => 'Nome',
+    'suspended' => 'Suspenso',
 ];

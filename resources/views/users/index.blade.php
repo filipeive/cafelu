@@ -19,6 +19,20 @@
             </button>
         </div>
 
+        @if ($errors->any())
+            <div class="mb-6 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+                <div class="flex items-center gap-2 font-bold mb-1">
+                    <i class="mdi mdi-alert-circle text-lg"></i>
+                    <span>{{ __('messages.validation_error') }}</span>
+                </div>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -107,7 +121,7 @@
                                             <i class="mdi mdi-eye text-lg"></i>
                                         </a>
                                         <button type="button" 
-                                            onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->username }}', '{{ $user->role }}')"
+                                            onclick="openEditModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', '{{ addslashes($user->username) }}', '{{ $user->role }}', '{{ $user->status }}')"
                                             class="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors" title="{{ __('messages.edit') }}">
                                             <i class="mdi mdi-pencil text-lg"></i>
                                         </button>
@@ -200,6 +214,16 @@
                                     <option value="waiter">{{ __('messages.waiter') }}</option>
                                 </select>
                             </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.status') }}</label>
+                                <select name="status" id="userStatus" required
+                                    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                    <option value="active">{{ __('messages.active') }}</option>
+                                    <option value="inactive">{{ __('messages.inactive') }}</option>
+                                    <option value="suspended">{{ __('messages.suspended') }}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -230,19 +254,21 @@
             form.action = "{{ route('users.store') }}";
             formMethod.value = 'POST';
             form.reset();
+            document.getElementById('userStatus').value = 'active';
             passwordHelp.classList.add('hidden');
             document.getElementById('userPassword').required = true;
             modal.classList.remove('hidden');
         }
 
-        function openEditModal(id, name, email, username, role) {
+        function openEditModal(id, name, email, username, role, status) {
             modalTitle.innerText = "{{ __('messages.edit_user') }}";
-            form.action = `/users/${id}`;
+            form.action = `{{ url('/users') }}/${id}`;
             formMethod.value = 'PUT';
             document.getElementById('userName').value = name;
             document.getElementById('userEmail').value = email;
             document.getElementById('userUsername').value = username;
             document.getElementById('userRole').value = role;
+            document.getElementById('userStatus').value = status || 'active';
             document.getElementById('userPassword').required = false;
             passwordHelp.classList.remove('hidden');
             modal.classList.remove('hidden');
@@ -251,5 +277,11 @@
         function closeModal() {
             modal.classList.add('hidden');
         }
+
+        @if ($errors->any())
+            document.addEventListener('DOMContentLoaded', function() {
+                modal.classList.remove('hidden');
+            });
+        @endif
     </script>
 @endsection

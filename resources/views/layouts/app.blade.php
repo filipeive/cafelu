@@ -373,6 +373,12 @@
                 showToast('{{ session('error') }}', 'error');
             @endif
 
+            @if($errors->any())
+                @foreach($errors->all() as $error)
+                    showToast('{{ addslashes($error) }}', 'error');
+                @endforeach
+            @endif
+
             @if(session('warning'))
                 showToast('{{ session('warning') }}', 'warning');
             @endif

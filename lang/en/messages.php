@@ -464,4 +464,5 @@ return [
     'no_items_found' => 'No items found',
     'search' => 'Search',
     'name' => 'Name',
+    'suspended' => 'Suspended',
 ];

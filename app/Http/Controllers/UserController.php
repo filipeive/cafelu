@@ -12,13 +12,28 @@ class UserController extends Controller
     // Display a listing of the users
     public function index(Request $request)
     {
-        //search
         $search = $request->input('search');
-        // Filtrar os usuários pelo nome ou email
-        $users = User::when($search, function ($query, $search) {
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%");
-        })->paginate(8);
+
+        $query = User::query();
+
+        // Scope to current tenant if not superadmin
+        if (Auth::check() && !Auth::user()->isSuperAdmin()) {
+            $tenantId = Auth::user()->tenant_id ?? current_tenant_id();
+            if ($tenantId) {
+                $query->where('tenant_id', $tenantId);
+            }
+        } elseif (session()->has('current_tenant_id')) {
+            $query->where('tenant_id', session('current_tenant_id'));
+        }
+
+        $users = $query->when($search, function ($q, $search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%");
+            });
+        })->latest('id')->paginate(10);
+
         $loggedId = intval(Auth::id());
 
         return view('users.index', compact('users', 'search', 'loggedId'));
@@ -34,21 +49,30 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
             'email' => 'required|email|unique:users,email',
-            'username' => 'required|unique:users,username|max:50',
-            'password' => 'required|min:8',
+            'username' => 'required|max:50|unique:users,username',
+            'password' => 'required|min:4',
             'name' => 'required|max:100',
             'role' => 'required|in:admin,manager,waiter',
-            'status' => 'required|in:active,inactive, suspended',
+            'status' => 'nullable|in:active,inactive,suspended',
         ]);
 
         $user = new User();
+        $user->tenant_id = Auth::user()->tenant_id ?? current_tenant_id();
         $user->email = $validatedData['email'];
         $user->username = $validatedData['username'];
         $user->password = Hash::make($validatedData['password']);
         $user->name = $validatedData['name'];
         $user->role = $validatedData['role'];
-        $user->status = $validatedData['status'];
+        $user->status = $validatedData['status'] ?? 'active';
         $user->save();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.user_created'),
+                'user' => $user
+            ]);
+        }
 
         return redirect()->route('users.index')->with('success', __('messages.user_created'));
     }
@@ -86,22 +110,41 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('error', __('messages.user_not_found'));
         }
 
+        // Restrict restaurant admin from editing other tenants' users
+        if (Auth::check() && !Auth::user()->isSuperAdmin() && Auth::user()->tenant_id) {
+            if ($user->tenant_id && $user->tenant_id !== Auth::user()->tenant_id) {
+                abort(403);
+            }
+        }
+
         $validatedData = $request->validate([
-            'email' => 'email|unique:users,email,' . $id,
-            'username' => 'unique:users,username,' . $id . '|max:50',
-            'password' => 'nullable|min:8',
-            'name' => 'max:100',
-            'role' => 'in:admin,manager,waiter',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'username' => 'required|max:50|unique:users,username,' . $id,
+            'password' => 'nullable|min:4',
+            'name' => 'required|max:100',
+            'role' => 'required|in:admin,manager,waiter',
+            'status' => 'nullable|in:active,inactive,suspended',
         ]);
 
-        $user->email = $validatedData['email'] ?? $user->email;
-        $user->username = $validatedData['username'] ?? $user->username;
+        $user->email = $validatedData['email'];
+        $user->username = $validatedData['username'];
         if (!empty($validatedData['password'])) {
             $user->password = Hash::make($validatedData['password']);
         }
-        $user->name = $validatedData['name'] ?? $user->name;
-        $user->role = $validatedData['role'] ?? $user->role;
+        $user->name = $validatedData['name'];
+        $user->role = $validatedData['role'];
+        if (!empty($validatedData['status'])) {
+            $user->status = $validatedData['status'];
+        }
         $user->save();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.user_updated'),
+                'user' => $user
+            ]);
+        }
 
         return redirect()->route('users.index')->with('success', __('messages.user_updated'));
     }

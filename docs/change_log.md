@@ -155,3 +155,11 @@ Instalação RestPOS:
 - **Logotipo e Identificação nos Recibos Térmicos**:
   - Criada função auxiliar `get_receipt_logo_data()` em `app/Helpers/helpers.php` que converte o logotipo em Data URI (base64) síncrono, eliminando falhas de carregamento em impressão térmica, erros 404 de maiúsculas/minúsculas (`Logo.png` vs `logo.png`) e problemas de caminho relativo em subpastas.
   - Atualizados os recibos de venda (`sales/receipt.blade.php`), PDV (`pos/receipt.blade.php`), pedidos (`orders/receipt.blade.php`) e fecho de caixa (`cash-shifts/receipt.blade.php`) para carregar o logotipo de forma garantida e exibir dinamicamente o nome do estabelecimento ("Café Lu & Yoshi") e seus dados fiscais.
+
+- **Criação e Gestão de Usuários (`/users`)**:
+  - Corrigida a validação de criação de usuário no `UserController`: o campo `status` agora é opcional e assume o padrão `active`, permitindo criar usuários diretamente pelo modal sem bloqueio de validação silenciosa.
+  - Tamanho mínimo de senha ajustado para 4 caracteres (compatível com PINs/senhas rápidas de caixa e garçom).
+  - Vinculação automática do novo usuário ao `tenant_id` do administrador autenticado, mantendo o isolamento multi-tenant.
+  - Adicionado campo de seleção de Status no modal de criação/edição e reabertura automática do modal com banner de erros detalhado caso ocorra qualquer erro de validação.
+  - Correção da rota de submissão de edição com prefixo base (`url('/users')`).
+  - Toasts globais configurados no layout principal para exibir erros de validação da sessão.

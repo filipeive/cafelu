@@ -25,3 +25,4 @@ if [ -f "/etc/systemd/system/restpos.service" ]; then
 fi
 
 echo "Desinstalação do RestPOS concluída com sucesso."
+

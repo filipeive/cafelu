@@ -152,3 +152,4 @@ Para escalar o RestPOS para múltiplos restaurantes comercializados:
    - O restaurante utiliza uma instalação local com o script `install-linux.sh` ou `install-windows.bat`.
    - O terminal funciona sem conexão à internet para emitir vendas e pedidos de cozinha.
    - Ao restabelecer conexão, o sistema sincroniza os fechamentos de turno (Fecho Z) e faturamento com a Nuvem Central do Dono do Sistema.
+

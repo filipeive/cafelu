@@ -16,7 +16,7 @@
             </p>
         </div>
 
-        @if(in_array(auth()->user()->role, ['admin', 'super_admin']))
+        @if(auth()->user()->isSuperAdmin())
         <a href="{{ route('admin.licenses.index') }}" 
            class="px-4 py-2 rounded-xl bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 text-white text-xs font-bold transition-all flex items-center gap-2">
             <i class="mdi mdi-shield-crown-outline text-base"></i>

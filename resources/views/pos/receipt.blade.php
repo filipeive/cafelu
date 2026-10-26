@@ -30,10 +30,12 @@
         }
 
         .logo {
-            max-width: 60px;
+            max-width: 35mm;
             height: auto;
             display: block;
             margin: 0 auto 4px;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .company-name {
@@ -149,8 +151,13 @@
                 display: none !important;
             }
 
-            img {
-                -webkit-print-color-adjust: exact;
+            img.logo {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                display: block !important;
+                max-width: 35mm !important;
+                height: auto !important;
+                margin: 0 auto 4px !important;
             }
         }
     </style>
@@ -158,30 +165,39 @@
 
 <body>
     <div class="receipt">
+        @php
+            $receiptLogo = get_receipt_logo_data();
+            $tenant = current_tenant();
+            $companyName = $tenant?->name ?? \App\Models\Setting::get('company_name', 'Café Lu & Yoshi');
+            $companySubtitle = \App\Models\Setting::get('company_subtitle');
+            $companyAddress = $tenant?->address ?? \App\Models\Setting::get('company_address');
+            $companyCity = $tenant?->city ?? \App\Models\Setting::get('company_city');
+            $companyPhone = $tenant?->phone ?? \App\Models\Setting::get('company_phone');
+            $companyNuit = $tenant?->nuit ?? \App\Models\Setting::get('company_nuit');
+            $companyEmail = $tenant?->email ?? \App\Models\Setting::get('company_email');
+        @endphp
         <div class="header">
-            @if($logo = \App\Models\Setting::get('system_logo'))
-                <img src="{{ asset('storage/' . $logo) }}" alt="Logo" class="logo">
-            @else
-                <img src="/assets/images/Logo.png" alt="Logo" class="logo">
+            @if($receiptLogo)
+                <img src="{{ $receiptLogo }}" alt="Logo" class="logo">
             @endif
-            <h2 class="company-name">{{ \App\Models\Setting::get('company_name', 'ZALALA BEACH BAR') }}</h2>
-            @if($subtitle = \App\Models\Setting::get('company_subtitle'))
-                <h3 class="company-subtitle">{{ $subtitle }}</h3>
+            <h2 class="company-name">{{ $companyName }}</h2>
+            @if($companySubtitle)
+                <h3 class="company-subtitle">{{ $companySubtitle }}</h3>
             @endif
-            @if($addr = \App\Models\Setting::get('company_address'))
-                <p class="company-info">{{ $addr }}</p>
+            @if($companyAddress)
+                <p class="company-info">{{ $companyAddress }}</p>
             @endif
-            @if($city = \App\Models\Setting::get('company_city'))
-                <p class="company-info">{{ $city }}</p>
+            @if($companyCity)
+                <p class="company-info">{{ $companyCity }}</p>
             @endif
-            @if($phone = \App\Models\Setting::get('company_phone'))
-                <p class="company-info">Tel: {{ $phone }}</p>
+            @if($companyPhone)
+                <p class="company-info">Tel: {{ $companyPhone }}</p>
             @endif
-            @if($nuit = \App\Models\Setting::get('company_nuit'))
-                <p class="company-info">NUIT: {{ $nuit }}</p>
+            @if($companyNuit)
+                <p class="company-info">NUIT: {{ $companyNuit }}</p>
             @endif
-            @if($email = \App\Models\Setting::get('company_email'))
-                <p class="company-info">Email: {{ $email }}</p>
+            @if($companyEmail)
+                <p class="company-info">Email: {{ $companyEmail }}</p>
             @endif
             <p>Data: {{ date('d/m/Y H:i', strtotime($sale->sale_date)) }}</p>
         </div>

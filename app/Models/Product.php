@@ -58,6 +58,22 @@ class Product extends Model
         });
     }
 
+    public function getSellingPriceAttribute($value)
+    {
+        if ($value !== null && $value !== '') {
+            return $value;
+        }
+        return $this->attributes['price'] ?? null;
+    }
+
+    public function getPurchasePriceAttribute($value)
+    {
+        if ($value !== null && $value !== '') {
+            return $value;
+        }
+        return '0.00';
+    }
+
     public function getImageUrlAttribute()
     {
         $path = $this->image_path ?: $this->image;

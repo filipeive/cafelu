@@ -56,7 +56,7 @@
 
                                 editProduct(productId) {
                                     showLoading();
-                                    fetch(`/products/${productId}`)
+                                    fetch(`{{ url('/products') }}/${productId}`)
                                         .then(res => res.json())
                                         .then(data => {
                                             this.product = {
@@ -64,11 +64,11 @@
                                                 name: data.name,
                                                 type: data.type || 'product',
                                                 description: data.description || '',
-                                                purchase_price: data.purchase_price || '0.00',
-                                                selling_price: data.selling_price,
-                                                stock_quantity: data.stock_quantity,
+                                                purchase_price: (data.purchase_price !== null && data.purchase_price !== undefined && data.purchase_price !== '') ? data.purchase_price : '0.00',
+                                                selling_price: (data.selling_price !== null && data.selling_price !== undefined && data.selling_price !== '') ? data.selling_price : (data.price ?? '0.00'),
+                                                stock_quantity: data.stock_quantity ?? 0,
                                                 unit: data.unit || '',
-                                                min_stock_level: data.min_stock_level || 5,
+                                                min_stock_level: data.min_stock_level ?? 5,
                                                 category_id: data.category_id,
                                                 is_active: data.is_active == 1,
                                                 image_path: data.image_path
@@ -92,7 +92,7 @@
 
                                     if (this.isEdit) formData.append('_method', 'PUT');
 
-                                    const url = this.isEdit ? `/products/${this.product.id}` : '{{ route('products.store') }}';
+                                    const url = this.isEdit ? `{{ url('/products') }}/${this.product.id}` : '{{ route('products.store') }}';
 
                                     showLoading();
                                     fetch(url, {
@@ -476,7 +476,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         showLoading();
-                        fetch(`/products/${productId}/stock`, {
+                        fetch(`{{ url('/products') }}/${productId}/stock`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -518,7 +518,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         showLoading();
-                        fetch(`/products/${productId}`, {
+                        fetch(`{{ url('/products') }}/${productId}`, {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',

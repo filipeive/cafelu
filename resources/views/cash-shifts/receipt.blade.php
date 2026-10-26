@@ -91,8 +91,16 @@
     </div>
 
     <div class="receipt">
+        @php
+            $receiptLogo = get_receipt_logo_data();
+            $tenant = current_tenant();
+            $companyName = $tenant?->name ?? \App\Models\Setting::get('company_name', config('app.name', 'CAFELU'));
+        @endphp
         <div class="header">
-            <div class="company-name">{{ config('app.name', 'CAFELU') }}</div>
+            @if($receiptLogo)
+                <img src="{{ $receiptLogo }}" alt="Logo" style="max-width: 35mm; height: auto; display: block; margin: 0 auto 3px; -webkit-print-color-adjust: exact !important;">
+            @endif
+            <div class="company-name">{{ $companyName }}</div>
             <div style="font-size: 8pt;">SISTEMA DE GESTAO DE RESTAURANTE</div>
             <div class="title">RELATORIO DE FECHO Z (TURNO #{{ $shift->id }})</div>
         </div>

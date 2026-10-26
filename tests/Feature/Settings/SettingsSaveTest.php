@@ -65,3 +65,4 @@ class SettingsSaveTest extends TestCase
         $this->assertEquals('+258 84 999 1111', $tenant->fresh()->phone);
     }
 }
+

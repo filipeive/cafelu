@@ -24,10 +24,12 @@
             margin-bottom: 2mm;
         }
         .logo {
-            max-width: 30mm;
+            max-width: 35mm;
             height: auto;
             display: block;
-            margin: 0 auto 1mm;
+            margin: 0 auto 1.5mm;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
         .header .company-name {
             font-size: 12pt;
@@ -107,6 +109,14 @@
             .print-button {
                 display: none;
             }
+            img.logo {
+                display: block !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                max-width: 35mm !important;
+                height: auto !important;
+                margin: 0 auto 2mm !important;
+            }
             @page {
                 size: 80mm auto;
                 margin: 0;
@@ -116,15 +126,40 @@
 </head>
 <body>
     <div class="receipt">
+        @php
+            $receiptLogo = get_receipt_logo_data();
+            $tenant = current_tenant();
+            $companyName = $tenant?->name ?? \App\Models\Setting::get('company_name', 'Café Lu & Yoshi');
+            $companySubtitle = \App\Models\Setting::get('company_subtitle');
+            $companyAddress = $tenant?->address ?? \App\Models\Setting::get('company_address');
+            $companyCity = $tenant?->city ?? \App\Models\Setting::get('company_city');
+            $companyPhone = $tenant?->phone ?? \App\Models\Setting::get('company_phone');
+            $companyNuit = $tenant?->nuit ?? \App\Models\Setting::get('company_nuit');
+            $companyEmail = $tenant?->email ?? \App\Models\Setting::get('company_email');
+        @endphp
         <div class="header">
-            <img src="/assets/images/Logo.png" alt="Logo" class="logo">
-            <h2 class="company-name">{{ \App\Models\Setting::get('company_name', 'ZALALA BEACH BAR') }}</h2>
-            <h3 class="company-subtitle">{{ \App\Models\Setting::get('company_subtitle', 'BEACH BAR & RESTAURANT') }}</h3>
-            <p class="company-info">{{ \App\Models\Setting::get('company_address', 'Bairro de Zalala, ER470') }}</p>
-            <p class="company-info">{{ \App\Models\Setting::get('company_city', 'Quelimane, Zambézia') }}</p>
-            <p class="company-info">Tel: {{ \App\Models\Setting::get('company_phone', '(+258) 846 885 214') }}</p>
-            <p class="company-info">NUIT: {{ \App\Models\Setting::get('company_nuit', '110735901') }}</p>
-            <p class="company-info">Email: {{ \App\Models\Setting::get('company_email', 'zalalabeachbar@gmail.com') }}</p>
+            @if($receiptLogo)
+                <img src="{{ $receiptLogo }}" alt="Logo" class="logo">
+            @endif
+            <h2 class="company-name">{{ $companyName }}</h2>
+            @if($companySubtitle)
+                <h3 class="company-subtitle">{{ $companySubtitle }}</h3>
+            @endif
+            @if($companyAddress)
+                <p class="company-info">{{ $companyAddress }}</p>
+            @endif
+            @if($companyCity)
+                <p class="company-info">{{ $companyCity }}</p>
+            @endif
+            @if($companyPhone)
+                <p class="company-info">Tel: {{ $companyPhone }}</p>
+            @endif
+            @if($companyNuit)
+                <p class="company-info">NUIT: {{ $companyNuit }}</p>
+            @endif
+            @if($companyEmail)
+                <p class="company-info">Email: {{ $companyEmail }}</p>
+            @endif
             <p>{{ __('messages.date') }}: {{ date('d/m/Y H:i', strtotime($sale->sale_date)) }}</p>
         </div>
 

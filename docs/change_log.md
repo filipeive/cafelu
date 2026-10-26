@@ -137,3 +137,21 @@ Instalação RestPOS:
   4. *Disparo Manual na UI*: Botão "Sincronizar Agora com a Nuvem" no menu Minha Licença (`/license/status`).
   5. *Monitoramento pelo Dono*: Painel SaaS com indicador em tempo real da última sincronização de cada restaurante.
   6. *Guia Completo*: Disponível em `docs/CLOUD_SYNC_GUIDE.md`.
+
+---
+
+## 6. Correções v1.3.1 (Edição de Produtos, Tradução e Impressão de Logotipo)
+
+- **Edição de Produtos (`/products`)**:
+  - Corrigido endpoint de busca e submissão na interface Alpine.js (`url('/products')` em vez de `/products` estático), garantindo compatibilidade com subdiretórios (`/RestPOS`).
+  - Preenchimento do preço anterior: produtos legados com coluna `selling_price` nula agora preenchem automaticamente a partir de `price`.
+  - Migração de banco de dados (`2026_10_26_193000_sync_product_selling_prices.php`) e accessors em `Product.php` garantindo consistência bidirecional entre `price` e `selling_price`.
+  - Correção das chamadas assíncronas de atualização de estoque e exclusão (`url('/products/{id}/stock')` e `url('/products/{id}')`).
+
+- **Traduções do Sistema (`messages.php`)**:
+  - Adicionadas 16 chaves em falta (`edit`, `save`, `role`, `view`, `last_access`, `professional_management`, `amount`, `date`, `confirm_delete`, `id`, `quantity`, `item`, `price`, `no_items_found`, `search`, `name`) em português (`lang/pt/messages.php`) e inglês (`lang/en/messages.php`).
+  - Resolvido o problema em que títulos e botões exibiam a string literal `messages.edit`.
+
+- **Logotipo e Identificação nos Recibos Térmicos**:
+  - Criada função auxiliar `get_receipt_logo_data()` em `app/Helpers/helpers.php` que converte o logotipo em Data URI (base64) síncrono, eliminando falhas de carregamento em impressão térmica, erros 404 de maiúsculas/minúsculas (`Logo.png` vs `logo.png`) e problemas de caminho relativo em subpastas.
+  - Atualizados os recibos de venda (`sales/receipt.blade.php`), PDV (`pos/receipt.blade.php`), pedidos (`orders/receipt.blade.php`) e fecho de caixa (`cash-shifts/receipt.blade.php`) para carregar o logotipo de forma garantida e exibir dinamicamente o nome do estabelecimento ("Café Lu & Yoshi") e seus dados fiscais.

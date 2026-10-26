@@ -182,3 +182,42 @@ if (!function_exists('is_impersonating')) {
         return session()->has('is_support_mode') && session('is_support_mode') === true;
     }
 }
+
+if (!function_exists('get_receipt_logo_data')) {
+    function get_receipt_logo_data(): ?string
+    {
+        // 1. Check custom system_logo from settings
+        $logo = \App\Models\Setting::get('system_logo');
+        if ($logo) {
+            $storagePaths = [
+                storage_path('app/public/' . $logo),
+                public_path('storage/' . $logo),
+                public_path($logo),
+            ];
+            foreach ($storagePaths as $filePath) {
+                if (file_exists($filePath) && is_file($filePath)) {
+                    $mime = @mime_content_type($filePath) ?: 'image/png';
+                    $data = base64_encode(file_get_contents($filePath));
+                    return "data:{$mime};base64,{$data}";
+                }
+            }
+            return asset('storage/' . $logo);
+        }
+
+        // 2. Fallback to default logo
+        $defaultPaths = [
+            public_path('assets/images/logo.png'),
+            public_path('assets/images/Logo.png'),
+            public_path('assets/images/favicon.png'),
+        ];
+        foreach ($defaultPaths as $filePath) {
+            if (file_exists($filePath) && is_file($filePath)) {
+                $mime = @mime_content_type($filePath) ?: 'image/png';
+                $data = base64_encode(file_get_contents($filePath));
+                return "data:{$mime};base64,{$data}";
+            }
+        }
+
+        return asset('assets/images/logo.png');
+    }
+}

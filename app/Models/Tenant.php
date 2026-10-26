@@ -132,3 +132,4 @@ class Tenant extends Model
         return max(0, (int) now()->diffInDays($expiry, false));
     }
 }
+

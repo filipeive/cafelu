@@ -66,3 +66,4 @@ class IdentifyTenant
         return $next($request);
     }
 }
+

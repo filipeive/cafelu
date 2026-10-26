@@ -179,7 +179,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tables/{table}/update-status', [TableController::class, 'updateStatus'])->name('tables.update-status');
         Route::post('/tables/{table}/create-order', [TableController::class, 'createOrder'])->name('tables.create-order');
         Route::post('/tables/status/{table}', [TableController::class, 'updateStatus'])->name('tables.status');
-        Route::post('/tables/store', [TableController::class, 'store'])->name('tables.store');
+        Route::post('/tables/store', [TableController::class, 'store'])->name('tables.store.alt');
         Route::post('/tables/merge', [TableController::class, 'mergeTables'])->name('tables.merge');
         Route::post('/tables/split', [TableController::class, 'splitTables'])->name('tables.split');
 

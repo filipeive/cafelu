@@ -19,7 +19,12 @@ class DashboardController extends Controller
             return redirect()->route('customer.dashboard');
         }
 
-        $data = cache()->remember('dashboard_data_' . auth()->id(), now()->addMinutes(5), function () {
+        $cacheKey = 'dashboard_data_' . auth()->id() . '_t_' . (current_tenant_id() ?? '0');
+        if (session('is_support_mode')) {
+            cache()->forget($cacheKey);
+        }
+
+        $data = cache()->remember($cacheKey, now()->addMinutes(5), function () {
             $today = Carbon::today();
             $yesterday = Carbon::yesterday();
             $startOfWeek = Carbon::now()->startOfWeek();

@@ -160,6 +160,23 @@
     </div>
 
     <div class="h-full flex flex-col">
+        <!-- Impersonation Support Banner -->
+        @if(session('is_support_mode'))
+        <div class="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 text-gray-950 px-4 py-2 z-50 flex items-center justify-between text-xs font-bold shadow-md">
+            <div class="flex items-center gap-2">
+                <i class="mdi mdi-shield-account text-lg"></i>
+                <span>MODO DE SUPORTE ATIVO: A navegar no restaurante <u>{{ session('current_tenant_name', 'Selecionado') }}</u> como SuperAdmin</span>
+            </div>
+            <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST" class="inline">
+                @csrf
+                <button type="submit" class="px-3 py-1 bg-gray-950 hover:bg-gray-800 text-white rounded-lg text-[11px] font-black uppercase transition flex items-center gap-1 shadow-xs">
+                    <i class="mdi mdi-logout-variant"></i>
+                    <span>Sair e Voltar ao Painel do Dono</span>
+                </button>
+            </form>
+        </div>
+        @endif
+
         <!-- Navbar -->
         @include('layouts.navbar')
 

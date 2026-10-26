@@ -247,6 +247,12 @@
                     <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
 
                     <x-sidebar.nav-item 
+                        route="admin.tenants.index" 
+                        icon="mdi-store-cog-outline" 
+                        title="Restaurantes (Tenants)" 
+                    />
+
+                    <x-sidebar.nav-item 
                         route="admin.licenses.index" 
                         icon="mdi-key-chain" 
                         title="Gestão de Licenças" 

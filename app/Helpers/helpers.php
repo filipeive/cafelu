@@ -147,9 +147,38 @@ if (!function_exists('get_status_class_staradmin')) {
 }
 function get_role_class($role) {
     return match($role) {
+        'superadmin' => 'dark',
         'admin' => 'danger',
         'manager' => 'warning',
         'waiter' => 'info',
         default => 'secondary'
     };
+}
+
+if (!function_exists('tenant_context')) {
+    function tenant_context(): \App\Services\TenantContext
+    {
+        return app(\App\Services\TenantContext::class);
+    }
+}
+
+if (!function_exists('current_tenant')) {
+    function current_tenant(): ?\App\Models\Tenant
+    {
+        return tenant_context()->getTenant();
+    }
+}
+
+if (!function_exists('current_tenant_id')) {
+    function current_tenant_id(): ?int
+    {
+        return tenant_context()->getTenantId();
+    }
+}
+
+if (!function_exists('is_impersonating')) {
+    function is_impersonating(): bool
+    {
+        return session()->has('is_support_mode') && session('is_support_mode') === true;
+    }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\DebtController;
@@ -115,6 +116,19 @@ Route::middleware(['auth'])->group(function () {
 
     // SuperAdmin ONLY (Dono do Sistema / Plataforma)
     Route::middleware(['role:superadmin'])->group(function () {
+        // Multi-Restaurante Control Center (ZBIZ Pattern)
+        Route::get('admin/tenants', [TenantController::class, 'index'])->name('admin.tenants.index');
+        Route::post('admin/tenants', [TenantController::class, 'store'])->name('admin.tenants.store');
+        Route::get('admin/tenants/{tenant}', [TenantController::class, 'show'])->name('admin.tenants.show');
+        Route::put('admin/tenants/{tenant}', [TenantController::class, 'update'])->name('admin.tenants.update');
+        Route::post('admin/tenants/{tenant}/impersonate', [TenantController::class, 'impersonate'])->name('admin.tenants.impersonate');
+        Route::post('admin/tenants/leave-impersonate', [TenantController::class, 'leaveImpersonate'])->name('admin.tenants.leave-impersonate');
+        Route::post('admin/tenants/{tenant}/suspend', [TenantController::class, 'suspend'])->name('admin.tenants.suspend');
+        Route::post('admin/tenants/{tenant}/reactivate', [TenantController::class, 'reactivate'])->name('admin.tenants.reactivate');
+        Route::get('admin/tenants/{tenant}/certificate', [TenantController::class, 'certificate'])->name('admin.tenants.certificate');
+        Route::get('admin/tenants/{tenant}/certificate-pdf', [TenantController::class, 'certificatePdf'])->name('admin.tenants.certificate-pdf');
+
+        // Licenças
         Route::get('admin/licenses', [LicenseController::class, 'adminIndex'])->name('admin.licenses.index');
         Route::post('admin/licenses', [LicenseController::class, 'store'])->name('admin.licenses.store');
         Route::post('admin/licenses/{license}/extend', [LicenseController::class, 'extend'])->name('admin.licenses.extend');

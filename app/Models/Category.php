@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Traits\Auditable;
+use App\Traits\BelongsToTenant;
 
 class Category extends Model
 {
-    use Auditable;
+    use Auditable, BelongsToTenant;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['tenant_id', 'name'];
 
     protected static function booted()
     {

@@ -5,12 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use App\Traits\Auditable;
+use App\Traits\BelongsToTenant;
 
 class Sale extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'order_id',
         'user_id',
         'cash_shift_id',

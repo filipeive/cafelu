@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 use App\Traits\Auditable;
+use App\Traits\BelongsToTenant;
 
 class Table extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use HasFactory, SoftDeletes, Auditable, BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'number',
         'capacity',
         'status',

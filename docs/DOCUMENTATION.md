@@ -131,25 +131,42 @@ O arquivo `nginx/restpos.conf` contém o bloco pronto para apontar para `/var/ww
 
 ---
 
-## 9. Arquitetura Multi-Tenant & Sincronização Cloud/Offline
+## 9. Arquitetura Multi-Tenant & Painel do Dono da Plataforma (Implementado)
 
-Para escalar o RestPOS para múltiplos restaurantes comercializados:
+O sistema agora opera no modelo **Multi-Tenant Nativo com Isolamento por `tenant_id` e Suporte a Impersonação 1-Click (Padrão ZBIZ)**:
 
 ```
 [ Nuvem Central (Oracle Cloud: /var/www/html/RestPOS) ]
      |
-     +---> SuperAdmin: Gestão de Tenants, Faturamento & Licenças
+     +---> SuperAdmin: Gestão Multi-Restaurantes (/admin/tenants) & Licenças (/admin/licenses)
+     |          |
+     |          +---> Métricas SaaS Executivas: MRR, ARR, Contratos Ativos e Renovações
+     |          +---> Acesso com 1-Click (Impersonate) para Suporte Técnico Imediato
+     |          +---> Emissão de Certificados Oficiais em PDF / HTML com Validação
      |
-     +---> Tenant 1 (Restaurante Luanda)   <--- Sincronização via API / Token
-     +---> Tenant 2 (Restaurante Maputo)   <--- Sincronização via API / Token
-     +---> Tenant N (Café & Bar Beira)     <--- Sincronização via API / Token
+     +---> Tenant 1 (Lu & Yoshi Cafe - Matriz)    [tenant_id = 1] -> Isolamento Total
+     +---> Tenant 2 (Restaurante Zambézia Grill) [tenant_id = 2] -> Isolamento Total
+     +---> Tenant N (Outros Clientes Contratados) [tenant_id = N] -> Isolamento Total
 ```
 
-1. **Modo Cloud Multi-Tenant**:
-   - Cada restaurante possui seu identificador `tenant_id`.
-   - As tabelas de produtos, vendas, pedidos e clientes possuem escopo global `TenantScope`.
-2. **Modo Híbrido / Offline Local**:
-   - O restaurante utiliza uma instalação local com o script `install-linux.sh` ou `install-windows.bat`.
-   - O terminal funciona sem conexão à internet para emitir vendas e pedidos de cozinha.
-   - Ao restabelecer conexão, o sistema sincroniza os fechamentos de turno (Fecho Z) e faturamento com a Nuvem Central do Dono do Sistema.
+### Componentes de Software:
+1. **`App\Models\Tenant`**:
+   - Campos: `name`, `slug`, `subdomain`, `nuit`, `phone`, `email`, `city`, `plan`, `installation_mode`, `max_tables`, `max_users`, `license_expires_at`, `status`.
+2. **`App\Services\TenantContext`**:
+   - Singleton registrado em `AppServiceProvider` que mantém o contexto do restaurante ativo. Suporta o método `withoutTenant(callable)` para que o SuperAdmin visualize dados globais ou de suporte sem interferência de escopos.
+3. **`App\Scopes\TenantScope` & `App\Traits\BelongsToTenant`**:
+   - Todas as entidades do restaurante (`Product`, `Category`, `Table`, `Order`, `Sale`, `CashShift`, `Expense`, `Client`) utilizam a trait `BelongsToTenant`.
+   - Todas as operações de leitura e escrita (`find`, `all`, `where`, `create`) filtram e gravam automaticamente o `tenant_id` correspondente.
+4. **`App\Http\Middleware\IdentifyTenant`**:
+   - Resolução transparente por:
+     - **Modo Suporte (Impersonação)**: `session('is_support_mode')` e `session('current_tenant_id')`.
+     - **Utilizador Autenticado**: `auth()->user()->tenant_id`.
+     - **API / Terminais PDV Offline**: Cabeçalhos HTTP `X-Tenant-Slug` ou `X-Tenant-ID`.
+     - **Subdomínio**: `slug.restpos.co.mz`.
+5. **Painel do Dono da Plataforma (`/admin/tenants`)**:
+   - **Métricas SaaS**: MRR (Receita Recorrente Mensal), ARR, Total de Empresas, Ativos, Trials e a expirar nos próximos 30 dias.
+   - **Cadastro Guiado**: Criação de novo restaurante com provisionamento automático de conta administrador e chave de licença com limites operacionais.
+   - **Suporte 1-Click (Impersonate)**: O Dono da Plataforma acessa o ambiente de qualquer cliente sem necessitar da senha dele. Uma barra superior de aviso permite retornar ao Painel do Dono a qualquer momento.
+   - **Certificado Oficial de Licenciamento**: Tela interativa e exportação em PDF de alta qualidade com brasão, QR Code, NUIT e validação para entrega ao cliente.
+
 

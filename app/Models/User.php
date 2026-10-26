@@ -17,6 +17,7 @@ class User extends Authenticatable
     public $timestamps = true; // Agora que tens created_at e updated_at
 
     protected $fillable = [
+        'tenant_id',
         'name',
         'email',
         'username',
@@ -47,6 +48,11 @@ class User extends Authenticatable
     public function sales()
     {
         return $this->hasMany(Sale::class);
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function cashShifts()

@@ -5,12 +5,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Traits\Auditable;
+use App\Traits\BelongsToTenant;
 
 class Order extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, BelongsToTenant;
     protected $table = 'orders'; // Specify the table name if different from the model name
     protected $fillable = [
+        'tenant_id',
         'table_id',
         'user_id',
         'customer_name',

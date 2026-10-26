@@ -12,6 +12,7 @@ class LicenseKey extends Model
     use HasFactory;
 
     protected $fillable = [
+        'tenant_id',
         'key_code',
         'key_hash',
         'business_name',
@@ -38,6 +39,11 @@ class LicenseKey extends Model
         'max_tables'   => 'integer',
         'max_users'    => 'integer',
     ];
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 
     /**
      * Gera uma chave serial única no formato CAFE-XXXX-XXXX-XXXX-XXXX

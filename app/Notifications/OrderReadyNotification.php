@@ -43,6 +43,9 @@ class OrderReadyNotification extends Notification implements ShouldQueue
             'title' => 'Pedido Pronto!',
             'message' => 'Seu pedido #' . $this->order->id . ' está pronto para retirada.',
             'type' => 'order_ready',
+            'icon' => 'mdi-check-decagram',
+            'color' => 'text-success',
+            'link' => route('customer.dashboard'),
             'url' => route('customer.dashboard'),
         ];
     }

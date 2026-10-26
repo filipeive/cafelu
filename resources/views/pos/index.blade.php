@@ -6,11 +6,84 @@
     <div class="h-[calc(100vh-5.5rem)] flex flex-col lg:flex-row gap-5" x-data="posSystem({ 
         products: {{ json_encode($products) }}, 
         categories: {{ json_encode($categories) }},
+        operators: {{ json_encode($operators) }},
+        currentShift: {{ json_encode($currentShift) }},
+        currentUser: {{ json_encode(['id' => auth()->id(), 'name' => auth()->user()->name, 'role' => auth()->user()->role]) }},
         csrfToken: '{{ csrf_token() }}'
     })">
 
         <!-- Products Area (Left Column) -->
         <div class="w-full lg:flex-1 min-w-0 flex flex-col h-full space-y-3.5">
+            <!-- Operator & Shift Control Bar -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl px-4 py-2.5 border border-gray-100 dark:border-gray-700/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <!-- Current Operator -->
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center font-black text-xs">
+                            <i class="mdi mdi-account-circle text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 block leading-tight">Operador</span>
+                            <span class="text-xs font-black text-gray-800 dark:text-gray-200" x-text="currentUser.name"></span>
+                        </div>
+                    </div>
+
+                    <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
+
+                    <!-- Shift Status Badge -->
+                    <div class="flex items-center gap-2">
+                        <template x-if="activeShift">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>Turno Aberto #<span x-text="activeShift.id"></span></span>
+                                </span>
+                                <span class="text-[11px] text-gray-500 hidden md:inline">
+                                    Fundo: <strong>MZN <span x-text="formatMoney(activeShift.opening_balance)"></span></strong>
+                                </span>
+                            </div>
+                        </template>
+                        <template x-if="!activeShift">
+                            <span class="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/60 flex items-center gap-1.5">
+                                <i class="mdi mdi-alert-circle-outline"></i>
+                                <span>Sem Turno Aberto</span>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-2">
+                    <template x-if="!activeShift">
+                        <button type="button" @click="showOpenShiftModal = true"
+                            class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
+                            <i class="mdi mdi-lock-open-variant-outline"></i>
+                            <span>Abrir Turno</span>
+                        </button>
+                    </template>
+                    <template x-if="activeShift">
+                        <button type="button" @click="showCloseShiftModal = true"
+                            class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-rose-50 hover:text-rose-600 dark:bg-gray-700 dark:hover:bg-rose-950/50 dark:hover:text-rose-400 text-gray-700 dark:text-gray-200 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                            <i class="mdi mdi-lock-outline"></i>
+                            <span>Fechar Turno</span>
+                        </button>
+                    </template>
+
+                    <button type="button" @click="showSwitchUserModal = true"
+                        class="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        title="Trocar operador de caixa / garçom">
+                        <i class="mdi mdi-account-switch-outline"></i>
+                        <span class="hidden sm:inline">Trocar Operador</span>
+                    </button>
+
+                    <a href="{{ route('shifts.index') }}" target="_blank"
+                        class="p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition-colors"
+                        title="Histórico de Turnos & Fecho Z">
+                        <i class="mdi mdi-history text-base"></i>
+                    </a>
+                </div>
+            </div>
+
             <!-- Search & Categories Card -->
             <div class="bg-white dark:bg-gray-800 rounded-3xl p-4 border border-gray-100 dark:border-gray-700/80 shadow-xs">
                 <div class="flex flex-col md:flex-row gap-3 items-center">
@@ -164,6 +237,17 @@
                     title="{{ __('messages.clear') }}"
                     :disabled="cart.length === 0">
                     <i class="mdi mdi-trash-can-outline text-base"></i>
+                </button>
+            </div>
+
+            <!-- Retrieved Order Link Banner -->
+            <div x-show="lastOrderId" x-cloak class="flex items-center justify-between px-4 py-1.5 bg-blue-50/90 dark:bg-blue-950/50 border-b border-blue-100 dark:border-blue-900/40 text-[11px] text-blue-800 dark:text-blue-300">
+                <span class="flex items-center gap-1.5 font-bold">
+                    <i class="mdi mdi-clipboard-text-clock-outline text-blue-600 dark:text-blue-400"></i>
+                    <span>Pedido Guardado #<span x-text="lastOrderId"></span> carregado</span>
+                </span>
+                <button type="button" @click="lastOrderId = null" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 text-[10px] font-semibold underline cursor-pointer">
+                    Desvincular
                 </button>
             </div>
 
@@ -366,9 +450,8 @@
                     <div class="p-6">
                         <div class="max-h-80 overflow-y-auto space-y-2 custom-scrollbar pr-1">
                             <template x-for="order in heldOrders" :key="order.id">
-                                <div class="p-3 bg-gray-50 dark:bg-gray-900/60 hover:bg-blue-50/60 dark:hover:bg-blue-950/40 rounded-2xl border border-gray-100 dark:border-gray-700/60 transition-all cursor-pointer flex items-center justify-between"
-                                    @click="retrieveOrder(order.id)">
-                                    <div>
+                                <div class="p-3 bg-gray-50 dark:bg-gray-900/60 hover:bg-blue-50/60 dark:hover:bg-blue-950/40 rounded-2xl border border-gray-100 dark:border-gray-700/60 transition-all flex items-center justify-between group">
+                                    <div class="flex-1 cursor-pointer" @click="retrieveOrder(order.id)">
                                         <p class="text-xs font-bold text-gray-900 dark:text-white"
                                             x-text="order.customer_name || 'Cliente Geral'"></p>
                                         <div class="flex items-center gap-2 text-[11px] text-gray-500 mt-0.5">
@@ -382,13 +465,20 @@
                                             <span x-text="new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})"></span>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <p class="text-xs font-black text-orange-600 dark:text-orange-400">
-                                            MZN <span x-text="formatMoney(order.total_amount)"></span>
-                                        </p>
-                                        <span class="text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/50 px-2 py-0.5 rounded-full font-bold">
-                                            {{ __('messages.pending') }}
-                                        </span>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right cursor-pointer" @click="retrieveOrder(order.id)">
+                                            <p class="text-xs font-black text-orange-600 dark:text-orange-400">
+                                                MZN <span x-text="formatMoney(order.total_amount)"></span>
+                                            </p>
+                                            <span class="text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/50 px-2 py-0.5 rounded-full font-bold">
+                                                {{ __('messages.pending') }}
+                                            </span>
+                                        </div>
+                                        <button type="button" @click.stop="discardHeldOrder(order.id)"
+                                            class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-xl transition-all cursor-pointer"
+                                            title="Descartar pedido guardado">
+                                            <i class="mdi mdi-trash-can-outline text-base"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </template>
@@ -403,6 +493,174 @@
                         <button type="button" @click="showHeldOrdersModal = false"
                             class="px-5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer">
                             {{ __('messages.close') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Open Shift Modal -->
+        <div x-show="showOpenShiftModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen p-4 bg-black/60 backdrop-blur-xs">
+                <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-lock-open-variant text-emerald-500 text-lg"></i>
+                            <span>Abertura de Turno de Caixa</span>
+                        </h3>
+                        <button type="button" @click="showOpenShiftModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
+                            <i class="mdi mdi-close text-lg"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Insira o valor do fundo de maneio inicial em dinheiro presente na gaveta do caixa.
+                    </p>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">
+                                Fundo de Maneio Inicial (MZN)
+                            </label>
+                            <input type="number" step="0.01" min="0" x-model="openingBalance"
+                                class="w-full text-base font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <!-- Quick presets -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <template x-for="preset in [0, 100, 200, 500, 1000, 2000]" :key="preset">
+                                <button type="button" @click="openingBalance = preset"
+                                    class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                    :class="openingBalance == preset ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200'">
+                                    <span x-text="'MZN ' + preset"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">
+                                Observações (Opcional)
+                            </label>
+                            <input type="text" x-model="shiftNotes" placeholder="Ex: Turno da manhã..."
+                                class="w-full text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showOpenShiftModal = false"
+                            class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold hover:bg-gray-100 cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button type="button" @click="openShift()" :disabled="isLoading"
+                            class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50">
+                            <span x-text="isLoading ? 'Abrindo...' : 'Confirmar Abertura'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Close Shift Modal (Fecho Cego) -->
+        <div x-show="showCloseShiftModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen p-4 bg-black/60 backdrop-blur-xs">
+                <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-lock text-rose-500 text-lg"></i>
+                            <span>Fecho Cego de Caixa (Turno #<span x-text="activeShift ? activeShift.id : ''"></span>)</span>
+                        </h3>
+                        <button type="button" @click="showCloseShiftModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
+                            <i class="mdi mdi-close text-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200/50 text-[11px] text-amber-800 dark:text-amber-200">
+                        <p class="font-bold flex items-center gap-1.5">
+                            <i class="mdi mdi-information-outline text-amber-500"></i>
+                            <span>Procedimento de Fecho Cego</span>
+                        </p>
+                        <p class="mt-1">
+                            Conte fisicamente todo o dinheiro em notas e moedas presente na gaveta e digite abaixo. O sistema confrontará a sua contagem com as vendas registradas e emitirá o talão de Fecho Z com a quebra/sobra.
+                        </p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">
+                                Valor Físico Contado na Gaveta (MZN) *
+                            </label>
+                            <input type="number" step="0.01" min="0" x-model="closingBalanceActual" placeholder="0.00"
+                                class="w-full text-lg font-black rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3.5 py-2.5 focus:ring-2 focus:ring-rose-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">
+                                Observações de Fecho (Opcional)
+                            </label>
+                            <input type="text" x-model="shiftNotes" placeholder="Ex: Deixado fundo para próximo turno..."
+                                class="w-full text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showCloseShiftModal = false"
+                            class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold hover:bg-gray-100 cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button type="button" @click="closeShift()" :disabled="isLoading"
+                            class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50">
+                            <span x-text="isLoading ? 'Fechando...' : 'Concluir e Emitir Fecho Z'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Switch Operator Modal -->
+        <div x-show="showSwitchUserModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen p-4 bg-black/60 backdrop-blur-xs">
+                <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-account-switch text-orange-500 text-lg"></i>
+                            <span>Trocar Operador / Garçom</span>
+                        </h3>
+                        <button type="button" @click="showSwitchUserModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
+                            <i class="mdi mdi-close text-lg"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Selecione o membro da equipe que está assumindo o atendimento neste terminal:
+                    </p>
+
+                    <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                        <template x-for="op in operators" :key="op.id">
+                            <div @click="selectedOperatorId = op.id"
+                                class="p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between"
+                                :class="selectedOperatorId == op.id ? 'border-orange-500 bg-orange-50/50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' : 'border-gray-100 dark:border-gray-700/60 bg-gray-50 dark:bg-gray-900/40 hover:bg-gray-100'">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-xl bg-white dark:bg-gray-700 flex items-center justify-center font-bold text-xs shadow-2xs">
+                                        <span x-text="op.name.charAt(0)"></span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-900 dark:text-white" x-text="op.name"></p>
+                                        <p class="text-[10px] text-gray-400 capitalize" x-text="op.role"></p>
+                                    </div>
+                                </div>
+                                <i class="mdi text-lg" :class="selectedOperatorId == op.id ? 'mdi-check-circle text-orange-500' : 'mdi-circle-outline text-gray-300'"></i>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showSwitchUserModal = false"
+                            class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold hover:bg-gray-100 cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button type="button" @click="switchOperator()" :disabled="isLoading"
+                            class="px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50">
+                            <span x-text="isLoading ? 'Trocando...' : 'Assumir Caixa'"></span>
                         </button>
                     </div>
                 </div>
@@ -445,7 +703,18 @@
                 Alpine.data('posSystem', (config) => ({
                     products: config.products,
                     categories: config.categories,
+                    operators: config.operators || [],
+                    currentUser: config.currentUser || {},
+                    activeShift: config.currentShift || null,
                     csrfToken: config.csrfToken,
+
+                    showOpenShiftModal: false,
+                    showCloseShiftModal: false,
+                    showSwitchUserModal: false,
+                    openingBalance: 0,
+                    closingBalanceActual: '',
+                    shiftNotes: '',
+                    selectedOperatorId: config.currentUser ? config.currentUser.id : '',
 
                     searchQuery: '',
                     customerName: '',
@@ -631,6 +900,26 @@
                     async processSale() {
                         if (this.cart.length === 0) return;
 
+                        if (!this.activeShift) {
+                            const confirmNoShift = await Swal.fire({
+                                title: 'Caixa Sem Turno Aberto',
+                                text: 'Não há um turno de caixa aberto registrado no momento. Deseja abrir o turno agora?',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Abrir Turno',
+                                cancelButtonText: 'Continuar sem Turno',
+                                confirmButtonColor: '#10B981',
+                                cancelButtonColor: '#6B7280',
+                                background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937',
+                            });
+
+                            if (confirmNoShift.isConfirmed) {
+                                this.showOpenShiftModal = true;
+                                return;
+                            }
+                        }
+
                         const cash = parseFloat(this.payments.cash) || 0;
                         const card = parseFloat(this.payments.card) || 0;
                         const mpesa = parseFloat(this.payments.mpesa) || 0;
@@ -742,6 +1031,8 @@
                                     if (data.sale_id) {
                                         window.printSaleRecibo(data.sale_id);
                                     }
+
+                                    this.refreshShiftStatus();
                                 } else {
                                     showToast(data.message || '{{ __('messages.error_processing_sale') }}', 'error');
                                 }
@@ -812,6 +1103,10 @@
                                             payload.table_id = parseInt(result.value.tableId);
                                         }
 
+                                        if (this.lastOrderId) {
+                                            payload.order_id = this.lastOrderId;
+                                        }
+
                                         fetch("{{ route('pos.hold') }}", {
                                             method: 'POST',
                                             headers: {
@@ -829,7 +1124,8 @@
                                                     this.saveCart();
                                                     this.resetPayments();
                                                     this.paymentMethod = 'cash';
-                                                    this.lastOrderId = data.order_id;
+                                                    this.lastOrderId = null;
+                                                    this.customerName = '';
                                                     this.lastSaleId = null;
                                                 } else {
                                                     showToast('{{ __('messages.error_holding_order') }}', 'error');
@@ -876,6 +1172,7 @@
                                     this.cart = data.cart;
                                     this.saveCart();
                                     this.lastOrderId = data.order_id;
+                                    this.customerName = data.customer_name || '';
                                     this.showHeldOrdersModal = false;
                                     showToast('{{ __('messages.order_retrieved') }}', 'success');
                                 } else {
@@ -887,6 +1184,50 @@
                                 this.isLoading = false;
                                 showToast('{{ __('messages.error_retrieving_order') }}', 'error');
                             });
+                    },
+
+                    discardHeldOrder(orderId) {
+                        Swal.fire({
+                            title: 'Descartar Pedido?',
+                            text: 'Deseja realmente cancelar este pedido guardado?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sim, descartar',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#EF4444',
+                            background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#1F2937',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                this.isLoading = true;
+                                fetch(`/pos/discard-order/${orderId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': this.csrfToken,
+                                        'Accept': 'application/json'
+                                    }
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.isLoading = false;
+                                        if (data.success) {
+                                            this.heldOrders = this.heldOrders.filter(o => o.id !== orderId);
+                                            if (this.lastOrderId === orderId) {
+                                                this.lastOrderId = null;
+                                            }
+                                            showToast(data.message, 'success');
+                                        } else {
+                                            showToast(data.message || 'Erro ao descartar pedido', 'error');
+                                        }
+                                    })
+                                    .catch(err => {
+                                        this.isLoading = false;
+                                        console.error(err);
+                                        showToast('Erro de conexão ao descartar pedido', 'error');
+                                    });
+                            }
+                        });
                     },
 
                     async registerAsDebt() {
@@ -987,6 +1328,154 @@
                             window.printRecibo(this.lastOrderId);
                         } else {
                             showToast('{{ __('messages.no_recent_sale_or_order') }}', 'info');
+                        }
+                    },
+
+                    async openShift() {
+                        this.isLoading = true;
+                        try {
+                            const res = await fetch("{{ route('pos.shift.open') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': this.csrfToken,
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    opening_balance: parseFloat(this.openingBalance) || 0,
+                                    notes: this.shiftNotes
+                                })
+                            });
+                            const data = await res.json();
+                            this.isLoading = false;
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                this.showOpenShiftModal = false;
+                                this.openingBalance = 0;
+                                this.shiftNotes = '';
+                                await this.refreshShiftStatus();
+                            } else {
+                                showToast(data.message || 'Erro ao abrir turno', 'error');
+                            }
+                        } catch (err) {
+                            this.isLoading = false;
+                            showToast('Erro de conexão ao abrir turno', 'error');
+                        }
+                    },
+
+                    async closeShift() {
+                        if (!this.activeShift) return;
+                        if (this.closingBalanceActual === '' || isNaN(this.closingBalanceActual)) {
+                            showToast('Informe o valor físico contado em caixa.', 'warning');
+                            return;
+                        }
+
+                        this.isLoading = true;
+                        try {
+                            const res = await fetch(`/pos/shift/${this.activeShift.id}/close`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': this.csrfToken,
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    closing_balance_actual: parseFloat(this.closingBalanceActual),
+                                    notes: this.shiftNotes
+                                })
+                            });
+                            const data = await res.json();
+                            this.isLoading = false;
+                            if (data.success) {
+                                this.showCloseShiftModal = false;
+                                this.closingBalanceActual = '';
+                                this.shiftNotes = '';
+                                this.activeShift = null;
+
+                                await Swal.fire({
+                                    title: 'Turno Fechado!',
+                                    html: `
+                                        <div class="text-left text-xs space-y-2 p-2">
+                                            <p><strong>Esperado em Gaveta:</strong> MZN ${this.formatMoney(data.expected_cash)}</p>
+                                            <p><strong>Contagem Informada:</strong> MZN ${this.formatMoney(data.actual_cash)}</p>
+                                            <p><strong>Diferença:</strong> <span class="${data.difference < 0 ? 'text-red-500 font-bold' : (data.difference > 0 ? 'text-blue-500 font-bold' : 'text-green-500 font-bold')}">MZN ${this.formatMoney(data.difference)}</span></p>
+                                        </div>
+                                    `,
+                                    icon: 'success',
+                                    confirmButtonText: 'Imprimir Fecho Z',
+                                    showCancelButton: true,
+                                    cancelButtonText: 'Concluir',
+                                    confirmButtonColor: '#F97316'
+                                }).then((result) => {
+                                    if (result.isConfirmed && data.receipt_url) {
+                                        window.open(data.receipt_url, '_blank');
+                                    }
+                                });
+
+                                await this.refreshShiftStatus();
+                            } else {
+                                showToast(data.message || 'Erro ao fechar turno', 'error');
+                            }
+                        } catch (err) {
+                            this.isLoading = false;
+                            showToast('Erro de conexão ao fechar turno', 'error');
+                        }
+                    },
+
+                    async switchOperator() {
+                        if (!this.selectedOperatorId) return;
+                        this.isLoading = true;
+                        try {
+                            const res = await fetch("{{ route('pos.switch-operator') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': this.csrfToken,
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    user_id: this.selectedOperatorId
+                                })
+                            });
+                            const data = await res.json();
+                            this.isLoading = false;
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                this.showSwitchUserModal = false;
+                                this.currentUser = {
+                                    id: data.user_id,
+                                    name: data.user_name,
+                                    role: data.user_role
+                                };
+                                await this.refreshShiftStatus();
+                            } else {
+                                showToast(data.message || 'Erro ao trocar operador', 'error');
+                            }
+                        } catch (err) {
+                            this.isLoading = false;
+                            showToast('Erro de conexão ao trocar operador', 'error');
+                        }
+                    },
+
+                    async refreshShiftStatus() {
+                        try {
+                            const res = await fetch("{{ route('pos.shift.current') }}");
+                            const data = await res.json();
+                            if (data.is_open) {
+                                this.activeShift = {
+                                    id: data.shift_id,
+                                    operator_name: data.operator_name,
+                                    opened_at: data.opened_at,
+                                    opening_balance: data.opening_balance,
+                                    cash_sales: data.cash_sales,
+                                    total_sales: data.total_sales,
+                                    expected_cash: data.expected_cash
+                                };
+                            } else {
+                                this.activeShift = null;
+                            }
+                        } catch (e) {
+                            console.error('Error refreshing shift status:', e);
                         }
                     }
                 }));

@@ -24,6 +24,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\KitchenController;
+use App\Http\Controllers\CashShiftController;
+use App\Http\Controllers\LicenseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,6 +111,12 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('debts', DebtController::class);
         Route::post('debts/{debt}/pay', [DebtController::class, 'pay'])->name('debts.pay');
         Route::post('debts/register', [DebtController::class, 'registerDebt'])->name('debts.register');
+
+        // Licensing Control Center (Owner / Dono do Sistema)
+        Route::get('admin/licenses', [LicenseController::class, 'adminIndex'])->name('admin.licenses.index');
+        Route::post('admin/licenses', [LicenseController::class, 'store'])->name('admin.licenses.store');
+        Route::post('admin/licenses/{license}/extend', [LicenseController::class, 'extend'])->name('admin.licenses.extend');
+        Route::post('admin/licenses/{license}/status', [LicenseController::class, 'updateStatus'])->name('admin.licenses.status');
     });
 
     // Staff Routes (Admin, Manager, Waiter)
@@ -125,7 +133,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pos/held-orders', [POSController::class, 'getHeldOrders'])->name('pos.held-orders');
         Route::get('/pos/tables', [POSController::class, 'getTables'])->name('pos.tables');
         Route::get('/pos/retrieve-order/{order}', [POSController::class, 'retrieveOrder'])->name('pos.retrieve-order');
+        Route::post('/pos/discard-order/{order}', [POSController::class, 'discardOrder'])->name('pos.discard-order');
         Route::post('/pos/process-sale', [SaleController::class, 'process_sale'])->name('sales.process');
+
+        // Cash Shifts / Turnos de Caixa
+        Route::get('/shifts', [CashShiftController::class, 'index'])->name('shifts.index');
+        Route::get('/shifts/{shift}', [CashShiftController::class, 'show'])->name('shifts.show');
+        Route::get('/shifts/{shift}/receipt', [CashShiftController::class, 'receipt'])->name('shifts.receipt');
+        Route::get('/pos/shift/current', [CashShiftController::class, 'currentStatus'])->name('pos.shift.current');
+        Route::post('/pos/shift/open', [CashShiftController::class, 'open'])->name('pos.shift.open');
+        Route::post('/pos/shift/{shift}/close', [CashShiftController::class, 'close'])->name('pos.shift.close');
+        Route::post('/pos/switch-operator', [CashShiftController::class, 'quickSwitchUser'])->name('pos.switch-operator');
+
+        // License status & activation
+        Route::get('/license/status', [LicenseController::class, 'clientStatus'])->name('license.status');
+        Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate');
 
         // Menu management
         Route::get('menu', [DashboardController::class, 'menu'])->name('menu.index');

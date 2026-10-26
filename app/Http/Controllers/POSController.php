@@ -8,6 +8,7 @@ use App\Models\Table;
 use App\Models\StockMovement;
 use App\Models\Sale;
 use App\Models\User;
+use App\Models\CashShift;
 use App\Notifications\SaleCompletedNotification;
 use App\Notifications\LowStockNotification;
 use Illuminate\Support\Facades\Notification;
@@ -40,11 +41,29 @@ class POSController extends Controller
             ->orderBy('name')
             ->get();
 
+        $operators = User::whereIn('role', ['admin', 'manager', 'waiter', 'cashier'])
+            ->orderBy('name')
+            ->select('id', 'name', 'role', 'email')
+            ->get();
+
+        $currentShift = CashShift::where('user_id', auth()->id())
+            ->where('status', 'open')
+            ->latest('opened_at')
+            ->first();
+
+        if (!$currentShift && in_array(auth()->user()->role, ['admin', 'manager'])) {
+            $currentShift = CashShift::where('status', 'open')
+                ->latest('opened_at')
+                ->first();
+        }
+
         return view('pos.index', [
             'categories' => $categories,
             'products' => $products,
             'categoryFilter' => $categoryFilter,
-            'searchTerm' => $searchTerm
+            'searchTerm' => $searchTerm,
+            'operators' => $operators,
+            'currentShift' => $currentShift,
         ]);
     }
 
@@ -233,51 +252,75 @@ class POSController extends Controller
                 'items.*.unit_price' => 'required|numeric|min:0',
                 'customer_name' => 'nullable|string',
                 'table_id' => 'nullable|exists:tables,id',
-                'total_amount' => 'required|numeric'
+                'total_amount' => 'required|numeric',
+                'order_id' => 'nullable|integer'
             ]);
 
             DB::beginTransaction();
 
+            $existingOrderId = $validated['order_id'] ?? null;
             $tableId = $validated['table_id'] ?? null;
             $createdTempTable = false;
 
-            // Create temporary table if no table selected
-            if (!$tableId) {
-                // Find next available temporary table number (starting from 9000)
-                $maxTempNumber = DB::table('tables')
-                    ->where('is_temporary', true)
-                    ->max('number');
+            if ($existingOrderId) {
+                $order = DB::table('orders')->where('id', $existingOrderId)->first();
+                if ($order) {
+                    $orderId = $existingOrderId;
+                    $tableId = $tableId ?: $order->table_id;
 
-                $tempNumber = $maxTempNumber ? $maxTempNumber + 1 : 9000;
+                    DB::table('orders')->where('id', $orderId)->update([
+                        'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
+                        'total_amount' => $validated['total_amount'],
+                        'table_id' => $tableId,
+                        'status' => 'active',
+                        'updated_at' => now(),
+                    ]);
 
-                $tableId = DB::table('tables')->insertGetId([
-                    'number' => $tempNumber,
-                    'capacity' => 1,
-                    'status' => 'occupied',
-                    'is_temporary' => true,
+                    // Remove itens anteriores e re-insere
+                    DB::table('order_items')->where('order_id', $orderId)->delete();
+                } else {
+                    $existingOrderId = null;
+                }
+            }
+
+            if (!$existingOrderId) {
+                // Create temporary table if no table selected
+                if (!$tableId) {
+                    $maxTempNumber = DB::table('tables')
+                        ->where('is_temporary', true)
+                        ->max('number');
+
+                    $tempNumber = $maxTempNumber ? $maxTempNumber + 1 : 9000;
+
+                    $tableId = DB::table('tables')->insertGetId([
+                        'number' => $tempNumber,
+                        'capacity' => 1,
+                        'status' => 'occupied',
+                        'is_temporary' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $createdTempTable = true;
+                } else {
+                    // Mark selected table as occupied
+                    DB::table('tables')->where('id', $tableId)->update([
+                        'status' => 'occupied',
+                        'updated_at' => now()
+                    ]);
+                }
+
+                // Create order with table assignment
+                $orderId = DB::table('orders')->insertGetId([
+                    'table_id' => $tableId,
+                    'user_id' => auth()->id(),
+                    'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
+                    'total_amount' => $validated['total_amount'],
+                    'status' => 'active',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-
-                $createdTempTable = true;
-            } else {
-                // Mark selected table as occupied
-                DB::table('tables')->where('id', $tableId)->update([
-                    'status' => 'occupied',
-                    'updated_at' => now()
-                ]);
             }
-
-            // Create order with table assignment
-            $orderId = DB::table('orders')->insertGetId([
-                'table_id' => $tableId,
-                'user_id' => auth()->id(),
-                'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
-                'total_amount' => $validated['total_amount'],
-                'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
 
             // Add items
             foreach ($validated['items'] as $item) {
@@ -379,6 +422,63 @@ class POSController extends Controller
             'customer_name' => $order->customer_name,
             'order_id' => $order->id
         ]);
+    }
+
+    public function discardOrder($orderId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $order = DB::table('orders')->where('id', $orderId)->first();
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pedido não encontrado'
+                ], 404);
+            }
+
+            DB::table('orders')->where('id', $orderId)->update([
+                'status' => 'canceled',
+                'updated_at' => now(),
+            ]);
+
+            if ($order->table_id) {
+                $table = DB::table('tables')->where('id', $order->table_id)->first();
+                if ($table) {
+                    if ($table->is_temporary) {
+                        DB::table('orders')->where('table_id', $table->id)->update(['table_id' => null]);
+                        DB::table('tables')->where('id', $table->id)->delete();
+                    } else {
+                        $hasOtherActive = DB::table('orders')
+                            ->where('table_id', $table->id)
+                            ->where('id', '!=', $orderId)
+                            ->whereIn('status', ['active', 'pending', 'preparing', 'ready'])
+                            ->exists();
+
+                        if (!$hasOtherActive) {
+                            DB::table('tables')->where('id', $table->id)->update([
+                                'status' => 'free',
+                                'updated_at' => now()
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pedido guardado cancelado com sucesso'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Discard Order Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao cancelar pedido: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     private function determinePaymentMethod($paymentData)

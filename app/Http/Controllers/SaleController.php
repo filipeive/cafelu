@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\SaleItem;
 use App\Models\StockMovement;
 use App\Models\User;
+use App\Models\CashShift;
 use App\Notifications\SaleCompletedNotification;
 use App\Notifications\LowStockNotification;
 use Illuminate\Http\Request;
@@ -224,8 +225,21 @@ class SaleController extends Controller
                 }
             }
 
+            // Localizar turno de caixa aberto para o operador atual (ou da casa)
+            $activeShift = CashShift::where('user_id', auth()->id())
+                ->where('status', 'open')
+                ->latest('opened_at')
+                ->first();
+
+            if (!$activeShift) {
+                $activeShift = CashShift::where('status', 'open')
+                    ->latest('opened_at')
+                    ->first();
+            }
+
             $sale = Sale::create([
                 'user_id' => auth()->id(),
+                'cash_shift_id' => $activeShift?->id,
                 'sale_date' => now(),
                 'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
                 'total_amount' => $totalAmount,
@@ -237,6 +251,15 @@ class SaleController extends Controller
                 'emola_amount' => $emola,
                 'order_id' => $request->order_id,
             ]);
+
+            // Atualizar os acumulados do turno aberto
+            if ($activeShift) {
+                $activeShift->increment('cash_sales', $cash);
+                $activeShift->increment('card_sales', $card);
+                $activeShift->increment('mpesa_sales', $mpesa);
+                $activeShift->increment('emola_sales', $emola);
+                $activeShift->increment('total_sales', $totalAmount);
+            }
 
             // Create Debt if amount paid is less than total
             if ($amountPaid < $totalAmount) {
@@ -282,16 +305,42 @@ class SaleController extends Controller
 
             DB::commit();
 
-            // Clean up temporary table if this sale came from a held order
+            // Sincronizar pedido e mesa caso a venda tenha se originado de um pedido guardado / recuperado
             if ($sale->order_id) {
                 $order = DB::table('orders')->where('id', $sale->order_id)->first();
-                if ($order && $order->table_id) {
-                    $table = DB::table('tables')->where('id', $order->table_id)->first();
-                    if ($table && $table->is_temporary) {
-                        // Set table_id to null in orders to avoid FK constraint violation
-                        DB::table('orders')->where('table_id', $table->id)->update(['table_id' => null]);
-                        // Delete temporary table
-                        DB::table('tables')->where('id', $table->id)->delete();
+                if ($order) {
+                    // Marcar pedido como concluído e pago para que saia da lista de pedidos guardados
+                    DB::table('orders')->where('id', $sale->order_id)->update([
+                        'status' => 'completed',
+                        'payment_status' => 'paid',
+                        'payment_method' => $validated['payment_method'],
+                        'delivered_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    if ($order->table_id) {
+                        $table = DB::table('tables')->where('id', $order->table_id)->first();
+                        if ($table) {
+                            if ($table->is_temporary) {
+                                // Desvincular mesa temporária para evitar erro de chave estrangeira e excluir
+                                DB::table('orders')->where('table_id', $table->id)->update(['table_id' => null]);
+                                DB::table('tables')->where('id', $table->id)->delete();
+                            } else {
+                                // Se for mesa real, verificar se existem outros pedidos pendentes/ativos nela
+                                $hasOtherActive = DB::table('orders')
+                                    ->where('table_id', $table->id)
+                                    ->where('id', '!=', $sale->order_id)
+                                    ->whereIn('status', ['active', 'pending', 'preparing', 'ready'])
+                                    ->exists();
+
+                                if (!$hasOtherActive) {
+                                    DB::table('tables')->where('id', $table->id)->update([
+                                        'status' => 'free',
+                                        'updated_at' => now()
+                                    ]);
+                                }
+                            }
+                        }
                     }
                 }
             }

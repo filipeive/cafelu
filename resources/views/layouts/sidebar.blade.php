@@ -140,6 +140,12 @@
                 />
 
                 <x-sidebar.nav-item 
+                    route="shifts.index" 
+                    icon="mdi-history" 
+                    title="Turnos de Caixa" 
+                />
+
+                <x-sidebar.nav-item 
                     route="expenses.index" 
                     icon="mdi-cash-minus" 
                     title="{{ __('messages.expenses') }}" 
@@ -213,6 +219,12 @@
                         route="settings.index" 
                         icon="mdi-cog-outline" 
                         title="{{ __('messages.system_settings') }}" 
+                    />
+
+                    <x-sidebar.nav-item 
+                        route="admin.licenses.index" 
+                        icon="mdi-certificate-outline" 
+                        title="Licenças do Sistema" 
                     />
 
                     <x-sidebar.nav-item 

@@ -27,20 +27,20 @@
                     @foreach($notifications as $notification)
                         <div
                             class="p-4 flex gap-4 {{ $notification->read_at ? 'opacity-60' : 'bg-orange-50/30 dark:bg-orange-900/10' }}">
-                            <div class="{{ $notification->data['color'] }} mt-1">
-                                <i class="mdi {{ $notification->data['icon'] }} text-2xl"></i>
+                            <div class="{{ $notification->data['color'] ?? 'text-warning' }} mt-1">
+                                <i class="mdi {{ $notification->data['icon'] ?? 'mdi-bell-outline' }} text-2xl"></i>
                             </div>
                             <div class="flex-1">
                                 <div class="flex justify-between items-start">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ $notification->data['message'] }}
+                                        {{ $notification->data['message'] ?? ($notification->data['title'] ?? __('messages.notifications')) }}
                                     </p>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">
                                         {{ $notification->created_at->format('d/m/Y H:i') }}
                                     </span>
                                 </div>
                                 <div class="mt-2 flex gap-4 items-center">
-                                    <a href="{{ $notification->data['link'] }}"
+                                    <a href="{{ $notification->data['link'] ?? ($notification->data['url'] ?? '#') }}"
                                         class="text-xs font-semibold text-warning hover:text-orange-600">
                                         {{ __('messages.view_details') }}
                                     </a>

@@ -44,6 +44,16 @@ class User extends Authenticatable
         return $this->hasMany(AuditLog::class);
     }
 
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    public function cashShifts()
+    {
+        return $this->hasMany(CashShift::class);
+    }
+
     public function isCustomer()
     {
         return $this->role === 'customer';

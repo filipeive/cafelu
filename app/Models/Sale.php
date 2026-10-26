@@ -13,6 +13,7 @@ class Sale extends Model
     protected $fillable = [
         'order_id',
         'user_id',
+        'cash_shift_id',
         'customer_name',
         'total_amount',
         'payment_method',
@@ -32,6 +33,11 @@ class Sale extends Model
         'mpesa_amount' => 'decimal:2',
         'emola_amount' => 'decimal:2'
     ];
+
+    public function cashShift()
+    {
+        return $this->belongsTo(CashShift::class, 'cash_shift_id');
+    }
 
     public function order()
     {

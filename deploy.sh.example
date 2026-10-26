@@ -68,3 +68,4 @@ ssh -i "$KEY" "$SERVER" "
     sudo chmod -R 775 storage bootstrap/cache && \
     echo '[SUCESSO] Deploy do RestPOS concluido com exito em $PROJECT_DIR!'
 "
+

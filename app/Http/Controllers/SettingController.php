@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
@@ -29,7 +31,7 @@ class SettingController extends Controller
                 $actualKey = substr($paramKey, 0, -7);
                 $setting = Setting::where('key', $actualKey)->first();
                 if ($setting && $setting->value) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($setting->value);
+                    Storage::disk('public')->delete($setting->value);
                     $setting->update(['value' => null]);
                 }
             }
@@ -69,6 +71,23 @@ class SettingController extends Controller
             );
         }
 
+        // Synchronize with tenant if present
+        if ($tenant = current_tenant()) {
+            $tenantUpdates = [];
+            if (!empty($data['company_name'])) $tenantUpdates['name'] = trim($data['company_name']);
+            if (!empty($data['company_phone'])) $tenantUpdates['phone'] = trim($data['company_phone']);
+            if (!empty($data['company_email'])) $tenantUpdates['email'] = trim($data['company_email']);
+            if (!empty($data['company_address'])) $tenantUpdates['address'] = trim($data['company_address']);
+            if (!empty($data['company_city'])) $tenantUpdates['city'] = trim($data['company_city']);
+            if (!empty($data['company_nuit'])) $tenantUpdates['nuit'] = trim($data['company_nuit']);
+            if (!empty($data['currency_symbol'])) $tenantUpdates['currency'] = trim($data['currency_symbol']);
+            if (!empty($tenantUpdates)) {
+                $tenant->update($tenantUpdates);
+            }
+        }
+
+        Cache::forget('app_settings_all');
+
         return redirect()->route('settings.index')->with('success', __('messages.settings_updated'));
     }
 
@@ -78,14 +97,22 @@ class SettingController extends Controller
             'company_name' => 'required|string|max:100',
         ]);
 
+        $name = trim($request->input('company_name'));
+
         Setting::updateOrCreate(
             ['key' => 'company_name'],
             [
-                'value' => trim($request->input('company_name')),
+                'value' => $name,
                 'group' => 'general',
                 'type' => 'text',
             ]
         );
+
+        if ($tenant = current_tenant()) {
+            $tenant->update(['name' => $name]);
+        }
+
+        Cache::forget('app_settings_all');
 
         return redirect()->back()->with('success', __('messages.establishment_name_updated'));
     }
@@ -116,6 +143,8 @@ class SettingController extends Controller
                 ]
             );
         }
+
+        Cache::forget('app_settings_all');
 
         return redirect()->back()->with('success', 'Cores do sistema atualizadas com sucesso!');
     }
@@ -153,12 +182,5 @@ class SettingController extends Controller
             // Stock
             ['key' => 'low_stock_threshold', 'value' => '10', 'group' => 'stock', 'type' => 'number'],
         ];
-    }
-
-    private function seedDefaults()
-    {
-        foreach ($this->getDefaults() as $default) {
-            Setting::updateOrCreate(['key' => $default['key']], $default);
-        }
     }
 }

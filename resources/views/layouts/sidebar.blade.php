@@ -310,7 +310,7 @@ function toggleSystemStats() {
                 </div>
                 <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl">
                     <small class="text-gray-500 dark:text-gray-400 block text-xs">Estabelecimento</small>
-                    <strong class="text-gray-800 dark:text-white text-sm">{{ \App\Models\Setting::get('company_name', 'Zalala Beach Bar') }}</strong>
+                    <strong class="text-gray-800 dark:text-white text-sm">{{ current_tenant()?->name ?? \App\Models\Setting::get('company_name', 'RestPOS') }}</strong>
                 </div>
                 <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl flex items-center justify-between">
                     <div>

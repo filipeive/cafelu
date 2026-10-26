@@ -41,6 +41,12 @@ class Product extends Model
 
     protected static function booted()
     {
+        static::creating(function ($product) {
+            if ($product->is_active === null) {
+                $product->is_active = true;
+            }
+        });
+
         static::saved(function () {
             \Illuminate\Support\Facades\Cache::forget('self_service_categories');
             \Illuminate\Support\Facades\Cache::forget('self_service_featured');

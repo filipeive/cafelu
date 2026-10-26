@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
@@ -16,9 +17,20 @@ class Setting extends Model
         'type',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function () {
+            Cache::forget('app_settings_all');
+        });
+
+        static::deleted(function () {
+            Cache::forget('app_settings_all');
+        });
+    }
+
     public static function allCached()
     {
-        return \Illuminate\Support\Facades\Cache::remember('app_settings_all', 3600, function () {
+        return Cache::remember('app_settings_all', 3600, function () {
             try {
                 return self::pluck('value', 'key')->toArray();
             } catch (\Exception $e) {
@@ -35,7 +47,7 @@ class Setting extends Model
 
     public static function set($key, $value, $group = 'general', $type = 'text')
     {
-        \Illuminate\Support\Facades\Cache::forget('app_settings_all');
+        Cache::forget('app_settings_all');
         return self::updateOrCreate(
             ['key' => $key],
             ['value' => $value, 'group' => $group, 'type' => $type]

@@ -214,15 +214,16 @@ class SyncIngestController extends Controller
                 ->first();
 
             $pAttributes = [
-                'tenant_id'     => $resolvedTenantId,
-                'category_id'   => $catId ?? ($product?->category_id),
-                'name'          => $name,
-                'description'   => $pData['description'] ?? null,
-                'price'         => (float)($pData['price'] ?? $pData['selling_price'] ?? $product?->price ?? 0),
-                'cost_price'    => (float)($pData['cost_price'] ?? $product?->cost_price ?? 0),
-                'stock'         => isset($pData['stock']) ? (int)$pData['stock'] : (isset($pData['stock_quantity']) ? (int)$pData['stock_quantity'] : ($product?->stock ?? 0)),
-                'min_stock'     => (int)($pData['min_stock'] ?? $pData['min_stock_level'] ?? $product?->min_stock ?? 5),
-                'is_active'     => (bool)($pData['is_active'] ?? true),
+                'tenant_id'      => $resolvedTenantId,
+                'category_id'    => $catId ?? ($product?->category_id),
+                'name'           => $name,
+                'description'    => $pData['description'] ?? null,
+                'price'          => (float)($pData['price'] ?? $pData['selling_price'] ?? $product?->price ?? 0),
+                'selling_price'  => (float)($pData['selling_price'] ?? $pData['price'] ?? $product?->selling_price ?? 0),
+                'purchase_price' => (float)($pData['purchase_price'] ?? $pData['cost_price'] ?? $product?->purchase_price ?? 0),
+                'stock_quantity' => isset($pData['stock_quantity']) ? (int)$pData['stock_quantity'] : (isset($pData['stock']) ? (int)$pData['stock'] : ($product?->stock_quantity ?? 0)),
+                'min_stock_level'=> (int)($pData['min_stock_level'] ?? $pData['min_stock'] ?? $product?->min_stock_level ?? 5),
+                'is_active'      => isset($pData['is_active']) ? (bool)$pData['is_active'] : true,
             ];
 
             if ($product) {
@@ -302,7 +303,7 @@ class SyncIngestController extends Controller
                     'notes'          => $sData['notes'] ?? null,
                     'status'         => $sData['status'] ?? 'completed',
                     'synced_at'      => now(),
-                    'created_at'     => !empty($sData['created_at']) ? Carbon\Carbon::parse($sData['created_at']) : now(),
+                    'created_at'     => !empty($sData['created_at']) ? \Carbon\Carbon::parse($sData['created_at']) : now(),
                 ]);
 
                 // Itens da Venda
@@ -373,7 +374,7 @@ class SyncIngestController extends Controller
                     'payment_method' => $oData['payment_method'] ?? 'cash',
                     'notes'          => $oData['notes'] ?? null,
                     'synced_at'      => now(),
-                    'created_at'     => !empty($oData['created_at']) ? Carbon\Carbon::parse($oData['created_at']) : now(),
+                    'created_at'     => !empty($oData['created_at']) ? \Carbon\Carbon::parse($oData['created_at']) : now(),
                 ]);
 
                 $items = $oData['items'] ?? [];
@@ -429,7 +430,7 @@ class SyncIngestController extends Controller
                 'reference_type' => $mData['reference_type'] ?? 'sale',
                 'notes'          => $mData['notes'] ?? null,
                 'synced_at'      => now(),
-                'created_at'     => !empty($mData['created_at']) ? Carbon\Carbon::parse($mData['created_at']) : now(),
+                'created_at'     => !empty($mData['created_at']) ? \Carbon\Carbon::parse($mData['created_at']) : now(),
             ]);
 
             $syncedMovementOfflineIds[] = $offlineId;
@@ -470,3 +471,4 @@ class SyncIngestController extends Controller
         ]);
     }
 }
+

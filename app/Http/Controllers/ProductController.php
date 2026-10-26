@@ -87,7 +87,7 @@ class ProductController extends Controller
                 'min_stock_level'
             ]);
 
-            $data['is_active'] = $request->has('is_active') ? 1 : 0;
+            $data['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
             $data['price'] = $request->selling_price; // Sync price with selling_price
 
             // Upload de imagem
@@ -169,7 +169,7 @@ class ProductController extends Controller
                 'min_stock_level'
             ]);
 
-            $data['is_active'] = $request->has('is_active') ? 1 : 0;
+            $data['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
             $data['price'] = $request->selling_price; // Sync price with selling_price
 
             // Upload de nova imagem

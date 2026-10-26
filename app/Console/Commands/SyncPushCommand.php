@@ -72,14 +72,15 @@ class SyncPushCommand extends Command
                 ->with('category')
                 ->get()
                 ->map(fn($p) => [
-                    'name'          => $p->name,
-                    'description'   => $p->description,
-                    'category_name' => $p->category?->name,
-                    'price'         => (float)$p->price,
-                    'cost_price'    => (float)($p->cost_price ?? 0),
-                    'stock'         => (int)($p->stock ?? 0),
-                    'min_stock'     => (int)($p->min_stock ?? 5),
-                    'is_active'     => (bool)$p->is_active,
+                    'name'            => $p->name,
+                    'description'     => $p->description,
+                    'category_name'   => $p->category?->name,
+                    'price'           => (float)($p->price ?? $p->selling_price ?? 0),
+                    'selling_price'   => (float)($p->selling_price ?? $p->price ?? 0),
+                    'purchase_price'  => (float)($p->purchase_price ?? $p->cost_price ?? 0),
+                    'stock_quantity'  => (int)($p->stock_quantity ?? 0),
+                    'min_stock_level' => (int)($p->min_stock_level ?? 5),
+                    'is_active'       => $p->is_active !== null ? (bool)$p->is_active : true,
                 ])->toArray();
 
             // 3. Buscar Vendas Pendentes
@@ -290,3 +291,4 @@ class SyncPushCommand extends Command
         return Command::SUCCESS;
     }
 }
+

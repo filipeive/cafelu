@@ -96,3 +96,4 @@ No menu **Dono da Plataforma** -> **Restaurantes (Tenants)** (`/admin/tenants`):
 2. **Histórico Comercial**: A coluna "Métricas" atualiza o total de vendas transmitidas por cada restaurante.
 3. **Bloqueio Remoto com 1 Clique**: Se o cliente deixar de pagar a mensalidade/anuidade, o Dono da Plataforma clica em **Suspender** (`󰏦`). No próximo ciclo de sincronização, a máquina local é bloqueada até a renovação.
 4. **Modo Suporte**: O botão **Entrar** (`󰗼`) permite acessar remotamente o ambiente do restaurante para diagnóstico sem pedir a senha do cliente.
+

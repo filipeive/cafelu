@@ -11,7 +11,7 @@
             @endif
             <div class="hidden lg:block leading-tight" x-show="!sidebarCollapsed" x-transition>
                 <span class="block font-bold text-gray-800 dark:text-white tracking-wide">
-                    {{ \App\Models\Setting::get('company_name', 'ZALALA BB') }}
+                    {{ current_tenant()?->name ?? \App\Models\Setting::get('company_name', 'RestPOS') }}
                 </span>
                 <span class="block text-xs text-warning font-semibold">POS SYSTEM</span>
             </div>

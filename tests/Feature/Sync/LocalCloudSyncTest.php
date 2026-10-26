@@ -34,9 +34,10 @@ class LocalCloudSyncTest extends TestCase
             'license_expires_at'=> now()->addYear(),
         ]);
 
+        $key = 'CAFE-TEST-' . strtoupper(substr(uniqid(), -4)) . '-9999';
         $license = LicenseKey::create([
             'tenant_id'    => $tenant->id,
-            'key_code'     => 'CAFE-TEST-SYNC-KEY1-9999',
+            'key_code'     => $key,
             'status'       => 'active',
             'license_type' => 'annual',
             'starts_at'    => now(),
@@ -44,7 +45,7 @@ class LocalCloudSyncTest extends TestCase
         ]);
 
         $response = $this->postJson(route('api.sync.verify'), [
-            'license_key' => 'CAFE-TEST-SYNC-KEY1-9999',
+            'license_key' => $key,
         ]);
 
         $response->assertStatus(200)
@@ -66,9 +67,10 @@ class LocalCloudSyncTest extends TestCase
             'plan'              => 'annual',
         ]);
 
+        $token = 'CAFE-BIST-' . strtoupper(substr(uniqid(), -4)) . '-1234';
         $license = LicenseKey::create([
             'tenant_id'    => $tenant->id,
-            'key_code'     => 'CAFE-BIST-SYNC-TOKEN-1234',
+            'key_code'     => $token,
             'status'       => 'active',
             'license_type' => 'annual',
             'starts_at'    => now(),
@@ -111,7 +113,7 @@ class LocalCloudSyncTest extends TestCase
 
         // 1º Envio
         $response1 = $this->withHeaders([
-            'X-Sync-Token' => 'CAFE-BIST-SYNC-TOKEN-1234',
+            'X-Sync-Token' => $token,
         ])->postJson(route('api.sync.ingest'), $payload);
 
         $response1->assertStatus(200)
@@ -127,7 +129,7 @@ class LocalCloudSyncTest extends TestCase
 
         // 2º Envio (Idempotência — não pode duplicar nem dar erro)
         $response2 = $this->withHeaders([
-            'X-Sync-Token' => 'CAFE-BIST-SYNC-TOKEN-1234',
+            'X-Sync-Token' => $token,
         ])->postJson(route('api.sync.ingest'), $payload);
 
         $response2->assertStatus(200)

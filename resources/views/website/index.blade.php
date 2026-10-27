@@ -64,6 +64,7 @@
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">Imagem *</label>
                     <input type="file" name="image" accept="image/*" required
                         class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer">
+                    <span class="block text-[11px] text-gray-400 mt-1">Formatos: JPG, PNG, WEBP. Imagens grandes são otimizadas automaticamente (máx. 4 MB).</span>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">Título</label>
@@ -221,6 +222,25 @@
                     </div>
                 @endforeach
 
+                <!-- Geolocalização Inteligente (Separação Automática Presencial vs Online) -->
+                <div class="md:col-span-2 p-4 rounded-2xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200/70 dark:border-orange-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="mdi mdi-map-marker-radius text-orange-500 text-lg"></i>
+                            Detecção Automática Presencial vs Pedido Online (Geofence GPS)
+                        </h4>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                            Quando as coordenadas estão definidas, o cardápio detecta automaticamente se o cliente está dentro do raio do restaurante (Atendimento na Mesa) ou à distância (Pedido Online / Takeaway).
+                        </p>
+                    </div>
+                    <button type="button"
+                            onclick="captureRestaurantGps()"
+                            class="px-4 py-2.5 rounded-xl bg-gray-900 hover:bg-black dark:bg-orange-500 dark:hover:bg-orange-600 text-white text-xs font-bold flex items-center gap-2 flex-shrink-0 cursor-pointer transition-all">
+                        <i class="mdi mdi-crosshairs-gps text-base"></i>
+                        <span>Capturar Meu GPS Atual</span>
+                    </button>
+                </div>
+
                 <!-- About image -->
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">Imagem da secção "Sobre Nós"</label>
@@ -257,5 +277,32 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function captureRestaurantGps() {
+    if (!navigator.geolocation) {
+        window.showToast('O seu navegador não suporta geolocalização GPS.', 'error');
+        return;
+    }
+    window.showToast('A obter coordenadas GPS atuais...', 'info');
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            const latInput = document.querySelector('input[name="site_latitude"]');
+            const lngInput = document.querySelector('input[name="site_longitude"]');
+            const radInput = document.querySelector('input[name="site_geofence_radius"]');
+            if (latInput) latInput.value = pos.coords.latitude.toFixed(6);
+            if (lngInput) lngInput.value = pos.coords.longitude.toFixed(6);
+            if (radInput && !radInput.value) radInput.value = '150';
+            window.showToast('Coordenadas GPS capturadas! Clique em "Guardar Conteúdo" para salvar.', 'success');
+        },
+        function(err) {
+            window.showToast('Não foi possível obter a localização GPS. Verifique as permissões do navegador ou insira manualmente.', 'warning');
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+}
+</script>
+@endpush
 @endsection
 

@@ -27,6 +27,9 @@
     $instagramUrl = \App\Models\Setting::get('site_instagram', '');
     $facebookUrl = \App\Models\Setting::get('site_facebook', '');
     $onlineOrdersEnabled = \App\Models\Setting::get('site_online_orders', '1') !== '0';
+    $restaurantLat = \App\Models\Setting::get('site_latitude', '');
+    $restaurantLng = \App\Models\Setting::get('site_longitude', '');
+    $geofenceRadius = (int) (\App\Models\Setting::get('site_geofence_radius', '150') ?: 150);
 
     $defaultHeroBg = $loginBg && file_exists(public_path('storage/' . $loginBg))
         ? asset('storage/' . $loginBg)
@@ -321,184 +324,136 @@
       x-data="restaurantMenuApp()"
       x-cloak>
 
-    <!-- Barra Superior de Anúncio / Horário & Contactos -->
-    <div class="bg-gray-950 text-gray-300 text-[11px] border-b border-white/10">
-        @if(!empty($siteAnnouncement))
-            <div class="bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 text-white font-extrabold py-1.5 px-4 text-center text-xs tracking-wide">
-                <i class="mdi mdi-bullhorn-outline mr-1"></i> {{ $siteAnnouncement }}
-            </div>
-        @endif
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex flex-wrap items-center gap-4">
-                @if(!empty($openingHours))
-                    <span class="inline-flex items-center gap-1.5 font-medium text-gray-300">
-                        <i class="mdi mdi-clock-outline text-orange-400 text-sm"></i>
-                        <span>{{ $openingHours }}</span>
-                    </span>
-                @endif
-                @if(!empty($companyAddress))
-                    <span class="hidden sm:inline-flex items-center gap-1.5 font-medium text-gray-400">
-                        <i class="mdi mdi-map-marker-outline text-orange-400 text-sm"></i>
-                        <span>{{ $companyAddress }}</span>
-                    </span>
-                @endif
-            </div>
-            <div class="flex items-center gap-4 ml-auto">
-                @if(!empty($companyPhone))
-                    <a href="tel:{{ $companyPhone }}" class="inline-flex items-center gap-1 hover:text-white transition-colors font-semibold">
-                        <i class="mdi mdi-phone-outline text-orange-400"></i>
-                        <span>{{ $companyPhone }}</span>
-                    </a>
-                @endif
-                @if(!empty($whatsappClean))
-                    <a href="https://wa.me/{{ $whatsappClean }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors font-bold">
-                        <i class="mdi mdi-whatsapp text-sm"></i>
-                        <span>WhatsApp</span>
-                    </a>
-                @endif
-                @if(!empty($instagramUrl))
-                    <a href="{{ $instagramUrl }}" target="_blank" rel="noopener" class="hover:text-pink-400 transition-colors" title="Instagram">
-                        <i class="mdi mdi-instagram text-sm"></i>
-                    </a>
-                @endif
-                @if(!empty($facebookUrl))
-                    <a href="{{ $facebookUrl }}" target="_blank" rel="noopener" class="hover:text-blue-400 transition-colors" title="Facebook">
-                        <i class="mdi mdi-facebook text-sm"></i>
-                    </a>
-                @endif
-            </div>
+    <!-- Faixa Promocional Discreta (Apenas se configurada no CMS) -->
+    @if(!empty($siteAnnouncement))
+        <div class="bg-gray-950 text-amber-300 font-semibold py-2 px-4 text-center text-xs tracking-wide border-b border-white/10">
+            <i class="mdi mdi-star-four-points-outline mr-1.5 text-orange-400"></i>
+            <span>{{ $siteAnnouncement }}</span>
         </div>
-    </div>
+    @endif
 
-    <!-- Header Principal Sticky -->
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/70 shadow-xs transition-all">
+    <!-- Navbar Executiva & Minimalista -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-stone-200/80 transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20 gap-3">
+            <div class="flex items-center justify-between h-20 gap-6">
                 
-                <!-- Logo & Nome do Restaurante -->
-                <a href="#" class="flex items-center gap-3.5 group">
+                <!-- Identidade da Marca (Esquerda) -->
+                <a href="#" class="flex items-center gap-3.5 group flex-shrink-0">
                     @if($logo && file_exists(public_path('storage/' . $logo)))
-                        <img src="{{ asset('storage/' . $logo) }}" alt="{{ $companyName }}" class="h-12 w-auto max-w-[130px] object-contain">
+                        <img src="{{ asset('storage/' . $logo) }}" alt="{{ $companyName }}" class="h-11 w-auto max-w-[125px] object-contain">
                     @else
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform">
-                            <i class="mdi mdi-silverware-fork-knife text-2xl"></i>
+                        <div class="w-11 h-11 rounded-xl bg-gray-950 flex items-center justify-center text-white shadow-sm group-hover:bg-orange-600 transition-colors">
+                            <i class="mdi mdi-silverware-fork-knife text-xl"></i>
                         </div>
                     @endif
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h1 class="text-lg md:text-xl font-black text-gray-900 tracking-tight">{{ $companyName }}</h1>
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                                Aberto
-                            </span>
-                        </div>
-                        <p class="text-[11px] text-gray-500 font-medium line-clamp-1">
-                            {{ $companySubtitle }}
-                        </p>
+                    <div class="flex flex-col">
+                        <span class="font-serif text-lg sm:text-xl font-bold text-gray-950 tracking-tight leading-none">{{ $companyName }}</span>
+                        <span class="text-[11px] text-gray-400 font-medium tracking-wide mt-1 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span x-text="isInStore ? (tableNumber ? 'Atendimento Presencial • Mesa ' + tableNumber : 'Atendimento Presencial no Local') : 'Cardápio & Pedidos Online'"></span>
+                        </span>
                     </div>
                 </a>
 
-                <!-- Links de Navegação Rápida (Desktop) -->
-                <nav class="hidden xl:flex items-center gap-6 text-xs font-extrabold text-gray-600">
-                    <a href="#menu" class="hover:text-orange-600 transition-colors flex items-center gap-1">
-                        <i class="mdi mdi-book-open-page-variant-outline text-base text-orange-500"></i>
-                        <span>Cardápio</span>
+                <!-- Navegação Editorial Central (Desktop) -->
+                <nav class="hidden lg:flex items-center gap-8 text-[13px] font-semibold text-gray-600">
+                    <a href="#menu" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
+                        Cardápio
                     </a>
-                    <a href="#destaques" class="hover:text-orange-600 transition-colors flex items-center gap-1">
-                        <i class="mdi mdi-star-four-points-outline text-base text-amber-500"></i>
-                        <span>Destaques</span>
+                    <a href="#destaques" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
+                        Destaques
                     </a>
-                    <a href="#sobre" class="hover:text-orange-600 transition-colors flex items-center gap-1">
-                        <i class="mdi mdi-storefront-outline text-base text-orange-500"></i>
-                        <span>Sobre Nós</span>
+                    <a href="#sobre" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
+                        O Espaço
                     </a>
-                    <a href="#contactos" class="hover:text-orange-600 transition-colors flex items-center gap-1">
-                        <i class="mdi mdi-map-marker-radius-outline text-base text-orange-500"></i>
-                        <span>Contactos</span>
+                    <a href="#contactos" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
+                        Contactos
                     </a>
                 </nav>
 
-                <!-- Barra de Pesquisa Rápida (Desktop) -->
-                <div class="hidden md:flex flex-1 max-w-xs lg:max-w-sm mx-2">
-                    <div class="relative w-full">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                            <i class="mdi mdi-magnify text-lg"></i>
-                        </span>
-                        <input type="text"
-                               x-model="searchQuery"
-                               @input="scrollToMenuIfSearching()"
-                               placeholder="Pesquisar prato, bebida ou ingrediente..."
-                               class="w-full pl-10 pr-8 py-2.5 rounded-2xl bg-stone-100 border border-stone-200/80 text-xs font-semibold text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-orange-500 transition-all">
-                        <button x-show="searchQuery" @click="searchQuery = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                            <i class="mdi mdi-close-circle text-base"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Botões de Ação do Cliente -->
-                <div class="flex items-center gap-2">
+                <!-- Ações Inteligentes & Contextuais (Direita) -->
+                <div class="flex items-center gap-2.5">
                     
-                    <!-- Mesa Detectada se veio via QR Code -->
-                    <template x-if="tableNumber">
-                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 text-orange-800 font-black text-xs border border-orange-200 shadow-2xs">
-                            <i class="mdi mdi-table-chair text-orange-600 text-sm"></i>
-                            <span x-text="'Mesa ' + tableNumber"></span>
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5"></span>
-                        </div>
+                    <!-- Botão de Pesquisa Expansível -->
+                    <button type="button"
+                            @click="toggleSearchBar()"
+                            :class="searchBarOpen || searchQuery ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-stone-100/80 hover:bg-stone-200/70 text-gray-700 border-transparent'"
+                            class="w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer"
+                            title="Pesquisar no Cardápio">
+                        <i class="mdi text-lg" :class="searchBarOpen ? 'mdi-close' : 'mdi-magnify'"></i>
+                    </button>
+
+                    <!-- Indicador Automático de Modo (Presencial vs Online por Distância/QR) -->
+                    <button type="button"
+                            @click="verifyCustomerLocation(true)"
+                            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer"
+                            :class="isInStore
+                                ? 'bg-emerald-50/90 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                                : 'bg-stone-100/90 text-gray-700 border-stone-200/80 hover:bg-stone-200/70'"
+                            :title="locationTooltip">
+                        <i class="mdi text-sm"
+                           :class="{
+                               'mdi-qrcode-scan text-emerald-600': locationStatus === 'qr',
+                               'mdi-map-marker-check text-emerald-600': locationStatus === 'gps_inside',
+                               'mdi-truck-fast-outline text-orange-500': locationStatus === 'gps_outside',
+                               'mdi-Loading mdi-spin text-orange-500': locationChecking,
+                               'mdi-crosshairs-gps text-gray-500': locationStatus === 'unknown' && !locationChecking
+                           }"></i>
+                        <span x-text="locationBadgeText"></span>
+                    </button>
+
+                    <!-- Botão Chamar Garçom (EXCLUSIVO quando o cliente está Presencial no Restaurante) -->
+                    <template x-if="isInStore">
+                        <button type="button"
+                                @click="openWaiterModal()"
+                                class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-200/90 transition-all flex items-center gap-1.5 cursor-pointer"
+                                title="Solicitar garçom na sua mesa">
+                            <i class="mdi mdi-bell-outline text-base text-amber-600"></i>
+                            <span class="hidden md:inline">Chamar Garçom</span>
+                        </button>
                     </template>
 
-                    <!-- Botão Chamar Garçom -->
-                    <button type="button"
-                            @click="openWaiterModal()"
-                            class="px-3 sm:px-3.5 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-200 transition-all flex items-center gap-1.5 cursor-pointer"
-                            title="Solicitar atendimento na mesa">
-                        <i class="mdi mdi-bell-ring-outline text-base text-amber-600"></i>
-                        <span class="hidden sm:inline">Chamar Atendente</span>
-                    </button>
-
-                    <!-- Botão da Comanda / Pedido Online -->
+                    <!-- Botão Principal: Comanda (Presencial) ou Pedido Online (Remoto) -->
                     <button type="button"
                             @click="cartOpen = true"
-                            style="background-color: {{ $primaryColor }};"
-                            class="relative text-white font-extrabold px-4 py-2.5 rounded-2xl shadow-lg shadow-orange-500/25 hover:opacity-95 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
-                        <i class="mdi mdi-shopping-outline text-lg"></i>
-                        <span class="hidden sm:inline text-xs">Pedido Online</span>
-                        <span class="bg-white text-gray-900 text-[11px] font-black px-2 py-0.5 rounded-full shadow-2xs"
+                            class="relative bg-gray-950 hover:bg-gray-800 text-white font-bold px-4 py-2.5 rounded-xl shadow-sm active:scale-95 transition-all flex items-center gap-2.5 cursor-pointer">
+                        <i class="mdi text-base text-orange-400" :class="isInStore ? 'mdi-silverware-fork-knife' : 'mdi-shopping-outline'"></i>
+                        <span class="hidden sm:inline text-xs tracking-tight" x-text="isInStore ? 'Comanda' : 'Pedido Online'"></span>
+                        <span class="bg-orange-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full min-w-[22px] text-center"
                               x-text="cartCount">
                         </span>
-                        <span class="hidden lg:inline text-xs border-l border-white/30 pl-2"
-                              x-text="cartTotalFormatted">
-                        </span>
+                        <template x-if="cartCount > 0">
+                            <span class="hidden xl:inline text-xs font-extrabold text-gray-200 border-l border-white/20 pl-2"
+                                  x-text="cartTotalFormatted">
+                            </span>
+                        </template>
                     </button>
 
-                    <!-- Acesso Staff / Admin -->
-                    @auth
-                        <a href="{{ url('/website') }}" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-extrabold border border-indigo-200 transition-all" title="Gerir Página Web (CMS)">
-                            <i class="mdi mdi-web text-base"></i>
-                            <span class="hidden lg:inline">CMS</span>
-                        </a>
-                        <a href="{{ url('/home') }}" class="p-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all" title="Painel Administrativo">
-                            <i class="mdi mdi-view-dashboard-outline text-xl"></i>
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="p-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all" title="Acesso dos Funcionários">
-                            <i class="mdi mdi-account-circle-outline text-xl"></i>
-                        </a>
-                    @endauth
                 </div>
 
             </div>
 
-            <!-- Barra de Pesquisa (Mobile) -->
-            <div class="md:hidden pb-3">
-                <div class="relative w-full">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+            <!-- Gaveta de Pesquisa Deslizante sob a Navbar -->
+            <div x-show="searchBarOpen || searchQuery.length > 0"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="pb-3.5 pt-1">
+                <div class="relative max-w-xl mx-auto">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                         <i class="mdi mdi-magnify text-lg"></i>
                     </span>
                     <input type="text"
+                           x-ref="searchInput"
                            x-model="searchQuery"
-                           placeholder="O que você deseja saborear hoje?"
-                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-100 border border-stone-200 text-xs font-semibold text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-orange-500">
+                           @input="scrollToMenuIfSearching()"
+                           placeholder="Pesquisar prato, bebida ou ingrediente no cardápio..."
+                           class="w-full pl-11 pr-10 py-2.5 rounded-xl bg-stone-100 border border-stone-200 text-xs font-semibold text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+                    <button x-show="searchQuery"
+                            @click="searchQuery = ''; searchBarOpen = false"
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-700 cursor-pointer">
+                        <i class="mdi mdi-close-circle text-base"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1129,23 +1084,28 @@
                     <template x-if="cart.length > 0">
                         <div class="space-y-4 pt-4 border-t border-gray-200">
                             
-                            <!-- Tipo de Atendimento: Mesa ou Levar -->
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-700 mb-1.5">Como deseja o seu pedido?</label>
-                                <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-2xl">
+                            <!-- Detecção Automática de Modo: Presencial vs Pedido Online -->
+                            <div class="p-3.5 rounded-2xl border transition-all"
+                                 :class="serviceType === 'dine_in'
+                                     ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
+                                     : 'bg-orange-50/70 border-orange-200 text-orange-950'">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex items-start gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                                             :class="serviceType === 'dine_in' ? 'bg-emerald-600 text-white' : 'bg-orange-500 text-white'">
+                                            <i class="mdi text-base" :class="serviceType === 'dine_in' ? 'mdi-silverware-fork-knife' : 'mdi-shopping-outline'"></i>
+                                        </div>
+                                        <div>
+                                            <span class="text-xs font-black block"
+                                                  x-text="serviceType === 'dine_in' ? 'Atendimento Presencial (No Local)' : 'Pedido Online / Para Levar'"></span>
+                                            <span class="text-[11px] opacity-80 block mt-0.5"
+                                                  x-text="locationSummaryText"></span>
+                                        </div>
+                                    </div>
                                     <button type="button"
-                                            @click="serviceType = 'dine_in'"
-                                            :class="serviceType === 'dine_in' ? 'bg-white text-gray-900 shadow-xs font-black' : 'text-gray-500 font-bold'"
-                                            class="py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                                        <i class="mdi mdi-silverware-fork-knife text-orange-500"></i>
-                                        <span>Consumo na Mesa</span>
-                                    </button>
-                                    <button type="button"
-                                            @click="serviceType = 'takeaway'; selectedTableId = ''; tableNumber = ''"
-                                            :class="serviceType === 'takeaway' ? 'bg-white text-gray-900 shadow-xs font-black' : 'text-gray-500 font-bold'"
-                                            class="py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                                        <i class="mdi mdi-shopping-outline text-orange-500"></i>
-                                        <span>Pedido Online / Levar</span>
+                                            @click="toggleManualServiceMode()"
+                                            class="text-[11px] font-extrabold underline whitespace-nowrap hover:opacity-80 cursor-pointer"
+                                            x-text="serviceType === 'dine_in' ? 'Mudar p/ Levar' : 'Estou na Mesa'">
                                     </button>
                                 </div>
                             </div>
@@ -1748,13 +1708,22 @@
             menuView: localStorage.getItem('restpos_welcome_view') || 'grid',
             selectedCategory: 'all',
             searchQuery: '',
+            searchBarOpen: false,
+
+            // Geolocation & Automatic Service Mode Separation
+            restaurantLat: parseFloat('{{ $restaurantLat }}') || null,
+            restaurantLng: parseFloat('{{ $restaurantLng }}') || null,
+            geofenceRadius: {{ $geofenceRadius }},
+            distanceMeters: null,
+            locationStatus: '{{ !empty($tableNumber) ? "qr" : "unknown" }}',
+            locationChecking: false,
 
             // Order & Table State
             selectedTableId: '{{ $detectedTableId ?? "" }}',
             tableNumber: '{{ $tableNumber ?? "" }}',
             customerName: '{{ Auth::check() ? Auth::user()->name : "" }}',
             customerPhone: '',
-            serviceType: 'dine_in',
+            serviceType: '{{ !empty($tableNumber) ? "dine_in" : "takeaway" }}',
             paymentMethod: 'counter',
             orderNotes: '',
             cart: [],
@@ -1783,12 +1752,143 @@
                     this.startSlideTimer();
                 }
 
+                // Automatic Presencial vs Online detection
+                if (this.tableNumber) {
+                    this.serviceType = 'dine_in';
+                    this.locationStatus = 'qr';
+                } else {
+                    this.verifyCustomerLocation(false);
+                }
+
                 const savedOrderId = localStorage.getItem('cafelu_active_order_id');
                 if (savedOrderId) {
                     this.activeOrderId = parseInt(savedOrderId);
                     this.fetchOrderStatus(this.activeOrderId);
                     this.startTrackingPoll();
                 }
+            },
+
+            get isInStore() {
+                return this.serviceType === 'dine_in';
+            },
+
+            get locationBadgeText() {
+                if (this.locationChecking) return 'A localizar...';
+                if (this.tableNumber) return 'Mesa ' + this.tableNumber;
+                if (this.locationStatus === 'gps_inside') {
+                    return 'No Local (' + this.distanceMeters + 'm)';
+                }
+                if (this.locationStatus === 'gps_outside' && this.distanceMeters !== null) {
+                    const km = (this.distanceMeters / 1000).toFixed(1);
+                    return 'Online • ' + (this.distanceMeters < 1000 ? this.distanceMeters + 'm' : km + ' km');
+                }
+                return this.serviceType === 'dine_in' ? 'No Restaurante' : 'Pedido Online';
+            },
+
+            get locationTooltip() {
+                if (this.tableNumber) return 'Atendimento presencial identificado pelo QR Code da Mesa ' + this.tableNumber;
+                if (this.locationStatus === 'gps_inside') return 'Localização confirmada dentro do restaurante (~' + this.distanceMeters + 'm)';
+                if (this.locationStatus === 'gps_outside') return 'Distância calculada até ao restaurante: ~' + (this.distanceMeters / 1000).toFixed(2) + ' km (Modo Pedido Online)';
+                return 'Clique para detetar automaticamente se está no restaurante via GPS';
+            },
+
+            get locationSummaryText() {
+                if (this.tableNumber) return 'Identificado automaticamente via QR Code da Mesa ' + this.tableNumber + '.';
+                if (this.locationStatus === 'gps_inside') return 'Detetado via GPS que você está no restaurante (~' + this.distanceMeters + 'm).';
+                if (this.locationStatus === 'gps_outside' && this.distanceMeters !== null) {
+                    const distFmt = this.distanceMeters < 1000 ? this.distanceMeters + 'm' : (this.distanceMeters / 1000).toFixed(1) + ' km';
+                    return 'Detetado automaticamente pela sua distância (~' + distFmt + ' do restaurante).';
+                }
+                return this.serviceType === 'dine_in'
+                    ? 'O seu pedido será servido diretamente na sua mesa.'
+                    : 'Encomenda online para levantamento no balcão.';
+            },
+
+            toggleSearchBar() {
+                this.searchBarOpen = !this.searchBarOpen;
+                if (this.searchBarOpen) {
+                    this.$nextTick(() => {
+                        if (this.$refs.searchInput) this.$refs.searchInput.focus();
+                    });
+                } else {
+                    this.searchQuery = '';
+                }
+            },
+
+            toggleManualServiceMode() {
+                if (this.serviceType === 'dine_in') {
+                    this.serviceType = 'takeaway';
+                    this.selectedTableId = '';
+                    this.tableNumber = '';
+                } else {
+                    this.serviceType = 'dine_in';
+                }
+            },
+
+            calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+                const R = 6371000; // Earth radius in meters
+                const toRad = deg => deg * Math.PI / 180;
+                const dLat = toRad(lat2 - lat1);
+                const dLon = toRad(lon2 - lon1);
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return Math.round(R * c);
+            },
+
+            verifyCustomerLocation(userInitiated = false) {
+                if (this.tableNumber) {
+                    this.serviceType = 'dine_in';
+                    this.locationStatus = 'qr';
+                    return;
+                }
+
+                if (!navigator.geolocation) {
+                    if (userInitiated) {
+                        this.toggleManualServiceMode();
+                    }
+                    return;
+                }
+
+                // If restaurant coordinates aren't configured yet and user clicked badge, toggle mode cleanly
+                if ((!this.restaurantLat || !this.restaurantLng) && userInitiated) {
+                    this.toggleManualServiceMode();
+                    return;
+                }
+
+                if (!this.restaurantLat || !this.restaurantLng) {
+                    return;
+                }
+
+                this.locationChecking = true;
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        this.locationChecking = false;
+                        const dist = this.calculateDistanceMeters(
+                            pos.coords.latitude,
+                            pos.coords.longitude,
+                            this.restaurantLat,
+                            this.restaurantLng
+                        );
+                        this.distanceMeters = dist;
+
+                        if (dist <= this.geofenceRadius) {
+                            this.serviceType = 'dine_in';
+                            this.locationStatus = 'gps_inside';
+                        } else {
+                            this.serviceType = 'takeaway';
+                            this.locationStatus = 'gps_outside';
+                        }
+                    },
+                    () => {
+                        this.locationChecking = false;
+                        if (userInitiated) {
+                            this.toggleManualServiceMode();
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+                );
             },
 
             startSlideTimer() {

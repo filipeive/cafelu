@@ -390,6 +390,112 @@
             console.log('Sistema inicializado com sucesso');
         });
 
+        /**
+         * Global File Upload Validation & Smart Image Compression
+         * Prevents 413 Request Entity Too Large errors across all forms
+         */
+        (function() {
+            const MAX_UPLOAD_BYTES = 4.5 * 1024 * 1024; // 4.5 MB hard limit after compression
+            const MAX_RAW_BYTES = 25 * 1024 * 1024;     // 25 MB raw phone camera limit
+            const COMPRESS_THRESHOLD = 1.2 * 1024 * 1024; // Auto-compress images > 1.2 MB
+
+            function formatBytes(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1048576) return (bytes / 1024).toFixed(0) + ' KB';
+                return (bytes / 1048576).toFixed(2) + ' MB';
+            }
+
+            function compressImageFile(file, maxDimension = 1920, quality = 0.82) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > maxDimension || height > maxDimension) {
+                                if (width > height) {
+                                    height = Math.round((height * maxDimension) / width);
+                                    width = maxDimension;
+                                } else {
+                                    width = Math.round((width * maxDimension) / height);
+                                    height = maxDimension;
+                                }
+                            }
+
+                            const canvas = document.createElement('canvas');
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            const outputType = file.type === 'image/png' ? 'image/jpeg' : file.type;
+                            canvas.toBlob((blob) => {
+                                if (!blob) return reject(new Error('Falha ao comprimir imagem'));
+                                const ext = outputType === 'image/jpeg' ? '.jpg' : '';
+                                const cleanName = file.name.replace(/\.[^/.]+$/, '') + (ext || '.jpg');
+                                const compressedFile = new File([blob], cleanName, {
+                                    type: outputType,
+                                    lastModified: Date.now()
+                                });
+                                resolve(compressedFile);
+                            }, outputType, quality);
+                        };
+                        img.onerror = reject;
+                        img.src = event.target.result;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            document.addEventListener('change', async function(e) {
+                const input = e.target;
+                if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
+                if (!input.files || input.files.length === 0) return;
+
+                const file = input.files[0];
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon'];
+
+                if (input.accept && input.accept.includes('image') && file.type && !file.type.startsWith('image/')) {
+                    window.showToast('Formato inválido. Por favor, selecione um ficheiro de imagem (JPG, PNG ou WEBP).', 'error');
+                    input.value = '';
+                    return;
+                }
+
+                if (file.size > MAX_RAW_BYTES) {
+                    window.showToast(`O ficheiro "${file.name}" (${formatBytes(file.size)}) é demasiado grande! Selecione uma imagem até 15 MB.`, 'error', { duration: 6000 });
+                    input.value = '';
+                    return;
+                }
+
+                const isCompressibleImage = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+
+                if (isCompressibleImage && file.size > COMPRESS_THRESHOLD && typeof DataTransfer !== 'undefined') {
+                    try {
+                        const originalSize = file.size;
+                        const compressed = await compressImageFile(file);
+                        if (compressed.size < originalSize) {
+                            const dt = new DataTransfer();
+                            dt.items.add(compressed);
+                            input.files = dt.files;
+                            window.showToast(`Imagem otimizada automaticamente (${formatBytes(originalSize)} -> ${formatBytes(compressed.size)}) para envio rápido.`, 'info', { duration: 4000 });
+                        }
+                    } catch (err) {
+                        console.warn('Compressão automática ignorada:', err);
+                    }
+                }
+
+                // Final size check after optional compression
+                const finalFile = input.files[0];
+                if (finalFile && finalFile.size > MAX_UPLOAD_BYTES) {
+                    window.showToast(`O ficheiro "${finalFile.name}" (${formatBytes(finalFile.size)}) excede o limite máximo de 4 MB. Escolha uma imagem mais leve.`, 'error', { duration: 6000 });
+                    input.value = '';
+                }
+            }, true);
+        })();
+
         // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

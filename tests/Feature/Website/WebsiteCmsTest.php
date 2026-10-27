@@ -74,7 +74,7 @@ class WebsiteCmsTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Página Web &amp; Pedidos Online', false);
 
-        // Update CMS Content Settings
+        // Update CMS Content Settings including GPS Geofence coordinates
         $this->actingAs($this->admin)
             ->post(route('website.content'), [
                 'site_hero_badge' => 'Especialidades Moçambicanas',
@@ -84,6 +84,9 @@ class WebsiteCmsTest extends TestCase
                 'site_about_text' => 'Desde 2018 servindo pratos frescos e café selecionado.',
                 'site_opening_hours' => 'Seg - Dom: 06:30 às 23:00',
                 'site_whatsapp' => '258841234567',
+                'site_latitude' => '-25.969200',
+                'site_longitude' => '32.573200',
+                'site_geofence_radius' => '150',
                 'site_online_orders' => '1',
             ])
             ->assertRedirect();
@@ -113,6 +116,14 @@ class WebsiteCmsTest extends TestCase
         $welcome->assertSee('Nossa Tradição Culinária');
         $welcome->assertSee('Festival de Mariscos & Grelhados', false);
         $welcome->assertSee('Seg - Dom: 06:30 às 23:00');
+        $welcome->assertSee('calculateDistanceMeters', false);
+        $welcome->assertSee('-25.969200', false);
+        $welcome->assertSee("serviceType: 'takeaway'", false);
+
+        // When accessed via QR Code (?mesa=3), it automatically switches to dine_in (Presencial)
+        $qrWelcome = $this->get('/?mesa=3');
+        $qrWelcome->assertStatus(200);
+        $qrWelcome->assertSee("serviceType: 'dine_in'", false);
     }
 
     public function test_pos_page_has_high_contrast_action_buttons(): void

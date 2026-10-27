@@ -29,6 +29,9 @@ class WebsiteController extends Controller
             'site_instagram'         => ['Instagram (URL)', 'text', ''],
             'site_facebook'          => ['Facebook (URL)', 'text', ''],
             'site_map_embed'         => ['Google Maps (URL de incorporação)', 'text', ''],
+            'site_latitude'          => ['Latitude do Restaurante (GPS)', 'text', ''],
+            'site_longitude'         => ['Longitude do Restaurante (GPS)', 'text', ''],
+            'site_geofence_radius'   => ['Raio Presencial em Metros (ex: 150)', 'text', '150'],
             'site_online_orders'     => ['Permitir pedidos online', 'boolean', '1'],
         ];
     }

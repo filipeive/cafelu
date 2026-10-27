@@ -136,4 +136,29 @@ class WebsiteCmsTest extends TestCase
         $response->assertSee('bg-rose-600');
         $response->assertSee('bg-emerald-600');
     }
+
+    public function test_call_waiter_dispatches_real_time_notification_with_sound_trigger_to_staff(): void
+    {
+        $welcome = $this->get('/');
+        $welcome->assertStatus(200);
+        $welcome->assertSee('Como deseja ser atendido hoje?', false);
+        $welcome->assertSee('Estou no Restaurante', false);
+        $welcome->assertSee('Reservar uma Mesa Online', false);
+
+        $callResponse = $this->postJson(route('welcome.call-waiter'), [
+            'table' => 'Mesa 5',
+            'name' => 'Filipe',
+            'reason' => 'Pediu a conta na mesa',
+        ]);
+
+        $callResponse->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        $unreadResponse = $this->actingAs($this->admin)
+            ->getJson(route('notifications.unread'));
+
+        $unreadResponse->assertStatus(200)
+            ->assertJsonPath('notifications.0.type', 'waiter_called')
+            ->assertJsonPath('notifications.0.table_name', 'Mesa 5');
+    }
 }

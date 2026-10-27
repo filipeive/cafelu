@@ -44,9 +44,13 @@ class NotificationController extends Controller
             $query->whereIn('data->type', ['order_ready', 'sale_completed', 'new_order']);
         }
 
-        $unreadNotifications = $query->take(5)->get()->map(function ($n) {
+        $unreadNotifications = $query->take(10)->get()->map(function ($n) {
             return [
                 'id' => $n->id,
+                'type' => $n->data['type'] ?? 'general',
+                'table_name' => $n->data['table_name'] ?? '',
+                'customer_name' => $n->data['customer_name'] ?? '',
+                'reason' => $n->data['reason'] ?? '',
                 'message' => $n->data['message'] ?? '',
                 'icon' => $n->data['icon'] ?? 'mdi-bell',
                 'color' => $n->data['color'] ?? 'text-primary',

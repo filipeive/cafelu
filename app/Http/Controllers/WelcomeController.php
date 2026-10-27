@@ -226,7 +226,7 @@ class WelcomeController extends Controller
 
             // Notify staff
             try {
-                $staff = User::whereIn('role', ['admin', 'manager', 'waiter'])->get();
+                $staff = User::whereIn('role', ['admin', 'superadmin', 'manager', 'waiter', 'cashier'])->get();
                 if ($staff->isNotEmpty()) {
                     Notification::send($staff, new \App\Notifications\NewOrderNotification($order));
                 }
@@ -329,20 +329,22 @@ class WelcomeController extends Controller
 
     public function callWaiter(Request $request)
     {
-        $table = $request->input('table', 'Balcão / Salão');
-        $name = $request->input('name', 'Cliente');
+        $table = trim((string) $request->input('table', 'Balcão / Salão')) ?: 'Balcão / Salão';
+        $name = trim((string) $request->input('name', 'Cliente')) ?: 'Cliente';
+        $reason = trim((string) $request->input('reason', 'Solicitou atendimento na mesa')) ?: 'Solicitou atendimento na mesa';
 
-        // Broadcast / notify staff
         try {
-            $staff = User::whereIn('role', ['admin', 'manager', 'waiter'])->get();
-            // You can log or send notification to staff
-        } catch (\Exception $e) {
-            // ignore
+            $staff = User::whereIn('role', ['admin', 'superadmin', 'manager', 'waiter', 'cashier'])->get();
+            if ($staff->isNotEmpty()) {
+                Notification::send($staff, new \App\Notifications\WaiterCalledNotification($table, $name, $reason));
+            }
+        } catch (\Throwable $e) {
+            // ignore notification error
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'O garçom foi chamado para ' . ($table ? 'a ' . $table : 'o seu atendimento') . '! Um atendente já está a caminho.'
+            'message' => 'O garçom foi chamado para ' . $table . '! A nossa equipa já recebeu o alerta sonoro.'
         ]);
     }
 }

@@ -84,12 +84,9 @@
             <!-- Language Switcher -->
             <li class="relative" x-data="{ open: false }">
                 <button @click="open = !open" @click.outside="open = false"
-                    class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2">
-                    @if(app()->getLocale() == 'pt')
-                        <span class="text-xl">🇵🇹</span>
-                    @else
-                        <span class="text-xl">🇬🇧</span>
-                    @endif
+                    class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5 text-xs font-bold uppercase">
+                    <i class="mdi mdi-translate text-lg text-warning"></i>
+                    <span>{{ app()->getLocale() == 'pt' ? 'PT' : 'EN' }}</span>
                     <i class="mdi mdi-chevron-down text-xs"></i>
                 </button>
 
@@ -98,11 +95,11 @@
                     style="display: none;">
                     <a href="{{ route('lang.switch', 'pt') }}"
                         class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 {{ app()->getLocale() == 'pt' ? 'bg-orange-50 dark:bg-gray-700 font-bold' : '' }}">
-                        <span class="text-lg">🇵🇹</span> {{ __('messages.portuguese') }}
+                        <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-black">PT</span> {{ __('messages.portuguese') }}
                     </a>
                     <a href="{{ route('lang.switch', 'en') }}"
                         class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 {{ app()->getLocale() == 'en' ? 'bg-orange-50 dark:bg-gray-700 font-bold' : '' }}">
-                        <span class="text-lg">🇬🇧</span> {{ __('messages.english') }}
+                        <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-black">EN</span> {{ __('messages.english') }}
                     </a>
                 </div>
             </li>
@@ -125,27 +122,84 @@
                 </button>
             </li>
 
-            <!-- Notifications -->
+            <!-- Notifications & Live Waiter Call / Order Alert -->
             <li class="relative" x-data="{ 
                 open: false,
                 unreadCount: {{ Auth::user()->unreadNotifications->count() }},
+                activeWaiterAlert: null,
+                knownIds: [
+                    @foreach(Auth::user()->unreadNotifications->take(10) as $notification)
+                        '{{ $notification->id }}',
+                    @endforeach
+                ],
                 notifications: [
-                    @foreach(Auth::user()->unreadNotifications->take(5) as $notification)
+                    @foreach(Auth::user()->unreadNotifications->take(10) as $notification)
                         {
                             id: '{{ $notification->id }}',
+                            type: '{{ $notification->data['type'] ?? 'general' }}',
+                            table_name: '{{ addslashes($notification->data['table_name'] ?? '') }}',
+                            customer_name: '{{ addslashes($notification->data['customer_name'] ?? '') }}',
+                            reason: '{{ addslashes($notification->data['reason'] ?? '') }}',
                             message: '{{ addslashes($notification->data['message'] ?? 'Notificação') }}',
                             icon: '{{ $notification->data['icon'] ?? 'mdi-bell-outline' }}',
-                            color: '{{ $notification->data['color'] ?? 'orange' }}',
+                            color: '{{ $notification->data['color'] ?? 'text-amber-500' }}',
                             link: '{{ $notification->data['link'] ?? '#' }}',
                             time: '{{ $notification->created_at->diffForHumans() }}'
                         },
                     @endforeach
                 ],
                 init() {
-                    // Poll for new notifications every 30 seconds
                     setInterval(() => {
                         this.fetchNotifications();
-                    }, 30000);
+                    }, 6000);
+                },
+                playWaiterBellSound() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const playStrike = (startTime, freq1, freq2) => {
+                            const osc1 = ctx.createOscillator();
+                            const osc2 = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc1.type = 'sine';
+                            osc2.type = 'triangle';
+                            osc1.frequency.setValueAtTime(freq1, startTime);
+                            osc2.frequency.setValueAtTime(freq2, startTime);
+                            gain.gain.setValueAtTime(0.35, startTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.55);
+                            osc1.connect(gain);
+                            osc2.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc1.start(startTime);
+                            osc2.start(startTime);
+                            osc1.stop(startTime + 0.55);
+                            osc2.stop(startTime + 0.55);
+                        };
+                        const now = ctx.currentTime;
+                        // Classic 3-chime hotel/restaurant service bell (Ding-Dong-Ding!)
+                        playStrike(now, 987.77, 1975.53);        // B5
+                        playStrike(now + 0.28, 783.99, 1567.98); // G5
+                        playStrike(now + 0.58, 1174.66, 2349.32);// D6
+                    } catch (e) {
+                        console.warn('Audio alert blocked until user interaction:', e);
+                    }
+                },
+                playNewOrderSound() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const now = ctx.currentTime;
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(523.25, now); // C5
+                        osc.frequency.setValueAtTime(659.25, now + 0.14); // E5
+                        osc.frequency.setValueAtTime(783.99, now + 0.28); // G5
+                        gain.gain.setValueAtTime(0.28, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.7);
+                    } catch (e) {}
                 },
                 fetchNotifications() {
                     fetch('{{ route('notifications.unread') }}', {
@@ -156,34 +210,103 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.unreadCount > this.unreadCount) {
-                            // Optional: Show a toast or play a sound
-                            console.log('New notification received!');
+                        if (data && Array.isArray(data.notifications)) {
+                            const newItems = data.notifications.filter(n => !this.knownIds.includes(n.id));
+                            if (newItems.length > 0) {
+                                newItems.forEach(n => this.knownIds.push(n.id));
+                                const waiterCall = newItems.find(n => n.type === 'waiter_called');
+                                if (waiterCall) {
+                                    this.activeWaiterAlert = waiterCall;
+                                    this.playWaiterBellSound();
+                                    if (window.showToast) {
+                                        window.showToast(waiterCall.message, 'warning', { title: 'Chamado de Garçom!', duration: 8000 });
+                                    }
+                                } else {
+                                    this.playNewOrderSound();
+                                    if (window.showToast) {
+                                        window.showToast(newItems[0].message, 'info', { title: 'Nova Notificação', duration: 6000 });
+                                    }
+                                }
+                            }
+                            this.unreadCount = data.unreadCount;
+                            this.notifications = data.notifications;
                         }
-                        this.unreadCount = data.unreadCount;
-                        this.notifications = data.notifications;
                     })
                     .catch(error => console.error('Error fetching notifications:', error));
                 },
-                markAsRead(id, link) {
-                    fetch(`/notifications/${id}/read`, {
+                acknowledgeWaiterAlert() {
+                    if (!this.activeWaiterAlert) return;
+                    const id = this.activeWaiterAlert.id;
+                    this.activeWaiterAlert = null;
+                    fetch('{{ url('/notifications') }}/' + id + '/read', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             'Accept': 'application/json'
                         }
                     }).then(() => {
-                        window.location.href = link;
+                        this.fetchNotifications();
+                    });
+                },
+                markAsRead(id, link) {
+                    fetch('{{ url('/notifications') }}/' + id + '/read', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    }).then(() => {
+                        if (link && link !== '#') {
+                            window.location.href = link;
+                        } else {
+                            this.fetchNotifications();
+                        }
                     });
                 }
             }">
                 <button @click="open = !open" @click.outside="open = false"
                     class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
-                    <i class="mdi mdi-bell-outline text-xl"></i>
+                    <i class="mdi mdi-bell-outline text-xl" :class="unreadCount > 0 ? 'text-warning animate-pulse' : ''"></i>
                     <template x-if="unreadCount > 0">
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-danger rounded-full"></span>
+                        <span class="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center"
+                              x-text="unreadCount"></span>
                     </template>
                 </button>
+
+                <!-- Alerta Sonoro & Visual Flutuante quando Cliente Chama Garçom -->
+                <template x-if="activeWaiterAlert">
+                    <div class="fixed inset-x-4 top-20 z-50 max-w-md mx-auto">
+                        <div class="bg-gray-950 text-white rounded-2xl shadow-2xl border-2 border-amber-400 p-4 flex items-start gap-3.5 animate-bounce">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-gray-950 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30">
+                                <i class="mdi mdi-bell-ring text-2xl"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-black uppercase tracking-wider">
+                                        Chamado de Atendimento
+                                    </span>
+                                    <span class="text-[11px] text-gray-400">Agora mesmo</span>
+                                </div>
+                                <h4 class="text-sm font-black text-white mt-1" x-text="activeWaiterAlert.table_name || 'Mesa / Balcão'"></h4>
+                                <p class="text-xs text-gray-300 mt-0.5" x-text="activeWaiterAlert.message"></p>
+                                <div class="mt-3 flex items-center gap-2">
+                                    <button type="button"
+                                            @click="acknowledgeWaiterAlert()"
+                                            class="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                                        <i class="mdi mdi-check-circle-outline"></i>
+                                        <span>Atender Agora</span>
+                                    </button>
+                                    <button type="button"
+                                            @click="playWaiterBellSound()"
+                                            class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 text-xs"
+                                            title="Repetir Som">
+                                        <i class="mdi mdi-volume-high"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
 
                 <div x-show="open" x-transition
                     class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"

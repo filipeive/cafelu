@@ -383,9 +383,9 @@
                         <i class="mdi text-lg" :class="searchBarOpen ? 'mdi-close' : 'mdi-magnify'"></i>
                     </button>
 
-                    <!-- Indicador Automático de Modo (Presencial vs Online por Distância/QR) -->
+                    <!-- Indicador Automático de Modo (Presencial vs Online / Reserva) -->
                     <button type="button"
-                            @click="verifyCustomerLocation(true)"
+                            @click="welcomeModalOpen = true"
                             class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer"
                             :class="isInStore
                                 ? 'bg-emerald-50/90 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
@@ -396,10 +396,12 @@
                                'mdi-qrcode-scan text-emerald-600': locationStatus === 'qr',
                                'mdi-map-marker-check text-emerald-600': locationStatus === 'gps_inside',
                                'mdi-truck-fast-outline text-orange-500': locationStatus === 'gps_outside',
-                               'mdi-Loading mdi-spin text-orange-500': locationChecking,
-                               'mdi-crosshairs-gps text-gray-500': locationStatus === 'unknown' && !locationChecking
+                               'mdi-loading mdi-spin text-orange-500': locationChecking,
+                               'mdi-silverware-fork-knife text-emerald-600': locationStatus === 'unknown' && isInStore,
+                               'mdi-shopping-outline text-orange-500': locationStatus === 'unknown' && !isInStore
                            }"></i>
                         <span x-text="locationBadgeText"></span>
+                        <i class="mdi mdi-chevron-down text-xs opacity-60"></i>
                     </button>
 
                     <!-- Botão Chamar Garçom (EXCLUSIVO quando o cliente está Presencial no Restaurante) -->
@@ -1361,7 +1363,176 @@
         </div>
     </div>
 
-    <!-- Modal Chamar Garçom -->
+    <!-- POP-UP DE BOAS-VINDAS: ESTOU NO RESTAURANTE vs ENCOMENDA / RESERVA ONLINE -->
+    <div x-show="welcomeModalOpen"
+         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="fixed inset-0 bg-gray-950/75 backdrop-blur-sm" @click="welcomeModalOpen = false"></div>
+
+        <div class="relative bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 z-10 overflow-hidden border border-stone-200">
+            <!-- Cabeçalho do Pop-up -->
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-gray-950 text-orange-400 mx-auto flex items-center justify-center text-2xl shadow-md">
+                    <i class="mdi mdi-silverware-fork-knife"></i>
+                </div>
+                <span class="inline-block text-[10px] font-extrabold uppercase tracking-widest text-orange-600">
+                    Bem-vindo ao {{ $companyName }}
+                </span>
+                <h3 class="font-serif text-2xl font-bold text-gray-950">Como deseja ser atendido hoje?</h3>
+                <p class="text-xs text-gray-500 max-w-sm mx-auto">
+                    Selecione uma opção abaixo para personalizarmos o seu cardápio e experiência de atendimento.
+                </p>
+            </div>
+
+            <!-- Etapa 1: Escolha entre Presencial, Encomenda Online ou Reserva -->
+            <div x-show="welcomeStep === 'choose'" class="space-y-3">
+                <!-- Opção 1: Estou no Restaurante -->
+                <button type="button"
+                        @click="welcomeStep = 'select_table'"
+                        class="w-full p-4 rounded-2xl border-2 text-left transition-all flex items-center justify-between gap-4 cursor-pointer group"
+                        :class="locationStatus === 'gps_inside' || isInStore ? 'border-emerald-500 bg-emerald-50/40 hover:bg-emerald-50' : 'border-stone-200 hover:border-gray-900 bg-white'">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-table-chair"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-sm text-gray-950">Estou no Restaurante</span>
+                                <template x-if="locationStatus === 'gps_inside'">
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-black uppercase">Detetado por GPS</span>
+                                </template>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">Fazer pedido para a minha mesa ou chamar garçom</p>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-chevron-right text-xl text-gray-400 group-hover:text-gray-900"></i>
+                </button>
+
+                <!-- Opção 2: Encomenda Online / Takeaway -->
+                <button type="button"
+                        @click="selectWelcomeMode('takeaway')"
+                        class="w-full p-4 rounded-2xl border-2 text-left transition-all flex items-center justify-between gap-4 cursor-pointer group"
+                        :class="locationStatus === 'gps_outside' ? 'border-orange-500 bg-orange-50/40 hover:bg-orange-50' : 'border-stone-200 hover:border-gray-900 bg-white'">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-shopping-outline"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-sm text-gray-950">Pedido Online (Para Levar)</span>
+                                <template x-if="locationStatus === 'gps_outside'">
+                                    <span class="px-2 py-0.5 rounded-full bg-orange-500 text-white text-[9px] font-black uppercase">Recomendado</span>
+                                </template>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">Encomendar à distância e levantar pronto no balcão</p>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-chevron-right text-xl text-gray-400 group-hover:text-gray-900"></i>
+                </button>
+
+                <!-- Opção 3: Fazer Reserva de Mesa Online -->
+                <button type="button"
+                        @click="welcomeStep = 'reservation'"
+                        class="w-full p-4 rounded-2xl border-2 border-stone-200 hover:border-gray-900 bg-white text-left transition-all flex items-center justify-between gap-4 cursor-pointer group">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-calendar-clock-outline"></i>
+                        </div>
+                        <div>
+                            <span class="font-extrabold text-sm text-gray-950 block">Reservar uma Mesa Online</span>
+                            <p class="text-xs text-gray-500 mt-0.5">Agendar data, horário e número de lugares antecipadamente</p>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-chevron-right text-xl text-gray-400 group-hover:text-gray-900"></i>
+                </button>
+            </div>
+
+            <!-- Etapa 2A: Selecionar Mesa quando está no Restaurante -->
+            <div x-show="welcomeStep === 'select_table'" class="space-y-4">
+                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+                    <label class="block text-xs font-extrabold text-emerald-950">Em qual mesa você está sentado?</label>
+                    <select x-model="selectedTableId"
+                            @change="onTableChange($event.target.value)"
+                            class="w-full px-4 py-3 rounded-xl border border-emerald-300 bg-white text-xs font-bold text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                        <option value="">Balcão / Salão Geral</option>
+                        @foreach($tables as $table)
+                            <option value="{{ $table->id }}">Mesa {{ $table->number }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="flex gap-2.5">
+                    <button type="button"
+                            @click="welcomeStep = 'choose'"
+                            class="px-4 py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-gray-700 text-xs font-bold cursor-pointer">
+                        Voltar
+                    </button>
+                    <button type="button"
+                            @click="selectWelcomeMode('dine_in')"
+                            class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 cursor-pointer">
+                        Confirmar Atendimento no Local
+                    </button>
+                </div>
+            </div>
+
+            <!-- Etapa 2B: Formulário Rápido de Reserva de Mesa Online -->
+            <div x-show="welcomeStep === 'reservation'" class="space-y-3.5">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Seu Nome *</label>
+                        <input type="text" x-model="reservationName" placeholder="Nome completo"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Telefone / WhatsApp *</label>
+                        <input type="tel" x-model="reservationPhone" placeholder="84 123 4567"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Nº de Pessoas</label>
+                        <select x-model="reservationGuests" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-bold">
+                            <option value="2 Pessoas">2 Pessoas</option>
+                            <option value="3 Pessoas">3 Pessoas</option>
+                            <option value="4 Pessoas">4 Pessoas</option>
+                            <option value="5 a 8 Pessoas">5 a 8 Pessoas</option>
+                            <option value="Grupo (+8 Pessoas)">Grupo (+8 Pessoas)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Data</label>
+                        <input type="date" x-model="reservationDate"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Horário</label>
+                        <input type="time" x-model="reservationTime"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-bold">
+                    </div>
+                </div>
+
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button"
+                            @click="welcomeStep = 'choose'"
+                            class="px-4 py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-gray-700 text-xs font-bold cursor-pointer">
+                        Voltar
+                    </button>
+                    <button type="button"
+                            @click="submitTableReservation()"
+                            class="flex-1 py-3 rounded-xl bg-gray-950 hover:bg-black text-white text-xs font-extrabold shadow-md cursor-pointer flex items-center justify-center gap-1.5">
+                        <i class="mdi mdi-calendar-check text-orange-400 text-base"></i>
+                        <span>Solicitar Reserva</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chamar Garçom (com Motivo e Alerta Sonoro para a Equipa) -->
     <div x-show="waiterModalOpen" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-xs" @click="waiterModalOpen = false"></div>
         <div class="relative bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4 z-10">
@@ -1369,24 +1540,53 @@
                 <i class="mdi mdi-bell-ring-outline"></i>
             </div>
             <div>
-                <h3 class="text-lg font-black text-gray-900">Chamar Atendente</h3>
-                <p class="text-xs text-gray-400 mt-1">Um dos nossos garçons virá atendê-lo imediatamente.</p>
+                <h3 class="text-lg font-black text-gray-900">Chamar Garçom</h3>
+                <p class="text-xs text-gray-500 mt-1">A nossa equipa receberá um alerta sonoro imediato no terminal.</p>
             </div>
 
-            <div class="text-left space-y-2">
-                <label class="block text-[11px] font-bold text-gray-700">Onde você está sentado?</label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                        <i class="mdi mdi-table-chair text-lg"></i>
-                    </span>
-                    <select x-model="selectedTableId"
-                            @change="onTableChange($event.target.value)"
-                            class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold focus:ring-2 focus:ring-orange-500">
-                        <option value="">Balcão / Salão Geral</option>
-                        @foreach($tables as $table)
-                            <option value="{{ $table->id }}">Mesa {{ $table->number }}</option>
-                        @endforeach
-                    </select>
+            <div class="text-left space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Onde você está sentado?</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="mdi mdi-table-chair text-lg"></i>
+                        </span>
+                        <select x-model="selectedTableId"
+                                @change="onTableChange($event.target.value)"
+                                class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs font-bold focus:ring-2 focus:ring-orange-500">
+                            <option value="">Balcão / Salão Geral</option>
+                            @foreach($tables as $table)
+                                <option value="{{ $table->id }}">Mesa {{ $table->number }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Como podemos ajudar?</label>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <button type="button"
+                                @click="waiterReason = 'Solicitou atendimento na mesa'"
+                                :class="waiterReason === 'Solicitou atendimento na mesa' ? 'border-amber-500 bg-amber-50 text-amber-950 font-extrabold' : 'border-stone-200 bg-stone-50 text-gray-600 font-semibold'"
+                                class="px-3 py-2 rounded-xl border text-xs text-left flex items-center gap-2 cursor-pointer">
+                            <i class="mdi mdi-hand-wave-outline text-amber-600"></i>
+                            <span>Atendimento na Mesa / Fazer Pedido</span>
+                        </button>
+                        <button type="button"
+                                @click="waiterReason = 'Pediu a conta na mesa'"
+                                :class="waiterReason === 'Pediu a conta na mesa' ? 'border-amber-500 bg-amber-50 text-amber-950 font-extrabold' : 'border-stone-200 bg-stone-50 text-gray-600 font-semibold'"
+                                class="px-3 py-2 rounded-xl border text-xs text-left flex items-center gap-2 cursor-pointer">
+                            <i class="mdi mdi-receipt-text-check-outline text-emerald-600"></i>
+                            <span>Pedir a Conta / Fechar Mesa</span>
+                        </button>
+                        <button type="button"
+                                @click="waiterReason = 'Trouxe talheres / guardanapos / apoio'"
+                                :class="waiterReason === 'Trouxe talheres / guardanapos / apoio' ? 'border-amber-500 bg-amber-50 text-amber-950 font-extrabold' : 'border-stone-200 bg-stone-50 text-gray-600 font-semibold'"
+                                class="px-3 py-2 rounded-xl border text-xs text-left flex items-center gap-2 cursor-pointer">
+                            <i class="mdi mdi-silverware-clean text-orange-500"></i>
+                            <span>Solicitar Talheres, Guardanapos ou Apoio</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1394,8 +1594,9 @@
                 <button type="button" @click="waiterModalOpen = false" class="flex-1 py-3 rounded-xl bg-gray-100 text-gray-700 text-xs font-bold hover:bg-gray-200 cursor-pointer">
                     Cancelar
                 </button>
-                <button type="button" @click="confirmCallWaiter()" class="flex-1 py-3 rounded-xl bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 shadow-md shadow-orange-500/20 cursor-pointer">
-                    Chamar Agora
+                <button type="button" @click="confirmCallWaiter()" class="flex-1 py-3 rounded-xl bg-amber-500 text-white text-xs font-extrabold hover:bg-amber-600 shadow-md shadow-amber-500/20 cursor-pointer flex items-center justify-center gap-1.5">
+                    <i class="mdi mdi-bell-ring"></i>
+                    <span>Chamar Agora</span>
                 </button>
             </div>
         </div>
@@ -1740,7 +1941,17 @@
             modalItem: null,
             modalItemNotes: '',
 
+            // Welcome Experience Pop-up & Reservation State
+            welcomeModalOpen: false,
+            welcomeStep: 'choose',
+            reservationName: '{{ Auth::check() ? Auth::user()->name : "" }}',
+            reservationPhone: '',
+            reservationGuests: '2 Pessoas',
+            reservationDate: '{{ date("Y-m-d") }}',
+            reservationTime: '19:30',
+
             waiterModalOpen: false,
+            waiterReason: 'Solicitou atendimento na mesa',
 
             systemTables: @json($tables->map(fn($t) => ['id' => $t->id, 'number' => $t->number]), JSON_UNESCAPED_UNICODE),
             products: @json($allProducts, JSON_UNESCAPED_UNICODE),
@@ -1752,11 +1963,18 @@
                     this.startSlideTimer();
                 }
 
-                // Automatic Presencial vs Online detection
+                // Automatic Presencial vs Online detection + Initial Pop-up
+                const savedChoice = sessionStorage.getItem('restpos_welcome_choice');
                 if (this.tableNumber) {
                     this.serviceType = 'dine_in';
                     this.locationStatus = 'qr';
+                    sessionStorage.setItem('restpos_welcome_choice', 'dine_in');
                 } else {
+                    if (savedChoice === 'dine_in' || savedChoice === 'takeaway') {
+                        this.serviceType = savedChoice;
+                    } else {
+                        this.welcomeModalOpen = true;
+                    }
                     this.verifyCustomerLocation(false);
                 }
 
@@ -1766,6 +1984,49 @@
                     this.fetchOrderStatus(this.activeOrderId);
                     this.startTrackingPoll();
                 }
+            },
+
+            selectWelcomeMode(mode) {
+                this.serviceType = mode;
+                sessionStorage.setItem('restpos_welcome_choice', mode);
+                if (mode === 'takeaway') {
+                    this.selectedTableId = '';
+                    this.tableNumber = '';
+                }
+                this.welcomeStep = 'choose';
+                this.welcomeModalOpen = false;
+            },
+
+            submitTableReservation() {
+                if (!this.reservationName.trim() || !this.reservationPhone.trim()) {
+                    alert('Por favor, informe o seu nome e telefone para confirmarmos a reserva.');
+                    return;
+                }
+                const summary = `Reserva Online: ${this.reservationGuests} em ${this.reservationDate} às ${this.reservationTime} (Tel: ${this.reservationPhone})`;
+                fetch('{{ route("welcome.call-waiter") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        table: 'Reserva de Mesa',
+                        name: this.reservationName,
+                        reason: summary
+                    })
+                })
+                .then(() => {
+                    this.welcomeStep = 'choose';
+                    this.welcomeModalOpen = false;
+                    sessionStorage.setItem('restpos_welcome_choice', 'takeaway');
+                    this.playChime();
+                    alert('Pedido de reserva enviado com sucesso! A nossa equipa entrará em contacto para confirmação.');
+                })
+                .catch(() => {
+                    this.welcomeModalOpen = false;
+                    alert('Solicitação de reserva registada!');
+                });
             },
 
             get isInStore() {
@@ -2038,20 +2299,24 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
                         table: this.tableNumber ? 'Mesa ' + this.tableNumber : 'Balcão / Salão',
-                        name: this.customerName || 'Cliente'
+                        name: this.customerName || 'Cliente',
+                        reason: this.waiterReason || 'Solicitou atendimento na mesa'
                     })
                 })
                 .then(res => res.json())
                 .then(data => {
                     this.waiterModalOpen = false;
+                    this.playChime();
                     alert(data.message || 'Atendente chamado com sucesso!');
                 })
                 .catch(() => {
                     this.waiterModalOpen = false;
+                    this.playChime();
                     alert('Atendente chamado! Um garçom virá até você em instantes.');
                 });
             },

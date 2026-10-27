@@ -60,3 +60,4 @@ class ProductIndexViewTest extends TestCase
         $response->assertSee('deleteProduct(' . $product->id, false);
     }
 }
+

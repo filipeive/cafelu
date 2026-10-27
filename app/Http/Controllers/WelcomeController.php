@@ -27,20 +27,16 @@ class WelcomeController extends Controller
 
     public function index(Request $request)
     {
-        $categories = Cache::remember('self_service_categories', 600, function () {
-            return Category::with([
-                'products' => function ($query) {
-                    $query->where('is_active', true);
-                }
-            ])->get();
-        });
+        $categories = Category::with([
+            'products' => function ($query) {
+                $query->where('is_active', true);
+            }
+        ])->get();
 
-        $featuredProducts = Cache::remember('self_service_featured', 600, function () {
-            return Product::where('is_active', true)
-                ->orderBy('created_at', 'desc')
-                ->take(6)
-                ->get();
-        });
+        $featuredProducts = Product::where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
 
         // Tables
         $tables = Table::orderBy('number', 'asc')->get();
@@ -58,7 +54,15 @@ class WelcomeController extends Controller
             }
         }
 
-        return view('welcome', compact('categories', 'featuredProducts', 'tables', 'tableNumber', 'detectedTableId'));
+        $slides = collect();
+        try {
+            $slides = \App\Models\WebsiteSlide::where('is_active', true)
+                ->orderBy('sort_order')->orderBy('id')->get();
+        } catch (\Throwable $e) {
+            // Table may not exist yet on outdated installs
+        }
+
+        return view('welcome', compact('categories', 'featuredProducts', 'tables', 'tableNumber', 'detectedTableId', 'slides'));
     }
 
     public function storeSelfServiceOrder(Request $request)

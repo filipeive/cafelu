@@ -23,6 +23,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\CashShiftController;
@@ -107,6 +108,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports/comparison', [ReportController::class, 'comparisonReport'])->name('reports.comparisonReport');
         Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
         Route::get('reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
+
+        // Website CMS (pagina publica / pedidos online)
+        Route::get('website', [WebsiteController::class, 'index'])->name('website.index');
+        Route::post('website/content', [WebsiteController::class, 'updateContent'])->name('website.content');
+        Route::post('website/slides', [WebsiteController::class, 'storeSlide'])->name('website.slides.store');
+        Route::put('website/slides/{slide}', [WebsiteController::class, 'updateSlide'])->name('website.slides.update');
+        Route::post('website/slides/{slide}/move/{direction}', [WebsiteController::class, 'moveSlide'])->name('website.slides.move')->where('direction', 'up|down');
+        Route::delete('website/slides/{slide}', [WebsiteController::class, 'destroySlide'])->name('website.slides.destroy');
 
         // Debts
         Route::resource('debts', DebtController::class);

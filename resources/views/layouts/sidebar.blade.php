@@ -216,6 +216,12 @@
                     />
                     
                     <x-sidebar.nav-item 
+                        route="website.index" 
+                        icon="mdi-web" 
+                        title="Página Web / Pedidos Online" 
+                    />
+
+                    <x-sidebar.nav-item 
                         route="settings.index" 
                         icon="mdi-cog-outline" 
                         title="{{ __('messages.system_settings') }}" 

@@ -163,3 +163,30 @@ Instalação RestPOS:
   - Adicionado campo de seleção de Status no modal de criação/edição e reabertura automática do modal com banner de erros detalhado caso ocorra qualquer erro de validação.
   - Correção da rota de submissão de edição com prefixo base (`url('/users')`).
   - Toasts globais configurados no layout principal para exibir erros de validação da sessão.
+
+---
+
+## 7. Melhorias Visuais & CMS de Pedidos Online (v1.3.2)
+
+- **Redesign do Catálogo de Produtos (`/products`)**:
+  - Implementado alternador entre **Vista em Grelha (Grid)** e **Vista em Lista (Tabela)** com persistência automática em `localStorage`.
+  - Restaurados e destacados os botões de ação (**Editar**, **Ajustar Estoque** e **Excluir**) para perfis `admin`, `superadmin` e `manager`.
+
+- **Botões de Ação de Alto Contraste no Carrinho do POS (`/pos`)**:
+  - Removido o fundo cinza de baixo contraste (`bg-gray-200/70` e `disabled:opacity-30`) que ofuscava os botões de ação no carrinho.
+  - Aplicadas cores vibrantes e nítidas para cada ação:
+    - **Guardar**: Âmbar sólido (`bg-amber-500 hover:bg-amber-600 text-white`).
+    - **Recuperar**: Azul sólido (`bg-blue-600 hover:bg-blue-700 text-white`).
+    - **Dívida**: Vermelho/Rosa sólido (`bg-rose-600 hover:bg-rose-700 text-white`).
+    - **Concluir Venda**: Verde Esmeralda sólido (`bg-emerald-600 hover:bg-emerald-700 text-white`).
+
+- **Nova Página Pública de Boas-Vindas & Pedidos Online (`/`) + CMS Administrativo (`/website`)**:
+  - **Hero Banner Slider Interativo**: Carrossel rotativo com transição suave, setas de navegação, indicadores e botões de chamada para ação ("Explorar Cardápio", "Encomendar Para Levar").
+  - **Duplo Modo de Exibição do Cardápio (inspirado em menus gastronómicos modernos)**:
+    - *Galeria com Fotos*: Cartões visuais ricos com fotografia culinária e contador rápido.
+    - *Menu Clássico de Restaurante*: Layout em duas colunas com miniaturas, linha pontilhada clássica (*dotted leader*) ligando o prato ao preço e botão rápido de pedido.
+  - **Imagens Culinárias Inteligentes**: Exibe a foto enviada pelo restaurante ou seleciona automaticamente fotografias gastronómicas de alta resolução de acordo com a categoria/nome do prato (cafetaria, grelhados, mariscos, bebidas, pastelaria, etc.).
+  - **CMS na Área Administrativa (`/website`)**:
+    - Gestão completa dos slides do banner (adicionar, ativar/desativar, ordenar e remover slides).
+    - Gestão de textos e secções da página ("Sobre Nós", imagem institucional, barra de anúncio promocional, horário de funcionamento, WhatsApp, Instagram e Facebook).
+  - **Pedidos Online & Na Mesa**: Suporte completo a encomendas para levar (*Takeaway*) e consumo na mesa via QR Code, com acompanhamento ao vivo em 4 etapas (`url('/order-status/{id}')`).

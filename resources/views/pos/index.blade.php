@@ -286,7 +286,7 @@
 
                             <!-- Remove Button -->
                             <button type="button" @click="removeFromCart(index)"
-                                class="text-gray-300 hover:text-rose-500 p-1 rounded-lg transition-colors cursor-pointer"
+                                class="text-rose-400 hover:text-white hover:bg-rose-500 p-1 rounded-lg transition-colors cursor-pointer"
                                 title="Remover item">
                                 <i class="mdi mdi-close text-sm"></i>
                             </button>
@@ -295,7 +295,7 @@
                 </template>
 
                 <div x-show="cart.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">
-                    <div class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-750 mx-auto flex items-center justify-center mb-2.5 text-gray-300 dark:text-gray-600">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-700 mx-auto flex items-center justify-center mb-2.5 text-gray-300 dark:text-gray-600">
                         <i class="mdi mdi-cart-arrow-down text-2xl"></i>
                     </div>
                     <p class="text-xs font-bold text-gray-600 dark:text-gray-300">{{ __('messages.empty_cart') }}</p>
@@ -397,7 +397,7 @@
 
                 <!-- Primary Big Finish Button (ALWAYS in view) -->
                 <button type="button" @click="processSale()" :disabled="cart.length === 0 || isLoading"
-                    class="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md shadow-emerald-600/25 transition-all flex items-center justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+                    class="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md shadow-emerald-600/25 transition-all flex items-center justify-between disabled:bg-emerald-300 dark:disabled:bg-emerald-900/50 disabled:shadow-none disabled:cursor-not-allowed cursor-pointer">
                     <span class="flex items-center gap-2">
                         <i class="mdi text-lg" :class="isLoading ? 'mdi-loading mdi-spin' : 'mdi-check-circle-outline'"></i>
                         <span x-text="isLoading ? 'Processando...' : 'Concluir Venda'"></span>
@@ -406,25 +406,25 @@
                 </button>
 
                 <!-- Auxiliary Action Buttons Row -->
-                <div class="grid grid-cols-3 gap-1.5 pt-0.5">
+                <div class="grid grid-cols-3 gap-2 pt-0.5">
                     <button type="button" @click="holdOrder()" :disabled="cart.length === 0 || isLoading"
-                        class="py-1.5 px-2 rounded-xl bg-gray-200/70 hover:bg-gray-200 dark:bg-gray-750 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-[11px] font-bold transition-all flex items-center justify-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        class="py-2 px-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm shadow-amber-500/25 transition-all flex items-center justify-center gap-1.5 disabled:bg-amber-200 disabled:text-amber-50 dark:disabled:bg-amber-900/40 dark:disabled:text-amber-200/50 disabled:shadow-none disabled:cursor-not-allowed cursor-pointer"
                         title="Guardar em mesa ou cliente temporário">
-                        <i class="mdi mdi-pause-circle-outline text-amber-500"></i>
+                        <i class="mdi mdi-pause-circle-outline text-sm"></i>
                         <span>Guardar</span>
                     </button>
 
                     <button type="button" @click="fetchHeldOrders()"
-                        class="py-1.5 px-2 rounded-xl bg-gray-200/70 hover:bg-gray-200 dark:bg-gray-750 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        class="py-2 px-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm shadow-blue-600/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         title="Recuperar pedidos pendentes">
-                        <i class="mdi mdi-clipboard-text-clock-outline text-blue-500"></i>
+                        <i class="mdi mdi-clipboard-text-clock-outline text-sm"></i>
                         <span>Recuperar</span>
                     </button>
 
                     <button type="button" @click="registerAsDebt()" :disabled="cart.length === 0 || isLoading"
-                        class="py-1.5 px-2 rounded-xl bg-gray-200/70 hover:bg-gray-200 dark:bg-gray-750 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-[11px] font-bold transition-all flex items-center justify-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        class="py-2 px-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm shadow-rose-600/25 transition-all flex items-center justify-center gap-1.5 disabled:bg-rose-200 disabled:text-rose-50 dark:disabled:bg-rose-900/40 dark:disabled:text-rose-200/50 disabled:shadow-none disabled:cursor-not-allowed cursor-pointer"
                         title="Registrar como dívida / conta corrente">
-                        <i class="mdi mdi-account-cash-outline text-orange-500"></i>
+                        <i class="mdi mdi-account-cash-outline text-sm"></i>
                         <span>Dívida</span>
                     </button>
                 </div>

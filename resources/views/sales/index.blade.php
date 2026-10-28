@@ -118,8 +118,8 @@
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="overflow-x-auto">
+            <!-- Table for Desktop -->
+            <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr
@@ -223,6 +223,79 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile / PWA Card View -->
+            <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-700/60 p-3 space-y-3">
+                @forelse ($sales as $sale)
+                    <div class="bg-gray-50/70 dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/60 space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <a href="{{ route('sales.show', $sale->id) }}" class="font-black text-orange-600 dark:text-orange-400 text-sm hover:underline block">
+                                    {{ $sale->invoice_number ?? '#' . str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}
+                                </a>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200/80 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-0.5">
+                                    {{ $sale->official_invoice_title }}
+                                </span>
+                            </div>
+                            <span class="{{ get_status_class_staradmins($sale->status) }} px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                                {{ ucfirst($sale->status) }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold">Cliente</span>
+                                <span class="font-semibold text-gray-800 dark:text-gray-200 truncate block">{{ $sale->customer_name ?: 'Consumidor Final' }}</span>
+                                @if($sale->customer_nuit)
+                                    <span class="text-[10px] text-gray-400">NUIT: {{ $sale->customer_nuit }}</span>
+                                @endif
+                            </div>
+                            <div>
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold">Data & Hora</span>
+                                <span class="text-gray-700 dark:text-gray-300 font-medium block">
+                                    {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y H:i') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-200/60 dark:border-gray-700/60">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block uppercase font-bold">Total Pago</span>
+                                <div class="text-base font-black text-gray-900 dark:text-white">
+                                    MZN {{ number_format($sale->total_amount, 2) }}
+                                </div>
+                                <span class="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                                    <i class="mdi {{ get_payment_icon_mdi($sale->payment_method) }} text-green-500"></i>
+                                    {{ ucfirst($sale->payment_method) }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                <a href="{{ route('sales.show', $sale->id) }}"
+                                   class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
+                                   title="Ver Detalhes">
+                                    <i class="mdi mdi-eye text-lg"></i>
+                                </a>
+                                <button onclick="window.printSaleRecibo({{ $sale->id }})"
+                                        class="p-2.5 rounded-xl bg-cyan-50 text-cyan-600 hover:bg-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-400"
+                                        title="Imprimir Talão">
+                                    <i class="mdi mdi-printer text-lg"></i>
+                                </button>
+                                <a href="{{ route('sales.invoice.pdf', $sale->id) }}"
+                                   class="p-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400"
+                                   title="PDF">
+                                    <i class="mdi mdi-file-pdf-box text-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-gray-400">
+                        <i class="mdi mdi-cash-remove text-4xl mb-2 block opacity-40"></i>
+                        <p class="text-sm font-medium">{{ __('messages.no_sales_found') }}</p>
+                    </div>
+                @endforelse
             </div>
 
             <!-- Pagination -->

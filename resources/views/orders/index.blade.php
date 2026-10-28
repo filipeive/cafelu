@@ -134,8 +134,8 @@
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="overflow-x-auto">
+            <!-- Table for Desktop -->
+            <div class="overflow-x-auto hidden md:block">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50/50 dark:bg-gray-900/20 border-b border-gray-50 dark:border-gray-700">
@@ -295,6 +295,97 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile / PWA Card View -->
+            <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-700/60 p-3 space-y-3">
+                @forelse ($orders as $order)
+                    <div class="bg-gray-50/70 dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/60 space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono text-orange-600 dark:text-orange-400 font-black text-base">
+                                    #{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}
+                                </span>
+                                @if($order->table_id)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50">
+                                        <i class="mdi mdi-table-furniture mr-1"></i> Mesa {{ $order->table_id }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-100 dark:border-purple-800/50">
+                                        <i class="mdi mdi-web mr-1"></i> Online
+                                    </span>
+                                @endif
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase {{ get_status_class_tailwind($order->status, $order->payment_status) }}">
+                                {{ $order->payment_status === 'awaiting_confirmation' ? 'Aguardando' : ucfirst($order->status) }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold">Cliente</span>
+                                <span class="font-bold text-gray-900 dark:text-white truncate block">{{ $order->customer_name ?? 'Cliente Anônimo' }}</span>
+                                <span class="text-[10px] text-gray-400">{{ $order->items->sum('quantity') }} itens solicitados</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold">Horário</span>
+                                <span class="text-gray-700 dark:text-gray-300 font-medium block">
+                                    {{ $order->created_at->format('d/m/Y H:i') }}
+                                </span>
+                                <span class="text-[10px] font-black uppercase {{ $order->payment_status === 'paid' ? 'text-green-500' : 'text-yellow-500' }}">
+                                    {{ $order->payment_status === 'paid' ? 'Pago' : 'Pagamento Pendente' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-200/60 dark:border-gray-700/60">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block uppercase font-bold">Total do Pedido</span>
+                                <div class="text-base font-black text-gray-900 dark:text-white">
+                                    MZN {{ number_format($order->total_amount, 2) }}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                <a href="{{ route('orders.show', $order->id) }}"
+                                   class="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
+                                   title="Ver Detalhes">
+                                    <i class="mdi mdi-eye text-lg"></i>
+                                </a>
+
+                                @if ($order->status == 'paid')
+                                    <button onclick="printRecibo({{ $order->id }})"
+                                            class="p-2 rounded-xl bg-cyan-50 text-cyan-600 hover:bg-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-400"
+                                            title="Imprimir">
+                                        <i class="mdi mdi-printer text-lg"></i>
+                                    </button>
+                                @endif
+
+                                @if ($order->status == 'completed' && $order->payment_status != 'awaiting_confirmation' && $order->payment_status != 'paid')
+                                    <button type="button"
+                                            @click="$dispatch('open-payment-modal', { orderId: {{ $order->id }}, total: {{ $order->total_amount }} })"
+                                            class="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400"
+                                            title="Pagar">
+                                        <i class="mdi mdi-cash text-lg"></i>
+                                    </button>
+                                @endif
+
+                                @if ($order->status != 'completed' && $order->status != 'canceled' && $order->status != 'paid' && $order->status != 'pending_cancel')
+                                    <a href="{{ route('orders.edit', $order->id) }}"
+                                       class="p-2 rounded-xl bg-yellow-50 text-yellow-600 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                       title="Editar">
+                                        <i class="mdi mdi-pencil text-lg"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-gray-400">
+                        <i class="mdi mdi-receipt-text-remove text-4xl mb-2 block opacity-40"></i>
+                        <p class="text-sm font-medium">Nenhum pedido encontrado.</p>
+                    </div>
+                @endforelse
             </div>
 
             <!-- Pagination -->

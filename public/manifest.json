@@ -1,56 +1,72 @@
 {
   "name": "RestPOS - Gestão de Restaurantes & POS",
   "short_name": "RestPOS",
-  "description": "Sistema Moderno de Ponto de Venda (PDV), Cozinha (KDS) e Gestão de Restaurantes",
-  "start_url": "/pos",
-  "scope": "/",
+  "description": "Sistema Moderno de Ponto de Venda (PDV), Cozinha (KDS), Mesas e Gestão de Restaurantes",
+  "start_url": "dashboard",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#111827",
+  "background_color": "#0f172a",
   "theme_color": "#f97316",
   "lang": "pt-MZ",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/images/logo.png",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "shortcuts": [
     {
-      "name": "Ponto de Venda (PDV)",
+      "name": "Frente de Caixa (PDV)",
       "short_name": "PDV",
       "description": "Operar caixa e vendas rápidas",
-      "url": "/pos",
-      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+      "url": "pos",
+      "icons": [{ "src": "favicon.png", "sizes": "96x96" }]
     },
     {
-      "name": "Ordem de Cozinha (KDS)",
+      "name": "Mapa de Mesas",
+      "short_name": "Mesas",
+      "description": "Visualizar e gerir mesas do restaurante",
+      "url": "tables",
+      "icons": [{ "src": "favicon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Monitor da Cozinha (KDS)",
       "short_name": "Cozinha",
       "description": "Visualizador de pedidos em preparação",
-      "url": "/orders/kitchen",
-      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Gestão de Mesas",
-      "short_name": "Mesas",
-      "description": "Mapa de mesas e pedidos ativos",
-      "url": "/tables",
-      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+      "url": "kitchen",
+      "icons": [{ "src": "favicon.png", "sizes": "96x96" }]
     },
     {
       "name": "Painel de Controlo",
       "short_name": "Dashboard",
       "description": "Visão executiva de faturamento",
-      "url": "/dashboard",
-      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+      "url": "dashboard",
+      "icons": [{ "src": "favicon.png", "sizes": "96x96" }]
     }
   ]
 }
-

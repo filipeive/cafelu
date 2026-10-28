@@ -1,21 +1,27 @@
 // ==============================================================================
-// Service Worker - RestPOS Mobile & Desktop PWA
+// Service Worker - RestPOS Mobile & Desktop PWA v1.3
 // ==============================================================================
 
-const CACHE_NAME = 'restpos-cache-v1.3';
-const PRECACHE_URLS = [
-    '/favicon.png',
-    '/manifest.json'
+const CACHE_NAME = 'restpos-pwa-v1.3';
+const STATIC_ASSETS = [
+    './favicon.png',
+    './apple-touch-icon.png',
+    './manifest.json'
 ];
 
+// Instalação do Service Worker
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(PRECACHE_URLS);
-        }).then(() => self.skipWaiting())
+            return cache.addAll(STATIC_ASSETS).catch((err) => {
+                console.warn('Erro ao pré-armazenar assets no cache:', err);
+            });
+        })
     );
 });
 
+// Ativação e limpeza de versões antigas do cache
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -30,37 +36,62 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// Interceção de requisições com Stale-While-Revalidate e Network-First
 self.addEventListener('fetch', (event) => {
-    // Only cache GET requests for static assets (images, fonts, css, js)
-    if (event.request.method !== 'GET') return;
+    const request = event.request;
 
-    const url = new URL(event.request.url);
-
-    // Bypass API, sync endpoints and POST actions
-    if (url.pathname.startsWith('/api') || url.pathname.includes('/process-sale')) {
+    // Ignorar requisições não-GET
+    if (request.method !== 'GET') {
         return;
     }
 
-    if (url.pathname.match(/\.(png|jpg|jpeg|svg|css|js|woff2|woff|ttf)$/)) {
+    const url = new URL(request.url);
+
+    // Bypass estrito de rotas transacionais, sincronização e polling ao vivo da cozinha
+    if (url.pathname.includes('/api/sync/') || 
+        url.pathname.includes('/process-sale') ||
+        url.pathname.includes('/pos/checkout') ||
+        url.pathname.includes('/orders/kitchen/live') ||
+        url.pathname.includes('/dashboard/stats') ||
+        url.pathname.includes('/call-waiter/status') ||
+        url.pathname.includes('/api/ping')) {
+        return;
+    }
+
+    // Para navegação HTML: Network First com fallback para cache
+    if (request.mode === 'navigate') {
         event.respondWith(
-            caches.match(event.request).then((cachedResponse) => {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
-                return fetch(event.request).then((networkResponse) => {
-                    if (networkResponse && networkResponse.status === 200) {
-                        const responseToCache = networkResponse.clone();
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(event.request, responseToCache);
-                        });
-                    }
-                    return networkResponse;
-                }).catch(() => {
-                    // Offline fallback if needed
-                    return caches.match('/favicon.png');
+            fetch(request).catch(() => {
+                return caches.match(request).then((response) => {
+                    return response || caches.match('./favicon.png');
+                });
+            })
+        );
+        return;
+    }
+
+    // Para ficheiros estáticos (CSS, JS, Imagens, Fontes): Stale-While-Revalidate
+    const isStaticAsset = 
+        request.destination === 'style' || 
+        request.destination === 'script' || 
+        request.destination === 'image' || 
+        request.destination === 'font' ||
+        url.pathname.match(/\.(png|jpg|jpeg|svg|webp|css|js|woff2|woff|ttf)$/);
+
+    if (isStaticAsset) {
+        event.respondWith(
+            caches.open(CACHE_NAME).then((cache) => {
+                return cache.match(request).then((cachedResponse) => {
+                    const fetchPromise = fetch(request).then((networkResponse) => {
+                        if (networkResponse && networkResponse.status === 200) {
+                            cache.put(request, networkResponse.clone());
+                        }
+                        return networkResponse;
+                    }).catch(() => cachedResponse);
+
+                    return cachedResponse || fetchPromise;
                 });
             })
         );
     }
 });
-

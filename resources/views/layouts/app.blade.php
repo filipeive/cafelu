@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="{{ __('messages.system_description_meta') }}">
     <title>{{ \App\Models\Setting::get('company_name', config('app.name', 'Restaurant System')) }} | @yield('title')
@@ -19,10 +19,11 @@
     <!-- PWA Manifest & Mobile Meta -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#f97316">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RestPOS">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -193,7 +194,7 @@
             @include('layouts.sidebar')
 
             <!-- Main Content -->
-            <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-all duration-300"
+            <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-all duration-300 pb-24 lg:pb-6"
                 :class="{ 'lg:ml-64': !sidebarCollapsed, 'lg:ml-20': sidebarCollapsed }">
                 <div class="w-full px-4 sm:px-6 lg:px-8 py-6">
                     <!-- Page Header -->
@@ -206,6 +207,99 @@
                     @yield('content')
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Mobile PWA Bottom Navigation Bar (Smartphones & Tablets < 1024px) -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-gray-900/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-800/80 px-2 sm:px-4 py-1.5 flex items-center justify-around text-gray-400 shadow-2xl transition-all pb-[max(0.6rem,env(safe-area-inset-bottom))]">
+        <a href="{{ route('dashboard') }}" 
+           class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition {{ request()->routeIs('dashboard*') ? 'text-orange-500 font-bold' : 'hover:text-gray-200' }}">
+            <i class="mdi mdi-view-dashboard text-xl"></i>
+            <span class="text-[10px]">Início</span>
+        </a>
+
+        <a href="{{ route('tables.index') }}" 
+           class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition {{ request()->routeIs('tables*') ? 'text-orange-500 font-bold' : 'hover:text-gray-200' }}">
+            <i class="mdi mdi-table-chair text-xl"></i>
+            <span class="text-[10px]">Mesas</span>
+        </a>
+
+        <!-- Botão Central Elevado de Ação Rápida: Frente de Caixa POS -->
+        <a href="{{ route('pos.index') }}" 
+           class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-orange-600 to-amber-500 text-white w-14 h-14 rounded-full shadow-lg shadow-orange-500/40 border-4 border-gray-900 dark:border-gray-950 active:scale-95 transition-transform"
+           title="Frente de Caixa POS">
+            <i class="mdi mdi-cash-register text-2xl"></i>
+            <span class="text-[8px] font-black uppercase tracking-wider mt-0.5">PDV</span>
+        </a>
+
+        <a href="{{ route('kitchen.index') }}" 
+           class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition {{ request()->routeIs('kitchen*') || request()->routeIs('orders.kitchen*') ? 'text-orange-500 font-bold' : 'hover:text-gray-200' }}">
+            <i class="mdi mdi-chef-hat text-xl"></i>
+            <span class="text-[10px]">Cozinha</span>
+        </a>
+
+        <button @click="sidebarOpen = !sidebarOpen" 
+                type="button" 
+                class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition hover:text-gray-200 cursor-pointer"
+                title="Menu Completo">
+            <i class="mdi mdi-menu text-xl"></i>
+            <span class="text-[10px]">Menu</span>
+        </button>
+    </nav>
+
+    <!-- PWA Install Prompt Banner (Mobile & Tablets) -->
+    <div x-data="{
+             showInstallPrompt: false,
+             deferredPrompt: null,
+             init() {
+                 if (window.matchMedia('(display-mode: standalone)').matches || sessionStorage.getItem('restpos_install_dismissed')) {
+                     return;
+                 }
+                 window.addEventListener('beforeinstallprompt', (e) => {
+                     e.preventDefault();
+                     this.deferredPrompt = e;
+                     this.showInstallPrompt = true;
+                 });
+             },
+             installApp() {
+                 if (this.deferredPrompt) {
+                     this.deferredPrompt.prompt();
+                     this.deferredPrompt.userChoice.then(() => {
+                         this.deferredPrompt = null;
+                         this.showInstallPrompt = false;
+                     });
+                 }
+             },
+             dismissPrompt() {
+                 this.showInstallPrompt = false;
+                 sessionStorage.setItem('restpos_install_dismissed', '1');
+             }
+         }"
+         x-show="showInstallPrompt"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-4"
+         style="display: none;"
+         class="lg:hidden fixed bottom-20 left-3 right-3 z-50 bg-gray-900/95 dark:bg-gray-950/95 backdrop-blur-xl border border-orange-500/30 rounded-2xl p-3 shadow-2xl flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 shrink-0">
+                <i class="mdi mdi-cellphone-arrow-down text-2xl"></i>
+            </div>
+            <div class="min-w-0">
+                <h4 class="text-xs font-black text-white truncate">Instalar App RestPOS</h4>
+                <p class="text-[11px] text-gray-300 leading-tight">Aceda mais rápido e trabalhe em ecrã inteiro no seu celular.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <button @click="dismissPrompt()" class="px-2.5 py-1.5 rounded-xl text-gray-400 hover:text-white text-xs font-bold cursor-pointer">
+                Depois
+            </button>
+            <button @click="installApp()" class="px-3.5 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-black shadow-md shadow-orange-500/30 cursor-pointer">
+                Instalar
+            </button>
         </div>
     </div>
 
@@ -499,9 +593,9 @@
         // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => {
-                    console.warn('SW registration skipped/failed:', err);
-                });
+                navigator.serviceWorker.register('{{ asset("sw.js") }}')
+                    .then(reg => console.log('RestPOS PWA ServiceWorker ativo:', reg.scope))
+                    .catch(err => console.warn('RestPOS PWA ServiceWorker indisponível:', err));
             });
         }
     </script>

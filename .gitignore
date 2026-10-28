@@ -26,3 +26,9 @@ yarn-error.log
 .vscode
 deploy.sh
 .deploy.env
+
+# Mobile Build Artifacts
+/android
+/ios
+/.capacitor
+*.apk

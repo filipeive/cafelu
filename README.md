@@ -187,6 +187,23 @@ php artisan test tests/Feature/Website/WebsiteCmsTest.php
 
 ---
 
+## 📱 Aplicação Mobile (PWA & Android APK via Capacitor)
+
+O RestPOS possui uma arquitetura híbrida projetada para dispositivos móveis, smartphones e tablets:
+
+- **PWA (Progressive Web App)**: 
+  - Manifesto `public/manifest.json` e Service Worker `public/sw.js` com cache inteligente (Stale-While-Revalidate para assets, Network-First para navegação com contingência offline).
+  - Barra de Navegação Inferior Nativa (`lg:hidden`) com acesso instantâneo ao Dashboard, Mesas, Frente de Caixa Flutuante (POS), Cozinha e Menu.
+  - Banner automático de instalação para Android e iOS (`beforeinstallprompt`).
+  - Modo Dual-View responsivo nas listagens (Tabela em Desktop, Cartões compactos em Mobile/PWA).
+
+- **Aplicação Android Nativa (APK)**:
+  - Empacotado via **Capacitor 6** (`mz.co.restpos.app`).
+  - Script automatizado de compilação: `./build-apk.sh` (gera `RestPOS-v1.3.apk`).
+  - Guia completo disponível em: [`CAPACITOR_GUIDE.md`](CAPACITOR_GUIDE.md).
+
+---
+
 ## 📄 Licença
 
 Software proprietário. Todos os direitos reservados à equipa de desenvolvimento do RestPOS.

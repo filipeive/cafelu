@@ -177,3 +177,4 @@ class Quotation extends Model
         };
     }
 }
+

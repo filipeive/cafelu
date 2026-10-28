@@ -83,7 +83,18 @@ class QrTablesQuotationsAndTenantIsolationTest extends TestCase
         app(\App\Services\TenantContext::class)->setTenant(null);
         $this->assertCount(0, Product::all());
 
-        // 2. When SuperAdmin enters Support Mode for Lu & Yoshi, they can access operational routes and products
+        // 2. SuperAdmin can open and download the license certificate for Tenant #1 even if no LicenseKey existed initially
+        $this->actingAs($this->superAdmin)
+            ->get(route('admin.tenants.certificate', $this->tenant))
+            ->assertStatus(200)
+            ->assertSee('Certificado Oficial de Licenciamento de Software')
+            ->assertSee('CAFE-');
+
+        $this->actingAs($this->superAdmin)
+            ->get(route('admin.tenants.certificate-pdf', $this->tenant))
+            ->assertStatus(200);
+
+        // 3. When SuperAdmin enters Support Mode for Lu & Yoshi, they can access operational routes and products
         $this->actingAs($this->superAdmin)
             ->withSession([
                 'impersonated_tenant_id' => $this->tenant->id,

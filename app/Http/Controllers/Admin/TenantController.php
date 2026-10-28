@@ -193,6 +193,7 @@ class TenantController extends Controller
     public function show(Tenant $tenant, TenantContext $context): View
     {
         return $context->withoutTenant(function () use ($tenant) {
+            $this->resolveOrCreateTenantLicense($tenant);
             $tenant->load(['users', 'latestLicenseKey', 'licenseKeys' => fn ($q) => $q->latest()]);
             
             $stats = [
@@ -268,8 +269,7 @@ class TenantController extends Controller
     public function certificate(Tenant $tenant, TenantContext $context): View
     {
         return $context->withoutTenant(function () use ($tenant) {
-            $license = $tenant->latestLicenseKey ?? $tenant->licenseKeys()->first();
-            abort_unless($license, 404, 'Nenhuma licença encontrada para este restaurante.');
+            $license = $this->resolveOrCreateTenantLicense($tenant);
 
             return view('admin.tenants.certificate', compact('tenant', 'license'));
         });
@@ -278,8 +278,7 @@ class TenantController extends Controller
     public function certificatePdf(Tenant $tenant, TenantContext $context)
     {
         return $context->withoutTenant(function () use ($tenant) {
-            $license = $tenant->latestLicenseKey ?? $tenant->licenseKeys()->first();
-            abort_unless($license, 404, 'Nenhuma licença encontrada para este restaurante.');
+            $license = $this->resolveOrCreateTenantLicense($tenant);
 
             $pdf = app('dompdf.wrapper');
             $pdf->loadView('admin.tenants.certificate_pdf', compact('tenant', 'license'))
@@ -290,5 +289,45 @@ class TenantController extends Controller
 
             return $pdf->download("Certificado_Licenca_{$cleanTenant}_{$cleanKey}.pdf");
         });
+    }
+
+    /**
+     * Garante que qualquer restaurante (incluindo o tenant inicial #1) tenha uma chave de licença associada.
+     */
+    protected function resolveOrCreateTenantLicense(Tenant $tenant): LicenseKey
+    {
+        $license = $tenant->latestLicenseKey ?? $tenant->licenseKeys()->latest()->first();
+
+        if ($license) {
+            return $license;
+        }
+
+        // Se existir uma licença órfã (sem tenant_id) do restaurante principal, vincula-a
+        $orphanLicense = LicenseKey::whereNull('tenant_id')->latest()->first();
+        if ($orphanLicense && $tenant->id === 1) {
+            $orphanLicense->update([
+                'tenant_id'     => $tenant->id,
+                'business_name' => $tenant->name,
+            ]);
+            return $orphanLicense->fresh();
+        }
+
+        $adminUser = $tenant->users()->where('role', 'admin')->first();
+
+        return LicenseKey::create([
+            'tenant_id'      => $tenant->id,
+            'business_name'  => $tenant->name,
+            'customer_name'  => $adminUser?->name ?? $tenant->name,
+            'customer_email' => $adminUser?->email ?? $tenant->email,
+            'customer_phone' => $tenant->phone,
+            'license_type'   => $tenant->plan ?? 'annual',
+            'status'         => $tenant->status === 'suspended' ? 'suspended' : 'active',
+            'starts_at'      => $tenant->created_at ?? now(),
+            'expires_at'     => $tenant->license_expires_at ?? now()->addYear(),
+            'max_tables'     => $tenant->max_tables ?? 30,
+            'max_users'      => $tenant->max_users ?? 15,
+            'is_current'     => true,
+            'notes'          => 'Chave oficial associada automaticamente ao restaurante.',
+        ]);
     }
 }

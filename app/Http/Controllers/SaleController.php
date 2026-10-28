@@ -164,16 +164,87 @@ class SaleController extends Controller
 
     public function show(Sale $sale)
     {
-        // Carregar os itens da venda junto com os produtos
-        $sale->load('saleItems.product');
+        // Carregar os itens da venda junto com os produtos e cotação associada
+        $sale->load(['saleItems.product', 'quotation']);
         return view('sales.show', compact('sale'));
     }
 
     public function receipt($saleId)
     {
         // Carregar a venda com seus itens e produtos relacionados
-        $sale = Sale::with(['saleItems.product'])->findOrFail($saleId);
+        $sale = Sale::with(['saleItems.product', 'quotation.items'])->findOrFail($saleId);
         return view('sales.receipt', compact('sale'));
+    }
+
+    /**
+     * Emitir / Descarregar Factura A4, Factura-Recibo ou Recibo Oficial em PDF (Estilo ZBIZ Plus)
+     */
+    public function invoicePdf(Sale $sale, Request $request)
+    {
+        $sale->load(['saleItems.product', 'user', 'quotation.items']);
+
+        if ($request->filled('type') && in_array($request->type, ['receipt', 'cash_invoice', 'invoice', 'proforma'])) {
+            if ($sale->invoice_type !== $request->type) {
+                $tenantId = $sale->tenant_id ?? current_tenant_id();
+                $sale->invoice_type = $request->type;
+                $sale->invoice_number = Sale::generateNextInvoiceNumber($tenantId, $request->type);
+                $sale->save();
+            }
+        }
+
+        $pdf = Pdf::loadView('documents.invoice_pdf', compact('sale'))
+            ->setPaper('a4', 'portrait');
+
+        $cleanNumber = str_replace(['/', '\\'], '_', $sale->invoice_number ?? ('VD_' . str_pad($sale->id, 5, '0', STR_PAD_LEFT)));
+        return $pdf->download("Documento_{$cleanNumber}.pdf");
+    }
+
+    /**
+     * Atualizar Dados Fiscais / Tipo de Documento (Recibo, Factura-Recibo, Factura Comercial) e NUIT do Cliente
+     */
+    public function updateInvoiceDetails(Request $request, Sale $sale)
+    {
+        $validated = $request->validate([
+            'invoice_type'     => 'required|in:receipt,cash_invoice,invoice,proforma',
+            'customer_name'    => 'required|string|max:255',
+            'customer_nuit'    => 'nullable|string|max:30',
+            'customer_phone'   => 'nullable|string|max:40',
+            'customer_address' => 'nullable|string|max:255',
+            'tax_regime'       => 'nullable|in:normal,exempt,simplified',
+            'due_date'         => 'nullable|date',
+        ]);
+
+        $tenantId = $sale->tenant_id ?? current_tenant_id();
+        $newType = $validated['invoice_type'];
+
+        if ($sale->invoice_type !== $newType || empty($sale->invoice_number)) {
+            $sale->invoice_number = Sale::generateNextInvoiceNumber($tenantId, $newType);
+        }
+
+        $taxRegime = $validated['tax_regime'] ?? ($sale->tax_regime ?: 'normal');
+        $taxRate = $taxRegime === 'normal' ? (float) ($sale->tax_rate ?: 16.0) : 0.0;
+        $total = (float) $sale->total_amount;
+        $taxAmount = 0.0;
+
+        if ($taxRegime === 'normal' && $taxRate > 0 && $total > 0) {
+            $base = $total / (1 + ($taxRate / 100));
+            $taxAmount = round($total - $base, 2);
+        }
+
+        $sale->update([
+            'invoice_type'     => $newType,
+            'invoice_number'   => $sale->invoice_number,
+            'customer_name'    => $validated['customer_name'],
+            'customer_nuit'    => $validated['customer_nuit'] ?? null,
+            'customer_phone'   => $validated['customer_phone'] ?? null,
+            'customer_address' => $validated['customer_address'] ?? null,
+            'tax_regime'       => $taxRegime,
+            'tax_rate'         => $taxRate,
+            'tax_amount'       => $taxAmount,
+            'due_date'         => $validated['due_date'] ?? $sale->due_date,
+        ]);
+
+        return back()->with('success', "Documento atualizado para {$sale->official_invoice_title} ({$sale->invoice_number}) com sucesso!");
     }
 
     public function process_sale(Request $request)
@@ -237,11 +308,18 @@ class SaleController extends Controller
                     ->first();
             }
 
+            $invoiceType = $request->input('invoice_type', !empty($request->customer_nuit) ? 'cash_invoice' : 'receipt');
+
             $sale = Sale::create([
                 'user_id' => auth()->id(),
                 'cash_shift_id' => $activeShift?->id,
                 'sale_date' => now(),
                 'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
+                'customer_nuit' => $request->input('customer_nuit'),
+                'customer_phone' => $request->input('customer_phone'),
+                'customer_address' => $request->input('customer_address'),
+                'invoice_type' => $invoiceType,
+                'subtotal' => $totalAmount,
                 'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
                 'status' => 'completed',

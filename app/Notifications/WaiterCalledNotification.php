@@ -36,3 +36,4 @@ class WaiterCalledNotification extends Notification
         ];
     }
 }
+

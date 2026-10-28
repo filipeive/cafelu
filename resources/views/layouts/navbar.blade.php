@@ -1,19 +1,24 @@
 <nav
     class="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex z-50 transition-colors duration-300">
+    @php
+        $isOwnerConsole = function_exists('is_owner_console') ? is_owner_console() : (auth()->check() && auth()->user()->isSuperAdmin() && !session('is_support_mode'));
+    @endphp
     <!-- Logo Area -->
     <div class="flex items-center justify-center border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300"
         :class="sidebarCollapsed ? 'w-20' : 'w-64'">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-decoration-none">
-            @if($logo = \App\Models\Setting::get('system_logo'))
+        <a href="{{ $isOwnerConsole ? route('admin.tenants.index') : route('dashboard') }}" class="flex items-center gap-2 text-decoration-none">
+            @if(!$isOwnerConsole && ($logo = \App\Models\Setting::get('system_logo')))
                 <img src="{{ asset('storage/' . $logo) }}" alt="Logo" class="h-8 w-auto">
             @else
                 <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="h-8 w-auto">
             @endif
             <div class="hidden lg:block leading-tight" x-show="!sidebarCollapsed" x-transition>
-                <span class="block font-bold text-gray-800 dark:text-white tracking-wide">
-                    {{ current_tenant()?->name ?? \App\Models\Setting::get('company_name', 'RestPOS') }}
+                <span class="block font-bold text-gray-800 dark:text-white tracking-wide truncate max-w-[160px]">
+                    {{ $isOwnerConsole ? 'RestPOS SaaS' : (current_tenant()?->name ?? \App\Models\Setting::get('company_name', 'RestPOS')) }}
                 </span>
-                <span class="block text-xs text-warning font-semibold">POS SYSTEM</span>
+                <span class="block text-[10px] text-warning font-bold uppercase tracking-wider">
+                    {{ $isOwnerConsole ? 'OWNER CONSOLE' : 'POS SYSTEM' }}
+                </span>
             </div>
         </a>
     </div>
@@ -27,7 +32,7 @@
                 <i class="mdi mdi-menu text-2xl"></i>
             </button>
 
-            @if(auth()->user()->role !== 'customer')
+            @if(auth()->user()->role !== 'customer' && !$isOwnerConsole)
                 <!-- Global Search -->
                 <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -47,7 +52,15 @@
 
         <!-- Right Side: Actions & Profile -->
         <ul class="flex items-center gap-3">
-            @if(auth()->user()->role !== 'customer')
+            @if($isOwnerConsole)
+                <li>
+                    <a href="{{ route('admin.tenants.index') }}"
+                        class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors">
+                        <i class="mdi mdi-shield-crown-outline text-base"></i>
+                        <span>Gestão de Restaurantes</span>
+                    </a>
+                </li>
+            @elseif(auth()->user()->role !== 'customer')
                 <!-- Quick Actions Dropdown -->
                 <li class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.outside="open = false"
@@ -57,21 +70,25 @@
                     </button>
 
                     <div x-show="open" x-transition
-                        class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+                        class="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
                         style="display: none;">
                         <a href="{{ route('orders.index') }}"
                             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <i class="mdi mdi-cart-plus text-success"></i> {{ __('messages.orders') }}
                         </a>
+                        <a href="{{ route('quotations.create') }}"
+                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <i class="mdi mdi-file-document-plus-outline text-sky-500"></i> Nova Cotação
+                        </a>
                         <a href="{{ route('tables.index') }}"
                             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-calendar-plus text-info"></i> {{ __('messages.tables') }}
+                            <i class="mdi mdi-qrcode-scan text-info"></i> Mesas & QR Codes
                         </a>
                         <a href="{{ route('products.index', ['create' => 1]) }}"
                             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <i class="mdi mdi-food-variant text-warning"></i> {{ __('messages.add_product') }}
                         </a>
-                        @if(auth()->user()->role === 'admin')
+                        @if(in_array(auth()->user()->role, ['admin', 'superadmin']))
                             <a href="{{ route('settings.index') }}"
                                 class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700">
                                 <i class="mdi mdi-store-cog text-warning"></i> {{ __('messages.change_establishment_name') }}

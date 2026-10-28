@@ -134,6 +134,13 @@ if (!function_exists('is_impersonating')) {
     }
 }
 
+if (!function_exists('is_owner_console')) {
+    function is_owner_console(): bool
+    {
+        return auth()->check() && auth()->user()->isSuperAdmin() && !is_impersonating();
+    }
+}
+
 if (!function_exists('get_receipt_logo_data')) {
     function get_receipt_logo_data(): ?string
     {

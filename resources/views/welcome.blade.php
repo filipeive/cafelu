@@ -332,6 +332,19 @@
         </div>
     @endif
 
+    <!-- Aviso de Fallback se o QR Code escaneado era de uma mesa que foi eliminada -->
+    @if(!empty($qrFallbackNotice))
+        <div x-data="{ showNotice: true }" x-show="showNotice" class="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-amber-900 text-xs font-semibold flex items-center justify-between gap-3">
+            <div class="max-w-7xl mx-auto flex items-center gap-2">
+                <i class="mdi mdi-qrcode-scan text-amber-600 text-base"></i>
+                <span>{{ $qrFallbackNotice }}</span>
+            </div>
+            <button type="button" @click="showNotice = false" class="text-amber-700 hover:text-amber-950 p-1">
+                <i class="mdi mdi-close"></i>
+            </button>
+        </div>
+    @endif
+
     <!-- Navbar Executiva & Minimalista -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-stone-200/80 transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

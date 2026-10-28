@@ -26,6 +26,14 @@ class TenantScope implements Scope
 
         if ($tenantId !== null) {
             $builder->where($model->qualifyColumn('tenant_id'), $tenantId);
+            return;
+        }
+
+        // Strict Tenant Isolation (ZBIZ Pattern):
+        // If SuperAdmin is logged in outside Support Mode, never leak operational tenant records
+        // unless explicitly bypassed via TenantContext::withoutTenant().
+        if (auth()->check() && auth()->user()->isSuperAdmin() && !session('is_support_mode')) {
+            $builder->whereRaw('1 = 0');
         }
     }
 }

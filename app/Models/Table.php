@@ -28,11 +28,21 @@ class Table extends Model
 
     protected $appends = [
         'name',
+        'qr_code_url',
     ];
 
     public function getNameAttribute()
     {
         return 'Mesa ' . $this->number;
+    }
+
+    public function getQrCodeUrlAttribute(): string
+    {
+        try {
+            return route('welcome.table.short', ['table' => $this->number]);
+        } catch (\Throwable $e) {
+            return url('/m/' . $this->number);
+        }
     }
 
     /**

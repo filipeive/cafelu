@@ -8,6 +8,7 @@ use App\Http\Controllers\TableController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ClientController;
@@ -181,6 +182,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Tables
         Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
+        Route::get('/tables/qrcodes/print', [TableController::class, 'printQrCodes'])->name('tables.qrcodes.print');
         Route::get('/tables/create', [TableController::class, 'create'])->name('tables.create');
         Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
         Route::get('/tables/{table}/edit', [TableController::class, 'edit'])->name('tables.edit');
@@ -227,10 +229,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/products/export', [ProductController::class, 'export'])->name('products.export');
         Route::resource('categories', CategoryController::class);
 
-        // Sales
+        // Sales, Invoices & Receipts
         Route::resource('sales', SaleController::class);
         Route::get('sales/{sale}/receipt', [SaleController::class, 'receipt'])->name('sales.receipt');
         Route::post('sales/{sale}/print', [SaleController::class, 'receipt'])->name('sales.print');
+        Route::get('sales/{sale}/invoice-pdf', [SaleController::class, 'invoicePdf'])->name('sales.invoice.pdf');
+        Route::post('sales/{sale}/invoice-details', [SaleController::class, 'updateInvoiceDetails'])->name('sales.update-invoice');
+
+        // Quotations / Proformas (Estilo ZBIZ Plus)
+        Route::get('quotations', [QuotationController::class, 'index'])->name('quotations.index');
+        Route::get('quotations/create', [QuotationController::class, 'create'])->name('quotations.create');
+        Route::post('quotations', [QuotationController::class, 'store'])->name('quotations.store');
+        Route::get('quotations/{quotation}', [QuotationController::class, 'show'])->name('quotations.show');
+        Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'downloadPdf'])->name('quotations.pdf');
+        Route::post('quotations/{quotation}/status', [QuotationController::class, 'updateStatus'])->name('quotations.status');
+        Route::post('quotations/{quotation}/convert', [QuotationController::class, 'convertToSale'])->name('quotations.convert');
 
         // Expenses
         Route::resource('expenses', ExpenseController::class);

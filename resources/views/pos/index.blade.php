@@ -240,6 +240,24 @@
                 </button>
             </div>
 
+            <!-- Documento Fiscal & NUIT Bar (Compact) -->
+            <div class="px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700/80 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-7 flex items-center gap-1.5">
+                    <i class="mdi mdi-file-document-outline text-orange-500 text-sm"></i>
+                    <select x-model="invoiceType"
+                        class="w-full py-1 px-2 text-[11px] font-bold rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-1 focus:ring-orange-500">
+                        <option value="receipt">Recibo de Pagamento (RC)</option>
+                        <option value="cash_invoice">Factura-Recibo (FR)</option>
+                        <option value="invoice">Factura Comercial (FT)</option>
+                    </select>
+                </div>
+                <div class="col-span-5 flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <span class="text-[10px] font-bold text-gray-400">NUIT:</span>
+                    <input type="text" x-model="customerNuit" placeholder="Opcional..."
+                        class="w-full bg-transparent border-0 p-0 text-[11px] text-gray-800 dark:text-gray-200 font-semibold focus:ring-0 placeholder:text-gray-400">
+                </div>
+            </div>
+
             <!-- Retrieved Order Link Banner -->
             <div x-show="lastOrderId" x-cloak class="flex items-center justify-between px-4 py-1.5 bg-blue-50/90 dark:bg-blue-950/50 border-b border-blue-100 dark:border-blue-900/40 text-[11px] text-blue-800 dark:text-blue-300">
                 <span class="flex items-center gap-1.5 font-bold">
@@ -718,6 +736,8 @@
 
                     searchQuery: '',
                     customerName: '',
+                    customerNuit: '',
+                    invoiceType: 'receipt',
                     selectedCategory: 'all',
                     cart: [],
                     paymentMethod: 'cash',
@@ -996,9 +1016,11 @@
                                 price: item.price
                             })),
                             payment_method: method,
+                            invoice_type: this.invoiceType || 'receipt',
                             amount_paid: totalPaid,
                             total_amount: this.cartTotal,
                             customer_name: this.customerName || 'Cliente Geral',
+                            customer_nuit: this.customerNuit || null,
                             order_id: this.lastOrderId,
                             cash_amount: cash,
                             card_amount: card,
@@ -1027,6 +1049,8 @@
                                     this.lastSaleId = data.sale_id;
                                     this.lastOrderId = null;
                                     this.customerName = '';
+                                    this.customerNuit = '';
+                                    this.invoiceType = 'receipt';
 
                                     if (data.sale_id) {
                                         window.printSaleRecibo(data.sale_id);

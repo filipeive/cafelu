@@ -25,11 +25,6 @@ class IdentifyTenant
             $user = auth()->user();
             if ($user->tenant_id) {
                 $tenant = Tenant::find($user->tenant_id);
-            } elseif ($user->isSuperAdmin()) {
-                // SuperAdmin browsing outside impersonation: if session has selected tenant
-                if (session()->has('current_tenant_id')) {
-                    $tenant = Tenant::find(session('current_tenant_id'));
-                }
             }
         }
 
@@ -51,8 +46,12 @@ class IdentifyTenant
             }
         }
 
-        // 5. Default Fallback: First active tenant (e.g. Lu & Yoshi Cafe) for public menus & guests
-        if (!$tenant) {
+        // 5. Default Fallback: First active tenant ONLY for public menu routes or non-SuperAdmin users
+        // SuperAdmin in Normal Mode (Owner Console) must NEVER fall back to a client restaurant tenant!
+        $isSuperAdminNormalMode = auth()->check() && auth()->user()->isSuperAdmin() && !session('is_support_mode');
+        $isPublicMenuRoute = $request->routeIs('welcome*', 'self-service.*', 'lang.*') || $request->is('/', 'm/*', 'mesa/*', 'self-service/*', 'call-waiter', 'order-status/*');
+
+        if (!$tenant && (!$isSuperAdminNormalMode || $isPublicMenuRoute)) {
             $tenant = Tenant::where('status', 'active')->first() ?? Tenant::first();
         }
 

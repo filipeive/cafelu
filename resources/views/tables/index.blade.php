@@ -37,6 +37,12 @@
                 <span>Nova Mesa</span>
             </button>
 
+            <a href="{{ route('tables.qrcodes.print') }}" target="_blank"
+                class="px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 font-bold text-sm rounded-xl transition-all flex items-center gap-2">
+                <i class="mdi mdi-qrcode-scan text-lg text-emerald-600"></i>
+                <span>Imprimir QR Codes ({{ $totalTablesCount }})</span>
+            </a>
+
             <button @click="openMergeModal()" type="button" 
                 class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
                 <i class="mdi mdi-link-variant text-lg text-orange-500"></i>
@@ -319,6 +325,15 @@
                         </a>
                     @endif
 
+                    <!-- Botão QR Code da Mesa (Para mesas novas e existentes) -->
+                    <button type="button"
+                        @click="openQrModalById({{ $table->id }})"
+                        class="py-2 px-2.5 bg-white hover:bg-orange-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 hover:text-orange-600 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                        title="Ver e Imprimir QR Code da Mesa {{ $table->number }}">
+                        <i class="mdi mdi-qrcode-scan text-base text-orange-500"></i>
+                        <span class="hidden sm:inline">QR</span>
+                    </button>
+
                     @if($isGrouped && $isMain)
                         <form action="{{ route('tables.split') }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja separar este grupo de mesas?');">
                             @csrf
@@ -332,13 +347,14 @@
                         </form>
                     @endif
 
-                    @if($table->is_temporary && !$hasActiveOrder)
-                        <form action="{{ route('tables.destroy', $table->id) }}" method="POST" class="inline" onsubmit="return confirm('Remover esta mesa temporária?');">
+                    @if(!$hasActiveOrder && !$isGrouped && ($table->is_temporary || in_array(auth()->user()->role, ['admin', 'manager', 'superadmin'])))
+                        <form id="delete-table-form-{{ $table->id }}" action="{{ route('tables.destroy', $table->id) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" 
+                            <button type="button"
+                                @click="confirmDeleteTable({{ $table->id }}, '{{ $table->number }}', {{ $table->is_temporary ? 'true' : 'false' }})"
                                 class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
-                                title="Remover mesa">
+                                title="Eliminar Mesa {{ $table->number }}">
                                 <i class="mdi mdi-trash-can-outline text-base"></i>
                             </button>
                         </form>
@@ -552,9 +568,97 @@
         </div>
     </div>
 
+    <!-- Modal QR Code Individual da Mesa -->
+    <div x-show="showQrModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeQrModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="relative inline-block align-middle bg-white dark:bg-gray-800 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:max-w-md w-full border border-gray-100 dark:border-gray-700">
+                <div class="px-6 py-5 bg-gradient-to-r from-gray-900 to-gray-800 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center">
+                            <i class="mdi mdi-qrcode-scan text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold leading-tight" x-text="qrTable ? ('QR Code • Mesa ' + qrTable.number) : 'QR Code da Mesa'"></h3>
+                            <p class="text-xs text-gray-300">Autoatendimento & Menu Digital na Mesa</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="closeQrModal()" class="text-white/80 hover:text-white rounded-lg p-1 cursor-pointer">
+                        <i class="mdi mdi-close text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-5">
+                    <!-- Cartão Visual da Mesa (Table Tent Preview) -->
+                    <div id="printable-qr-card" class="bg-stone-50 dark:bg-gray-900 border-2 border-dashed border-orange-300 dark:border-orange-700/60 rounded-3xl p-6 text-center space-y-3 shadow-inner">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 text-white text-[11px] font-black uppercase tracking-wider">
+                            <i class="mdi mdi-silverware-fork-knife"></i>
+                            <span>{{ current_tenant()?->name ?? \App\Models\Setting::get('company_name', 'RestPOS') }}</span>
+                        </div>
+
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-gray-400 block">Atendimento Digital</span>
+                            <h4 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight" x-text="qrTable ? ('MESA ' + qrTable.number) : ''"></h4>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" x-text="qrTable ? (qrTable.capacity + ' lugares') : ''"></span>
+                        </div>
+
+                        <!-- Container do QR Code -->
+                        <div class="bg-white p-4 rounded-2xl inline-block shadow-md border border-gray-100 mx-auto">
+                            <div id="table-qr-svg-container" class="w-44 h-44 flex items-center justify-center mx-auto"></div>
+                        </div>
+
+                        <div class="space-y-1 pt-1">
+                            <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                Aponte a câmara do telemóvel para o QR Code
+                            </p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs mx-auto">
+                                Veja o menu ilustrado, faça o seu pedido diretamente para esta mesa ou chame o garçom com 1 toque.
+                            </p>
+                        </div>
+
+                        <div class="pt-2 border-t border-gray-200/80 dark:border-gray-800">
+                            <code class="text-[10px] text-orange-600 dark:text-orange-400 font-mono break-all" x-text="qrTable ? qrTable.qr_code_url : ''"></code>
+                        </div>
+                    </div>
+
+                    <!-- Ações Rápidas do QR Code -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button type="button" @click="copyQrLink()"
+                            class="py-2.5 px-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                            <i class="mdi" :class="qrCopied ? 'mdi-check text-emerald-500' : 'mdi-content-copy'"></i>
+                            <span x-text="qrCopied ? 'Link Copiado!' : 'Copiar Link'"></span>
+                        </button>
+
+                        <a :href="qrTable ? qrTable.qr_code_url : '#'" target="_blank"
+                            class="py-2.5 px-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                            <i class="mdi mdi-open-in-new text-orange-500"></i>
+                            <span>Testar Menu da Mesa</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-3">
+                    <button @click="closeQrModal()" type="button"
+                        class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer">
+                        Fechar
+                    </button>
+
+                    <a :href="qrTable ? ('{{ route('tables.qrcodes.print') }}?table_id=' + qrTable.id) : '{{ route('tables.qrcodes.print') }}'"
+                       target="_blank"
+                       class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5">
+                        <i class="mdi mdi-printer text-base"></i>
+                        <span>Imprimir Placa QR Code</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
     function tableManagement(tablesData) {
         return {
@@ -562,10 +666,21 @@
             activeFilter: 'all',
             showMergeModal: false,
             showCreateModal: false,
+            showQrModal: false,
+            qrTable: null,
+            qrCopied: false,
             selectedTables: [],
             mainTable: '',
             createCapacity: 4,
             tables: tablesData || [],
+
+            init() {
+                @if(session('new_table_qr_id'))
+                    this.$nextTick(() => {
+                        this.openQrModalById({{ (int) session('new_table_qr_id') }});
+                    });
+                @endif
+            },
 
             nextNumber: (function() {
                 if (!tablesData || tablesData.length === 0) return 1;
@@ -631,6 +746,96 @@
 
             closeCreateModal() {
                 this.showCreateModal = false;
+            },
+
+            openQrModalById(tableId) {
+                const found = this.tables.find(t => parseInt(t.id) === parseInt(tableId));
+                if (!found) return;
+                if (!found.qr_code_url) {
+                    found.qr_code_url = '{{ url('/m') }}/' + found.number;
+                }
+                this.qrTable = found;
+                this.qrCopied = false;
+                this.showQrModal = true;
+                this.$nextTick(() => {
+                    this.renderQrCode(found.qr_code_url);
+                });
+            },
+
+            closeQrModal() {
+                this.showQrModal = false;
+            },
+
+            renderQrCode(url) {
+                const container = document.getElementById('table-qr-svg-container');
+                if (!container) return;
+                try {
+                    if (typeof qrcode === 'function') {
+                        const qr = qrcode(0, 'M');
+                        qr.addData(url);
+                        qr.make();
+                        container.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2, scalable: true });
+                        const svg = container.querySelector('svg');
+                        if (svg) {
+                            svg.setAttribute('width', '176');
+                            svg.setAttribute('height', '176');
+                            svg.classList.add('w-44', 'h-44');
+                        }
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Fallback QR image:', e);
+                }
+                container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" alt="QR Code" class="w-44 h-44 object-contain">`;
+            },
+
+            copyQrLink() {
+                if (!this.qrTable || !this.qrTable.qr_code_url) return;
+                navigator.clipboard.writeText(this.qrTable.qr_code_url);
+                this.qrCopied = true;
+                setTimeout(() => { this.qrCopied = false; }, 2500);
+            },
+
+            confirmDeleteTable(tableId, tableNumber, isTemporary) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: `Eliminar Mesa ${tableNumber}?`,
+                        html: `
+                            <div class="text-left space-y-3 text-xs text-gray-600 dark:text-gray-300 mt-2">
+                                <p>Está prestes a eliminar a <strong>Mesa ${tableNumber}</strong>${isTemporary ? ' (Temporária)' : ''}.</p>
+                                <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+                                    <div class="font-bold flex items-center gap-1.5 mb-1 text-amber-700 dark:text-amber-300">
+                                        <i class="mdi mdi-qrcode-scan text-base"></i>
+                                        <span>Impacto no QR Code da Mesa ${tableNumber}</span>
+                                    </div>
+                                    <p class="leading-relaxed">
+                                        O QR Code impresso desta mesa (<code>/m/${tableNumber}</code>) deixará de criar pedidos vinculados à Mesa ${tableNumber}.
+                                        Caso algum cliente escaneie o QR Code antigo, o sistema abrirá automaticamente o <strong>Menu Digital Geral</strong> para não perder o atendimento.
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Sim, eliminar mesa',
+                        cancelButtonText: 'Cancelar',
+                        customClass: {
+                            popup: 'rounded-3xl'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('delete-table-form-' + tableId);
+                            if (form) form.submit();
+                        }
+                    });
+                } else {
+                    if (confirm(`Atenção: Ao eliminar a Mesa ${tableNumber}, o QR Code desta mesa passará a abrir apenas o Menu Geral. Confirmar exclusão?`)) {
+                        const form = document.getElementById('delete-table-form-' + tableId);
+                        if (form) form.submit();
+                    }
+                }
             },
 
             toggleTableSelection(id) {

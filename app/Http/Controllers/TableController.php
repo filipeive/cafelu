@@ -200,25 +200,36 @@ class TableController extends Controller
     }
 
     /**
-     * Criar uma nova mesa (temporária ou permanente)
+     * Criar uma nova mesa (temporária ou permanente) e disponibilizar o QR Code imediato
      */
     public function store(Request $request)
     {
         try {
+            $tenantId = current_tenant_id() ?? auth()->user()?->tenant_id;
+
             $request->validate([
-                'number' => 'required|integer|unique:tables,number',
+                'number' => [
+                    'required',
+                    'integer',
+                    'min:1',
+                    \Illuminate\Validation\Rule::unique('tables', 'number')
+                        ->where(fn ($q) => $tenantId ? $q->where('tenant_id', $tenantId) : $q)
+                        ->whereNull('deleted_at'),
+                ],
                 'capacity' => 'required|integer|min:1',
                 'is_temporary' => 'boolean'
             ]);
 
-            Table::create([
+            $table = Table::create([
                 'number' => $request->number,
                 'capacity' => $request->capacity,
                 'status' => 'free',
                 'is_temporary' => $request->is_temporary ?? false
             ]);
 
-            return redirect()->route('tables.index')->with('success', 'Mesa criada com sucesso!');
+            return redirect()->route('tables.index')
+                ->with('success', "Mesa {$table->number} criada com sucesso! O QR Code exclusivo da Mesa {$table->number} já está disponível para impressão.")
+                ->with('new_table_qr_id', $table->id);
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erro ao criar mesa: ' . $e->getMessage());
@@ -226,7 +237,23 @@ class TableController extends Controller
     }
 
     /**
-     * Remover uma mesa
+     * Página de impressão de QR Codes das mesas (individual ou em lote)
+     */
+    public function printQrCodes(Request $request)
+    {
+        $query = Table::orderBy('number');
+
+        if ($request->filled('table_id')) {
+            $query->where('id', $request->table_id);
+        }
+
+        $tables = $query->get();
+
+        return view('tables.print-qrcodes', compact('tables'));
+    }
+
+    /**
+     * Remover uma mesa (com salvaguarda para o QR Code)
      */
     public function destroy($id)
     {
@@ -237,9 +264,15 @@ class TableController extends Controller
                 return redirect()->back()->with('error', 'Não é possível remover uma mesa com pedido ativo.');
             }
 
+            if ($table->group_id) {
+                return redirect()->back()->with('error', 'Não é possível remover uma mesa que faz parte de um grupo. Separe o grupo primeiro.');
+            }
+
+            $tableNumber = $table->number;
             $table->delete();
 
-            return redirect()->route('tables.index')->with('success', 'Mesa removida com sucesso!');
+            return redirect()->route('tables.index')
+                ->with('success', "Mesa {$tableNumber} removida com sucesso! Nota: Caso o QR Code físico da Mesa {$tableNumber} seja escaneado, o sistema abrirá automaticamente o Menu Geral.");
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erro ao remover mesa: ' . $e->getMessage());

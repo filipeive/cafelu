@@ -121,6 +121,12 @@ class WebsiteCmsTest extends TestCase
         $welcome->assertSee("serviceType: 'takeaway'", false);
 
         // When accessed via QR Code (?mesa=3), it automatically switches to dine_in (Presencial)
+        \App\Models\Table::create([
+            'tenant_id' => $this->tenant->id,
+            'number' => 3,
+            'capacity' => 4,
+            'status' => 'free',
+        ]);
         $qrWelcome = $this->get('/?mesa=3');
         $qrWelcome->assertStatus(200);
         $qrWelcome->assertSee("serviceType: 'dine_in'", false);

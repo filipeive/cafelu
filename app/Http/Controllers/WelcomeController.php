@@ -20,9 +20,23 @@ class WelcomeController extends Controller
     {
         $cleanNumber = preg_replace('/[^0-9]/', '', $table);
         if (!empty($cleanNumber)) {
-            session(['self_service_table_number' => $cleanNumber]);
+            $matched = Table::where('number', (int) $cleanNumber)->first();
+            if ($matched) {
+                session([
+                    'self_service_table_number' => $cleanNumber,
+                    'self_service_table_id' => $matched->id,
+                ]);
+                return redirect()->route('welcome', ['mesa' => $cleanNumber]);
+            }
+
+            // Fallback seguro se a mesa foi eliminada: abre o menu geral sem falhar
+            session()->forget(['self_service_table_number', 'self_service_table_id']);
+            return redirect()->route('welcome')->with(
+                'qr_table_fallback',
+                "A Mesa {$cleanNumber} não se encontra ativa no momento. O Menu Digital foi aberto no modo geral — selecione a sua mesa atual ou faça o pedido para levar."
+            );
         }
-        return redirect()->route('welcome', ['mesa' => $cleanNumber]);
+        return redirect()->route('welcome');
     }
 
     public function index(Request $request)
@@ -42,15 +56,26 @@ class WelcomeController extends Controller
         $tables = Table::orderBy('number', 'asc')->get();
 
         // Detected table from QR code query parameter or session
+        $explicitQueryTable = $request->has('mesa') || $request->has('table');
         $detectedTable = $request->get('mesa', $request->get('table', session('self_service_table_number', '')));
-        $tableNumber = preg_replace('/[^0-9]/', '', (string)$detectedTable);
+        $rawTableNumber = preg_replace('/[^0-9]/', '', (string)$detectedTable);
 
+        $tableNumber = '';
         $detectedTableId = '';
-        if (!empty($tableNumber)) {
-            $matched = $tables->firstWhere('number', (int)$tableNumber);
+        $qrFallbackNotice = session('qr_table_fallback');
+
+        if (!empty($rawTableNumber)) {
+            $matched = $tables->firstWhere('number', (int)$rawTableNumber);
             if ($matched) {
+                $tableNumber = (string) $matched->number;
                 $detectedTableId = $matched->id;
                 session(['self_service_table_number' => $tableNumber, 'self_service_table_id' => $matched->id]);
+            } else {
+                // Table was deleted or does not exist: gracefully fall back to general menu
+                session()->forget(['self_service_table_number', 'self_service_table_id']);
+                if ($explicitQueryTable && !$qrFallbackNotice) {
+                    $qrFallbackNotice = "A Mesa {$rawTableNumber} já não se encontra registada. Apresentamos o nosso Menu Geral — pode selecionar outra mesa ou pedir para levar.";
+                }
             }
         }
 
@@ -62,7 +87,7 @@ class WelcomeController extends Controller
             // Table may not exist yet on outdated installs
         }
 
-        return view('welcome', compact('categories', 'featuredProducts', 'tables', 'tableNumber', 'detectedTableId', 'slides'));
+        return view('welcome', compact('categories', 'featuredProducts', 'tables', 'tableNumber', 'detectedTableId', 'slides', 'qrFallbackNotice'));
     }
 
     public function storeSelfServiceOrder(Request $request)

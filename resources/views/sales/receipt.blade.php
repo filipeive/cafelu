@@ -166,8 +166,15 @@
         <div class="divider"></div>
 
         <div class="info">
-            <p><strong>{{ __('messages.receipt_number') }} #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</strong></p>
+            <p><strong>{{ strtoupper($sale->official_invoice_title) }}</strong></p>
+            <p><strong>Nº: {{ $sale->invoice_number ?? '#' . str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}</strong></p>
             <p><strong>{{ __('messages.date') }}:</strong> {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y H:i') }}</p>
+            @if($sale->customer_name)
+                <p><strong>Cliente:</strong> {{ $sale->customer_name }}</p>
+            @endif
+            @if($sale->customer_nuit)
+                <p><strong>NUIT Cliente:</strong> {{ $sale->customer_nuit }}</p>
+            @endif
             @if($sale->table)
                 <p><strong>{{ __('messages.table') }}:</strong> {{ $sale->table->number }}</p>
             @endif

@@ -10,6 +10,10 @@
     <!-- Menu de Navegação Principal -->
     <ul class="flex-1 overflow-y-auto py-3 px-3 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 overflow-x-hidden">
         
+        @php
+            $isOwnerConsole = function_exists('is_owner_console') ? is_owner_console() : (Auth::user()->role === 'superadmin' && !session('is_support_mode'));
+        @endphp
+
         @if(Auth::user()->role == 'customer')
             <!-- ÁREA DO CLIENTE -->
             <div class="mb-2">
@@ -18,7 +22,93 @@
                 <x-sidebar.nav-item route="welcome" icon="mdi-silverware-fork-knife" title="Fazer Pedido" />
                 <x-sidebar.nav-item route="customer.profile" icon="mdi-account-circle-outline" title="Meu Perfil" />
             </div>
+        @elseif($isOwnerConsole)
+            <!-- CONSOLE DO DONO DA PLATAFORMA (SAAS MODE - ESTILO ZBIZ PLUS) -->
+            <div class="pt-1 pb-1">
+                <div class="px-3 mb-2 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                    <span class="text-[10px] font-black text-orange-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="mdi mdi-shield-crown text-sm"></i>
+                        <span>Painel do Dono (SaaS)</span>
+                    </span>
+                </div>
+                <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
+
+                @php
+                    $totalTenantsCount = \App\Models\Tenant::count();
+                    $activeLicensesCount = \App\Models\LicenseKey::where('status', 'active')->count();
+                @endphp
+
+                <x-sidebar.nav-item 
+                    route="admin.tenants.index" 
+                    icon="mdi-store-cog-outline" 
+                    title="Restaurantes & Clientes"
+                    :badge="$totalTenantsCount"
+                    badgeClass="bg-orange-50 text-orange-600 dark:bg-orange-950/60 dark:text-orange-400 border border-orange-200/60"
+                    :showBadge="$totalTenantsCount > 0"
+                />
+
+                <x-sidebar.nav-item 
+                    route="admin.licenses.index" 
+                    icon="mdi-key-chain" 
+                    title="Licenças & Seriais"
+                    :badge="$activeLicensesCount"
+                    badgeClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60"
+                    :showBadge="$activeLicensesCount > 0"
+                />
+            </div>
+
+            <!-- ADMINISTRAÇÃO GLOBAL DA PLATAFORMA -->
+            <div class="pt-3 pb-1">
+                <div class="px-3 mb-2 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
+                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        Administração Global
+                    </span>
+                </div>
+                <div class="h-px bg-gray-200/80 dark:bg-gray-800 my-2 mx-2" x-show="sidebarCollapsed"></div>
+
+                <x-sidebar.nav-item 
+                    route="users.index" 
+                    icon="mdi-account-cog-outline" 
+                    title="Todos os Utilizadores" 
+                />
+
+                <x-sidebar.nav-item 
+                    route="audit_logs.index" 
+                    icon="mdi-history" 
+                    title="Auditoria & Atividades" 
+                />
+
+                <x-sidebar.nav-item 
+                    route="profile.edit" 
+                    icon="mdi-account-circle-outline" 
+                    title="Perfil do Owner" 
+                />
+            </div>
+
+            <!-- Card Informativo de Isolamento de Tenant -->
+            <div class="mt-4 mx-1 p-3.5 rounded-2xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/70 dark:border-orange-800/40" x-show="!sidebarCollapsed" x-transition>
+                <div class="flex items-center gap-2 text-orange-700 dark:text-orange-300 font-bold text-xs mb-1">
+                    <i class="mdi mdi-shield-lock-outline text-base"></i>
+                    <span>Isolamento SaaS Ativo</span>
+                </div>
+                <p class="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed">
+                    Está no modo <strong>Dono do Sistema</strong>. Os dados operacionais de cada restaurante estão isolados. Para prestar suporte técnico num restaurante, clique em <strong>Entrar</strong> na lista de clientes.
+                </p>
+            </div>
         @else
+            <!-- MODO OPERACIONAL DO RESTAURANTE (OU SUPERADMIN EM MODO SUPORTE) -->
+            @if(session('is_support_mode'))
+                <div class="mb-3 mx-1 p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700/60" x-show="!sidebarCollapsed" x-transition>
+                    <div class="flex items-center justify-between text-[11px] font-black text-amber-800 dark:text-amber-300">
+                        <span class="flex items-center gap-1 truncate">
+                            <i class="mdi mdi-shield-account text-sm"></i>
+                            <span class="truncate">{{ session('current_tenant_name', 'Modo Suporte') }}</span>
+                        </span>
+                        <span class="px-1.5 py-0.5 rounded bg-amber-200/80 dark:bg-amber-800 text-[9px] uppercase">Suporte</span>
+                    </div>
+                </div>
+            @endif
+
             <!-- PRINCIPAL -->
             <div class="mb-2">
                 <x-sidebar.nav-item route="dashboard" icon="mdi-view-dashboard-outline" title="{{ __('messages.dashboard') }}" />
@@ -129,14 +219,26 @@
                     $todaySales = \App\Models\Sale::whereDate('created_at', today())->sum('total_amount') ?? 0;
                     $formattedSales = number_format($todaySales, 0, ',', '.');
                     $debtsCount = \App\Models\CustomerDebt::where('status', '!=', 'paid')->count();
+                    $quotationsCount = \Illuminate\Support\Facades\Schema::hasTable('quotations')
+                        ? \App\Models\Quotation::whereIn('status', ['draft', 'sent', 'approved'])->count()
+                        : 0;
                 @endphp
 
                 <x-sidebar.nav-item 
                     route="sales.index" 
                     icon="mdi-cash-register" 
-                    title="{{ __('messages.sales') }}"
+                    title="Vendas, Facturas & Recibos"
                     :badge="'MZN ' . $formattedSales"
                     badgeClass="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 text-[10px]"
+                />
+
+                <x-sidebar.nav-item 
+                    route="quotations.index" 
+                    icon="mdi-file-document-edit-outline" 
+                    title="Cotações & Propostas"
+                    :badge="$quotationsCount"
+                    badgeClass="bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400 border border-sky-200/60"
+                    :showBadge="$quotationsCount > 0"
                 />
 
                 <x-sidebar.nav-item 
@@ -160,7 +262,7 @@
                     :showBadge="$debtsCount > 0"
                 />
 
-                @if(Auth::user()->role == 'admin')
+                @if(in_array(Auth::user()->role, ['admin', 'superadmin', 'super_admin']))
                     <x-sidebar.nav-item 
                         route="reports.index" 
                         icon="mdi-chart-box-outline" 
@@ -200,7 +302,7 @@
             </div>
 
             <!-- ADMINISTRAÇÃO (Admin Only) -->
-            @if(Auth::user()->role == 'admin' || Auth::user()->role == 'super_admin')
+            @if(in_array(Auth::user()->role, ['admin', 'superadmin', 'super_admin']))
                 <div class="pt-3 pb-1">
                     <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
                         <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">

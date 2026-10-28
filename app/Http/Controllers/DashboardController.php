@@ -19,6 +19,11 @@ class DashboardController extends Controller
             return redirect()->route('customer.dashboard');
         }
 
+        // ZBIZ Pattern: SuperAdmin in Normal Mode (Owner Console) goes directly to SaaS Control Center
+        if (auth()->user()->isSuperAdmin() && !session('is_support_mode')) {
+            return redirect()->route('admin.tenants.index');
+        }
+
         $cacheKey = 'dashboard_data_' . auth()->id() . '_t_' . (current_tenant_id() ?? '0');
         if (session('is_support_mode')) {
             cache()->forget($cacheKey);

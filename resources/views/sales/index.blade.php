@@ -102,9 +102,16 @@
                             placeholder="{{ __('messages.search_sales_placeholder') }}">
                     </div>
 
+                    <!-- Cotações Button -->
+                    <a href="{{ route('quotations.index') }}"
+                        class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium transition-colors flex items-center gap-2 text-sm">
+                        <i class="mdi mdi-file-document-edit-outline"></i>
+                        Cotações & Proformas
+                    </a>
+
                     <!-- New Sale Button -->
                     <a href="{{ route('pos.index') }}"
-                        class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors flex items-center gap-2">
+                        class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors flex items-center gap-2 text-sm">
                         <i class="mdi mdi-plus"></i>
                         {{ __('messages.new_sale') }}
                     </a>
@@ -117,7 +124,8 @@
                     <thead>
                         <tr
                             class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold">
-                            <th class="px-6 py-3">{{ __('messages.id') }}</th>
+                            <th class="px-6 py-3">Documento / Nº</th>
+                            <th class="px-6 py-3">Cliente / NUIT</th>
                             <th class="px-6 py-3">{{ __('messages.date') }}</th>
                             <th class="px-6 py-3">{{ __('messages.total') }}</th>
                             <th class="px-6 py-3">{{ __('messages.payment_method') }}</th>
@@ -129,9 +137,20 @@
                         @forelse ($sales as $sale)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4">
-                                    <span class="font-medium text-orange-600 dark:text-orange-400">
-                                        #{{ str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}
+                                    <a href="{{ route('sales.show', $sale->id) }}" class="font-bold text-orange-600 dark:text-orange-400 hover:underline block">
+                                        {{ $sale->invoice_number ?? '#' . str_pad($sale->id, 5, '0', STR_PAD_LEFT) }}
+                                    </a>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 mt-0.5">
+                                        {{ $sale->official_invoice_title }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                                        {{ $sale->customer_name ?: 'Consumidor Final' }}
+                                    </div>
+                                    @if($sale->customer_nuit)
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">NUIT: {{ $sale->customer_nuit }}</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
@@ -151,6 +170,9 @@
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-gray-900 dark:text-white">MZN
                                         {{ number_format($sale->total_amount, 2) }}</div>
+                                    @if($sale->tax_amount > 0)
+                                        <div class="text-[11px] text-gray-400">IVA: {{ number_format($sale->tax_amount, 2) }}</div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
@@ -169,7 +191,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="flex justify-center gap-2">
+                                    <div class="flex justify-center gap-1.5">
                                         <a href="{{ route('sales.show', $sale->id) }}"
                                             class="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-colors"
                                             title="{{ __('messages.view_details') }}">
@@ -177,15 +199,20 @@
                                         </a>
                                         <button onclick="window.printSaleRecibo({{ $sale->id }})"
                                             class="p-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-400 dark:hover:bg-cyan-900/40 transition-colors"
-                                            title="{{ __('messages.print') }}">
+                                            title="Imprimir Talão Térmico 80mm">
                                             <i class="mdi mdi-printer"></i>
                                         </button>
+                                        <a href="{{ route('sales.invoice.pdf', $sale->id) }}"
+                                            class="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                                            title="Descarregar Factura / Recibo PDF A4">
+                                            <i class="mdi mdi-file-pdf-box"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
+                                <td colspan="7" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
                                         <i class="mdi mdi-cash-remove text-6xl mb-3 opacity-50"></i>
                                         <p class="text-lg font-medium mb-1">{{ __('messages.no_sales_found') }}</p>

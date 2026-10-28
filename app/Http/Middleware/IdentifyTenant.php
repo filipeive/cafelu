@@ -15,8 +15,29 @@ class IdentifyTenant
         $context = app(TenantContext::class);
         $tenant = null;
 
+        // 0. Public Restaurant Route Parameter (/r/{tenant}, /restaurante/{tenant}, /{tenant})
+        $routeTenantParam = $request->route('tenant');
+        if ($routeTenantParam && !$request->is('admin/*')) {
+            if ($routeTenantParam instanceof Tenant) {
+                $tenant = $routeTenantParam;
+            } elseif (is_string($routeTenantParam) || is_numeric($routeTenantParam)) {
+                $tenant = Tenant::where('slug', (string) $routeTenantParam)
+                    ->orWhere('subdomain', (string) $routeTenantParam)
+                    ->when(is_numeric($routeTenantParam), fn ($q) => $q->orWhere('id', (int) $routeTenantParam))
+                    ->first();
+            }
+        }
+
+        // 0b. Public Request Query / Payload (?restaurante=slug or tenant_id in self-service order/waiter call)
+        if (!$tenant && ($request->filled('restaurante') || ($request->is('self-service/*', 'call-waiter') && $request->filled('tenant_id')))) {
+            $identifier = $request->input('restaurante', $request->input('tenant_id'));
+            $tenant = Tenant::where('slug', (string) $identifier)
+                ->when(is_numeric($identifier), fn ($q) => $q->orWhere('id', (int) $identifier))
+                ->first();
+        }
+
         // 1. Support Mode / Impersonation by SuperAdmin
-        if (session('is_support_mode') && session()->has('current_tenant_id')) {
+        if (!$tenant && session('is_support_mode') && session()->has('current_tenant_id')) {
             $tenant = Tenant::find(session('current_tenant_id'));
         }
 
@@ -46,10 +67,17 @@ class IdentifyTenant
             }
         }
 
+        // 4b. Public Session Tenant (when visitor previously selected a restaurant from the network hub)
+        $isPublicMenuRoute = $request->routeIs('welcome*', 'restaurant.*', 'self-service.*', 'lang.*')
+            || $request->is('/', 'r/*', 'restaurante/*', 'm/*', 'mesa/*', 'self-service/*', 'call-waiter', 'order-status/*');
+
+        if (!$tenant && $isPublicMenuRoute && session()->has('public_tenant_id')) {
+            $tenant = Tenant::find(session('public_tenant_id'));
+        }
+
         // 5. Default Fallback: First active tenant ONLY for public menu routes or non-SuperAdmin users
         // SuperAdmin in Normal Mode (Owner Console) must NEVER fall back to a client restaurant tenant!
         $isSuperAdminNormalMode = auth()->check() && auth()->user()->isSuperAdmin() && !session('is_support_mode');
-        $isPublicMenuRoute = $request->routeIs('welcome*', 'self-service.*', 'lang.*') || $request->is('/', 'm/*', 'mesa/*', 'self-service/*', 'call-waiter', 'order-status/*');
 
         if (!$tenant && (!$isSuperAdminNormalMode || $isPublicMenuRoute)) {
             $tenant = Tenant::where('status', 'active')->first() ?? Tenant::first();
@@ -60,9 +88,11 @@ class IdentifyTenant
 
             // Share current tenant to all Blade views automatically
             view()->share('currentTenant', $tenant);
+        } else {
+            $context->setTenant(null);
+            view()->share('currentTenant', null);
         }
 
         return $next($request);
     }
 }
-

@@ -39,6 +39,10 @@ class Table extends Model
     public function getQrCodeUrlAttribute(): string
     {
         try {
+            $tenantSlug = $this->tenant?->slug ?? (function_exists('current_tenant') ? current_tenant()?->slug : null);
+            if ($tenantSlug) {
+                return route('welcome.tenant.table', ['tenant' => $tenantSlug, 'table' => $this->number]);
+            }
             return route('welcome.table.short', ['table' => $this->number]);
         } catch (\Throwable $e) {
             return url('/m/' . $this->number);

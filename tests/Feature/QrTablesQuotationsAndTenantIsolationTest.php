@@ -242,4 +242,96 @@ class QrTablesQuotationsAndTenantIsolationTest extends TestCase
         $this->assertEquals('Factura Comercial', $sale->official_invoice_title);
         $this->assertEquals('400555777', $sale->customer_nuit);
     }
+
+    public function test_settings_audit_logs_and_public_restaurant_menus_are_isolated_per_tenant(): void
+    {
+        $secondTenant = Tenant::create([
+            'name' => 'Zalala Grill & Lounge',
+            'slug' => 'zalala-grill',
+            'city' => 'Quelimane',
+            'status' => 'active',
+        ]);
+
+        $secondAdmin = User::create([
+            'tenant_id' => $secondTenant->id,
+            'name' => 'Admin Zalala',
+            'username' => 'adminzalala',
+            'email' => 'admin@zalala.co.mz',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        // 1. Settings Isolation: Tenant 1 vs Tenant 2 vs Owner Console
+        $this->actingAs($this->tenantAdmin)
+            ->post(route('settings.update-name'), ['company_name' => 'Café Lu & Yoshi Oficial'])
+            ->assertRedirect();
+
+        $this->actingAs($secondAdmin)
+            ->post(route('settings.update-name'), ['company_name' => 'Zalala Grill Premium'])
+            ->assertRedirect();
+
+        $this->assertEquals('Café Lu & Yoshi Oficial', \App\Models\Setting::get('company_name', null, $this->tenant->id));
+        $this->assertEquals('Zalala Grill Premium', \App\Models\Setting::get('company_name', null, $secondTenant->id));
+
+        // 2. Audit Logs Differentiation: Owner Console vs Restaurant Admin
+        $cat1 = Category::create(['tenant_id' => $this->tenant->id, 'name' => 'Cafés']);
+        $cat2 = Category::create(['tenant_id' => $secondTenant->id, 'name' => 'Mariscos']);
+
+        $prod1 = Product::create([
+            'tenant_id' => $this->tenant->id,
+            'category_id' => $cat1->id,
+            'name' => 'Expresso Duplo Lu',
+            'price' => 150,
+            'selling_price' => 150,
+            'is_active' => true,
+        ]);
+
+        $prod2 = Product::create([
+            'tenant_id' => $secondTenant->id,
+            'category_id' => $cat2->id,
+            'name' => 'Lagosta Grelhada Zalala',
+            'price' => 1800,
+            'selling_price' => 1800,
+            'is_active' => true,
+        ]);
+
+        // Owner sees the Enterprise SaaS Audit Console and both tenants
+        $this->actingAs($this->superAdmin)
+            ->get(route('audit_logs.index'))
+            ->assertStatus(200)
+            ->assertSee('Central de Auditoria da Plataforma', false)
+            ->assertSee('Café Lu & Yoshi Oficial')
+            ->assertSee('Zalala Grill Premium');
+
+        // Tenant 1 Admin sees Operational Audit and CANNOT open Tenant 2's audit log detail
+        $this->actingAs($this->tenantAdmin)
+            ->get(route('audit_logs.index'))
+            ->assertStatus(200)
+            ->assertSee('Registo de Atividades do Restaurante', false)
+            ->assertDontSee('Central de Auditoria da Plataforma', false);
+
+        $tenant2Log = \App\Models\AuditLog::where('tenant_id', $secondTenant->id)->first();
+        if ($tenant2Log) {
+            $this->actingAs($this->tenantAdmin)
+                ->get(route('audit_logs.show', $tenant2Log->id))
+                ->assertStatus(403);
+        }
+
+        // 3. Public Network Hub (/) vs Individual Restaurant Pages (/{slug})
+        $this->get('/')
+            ->assertStatus(200)
+            ->assertSee('Café Lu & Yoshi Oficial')
+            ->assertSee('Zalala Grill Premium');
+
+        $this->get('/lu-yoshi')
+            ->assertStatus(200)
+            ->assertSee('Expresso Duplo Lu', false)
+            ->assertDontSee('Lagosta Grelhada Zalala', false);
+
+        $this->get('/zalala-grill')
+            ->assertStatus(200)
+            ->assertSee('Lagosta Grelhada Zalala', false)
+            ->assertDontSee('Expresso Duplo Lu', false);
+    }
 }

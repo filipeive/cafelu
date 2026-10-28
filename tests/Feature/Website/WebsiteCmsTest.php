@@ -56,13 +56,25 @@ class WebsiteCmsTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->get('/');
+        // Root / renders the Restaurant Network Hub
+        $networkResponse = $this->get('/');
+        $networkResponse->assertStatus(200);
+        $networkResponse->assertSee('Rede de Restaurantes', false);
+        $networkResponse->assertSee($this->tenant->name);
+        $networkResponse->assertSee('/' . $this->tenant->slug, false);
+
+        // Visiting /{slug}, /{id}, or /r/{slug} opens that specific restaurant's digital menu
+        $response = $this->get('/' . $this->tenant->slug);
 
         $response->assertStatus(200);
         $response->assertSee('Camarão Grelhado à Café Lu', false);
         $response->assertSee('Galeria com Fotos', false);
         $response->assertSee('Menu Clássico', false);
         $response->assertSee('Sugestões & Destaques da Casa', false);
+
+        $byIdResponse = $this->get('/' . $this->tenant->id);
+        $byIdResponse->assertStatus(200);
+        $byIdResponse->assertSee('Camarão Grelhado à Café Lu', false);
     }
 
     public function test_admin_can_manage_website_cms_content_and_slides(): void
@@ -109,8 +121,8 @@ class WebsiteCmsTest extends TestCase
             'button_text' => 'Encomendar Agora',
         ]);
 
-        // Verify the public welcome page reflects the CMS updates and slide
-        $welcome = $this->get('/');
+        // Verify the public restaurant page reflects the CMS updates and slide
+        $welcome = $this->get('/' . $this->tenant->slug);
         $welcome->assertStatus(200);
         $welcome->assertSee('Entregas grátis em compras acima de 2000 MT');
         $welcome->assertSee('Nossa Tradição Culinária');
@@ -145,7 +157,7 @@ class WebsiteCmsTest extends TestCase
 
     public function test_call_waiter_dispatches_real_time_notification_with_sound_trigger_to_staff(): void
     {
-        $welcome = $this->get('/');
+        $welcome = $this->get('/' . $this->tenant->slug);
         $welcome->assertStatus(200);
         $welcome->assertSee('Como deseja ser atendido hoje?', false);
         $welcome->assertSee('Estou no Restaurante', false);

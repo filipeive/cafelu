@@ -38,7 +38,7 @@ class CheckRole
             // In Normal Mode (Owner Console), SuperAdmin only accesses SaaS & Global Admin routes (users, audit_logs).
             // Operational restaurant routes (POS, Products, Tables, Orders, Sales, etc.) require Support Mode!
             if ($userRole === 'superadmin' && in_array($expected, ['admin', 'manager', 'waiter', 'cashier'])) {
-                $isGlobalAdminRoute = $request->routeIs('users.*', 'audit_logs.*', 'admin.*', 'profile.*', 'notifications.*');
+                $isGlobalAdminRoute = $request->routeIs('users.*', 'audit_logs.*', 'settings.*', 'admin.*', 'profile.*', 'notifications.*');
                 if (!session('is_support_mode') && !$isGlobalAdminRoute) {
                     return redirect()->route('admin.tenants.index')
                         ->with('warning', 'Isolamento SaaS Ativo: Para aceder ou gerir os módulos operacionais de um restaurante (Produtos, POS, Mesas, Pedidos, Faturação), clique em "Entrar (Modo Suporte)" no restaurante desejado.');

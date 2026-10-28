@@ -261,6 +261,13 @@
                                     </button>
                                 </form>
 
+                                <!-- Public Page / Menu Digital -->
+                                <a href="{{ url('/' . $tenant->slug) }}" target="_blank"
+                                   class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-orange-500 transition"
+                                   title="Abrir Página Pública / Cardápio Digital (/{{ $tenant->slug }})">
+                                    <i class="mdi mdi-web text-base"></i>
+                                </a>
+
                                 <!-- Certificate -->
                                 <a href="{{ route('admin.tenants.certificate', $tenant) }}" 
                                    class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-emerald-500 transition"

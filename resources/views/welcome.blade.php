@@ -2,11 +2,12 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth h-full">
 
 @php
-    $companyName = \App\Models\Setting::get('company_name', 'Café & Restaurante');
+    $currentTenantModel = current_tenant();
+    $companyName = \App\Models\Setting::get('company_name', $currentTenantModel?->name ?? 'Café & Restaurante');
     $companySubtitle = \App\Models\Setting::get('company_subtitle', 'Cardápio Digital & Pedidos Online');
-    $companyPhone = \App\Models\Setting::get('company_phone', '');
-    $companyEmail = \App\Models\Setting::get('company_email', '');
-    $companyAddress = \App\Models\Setting::get('company_address', '');
+    $companyPhone = \App\Models\Setting::get('company_phone', $currentTenantModel?->phone ?? '');
+    $companyEmail = \App\Models\Setting::get('company_email', $currentTenantModel?->email ?? '');
+    $companyAddress = \App\Models\Setting::get('company_address', $currentTenantModel?->address ?? '');
     $primaryColor = \App\Models\Setting::get('primary_color', '#f97316');
     $currency = \App\Models\Setting::get('currency_symbol', 'MT');
     $logo = \App\Models\Setting::get('system_logo');
@@ -381,6 +382,10 @@
                     </a>
                     <a href="#contactos" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
                         Contactos
+                    </a>
+                    <a href="{{ route('welcome') }}" class="py-1 text-orange-600 hover:text-orange-700 transition-colors inline-flex items-center gap-1">
+                        <i class="mdi mdi-store-marker-outline"></i>
+                        Rede de Restaurantes
                     </a>
                 </nav>
 
@@ -2316,6 +2321,7 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
+                        tenant_id: {{ current_tenant_id() ?? 'null' }},
                         table: this.tableNumber ? 'Mesa ' + this.tableNumber : 'Balcão / Salão',
                         name: this.customerName || 'Cliente',
                         reason: this.waiterReason || 'Solicitou atendimento na mesa'
@@ -2410,6 +2416,7 @@
                 this.submitting = true;
 
                 const payload = {
+                    tenant_id: {{ current_tenant_id() ?? 'null' }},
                     customer_name: this.customerName || null,
                     phone: this.customerPhone || null,
                     table_id: this.serviceType === 'dine_in' ? (this.selectedTableId || null) : null,
@@ -2429,7 +2436,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify(payload)
                 })

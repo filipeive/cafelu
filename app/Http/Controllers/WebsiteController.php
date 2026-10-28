@@ -79,7 +79,7 @@ class WebsiteController extends Controller
             Setting::set('site_about_image', $path, 'website', 'file');
         }
 
-        Cache::forget('app_settings_all');
+        Setting::clearCache();
 
         return redirect()->route('website.index', ['tab' => 'content'])->with('success', 'Conteúdo da página atualizado com sucesso.');
     }

@@ -38,6 +38,7 @@ class LoginController extends Controller
         $user->update(['last_login_at' => now()]);
 
         AuditLog::create([
+            'tenant_id' => $user->tenant_id,
             'user_id' => $user->id,
             'action' => 'login',
             'ip_address' => $request->ip(),
@@ -51,6 +52,7 @@ class LoginController extends Controller
 
         if ($user) {
             AuditLog::create([
+                'tenant_id' => $user->tenant_id ?? (function_exists('current_tenant_id') ? current_tenant_id() : null),
                 'user_id' => $user->id,
                 'action' => 'logout',
                 'ip_address' => $request->ip(),

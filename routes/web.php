@@ -36,6 +36,10 @@ use App\Http\Controllers\LicenseController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+Route::get('/restaurantes', [WelcomeController::class, 'network'])->name('restaurants.network');
+Route::get('/r/{tenant}', [WelcomeController::class, 'showRestaurant'])->name('restaurant.menu');
+Route::get('/restaurante/{tenant}', [WelcomeController::class, 'showRestaurant'])->name('restaurant.menu.alt');
+Route::get('/r/{tenant}/m/{table}', [WelcomeController::class, 'tenantTableEntry'])->name('welcome.tenant.table');
 Route::get('/m/{table}', [WelcomeController::class, 'tableEntry'])->name('welcome.table.short');
 Route::get('/mesa/{table}', [WelcomeController::class, 'tableEntry'])->name('welcome.table');
 Route::post('/self-service/order', [WelcomeController::class, 'storeSelfServiceOrder'])->name('self-service.order');
@@ -281,6 +285,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.save');
 });
+
+// Direct Restaurant Public Routes: http://host/RestPOS/{tenant_id_or_slug}
+Route::get('/{tenant}/m/{table}', [WelcomeController::class, 'tenantTableEntry'])->name('welcome.slug.table');
+Route::get('/{tenant}', [WelcomeController::class, 'showRestaurant'])->name('restaurant.slug');
 // Restricted Routes with Throttling
 // Route::middleware(['auth:web', 'throttle:6,1'])->group(function () {
 //     Route::get('/restricted-page', 'RestrictedController@show')->name('restricted-page');

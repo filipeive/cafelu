@@ -35,8 +35,9 @@ trait Auditable
             // Don't log if no changes (except timestamps)
             unset($newValues['updated_at']);
             unset($oldValues['updated_at']);
-            if (empty($newValues))
+            if (empty($newValues)) {
                 return;
+            }
         } elseif ($action === 'created') {
             $newValues = $this->getAttributes();
             unset($newValues['created_at'], $newValues['updated_at']);
@@ -44,15 +45,20 @@ trait Auditable
             $oldValues = $this->getAttributes();
         }
 
+        $tenantId = $this->getAttribute('tenant_id')
+            ?? (function_exists('current_tenant_id') ? current_tenant_id() : null)
+            ?? Auth::user()?->tenant_id;
+
         AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => $action,
+            'tenant_id'      => $tenantId,
+            'user_id'        => Auth::id(),
+            'action'         => $action,
             'auditable_type' => get_class($this),
-            'auditable_id' => $this->id,
-            'old_values' => $oldValues,
-            'new_values' => $newValues,
-            'ip_address' => Request::ip(),
-            'user_agent' => Request::userAgent(),
+            'auditable_id'   => $this->id,
+            'old_values'     => $oldValues,
+            'new_values'     => $newValues,
+            'ip_address'     => Request::ip(),
+            'user_agent'     => Request::userAgent(),
         ]);
     }
 }

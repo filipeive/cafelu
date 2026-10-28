@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\LicenseKey;
 use App\Models\Product;
 use App\Models\Sale;
@@ -186,6 +187,23 @@ class TenantController extends Controller
             return $tenant;
         });
 
+        AuditLog::create([
+            'tenant_id'      => $tenant->id,
+            'user_id'        => auth()->id(),
+            'action'         => 'tenant_created',
+            'auditable_type' => Tenant::class,
+            'auditable_id'   => $tenant->id,
+            'new_values'     => [
+                'name'              => $tenant->name,
+                'slug'              => $tenant->slug,
+                'plan'              => $tenant->plan,
+                'installation_mode' => $tenant->installation_mode,
+                'city'              => $tenant->city,
+            ],
+            'ip_address'     => $request->ip(),
+            'user_agent'     => $request->userAgent(),
+        ]);
+
         return redirect()->route('admin.tenants.show', $tenant)
             ->with('success', "Restaurante '{$tenant->name}' registado com sucesso com licença {$tenant->plan}!");
     }
@@ -231,7 +249,7 @@ class TenantController extends Controller
             ->with('success', "Dados do restaurante '{$tenant->name}' atualizados com sucesso!");
     }
 
-    public function impersonate(Tenant $tenant): RedirectResponse
+    public function impersonate(Request $request, Tenant $tenant): RedirectResponse
     {
         session([
             'is_support_mode'    => true,
@@ -240,28 +258,86 @@ class TenantController extends Controller
             'current_tenant_name'=> $tenant->name,
         ]);
 
+        AuditLog::create([
+            'tenant_id'      => $tenant->id,
+            'user_id'        => auth()->id(),
+            'action'         => 'impersonate_start',
+            'auditable_type' => Tenant::class,
+            'auditable_id'   => $tenant->id,
+            'new_values'     => [
+                'tenant_name' => $tenant->name,
+                'tenant_slug' => $tenant->slug,
+                'mode'        => 'Modo Suporte Técnico',
+            ],
+            'ip_address'     => $request->ip(),
+            'user_agent'     => $request->userAgent(),
+        ]);
+
         return redirect()->route('dashboard')
             ->with('success', "A aceder ao ambiente do restaurante: {$tenant->name} (Modo Suporte Técnico)");
     }
 
-    public function leaveImpersonate(): RedirectResponse
+    public function leaveImpersonate(Request $request): RedirectResponse
     {
+        $tenantId = session('current_tenant_id');
+        $tenantName = session('current_tenant_name');
+
         session()->forget(['is_support_mode', 'support_owner_id', 'current_tenant_id', 'current_tenant_name']);
+
+        AuditLog::create([
+            'tenant_id'      => $tenantId,
+            'user_id'        => auth()->id(),
+            'action'         => 'impersonate_end',
+            'auditable_type' => Tenant::class,
+            'auditable_id'   => $tenantId,
+            'new_values'     => [
+                'tenant_name' => $tenantName,
+                'mode'        => 'Saída do Modo Suporte',
+            ],
+            'ip_address'     => $request->ip(),
+            'user_agent'     => $request->userAgent(),
+        ]);
 
         return redirect()->route('admin.tenants.index')
             ->with('success', 'Saiu do modo de suporte. Retornou ao Painel do Dono da Plataforma.');
     }
 
-    public function suspend(Tenant $tenant): RedirectResponse
+    public function suspend(Request $request, Tenant $tenant): RedirectResponse
     {
+        $oldStatus = $tenant->status;
         $tenant->update(['status' => 'suspended']);
+
+        AuditLog::create([
+            'tenant_id'      => $tenant->id,
+            'user_id'        => auth()->id(),
+            'action'         => 'tenant_suspended',
+            'auditable_type' => Tenant::class,
+            'auditable_id'   => $tenant->id,
+            'old_values'     => ['status' => $oldStatus],
+            'new_values'     => ['status' => 'suspended', 'name' => $tenant->name],
+            'ip_address'     => $request->ip(),
+            'user_agent'     => $request->userAgent(),
+        ]);
 
         return back()->with('warning', "Restaurante '{$tenant->name}' suspenso.");
     }
 
-    public function reactivate(Tenant $tenant): RedirectResponse
+    public function reactivate(Request $request, Tenant $tenant): RedirectResponse
     {
+        $oldStatus = $tenant->status;
         $tenant->update(['status' => 'active']);
+
+        AuditLog::create([
+            'tenant_id'      => $tenant->id,
+            'user_id'        => auth()->id(),
+            'action'         => 'tenant_reactivated',
+            'auditable_type' => Tenant::class,
+            'auditable_id'   => $tenant->id,
+            'old_values'     => ['status' => $oldStatus],
+            'new_values'     => ['status' => 'active', 'name' => $tenant->name],
+            'ip_address'     => $request->ip(),
+            'user_agent'     => $request->userAgent(),
+        ]);
 
         return back()->with('success', "Restaurante '{$tenant->name}' reativado com sucesso.");
     }

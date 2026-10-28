@@ -4,32 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
     public function index()
     {
-        // Ensure standard defaults exist if missing
+        $tenantId = current_tenant_id() ?? auth()->user()?->tenant_id;
+
+        // Ensure standard defaults exist if missing for this specific tenant
         foreach ($this->getDefaults() as $default) {
-            Setting::firstOrCreate(['key' => $default['key']], $default);
+            Setting::withoutGlobalScopes()->firstOrCreate(
+                [
+                    'tenant_id' => $tenantId,
+                    'key'       => $default['key'],
+                ],
+                array_merge($default, ['tenant_id' => $tenantId])
+            );
         }
 
-        $settings = Setting::all()->groupBy('group');
+        $settings = Setting::where('tenant_id', $tenantId)->get()->groupBy('group');
 
         return view('settings.index', compact('settings'));
     }
 
     public function update(Request $request)
     {
+        $tenantId = current_tenant_id() ?? auth()->user()?->tenant_id;
         $data = $request->except(['_token', '_method']);
 
         // Check if any file was requested to be removed
         foreach ($request->all() as $paramKey => $paramVal) {
             if (str_ends_with($paramKey, '_remove') && $paramVal == '1') {
                 $actualKey = substr($paramKey, 0, -7);
-                $setting = Setting::where('key', $actualKey)->first();
+                $setting = Setting::where('tenant_id', $tenantId)->where('key', $actualKey)->first();
                 if ($setting && $setting->value) {
                     Storage::disk('public')->delete($setting->value);
                     $setting->update(['value' => null]);
@@ -41,33 +49,27 @@ class SettingController extends Controller
         foreach ($request->allFiles() as $key => $file) {
             if ($request->hasFile($key)) {
                 $path = $request->file($key)->store('settings', 'public');
-                Setting::updateOrCreate(
-                    ['key' => $key],
-                    [
-                        'value' => $path,
-                        'group' => 'branding',
-                        'type' => 'file'
-                    ]
-                );
+                Setting::set($key, $path, 'branding', 'file', $tenantId);
             }
         }
 
         // Handle regular fields
         foreach ($data as $key => $value) {
-            // Ignore helper fields and files
             if (str_ends_with($key, '_hex') || str_ends_with($key, '_remove') || $request->hasFile($key)) {
                 continue;
             }
 
-            // If it's a known file setting and not uploaded, do not overwrite with null
-            $existing = Setting::where('key', $key)->first();
+            $existing = Setting::where('tenant_id', $tenantId)->where('key', $key)->first();
             if ($existing && $existing->type === 'file') {
                 continue;
             }
 
-            Setting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value]
+            Setting::set(
+                $key,
+                $value,
+                $existing->group ?? 'general',
+                $existing->type ?? 'text',
+                $tenantId
             );
         }
 
@@ -86,7 +88,7 @@ class SettingController extends Controller
             }
         }
 
-        Cache::forget('app_settings_all');
+        Setting::clearCache($tenantId);
 
         return redirect()->route('settings.index')->with('success', __('messages.settings_updated'));
     }
@@ -97,22 +99,16 @@ class SettingController extends Controller
             'company_name' => 'required|string|max:100',
         ]);
 
+        $tenantId = current_tenant_id() ?? auth()->user()?->tenant_id;
         $name = trim($request->input('company_name'));
 
-        Setting::updateOrCreate(
-            ['key' => 'company_name'],
-            [
-                'value' => $name,
-                'group' => 'general',
-                'type' => 'text',
-            ]
-        );
+        Setting::set('company_name', $name, 'general', 'text', $tenantId);
 
         if ($tenant = current_tenant()) {
             $tenant->update(['name' => $name]);
         }
 
-        Cache::forget('app_settings_all');
+        Setting::clearCache($tenantId);
 
         return redirect()->back()->with('success', __('messages.establishment_name_updated'));
     }
@@ -124,42 +120,32 @@ class SettingController extends Controller
             'secondary_color' => 'nullable|string|max:30',
         ]);
 
-        Setting::updateOrCreate(
-            ['key' => 'primary_color'],
-            [
-                'value' => $request->input('primary_color'),
-                'group' => 'branding',
-                'type' => 'color',
-            ]
-        );
+        $tenantId = current_tenant_id() ?? auth()->user()?->tenant_id;
+
+        Setting::set('primary_color', $request->input('primary_color'), 'branding', 'color', $tenantId);
 
         if ($request->filled('secondary_color')) {
-            Setting::updateOrCreate(
-                ['key' => 'secondary_color'],
-                [
-                    'value' => $request->input('secondary_color'),
-                    'group' => 'branding',
-                    'type' => 'color',
-                ]
-            );
+            Setting::set('secondary_color', $request->input('secondary_color'), 'branding', 'color', $tenantId);
         }
 
-        Cache::forget('app_settings_all');
+        Setting::clearCache($tenantId);
 
         return redirect()->back()->with('success', 'Cores do sistema atualizadas com sucesso!');
     }
 
     private function getDefaults(): array
     {
+        $tenant = current_tenant();
+
         return [
-            // General / Estabelecimento
-            ['key' => 'company_name', 'value' => 'Zalala Beach Bar', 'group' => 'general', 'type' => 'text'],
-            ['key' => 'company_subtitle', 'value' => 'Bar & Restaurante', 'group' => 'general', 'type' => 'text'],
-            ['key' => 'company_address', 'value' => 'Bairro de Zalala, ER470', 'group' => 'general', 'type' => 'text'],
-            ['key' => 'company_city', 'value' => 'Quelimane, Zambézia', 'group' => 'general', 'type' => 'text'],
-            ['key' => 'company_phone', 'value' => '(+258) 846 885 214', 'group' => 'general', 'type' => 'text'],
-            ['key' => 'company_email', 'value' => 'zalalabeachbar@gmail.com', 'group' => 'general', 'type' => 'text'],
-            ['key' => 'company_nuit', 'value' => '110735901', 'group' => 'general', 'type' => 'text'],
+            // General / Estabelecimento (preenchido a partir do Tenant atual ou Plataforma Global)
+            ['key' => 'company_name', 'value' => $tenant?->name ?? 'RestPOS Cloud', 'group' => 'general', 'type' => 'text'],
+            ['key' => 'company_subtitle', 'value' => $tenant ? 'Café, Bar & Restaurante' : 'Plataforma Multi-Restaurante SaaS', 'group' => 'general', 'type' => 'text'],
+            ['key' => 'company_address', 'value' => $tenant?->address ?? '', 'group' => 'general', 'type' => 'text'],
+            ['key' => 'company_city', 'value' => $tenant?->city ?? 'Maputo', 'group' => 'general', 'type' => 'text'],
+            ['key' => 'company_phone', 'value' => $tenant?->phone ?? '', 'group' => 'general', 'type' => 'text'],
+            ['key' => 'company_email', 'value' => $tenant?->email ?? '', 'group' => 'general', 'type' => 'text'],
+            ['key' => 'company_nuit', 'value' => $tenant?->nuit ?? '', 'group' => 'general', 'type' => 'text'],
 
             // Branding
             ['key' => 'system_logo', 'value' => null, 'group' => 'branding', 'type' => 'file'],
@@ -170,8 +156,8 @@ class SettingController extends Controller
             ['key' => 'secondary_color', 'value' => '#000000', 'group' => 'branding', 'type' => 'color'],
 
             // Finance
-            ['key' => 'currency_symbol', 'value' => 'MZN', 'group' => 'finance', 'type' => 'text'],
-            ['key' => 'tax_rate', 'value' => '17', 'group' => 'finance', 'type' => 'number'],
+            ['key' => 'currency_symbol', 'value' => $tenant?->currency ?? 'MZN', 'group' => 'finance', 'type' => 'text'],
+            ['key' => 'tax_rate', 'value' => '16', 'group' => 'finance', 'type' => 'number'],
 
             // System
             ['key' => 'system_language', 'value' => 'pt', 'group' => 'system', 'type' => 'select'],

@@ -2,9 +2,11 @@
 
 @section('content')
 @php
+    $isOwnerConsole = function_exists('is_owner_console') && is_owner_console();
+    $currentTenantObj = function_exists('current_tenant') ? current_tenant() : null;
     $primaryColor = \App\Models\Setting::get('primary_color', '#F97316');
     $secondaryColor = \App\Models\Setting::get('secondary_color', '#10B981');
-    $companyName = \App\Models\Setting::get('company_name', 'Zalala Beach Bar');
+    $companyName = \App\Models\Setting::get('company_name', $currentTenantObj?->name ?? ($isOwnerConsole ? 'RestPOS Cloud' : 'Meu Restaurante'));
 
     $groupIcons = [
         'general' => 'mdi-storefront-outline',
@@ -59,11 +61,18 @@
             </p>
         </div>
 
-        <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold">
-                <i class="mdi mdi-shield-check-outline text-emerald-500 text-sm"></i>
-                Modo Administrador
-            </span>
+        <div class="flex flex-wrap items-center gap-2">
+            @if($isOwnerConsole)
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+                    <i class="mdi mdi-shield-crown-outline text-indigo-500 text-sm"></i>
+                    Consola Global da Plataforma (Isolada dos Restaurantes)
+                </span>
+            @elseif($currentTenantObj)
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                    <i class="mdi mdi-store-check-outline text-emerald-500 text-sm"></i>
+                    Restaurante Isolado: {{ $currentTenantObj->name }}
+                </span>
+            @endif
         </div>
     </div>
 

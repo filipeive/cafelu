@@ -2,6 +2,7 @@
     class="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex z-50 transition-colors duration-300">
     @php
         $isOwnerConsole = function_exists('is_owner_console') ? is_owner_console() : (auth()->check() && auth()->user()->isSuperAdmin() && !session('is_support_mode'));
+        $displayUserName = trim(preg_replace('/\s*\(.*?\)\s*/', '', Auth::user()->name));
     @endphp
     <!-- Logo Area -->
     <div class="flex items-center justify-center border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300"
@@ -44,44 +45,22 @@
             @endif
 
             <div class="hidden xl:block">
-                <h1 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                    {{ __('messages.welcome') }}, <span class="text-warning">{{ Auth::user()->name }}</span>
+                <h1 class="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                    {{ __('messages.welcome') }}, <span class="text-warning font-bold">{{ $displayUserName }}</span>
                 </h1>
             </div>
         </div>
 
         <!-- Right Side: Actions & Profile -->
-        <ul class="flex items-center gap-3">
-            @if(session('is_support_mode'))
-                <li>
-                    <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit"
-                            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer"
-                            title="Voltar ao Painel do Dono da Plataforma">
-                            <i class="mdi mdi-shield-account text-sm"></i>
-                            <span class="max-w-[130px] truncate">{{ session('current_tenant_name', current_tenant()?->name ?? 'Suporte') }}</span>
-                            <span class="px-1.5 py-0.5 rounded-full bg-black/20 text-[10px] uppercase">Sair do Suporte</span>
-                        </button>
-                    </form>
-                </li>
-            @endif
-
-            @if($isOwnerConsole)
-                <li>
-                    <a href="{{ route('admin.tenants.index') }}"
-                        class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors">
-                        <i class="mdi mdi-shield-crown-outline text-base"></i>
-                        <span>Gestão de Restaurantes</span>
-                    </a>
-                </li>
-            @elseif(auth()->user()->role !== 'customer')
-                <!-- Quick Actions Dropdown -->
+        <ul class="flex items-center gap-2">
+            @if(!$isOwnerConsole && auth()->user()->role !== 'customer')
+                <!-- Quick Actions Dropdown (Atalhos) -->
                 <li class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.outside="open = false"
-                        class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium text-warning hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors">
-                        <i class="mdi mdi-plus-circle-outline text-lg"></i>
-                        <span>{{ __('messages.quick_actions') }}</span>
+                        class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer">
+                        <i class="mdi mdi-lightning-bolt-outline text-base text-orange-500"></i>
+                        <span>Atalhos</span>
+                        <i class="mdi mdi-chevron-down text-xs text-gray-400"></i>
                     </button>
 
                     <div x-show="open" x-transition
@@ -404,20 +383,20 @@
                         </div>
                     @endif
                     <div class="hidden md:block text-left">
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200 leading-none">
-                            {{ Auth::user()->name }}
+                        <p class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-none">
+                            {{ $displayUserName }}
                         </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ Auth::user()->role ?? 'Usuário' }}
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{{ Auth::user()->role ?? 'Usuário' }}
                         </p>
                     </div>
-                    <i class="mdi mdi-chevron-down text-gray-400"></i>
+                    <i class="mdi mdi-chevron-down text-gray-400 text-sm"></i>
                 </button>
 
                 <div x-show="open" x-transition
-                    class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+                    class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
                     style="display: none;">
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ Auth::user()->name }}</p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $displayUserName }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p>
                     </div>
                     <div class="py-1">

@@ -348,29 +348,29 @@
 
     <!-- Navbar Executiva & Minimalista -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-stone-200/80 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20 gap-6">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-3 xl:gap-6">
                 
                 <!-- Identidade da Marca (Esquerda) -->
-                <a href="#" class="flex items-center gap-3.5 group flex-shrink-0">
+                <a href="{{ url('/' . ($currentTenantModel->slug ?? '')) }}" class="flex items-center gap-3 group flex-shrink-0 min-w-0">
                     @if($logo && file_exists(public_path('storage/' . $logo)))
-                        <img src="{{ asset('storage/' . $logo) }}" alt="{{ $companyName }}" class="h-11 w-auto max-w-[125px] object-contain">
+                        <img src="{{ asset('storage/' . $logo) }}" alt="{{ $companyName }}" class="h-10 sm:h-11 w-auto max-w-[110px] sm:max-w-[130px] object-contain flex-shrink-0">
                     @else
-                        <div class="w-11 h-11 rounded-xl bg-gray-950 flex items-center justify-center text-white shadow-sm group-hover:bg-orange-600 transition-colors">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gray-950 flex items-center justify-center text-white shadow-sm group-hover:bg-orange-600 transition-colors flex-shrink-0">
                             <i class="mdi mdi-silverware-fork-knife text-xl"></i>
                         </div>
                     @endif
-                    <div class="flex flex-col">
-                        <span class="font-serif text-lg sm:text-xl font-bold text-gray-950 tracking-tight leading-none">{{ $companyName }}</span>
-                        <span class="text-[11px] text-gray-400 font-medium tracking-wide mt-1 flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span x-text="isInStore ? (tableNumber ? 'Atendimento Presencial • Mesa ' + tableNumber : 'Atendimento Presencial no Local') : 'Cardápio & Pedidos Online'"></span>
+                    <div class="flex flex-col min-w-0">
+                        <span class="font-serif text-base sm:text-lg xl:text-xl font-bold text-gray-950 tracking-tight leading-none truncate max-w-[150px] sm:max-w-[220px]">{{ $companyName }}</span>
+                        <span class="text-[11px] text-gray-500 font-medium tracking-wide mt-1 flex items-center gap-1.5 truncate whitespace-nowrap">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                            <span class="truncate" x-text="isInStore ? (tableNumber ? 'Mesa ' + tableNumber : 'Presencial') : 'Pedidos Online'"></span>
                         </span>
                     </div>
                 </a>
 
-                <!-- Navegação Editorial Central (Desktop) -->
-                <nav class="hidden lg:flex items-center gap-8 text-[13px] font-semibold text-gray-600">
+                <!-- Navegação Editorial Central (Desktop / Grande) -->
+                <nav class="hidden xl:flex items-center gap-6 text-[13px] font-semibold text-gray-600 whitespace-nowrap">
                     <a href="#menu" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
                         Cardápio
                     </a>
@@ -383,20 +383,28 @@
                     <a href="#contactos" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
                         Contactos
                     </a>
-                    <a href="{{ route('welcome') }}" class="py-1 text-orange-600 hover:text-orange-700 transition-colors inline-flex items-center gap-1">
+                    <a href="{{ route('welcome') }}" class="py-1 text-orange-600 hover:text-orange-700 transition-colors inline-flex items-center gap-1 font-bold">
                         <i class="mdi mdi-store-marker-outline"></i>
-                        Rede de Restaurantes
+                        Rede
                     </a>
                 </nav>
 
                 <!-- Ações Inteligentes & Contextuais (Direita) -->
-                <div class="flex items-center gap-2.5">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap">
                     
+                    <!-- Link Discreto para Rede em Telas Médias -->
+                    <a href="{{ route('welcome') }}"
+                       class="hidden md:inline-flex xl:hidden items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-bold text-orange-600 hover:bg-orange-50 transition-all border border-orange-200"
+                       title="Ver todos os restaurantes da rede">
+                        <i class="mdi mdi-store-marker-outline text-sm"></i>
+                        <span>Rede</span>
+                    </a>
+
                     <!-- Botão de Pesquisa Expansível -->
                     <button type="button"
                             @click="toggleSearchBar()"
                             :class="searchBarOpen || searchQuery ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-stone-100/80 hover:bg-stone-200/70 text-gray-700 border-transparent'"
-                            class="w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer"
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
                             title="Pesquisar no Cardápio">
                         <i class="mdi text-lg" :class="searchBarOpen ? 'mdi-close' : 'mdi-magnify'"></i>
                     </button>
@@ -404,12 +412,12 @@
                     <!-- Indicador Automático de Modo (Presencial vs Online / Reserva) -->
                     <button type="button"
                             @click="welcomeModalOpen = true"
-                            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer"
+                            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap flex-shrink-0"
                             :class="isInStore
                                 ? 'bg-emerald-50/90 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
                                 : 'bg-stone-100/90 text-gray-700 border-stone-200/80 hover:bg-stone-200/70'"
                             :title="locationTooltip">
-                        <i class="mdi text-sm"
+                        <i class="mdi text-sm flex-shrink-0"
                            :class="{
                                'mdi-qrcode-scan text-emerald-600': locationStatus === 'qr',
                                'mdi-map-marker-check text-emerald-600': locationStatus === 'gps_inside',
@@ -418,7 +426,7 @@
                                'mdi-silverware-fork-knife text-emerald-600': locationStatus === 'unknown' && isInStore,
                                'mdi-shopping-outline text-orange-500': locationStatus === 'unknown' && !isInStore
                            }"></i>
-                        <span x-text="locationBadgeText"></span>
+                        <span class="whitespace-nowrap" x-text="locationBadgeText"></span>
                         <i class="mdi mdi-chevron-down text-xs opacity-60"></i>
                     </button>
 
@@ -426,7 +434,7 @@
                     <template x-if="isInStore">
                         <button type="button"
                                 @click="openWaiterModal()"
-                                class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-200/90 transition-all flex items-center gap-1.5 cursor-pointer"
+                                class="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-200/90 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0"
                                 title="Solicitar garçom na sua mesa">
                             <i class="mdi mdi-bell-outline text-base text-amber-600"></i>
                             <span class="hidden md:inline">Chamar Garçom</span>
@@ -436,14 +444,14 @@
                     <!-- Botão Principal: Comanda (Presencial) ou Pedido Online (Remoto) -->
                     <button type="button"
                             @click="cartOpen = true"
-                            class="relative bg-gray-950 hover:bg-gray-800 text-white font-bold px-4 py-2.5 rounded-xl shadow-sm active:scale-95 transition-all flex items-center gap-2.5 cursor-pointer">
+                            class="relative bg-gray-950 hover:bg-gray-800 text-white font-bold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-sm active:scale-95 transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap flex-shrink-0">
                         <i class="mdi text-base text-orange-400" :class="isInStore ? 'mdi-silverware-fork-knife' : 'mdi-shopping-outline'"></i>
-                        <span class="hidden sm:inline text-xs tracking-tight" x-text="isInStore ? 'Comanda' : 'Pedido Online'"></span>
-                        <span class="bg-orange-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full min-w-[22px] text-center"
+                        <span class="hidden md:inline text-xs tracking-tight" x-text="isInStore ? 'Comanda' : 'Pedido Online'"></span>
+                        <span class="bg-orange-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full min-w-[20px] text-center"
                               x-text="cartCount">
                         </span>
                         <template x-if="cartCount > 0">
-                            <span class="hidden xl:inline text-xs font-extrabold text-gray-200 border-l border-white/20 pl-2"
+                            <span class="hidden 2xl:inline text-xs font-extrabold text-gray-200 border-l border-white/20 pl-2"
                                   x-text="cartTotalFormatted">
                             </span>
                         </template>

@@ -1188,7 +1188,7 @@
 
                     retrieveOrder(orderId) {
                         this.isLoading = true;
-                        fetch(`/pos/retrieve-order/${orderId}`)
+                        fetch(`{{ url('/pos/retrieve-order') }}/${orderId}`)
                             .then(res => res.json())
                             .then(data => {
                                 this.isLoading = false;
@@ -1224,7 +1224,7 @@
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 this.isLoading = true;
-                                fetch(`/pos/discard-order/${orderId}`, {
+                                fetch(`{{ url('/pos/discard-order') }}/${orderId}`, {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
@@ -1396,7 +1396,7 @@
 
                         this.isLoading = true;
                         try {
-                            const res = await fetch(`/pos/shift/${this.activeShift.id}/close`, {
+                            const res = await fetch(`{{ url('/pos/shift') }}/${this.activeShift.id}/close`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',

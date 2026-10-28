@@ -261,6 +261,7 @@ class POSController extends Controller
             $existingOrderId = $validated['order_id'] ?? null;
             $tableId = $validated['table_id'] ?? null;
             $createdTempTable = false;
+            $tenantId = current_tenant_id() ?? auth()->user()?->tenant_id ?? 1;
 
             if ($existingOrderId) {
                 $order = DB::table('orders')->where('id', $existingOrderId)->first();
@@ -269,6 +270,7 @@ class POSController extends Controller
                     $tableId = $tableId ?: $order->table_id;
 
                     DB::table('orders')->where('id', $orderId)->update([
+                        'tenant_id' => $order->tenant_id ?? $tenantId,
                         'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
                         'total_amount' => $validated['total_amount'],
                         'table_id' => $tableId,
@@ -287,12 +289,14 @@ class POSController extends Controller
                 // Create temporary table if no table selected
                 if (!$tableId) {
                     $maxTempNumber = DB::table('tables')
+                        ->where('tenant_id', $tenantId)
                         ->where('is_temporary', true)
                         ->max('number');
 
                     $tempNumber = $maxTempNumber ? $maxTempNumber + 1 : 9000;
 
                     $tableId = DB::table('tables')->insertGetId([
+                        'tenant_id' => $tenantId,
                         'number' => $tempNumber,
                         'capacity' => 1,
                         'status' => 'occupied',
@@ -312,6 +316,7 @@ class POSController extends Controller
 
                 // Create order with table assignment
                 $orderId = DB::table('orders')->insertGetId([
+                    'tenant_id' => $tenantId,
                     'table_id' => $tableId,
                     'user_id' => auth()->id(),
                     'customer_name' => $validated['customer_name'] ?? 'Cliente Geral',
@@ -374,9 +379,17 @@ class POSController extends Controller
 
     public function getHeldOrders()
     {
+        $tenantId = current_tenant_id() ?? auth()->user()?->tenant_id;
+
         $orders = DB::table('orders')
             ->leftJoin('tables', 'orders.table_id', '=', 'tables.id')
             ->where('orders.status', 'active')
+            ->when($tenantId, function ($q) use ($tenantId) {
+                $q->where(function ($sub) use ($tenantId) {
+                    $sub->where('orders.tenant_id', $tenantId)
+                        ->orWhereNull('orders.tenant_id');
+                });
+            })
             ->orderBy('orders.created_at', 'desc')
             ->select(
                 'orders.id',

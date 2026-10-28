@@ -328,7 +328,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     showLoading();
-                    fetch(`/orders/complete/${orderId}`, {
+                    fetch(`{{ url('/orders/complete') }}/${orderId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -370,7 +370,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     showLoading();
-                    fetch(`/orders/cancel/${orderId}`, {
+                    fetch(`{{ url('/orders/cancel') }}/${orderId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -416,7 +416,7 @@
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = `/orders/${orderId}/approve-cancellation`;
+                    form.action = `{{ url('/orders') }}/${orderId}/approve-cancellation`;
                     const csrfToken = document.createElement('input');
                     csrfToken.type = 'hidden';
                     csrfToken.name = '_token';
@@ -444,7 +444,7 @@
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = `/orders/${orderId}/reject-cancellation`;
+                    form.action = `{{ url('/orders') }}/${orderId}/reject-cancellation`;
                     const csrfToken = document.createElement('input');
                     csrfToken.type = 'hidden';
                     csrfToken.name = '_token';

@@ -312,7 +312,7 @@
          * Print Receipt
          */
         window.printRecibo = (id) => {
-            const url = `/orders/${id}/print`;
+            const url = `{{ url('/orders') }}/${id}/print`;
             const printWindow = window.open(url, 'Print Receipt', 'height=600,width=400');
             // Note: The print window should handle the printing itself (e.g. window.print() on load)
         };
@@ -321,7 +321,7 @@
          * Print Sale Receipt
          */
         window.printSaleRecibo = (id) => {
-            const url = `/sales/${id}/receipt`;
+            const url = `{{ url('/sales') }}/${id}/receipt`;
             const printWindow = window.open(url, 'Print Receipt', 'height=600,width=400');
         };
 

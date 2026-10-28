@@ -220,7 +220,7 @@ function paymentModalData() {
             this.isLoading = true;
 
             try {
-                const response = await fetch(`/orders/${this.orderId}/pay`, {
+                const response = await fetch(`{{ url('/orders') }}/${this.orderId}/pay`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

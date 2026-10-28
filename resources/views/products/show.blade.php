@@ -178,7 +178,7 @@
         });
 
         function loadSalesData() {
-            fetch(`/products/${@json($product->id)}/sales-data`)
+            fetch(`{{ url('/products') }}/${@json($product->id)}/sales-data`)
                 .then(response => response.json())
                 .then(data => {
                     const ctx = document.getElementById('salesChart').getContext('2d');
@@ -234,7 +234,7 @@
         }
 
         function loadStockData() {
-            fetch(`/products/${@json($product->id)}/stock-history`)
+            fetch(`{{ url('/products') }}/${@json($product->id)}/stock-history`)
                 .then(response => response.json())
                 .then(data => {
                     const ctx = document.getElementById('stockChart').getContext('2d');

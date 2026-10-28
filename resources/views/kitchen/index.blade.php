@@ -230,11 +230,11 @@
 
                     <!-- Secondary Link: Ver Comanda / Detalhes -->
                     <div class="flex items-center justify-between text-[11px] pt-1 px-1">
-                        <a :href="'/orders/' + order.id" class="text-gray-400 hover:text-orange-500 font-semibold flex items-center gap-1 transition-colors">
+                        <a :href="'{{ url('/orders') }}/' + order.id" class="text-gray-400 hover:text-orange-500 font-semibold flex items-center gap-1 transition-colors">
                             <i class="mdi mdi-clipboard-text-outline"></i>
                             <span>Ver Comanda</span>
                         </a>
-                        <a :href="'/orders/' + order.id + '/print-receipt'" target="_blank" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-semibold flex items-center gap-1 transition-colors">
+                        <a :href="'{{ url('/orders') }}/' + order.id + '/print-receipt'" target="_blank" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-semibold flex items-center gap-1 transition-colors">
                             <i class="mdi mdi-printer"></i>
                             <span>Imprimir Ticket</span>
                         </a>
@@ -339,7 +339,7 @@ function kitchenDisplay() {
         },
 
         updateStatus(orderId, newStatus) {
-            fetch(`/orders/${orderId}/update-status`, {
+            fetch(`{{ url('/orders') }}/${orderId}/update-status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

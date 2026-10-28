@@ -30,7 +30,7 @@
                         formData.append('payment_proof', fileInput.files[0]);
                     }
 
-                    const response = await fetch(`/customer/order/${this.orderId}/pay`, {
+                    const response = await fetch(`{{ url('/customer/order') }}/${this.orderId}/pay`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',

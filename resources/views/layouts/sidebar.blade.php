@@ -98,14 +98,32 @@
         @else
             <!-- MODO OPERACIONAL DO RESTAURANTE (OU SUPERADMIN EM MODO SUPORTE) -->
             @if(session('is_support_mode'))
-                <div class="mb-3 mx-1 p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700/60" x-show="!sidebarCollapsed" x-transition>
-                    <div class="flex items-center justify-between text-[11px] font-black text-amber-800 dark:text-amber-300">
-                        <span class="flex items-center gap-1 truncate">
-                            <i class="mdi mdi-shield-account text-sm"></i>
-                            <span class="truncate">{{ session('current_tenant_name', 'Modo Suporte') }}</span>
+                <div class="mb-3 mx-1 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/70 space-y-2" x-show="!sidebarCollapsed" x-transition>
+                    <div class="flex items-center justify-between text-[11px] font-black text-amber-900 dark:text-amber-300">
+                        <span class="flex items-center gap-1.5 truncate">
+                            <i class="mdi mdi-shield-account text-base text-amber-600 dark:text-amber-400"></i>
+                            <span class="truncate">{{ session('current_tenant_name', current_tenant()?->name ?? 'Restaurante') }}</span>
                         </span>
-                        <span class="px-1.5 py-0.5 rounded bg-amber-200/80 dark:bg-amber-800 text-[9px] uppercase">Suporte</span>
+                        <span class="px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-[9px] uppercase tracking-wider">Suporte</span>
                     </div>
+                    <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            class="w-full py-1.5 px-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer">
+                            <i class="mdi mdi-exit-to-app text-sm"></i>
+                            <span>Sair do Modo Suporte</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mb-3 flex justify-center" x-show="sidebarCollapsed" x-cloak>
+                    <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST">
+                        @csrf
+                        <button type="submit" title="Sair do Modo Suporte ({{ session('current_tenant_name', 'Restaurante') }})"
+                            class="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center shadow-sm transition-colors cursor-pointer">
+                            <i class="mdi mdi-exit-to-app text-lg"></i>
+                        </button>
+                    </form>
                 </div>
             @endif
 

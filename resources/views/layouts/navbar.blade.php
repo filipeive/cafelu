@@ -52,6 +52,21 @@
 
         <!-- Right Side: Actions & Profile -->
         <ul class="flex items-center gap-3">
+            @if(session('is_support_mode'))
+                <li>
+                    <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer"
+                            title="Voltar ao Painel do Dono da Plataforma">
+                            <i class="mdi mdi-shield-account text-sm"></i>
+                            <span class="max-w-[130px] truncate">{{ session('current_tenant_name', current_tenant()?->name ?? 'Suporte') }}</span>
+                            <span class="px-1.5 py-0.5 rounded-full bg-black/20 text-[10px] uppercase">Sair do Suporte</span>
+                        </button>
+                    </form>
+                </li>
+            @endif
+
             @if($isOwnerConsole)
                 <li>
                     <a href="{{ route('admin.tenants.index') }}"
@@ -406,11 +421,28 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p>
                     </div>
                     <div class="py-1">
+                        @if(session('is_support_mode'))
+                            <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST" class="px-2 py-1">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-black text-amber-900 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-200 dark:hover:bg-amber-900/80 transition-colors cursor-pointer">
+                                    <i class="mdi mdi-exit-to-app text-base text-amber-600 dark:text-amber-400"></i>
+                                    <span>Sair do Modo Suporte</span>
+                                </button>
+                            </form>
+                            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                        @endif
+                        @if(auth()->user()->isSuperAdmin())
+                            <a href="{{ route('admin.tenants.index') }}"
+                                class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-gray-700">
+                                <i class="mdi mdi-shield-crown-outline"></i> Painel do Dono (SaaS)
+                            </a>
+                        @endif
                         <a href="{{ route('profile.edit') }}"
                             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                             <i class="mdi mdi-account-edit-outline text-primary"></i> {{ __('messages.edit_profile') }}
                         </a>
-                        @if(auth()->user()->role !== 'customer')
+                        @if(auth()->user()->role !== 'customer' && !$isOwnerConsole)
                             <a href="{{ route('settings.index') }}"
                                 class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <i class="mdi mdi-cog-outline text-primary"></i> {{ __('messages.system_settings') }}

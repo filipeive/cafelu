@@ -489,60 +489,61 @@
 
     <!-- HERO BANNER SLIDER / CARROSSEL -->
     <section class="relative bg-gray-950 overflow-hidden">
-        <div class="relative h-[380px] sm:h-[440px] lg:h-[500px] w-full">
-            <template x-for="(slide, idx) in slides" :key="idx">
-                <div x-show="activeSlide === idx"
+        <div class="relative h-[420px] sm:h-[460px] lg:h-[520px] w-full">
+            @foreach($sliderItems as $idx => $slide)
+                <div x-show="activeSlide === {{ $idx }}"
                      x-transition:enter="transition ease-out duration-700"
                      x-transition:enter-start="opacity-0 scale-105"
                      x-transition:enter-end="opacity-100 scale-100"
                      x-transition:leave="transition ease-in duration-500"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
-                     class="absolute inset-0">
+                     class="absolute inset-0 w-full h-full"
+                     @if($idx !== 0) style="display: none;" @endif>
                     
-                    <!-- Imagem de Fundo do Slide -->
-                    <img :src="slide.image_url"
-                         :alt="slide.title"
-                         class="w-full h-full object-cover object-center">
+                    <!-- Imagem de Fundo do Slide (Fixada como background com absolute inset-0) -->
+                    <img src="{{ $slide['image_url'] }}"
+                         alt="{{ $slide['title'] }}"
+                         class="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none">
                     
-                    <!-- Gradiente Sofisticado Estilo Restaurante -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-gray-950/95 via-gray-950/75 to-gray-950/30"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-black/30"></div>
+                    <!-- Gradientes Sofisticados para Garantir Alto Contraste e Legibilidade do Texto -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-gray-950/95 via-gray-950/80 to-black/35 z-10 pointer-events-none"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40 z-10 pointer-events-none"></div>
 
-                    <!-- Conteúdo do Slide -->
-                    <div class="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
+                    <!-- Conteúdo do Slide: Garantido Sobre a Imagem e Gradientes (z-20) -->
+                    <div class="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
                         <div class="max-w-2xl space-y-4">
                             <div class="flex flex-wrap items-center gap-2">
-                                <template x-if="tableNumber">
-                                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold bg-orange-500 text-white shadow-lg shadow-orange-500/30">
-                                        <i class="mdi mdi-table-chair"></i> Atendimento na Mesa <strong x-text="tableNumber"></strong>
-                                    </span>
-                                </template>
-                                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold bg-white/15 backdrop-blur-md text-amber-300 border border-white/20">
+                                <span x-show="tableNumber"
+                                      style="display: none;"
+                                      class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-orange-500 text-white shadow-lg shadow-orange-500/30">
+                                    <i class="mdi mdi-table-chair"></i> Atendimento na Mesa <strong x-text="tableNumber"></strong>
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black bg-white/20 backdrop-blur-md text-amber-300 border border-white/25 shadow-md">
                                     <i class="mdi mdi-silverware-clean"></i>
-                                    <span x-text="slide.badge"></span>
+                                    <span>{{ $slide['badge'] }}</span>
                                 </span>
                             </div>
 
-                            <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-sm"
-                                x-text="slide.title">
+                            <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight drop-shadow-lg">
+                                {{ $slide['title'] }}
                             </h2>
 
-                            <p class="text-xs sm:text-sm lg:text-base text-gray-200 font-medium leading-relaxed max-w-xl"
-                               x-text="slide.subtitle">
+                            <p class="text-xs sm:text-sm lg:text-base text-gray-100 font-medium leading-relaxed max-w-xl drop-shadow-md">
+                                {{ $slide['subtitle'] }}
                             </p>
 
                             <div class="pt-2 flex flex-wrap items-center gap-3">
-                                <a :href="slide.cta_link || '#menu'"
+                                <a href="{{ $slide['cta_link'] ?: '#menu' }}"
                                    style="background-color: {{ $primaryColor }};"
                                    class="px-6 py-3.5 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-orange-500/30 hover:opacity-95 active:scale-95 transition-all inline-flex items-center gap-2">
                                     <i class="mdi mdi-silverware-fork-knife text-base"></i>
-                                    <span x-text="slide.cta_text || 'Explorar Cardápio'"></span>
+                                    <span>{{ $slide['cta_text'] ?: 'Explorar Cardápio' }}</span>
                                 </a>
 
                                 <button type="button"
                                         @click="serviceType = 'takeaway'; cartOpen = true"
-                                        class="px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-xs sm:text-sm border border-white/25 transition-all inline-flex items-center gap-2 cursor-pointer">
+                                        class="px-5 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-white font-bold text-xs sm:text-sm border border-white/30 transition-all inline-flex items-center gap-2 cursor-pointer shadow-md">
                                     <i class="mdi mdi-shopping-outline text-amber-400 text-base"></i>
                                     <span>Encomendar Para Levar</span>
                                 </button>
@@ -550,35 +551,34 @@
                         </div>
                     </div>
                 </div>
-            </template>
+            @endforeach
 
-            <!-- Setas de Navegação do Slider -->
-            <template x-if="slides.length > 1">
-                <div>
-                    <button type="button"
-                            @click="prevSlide()"
-                            class="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md items-center justify-center transition-all cursor-pointer"
-                            title="Slide Anterior">
-                        <i class="mdi mdi-chevron-left text-2xl"></i>
-                    </button>
-                    <button type="button"
-                            @click="nextSlide()"
-                            class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 backdrop-blur-md items-center justify-center transition-all cursor-pointer"
-                            title="Próximo Slide">
-                        <i class="mdi mdi-chevron-right text-2xl"></i>
-                    </button>
+            <!-- Controles do Slider (Quando há mais de um slide) -->
+            @if(count($sliderItems) > 1)
+                <!-- Setas de Navegação -->
+                <button type="button"
+                        @click="prevSlide()"
+                        class="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-black/80 text-white border border-white/25 backdrop-blur-md items-center justify-center transition-all cursor-pointer shadow-lg"
+                        title="Slide Anterior">
+                    <i class="mdi mdi-chevron-left text-2xl"></i>
+                </button>
+                <button type="button"
+                        @click="nextSlide()"
+                        class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-black/80 text-white border border-white/25 backdrop-blur-md items-center justify-center transition-all cursor-pointer shadow-lg"
+                        title="Próximo Slide">
+                    <i class="mdi mdi-chevron-right text-2xl"></i>
+                </button>
 
-                    <!-- Indicadores (Dots) -->
-                    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15">
-                        <template x-for="(slide, idx) in slides" :key="'dot-' + idx">
-                            <button type="button"
-                                    @click="goToSlide(idx)"
-                                    class="h-2 rounded-full transition-all cursor-pointer"
-                                    :class="activeSlide === idx ? 'w-7 bg-orange-500' : 'w-2 bg-white/50 hover:bg-white'"></button>
-                        </template>
-                    </div>
+                <!-- Indicadores (Dots) -->
+                <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 bg-black/50 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-md">
+                    @foreach($sliderItems as $idx => $s)
+                        <button type="button"
+                                @click="goToSlide({{ $idx }})"
+                                class="h-2 rounded-full transition-all cursor-pointer"
+                                :class="activeSlide === {{ $idx }} ? 'w-7 bg-orange-500' : 'w-2 bg-white/50 hover:bg-white'"></button>
+                    @endforeach
                 </div>
-            </template>
+            @endif
         </div>
     </section>
 

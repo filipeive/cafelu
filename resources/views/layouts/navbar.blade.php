@@ -35,12 +35,13 @@
 
             @if(auth()->user()->role !== 'customer' && !$isOwnerConsole)
                 <!-- Global Search -->
-                <form action="{{ route('search') }}" method="GET" class="hidden lg:block relative group">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="mdi mdi-magnify text-gray-400 group-focus-within:text-warning transition-colors"></i>
+                <form action="{{ route('search') }}" method="GET" class="hidden md:block relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <i class="mdi mdi-magnify text-gray-400 group-focus-within:text-orange-500 transition-colors text-base"></i>
                     </div>
-                    <input type="text" name="q" placeholder="{{ __('messages.search_placeholder') }}"
-                        class="block w-64 pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-full leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-warning/50 focus:border-warning sm:text-sm transition-all duration-300 focus:w-80">
+                    <input type="text" name="q" value="{{ request('q') }}"
+                        placeholder="Pesquisar produto, pedido, factura, cliente..."
+                        class="block w-72 lg:w-80 pl-10 pr-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 text-xs font-medium transition-all duration-300 focus:w-96">
                 </form>
             @endif
 

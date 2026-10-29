@@ -99,4 +99,20 @@ class MobilePwaAndDualViewTest extends TestCase
         $responseOrders->assertSee('Table for Desktop', false);
         $responseOrders->assertSee('Mobile / PWA Card View', false);
     }
+
+    public function test_welcome_and_network_pages_render_apk_download_buttons_and_links()
+    {
+        // 1. Restaurant Welcome Menu Page
+        $responseRestaurant = $this->get(route('restaurant.menu', ['tenant' => $this->tenant->slug]));
+        $responseRestaurant->assertStatus(200);
+        $responseRestaurant->assertSee('downloads/RestPOS-v1.3.apk', false);
+        $responseRestaurant->assertSee('Baixar App (APK)', false);
+        $responseRestaurant->assertSee('Baixar APK Android (v1.3)', false);
+
+        // 2. Network Welcome Page
+        $responseNetwork = $this->get(route('welcome'));
+        $responseNetwork->assertStatus(200);
+        $responseNetwork->assertSee('downloads/RestPOS-v1.3.apk', false);
+        $responseNetwork->assertSee('Baixar App Android', false);
+    }
 }

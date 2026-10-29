@@ -387,11 +387,24 @@
                         <i class="mdi mdi-store-marker-outline"></i>
                         Rede
                     </a>
+                    <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}" download="RestPOS-v1.3.apk" class="py-1 text-emerald-600 hover:text-emerald-700 transition-colors inline-flex items-center gap-1 font-bold" title="Baixar App Android (APK)">
+                        <i class="mdi mdi-android"></i>
+                        Baixar App
+                    </a>
                 </nav>
 
                 <!-- Ações Inteligentes & Contextuais (Direita) -->
                 <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap">
                     
+                    <!-- Botão Baixar App Android (APK) -->
+                    <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}"
+                       download="RestPOS-v1.3.apk"
+                       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-xs transition-all flex-shrink-0 cursor-pointer"
+                       title="Baixar Aplicativo Android (APK)">
+                        <i class="mdi mdi-android text-base text-emerald-600"></i>
+                        <span class="hidden sm:inline">Baixar App</span>
+                    </a>
+
                     <!-- Link Discreto para Rede em Telas Médias -->
                     <a href="{{ route('welcome') }}"
                        class="hidden md:inline-flex xl:hidden items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-bold text-orange-600 hover:bg-orange-50 transition-all border border-orange-200"
@@ -547,6 +560,13 @@
                                     <i class="mdi mdi-shopping-outline text-amber-400 text-base"></i>
                                     <span>Encomendar Para Levar</span>
                                 </button>
+
+                                <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}"
+                                   download="RestPOS-v1.3.apk"
+                                   class="px-5 py-3.5 rounded-2xl bg-emerald-600/90 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm border border-emerald-400/40 backdrop-blur-md shadow-lg shadow-emerald-600/30 transition-all inline-flex items-center gap-2">
+                                    <i class="mdi mdi-android text-base text-emerald-200"></i>
+                                    <span>Baixar App (APK)</span>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -965,6 +985,94 @@
                                     <span>Falar no WhatsApp</span>
                                 </a>
                             @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECÇÃO: APLICATIVO MÓVEL & DOWNLOAD (APK / PWA) -->
+        <section id="app" class="scroll-mt-24 pt-6">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-stone-900 to-gray-950 text-white border border-stone-800 p-8 sm:p-12 shadow-xl">
+                <!-- Background decorative glow -->
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <i class="mdi mdi-cellphone-check text-base"></i>
+                            <span>Disponível para Celular & Tablet</span>
+                        </div>
+
+                        <h3 class="font-serif text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+                            Tenha o Cardápio & Atendimento na Palma da Sua Mão
+                        </h3>
+
+                        <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+                            Baixe o aplicativo nativo oficial do <strong>{{ $companyName }}</strong> ou aceda diretamente no seu ecrã inicial. Faça pedidos direto na mesa com leitura QR rápida, acompanhe o preparo em tempo real e faça encomendas sem filas.
+                        </p>
+
+                        <!-- Highlights Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                            <div class="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs flex items-center gap-2.5">
+                                <i class="mdi mdi-flash text-amber-400 text-xl flex-shrink-0"></i>
+                                <span class="text-xs font-semibold text-gray-200">Pedidos Mais Rápidos</span>
+                            </div>
+                            <div class="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs flex items-center gap-2.5">
+                                <i class="mdi mdi-bell-ring-outline text-emerald-400 text-xl flex-shrink-0"></i>
+                                <span class="text-xs font-semibold text-gray-200">Notificações em Direto</span>
+                            </div>
+                            <div class="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs flex items-center gap-2.5 col-span-2 sm:col-span-1">
+                                <i class="mdi mdi-shield-check-outline text-blue-400 text-xl flex-shrink-0"></i>
+                                <span class="text-xs font-semibold text-gray-200">100% Seguro & Leve</span>
+                            </div>
+                        </div>
+
+                        <!-- CTA Actions -->
+                        <div class="pt-3 flex flex-wrap items-center gap-3">
+                            <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}"
+                               download="RestPOS-v1.3.apk"
+                               class="px-6 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm shadow-xl shadow-emerald-600/30 transition-all inline-flex items-center gap-3 active:scale-95 cursor-pointer">
+                                <i class="mdi mdi-android text-2xl"></i>
+                                <div class="text-left">
+                                    <div class="text-[10px] uppercase font-bold text-emerald-200 leading-none">Download Direto</div>
+                                    <div class="font-extrabold leading-tight">Baixar APK Android (v1.3)</div>
+                                </div>
+                            </a>
+
+                            <a href="#menu"
+                               class="px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition-all inline-flex items-center gap-2 backdrop-blur-xs">
+                                <i class="mdi mdi-silverware-fork-knife text-lg text-orange-400"></i>
+                                <span>Ver Cardápio Web</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Visual Mockup Card -->
+                    <div class="lg:col-span-5 flex justify-center">
+                        <div class="relative w-full max-w-sm rounded-3xl p-6 bg-gradient-to-b from-stone-800 to-stone-900 border border-stone-700 shadow-2xl text-center space-y-4">
+                            <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-3xl border border-emerald-500/30">
+                                <i class="mdi mdi-cellphone-arrow-down"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-serif text-lg font-bold text-white">Instalação Simples e Rápida</h4>
+                                <p class="text-xs text-gray-400 mt-1">Compatível com Android 8.0 ou superior</p>
+                            </div>
+                            <div class="text-left text-xs text-gray-300 space-y-2.5 pt-2 border-t border-stone-700/80">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                                    <span>Clique no botão para baixar o ficheiro <strong>RestPOS-v1.3.apk</strong>.</span>
+                                </div>
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                                    <span>Abra o arquivo baixado e autorize a instalação no telemóvel.</span>
+                                </div>
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                                    <span>Pronto! Aceda aos restaurantes, faça pedidos e acompanhe status em direto.</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1897,6 +2005,7 @@
                         <li><a href="#menu" class="hover:text-white transition-colors">Cardápio Digital</a></li>
                         <li><a href="#destaques" class="hover:text-white transition-colors">Sugestões do Chef</a></li>
                         <li><a href="#sobre" class="hover:text-white transition-colors">Sobre Nós</a></li>
+                        <li><a href="#app" class="hover:text-emerald-400 transition-colors text-emerald-400 font-semibold inline-flex items-center gap-1"><i class="mdi mdi-android"></i> Baixar App (APK)</a></li>
                         <li><a href="{{ route('login') }}" class="hover:text-white transition-colors">Área de Funcionários</a></li>
                     </ul>
                 </div>

@@ -39,7 +39,15 @@
                 </div>
             </a>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}" download="RestPOS-v1.3.apk"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs sm:text-sm font-bold transition-all shadow-xs"
+                    title="Baixar App Android (APK)">
+                    <i class="mdi mdi-android text-base text-emerald-600"></i>
+                    <span class="hidden sm:inline">Baixar App Android</span>
+                    <span class="sm:hidden">App</span>
+                </a>
+
                 @auth
                     <a href="{{ auth()->user()->isSuperAdmin() && !session('is_support_mode') ? route('admin.tenants.index') : route('dashboard') }}"
                         class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold transition-all shadow-sm">
@@ -259,8 +267,12 @@
                 <span class="font-bold text-slate-800">RestPOS Cloud & Local</span>
                 <span>— Plataforma Multi-Restaurante de Gestão, POS, QR Code & Faturação</span>
             </div>
-            <div>
-                &copy; {{ date('Y') }} RestPOS. Todos os direitos reservados.
+            <div class="flex items-center gap-4">
+                <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}" download="RestPOS-v1.3.apk" class="text-emerald-600 hover:text-emerald-700 font-semibold inline-flex items-center gap-1">
+                    <i class="mdi mdi-android"></i>
+                    <span>Baixar App Android (APK)</span>
+                </a>
+                <span>&copy; {{ date('Y') }} RestPOS. Todos os direitos reservados.</span>
             </div>
         </div>
     </footer>

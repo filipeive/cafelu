@@ -246,6 +246,36 @@ class WelcomeController extends Controller
         return view('welcome', compact('categories', 'featuredProducts', 'tables', 'tableNumber', 'detectedTableId', 'slides', 'qrFallbackNotice', 'tenant'));
     }
 
+    public function downloadApp(Request $request, ?string $tenant = null)
+    {
+        $tenantModel = null;
+        if (!empty($tenant)) {
+            $tenantModel = $this->resolveTenantOrFail($tenant);
+        } elseif ($request->filled('restaurante')) {
+            $tenantModel = $this->resolveTenantOrFail((string) $request->query('restaurante'));
+        } else {
+            $tenantModel = current_tenant();
+        }
+
+        if ($tenantModel) {
+            app(TenantContext::class)->setTenant($tenantModel);
+            view()->share('currentTenant', $tenantModel);
+            session(['public_tenant_id' => $tenantModel->id]);
+        }
+
+        $apkPath = public_path('downloads/RestPOS-v1.3.apk');
+        $apkExists = file_exists($apkPath);
+        $apkSizeFormatted = $apkExists ? number_format(filesize($apkPath) / (1024 * 1024), 1) . ' MB' : '24.4 MB';
+        $apkUrl = asset('downloads/RestPOS-v1.3.apk');
+
+        return view('app-download', [
+            'tenant' => $tenantModel,
+            'apkExists' => $apkExists,
+            'apkSizeFormatted' => $apkSizeFormatted,
+            'apkUrl' => $apkUrl,
+        ]);
+    }
+
     protected function resolveTenantOrFail(string $identifier): Tenant
     {
         $tenant = Tenant::where('slug', $identifier)

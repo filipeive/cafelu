@@ -40,11 +40,11 @@
             </a>
 
             <div class="flex items-center gap-2 sm:gap-3">
-                <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}" download="RestPOS-v1.3.apk"
-                    class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs sm:text-sm font-bold transition-all shadow-xs"
-                    title="Baixar App Android (APK)">
-                    <i class="mdi mdi-android text-base text-emerald-600"></i>
-                    <span class="hidden sm:inline">Baixar App Android</span>
+                <a href="{{ route('app.download') }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/80 text-xs sm:text-sm font-bold transition-all shadow-xs"
+                    title="Conheça e baixe a nossa aplicação móvel">
+                    <i class="mdi mdi-cellphone-check text-base text-emerald-600"></i>
+                    <span class="hidden sm:inline">Baixe a Nossa App</span>
                     <span class="sm:hidden">App</span>
                 </a>
 
@@ -268,9 +268,9 @@
                 <span>— Plataforma Multi-Restaurante de Gestão, POS, QR Code & Faturação</span>
             </div>
             <div class="flex items-center gap-4">
-                <a href="{{ asset('downloads/RestPOS-v1.3.apk') }}" download="RestPOS-v1.3.apk" class="text-emerald-600 hover:text-emerald-700 font-semibold inline-flex items-center gap-1">
-                    <i class="mdi mdi-android"></i>
-                    <span>Baixar App Android (APK)</span>
+                <a href="{{ route('app.download') }}" class="text-slate-600 hover:text-orange-600 font-semibold inline-flex items-center gap-1 transition-colors">
+                    <i class="mdi mdi-cellphone-check text-emerald-600"></i>
+                    <span>Baixe a Nossa App</span>
                 </a>
                 <span>&copy; {{ date('Y') }} RestPOS. Todos os direitos reservados.</span>
             </div>

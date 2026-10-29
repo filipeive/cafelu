@@ -102,17 +102,30 @@ class MobilePwaAndDualViewTest extends TestCase
 
     public function test_welcome_and_network_pages_render_apk_download_buttons_and_links()
     {
-        // 1. Restaurant Welcome Menu Page
+        // 1. Restaurant Welcome Menu Page (clean link to dedicated page, no clutter)
         $responseRestaurant = $this->get(route('restaurant.menu', ['tenant' => $this->tenant->slug]));
         $responseRestaurant->assertStatus(200);
-        $responseRestaurant->assertSee('downloads/RestPOS-v1.3.apk', false);
-        $responseRestaurant->assertSee('Baixar App (APK)', false);
-        $responseRestaurant->assertSee('Baixar APK Android (v1.3)', false);
+        $responseRestaurant->assertSee('App Móvel', false);
+        $responseRestaurant->assertSee('Baixe a Nossa App', false);
 
-        // 2. Network Welcome Page
+        // 2. Network Welcome Page (clean link to dedicated page)
         $responseNetwork = $this->get(route('welcome'));
         $responseNetwork->assertStatus(200);
-        $responseNetwork->assertSee('downloads/RestPOS-v1.3.apk', false);
-        $responseNetwork->assertSee('Baixar App Android', false);
+        $responseNetwork->assertSee('Baixe a Nossa App', false);
+
+        // 3. Dedicated App Download Page (General)
+        $responseAppGeneral = $this->get(route('app.download'));
+        $responseAppGeneral->assertStatus(200);
+        $responseAppGeneral->assertSee('Baixe a Nossa App Móvel', false);
+        $responseAppGeneral->assertSee('downloads/RestPOS-v1.3.apk', false);
+        $responseAppGeneral->assertSee('O que você pode fazer com a nossa aplicação?', false);
+        $responseAppGeneral->assertSee('Como instalar no seu celular em 3 passos', false);
+
+        // 4. Dedicated App Download Page (Tenant-branded)
+        $responseAppTenant = $this->get(route('restaurant.app', ['tenant' => $this->tenant->slug]));
+        $responseAppTenant->assertStatus(200);
+        $responseAppTenant->assertSee(e($this->tenant->name), false);
+        $responseAppTenant->assertSee('downloads/RestPOS-v1.3.apk', false);
+        $responseAppTenant->assertSee('Voltar ao Restaurante', false);
     }
 }

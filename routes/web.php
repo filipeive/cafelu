@@ -36,6 +36,9 @@ use App\Http\Controllers\LicenseController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+Route::get('/app', [WelcomeController::class, 'downloadApp'])->name('app.download');
+Route::get('/baixar-app', [WelcomeController::class, 'downloadApp'])->name('app.download.alt');
+Route::get('/r/{tenant}/app', [WelcomeController::class, 'downloadApp'])->name('restaurant.app');
 Route::get('/restaurantes', [WelcomeController::class, 'network'])->name('restaurants.network');
 Route::get('/r/{tenant}', [WelcomeController::class, 'showRestaurant'])->name('restaurant.menu');
 Route::get('/restaurante/{tenant}', [WelcomeController::class, 'showRestaurant'])->name('restaurant.menu.alt');
@@ -287,6 +290,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Direct Restaurant Public Routes: http://host/RestPOS/{tenant_id_or_slug}
+Route::get('/{tenant}/app', [WelcomeController::class, 'downloadApp'])->name('restaurant.slug.app');
 Route::get('/{tenant}/m/{table}', [WelcomeController::class, 'tenantTableEntry'])->name('welcome.slug.table');
 Route::get('/{tenant}', [WelcomeController::class, 'showRestaurant'])->name('restaurant.slug');
 // Restricted Routes with Throttling

@@ -89,7 +89,7 @@
     </style>
 </head>
 
-<body class="bg-background text-foreground antialiased selection:bg-primary selection:text-white min-h-screen flex flex-col">
+<body class="bg-background text-foreground antialiased selection:bg-primary/20 selection:text-foreground min-h-screen flex flex-col">
 
     <!-- Top Utility Bar -->
     <div class="bg-slate-900 text-slate-300 text-xs border-b border-slate-800">
@@ -381,29 +381,20 @@
                 @foreach($restaurants as $rest)
                     <article class="group bg-card rounded-3xl border border-border/80 hover:border-primary/50 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
                         <!-- Top Accent Banner -->
-                        <div class="relative h-28 bg-gradient-to-r from-slate-900 via-slate-800 to-orange-950 p-5 flex items-start justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/15 backdrop-blur-md text-white">
-                                    <i class="mdi mdi-map-marker text-orange-400"></i>
-                                    {{ $rest['city'] }}
-                                </span>
-                                @if($rest['online_orders'])
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 border border-emerald-400/30 text-emerald-300">
-                                        <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                        Pedidos Online
-                                    </span>
-                                @endif
-                            </div>
+                        <div class="relative h-24 bg-gradient-to-r from-slate-900 via-slate-800 to-stone-900 p-4 flex items-start justify-end overflow-hidden">
+                            <!-- Subtle Ambient Glow -->
+                            <div class="absolute -right-8 -top-8 size-24 rounded-full bg-orange-500/15 blur-xl pointer-events-none"></div>
 
-                            <span class="text-[11px] font-mono text-slate-300 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg">
-                                /{{ $rest['slug'] }}
+                            <span class="relative z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-md text-white border border-white/15 shadow-xs whitespace-nowrap">
+                                <i class="mdi mdi-map-marker text-orange-400 text-xs"></i>
+                                {{ $rest['city'] }}
                             </span>
                         </div>
 
                         <!-- Restaurant Identity & Content -->
                         <div class="px-6 pt-0 pb-6 flex-1 flex flex-col">
                             <div class="relative -mt-10 mb-4 flex items-end justify-between">
-                                <div class="size-20 rounded-2xl bg-card p-1.5 shadow-lg border border-border flex items-center justify-center overflow-hidden">
+                                <div class="size-20 rounded-2xl bg-card p-1.5 shadow-lg border border-border flex items-center justify-center overflow-hidden shrink-0">
                                     @if($rest['logo'])
                                         <img src="{{ $rest['logo'] }}" alt="{{ $rest['name'] }}" class="size-full object-contain rounded-xl">
                                     @else
@@ -413,12 +404,12 @@
                                     @endif
                                 </div>
 
-                                <div class="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                                    <span class="px-2.5 py-1 rounded-xl bg-secondary text-secondary-foreground" title="Produtos ativos no cardápio">
+                                <div class="flex items-center gap-2 text-xs font-bold text-muted-foreground whitespace-nowrap">
+                                    <span class="px-2.5 py-1 rounded-xl bg-secondary text-secondary-foreground whitespace-nowrap" title="Produtos ativos no cardápio">
                                         <i class="mdi mdi-food-fork-drink text-primary mr-1"></i>{{ $rest['products_count'] }} itens
                                     </span>
                                     @if($rest['tables_count'] > 0)
-                                        <span class="px-2.5 py-1 rounded-xl bg-secondary text-secondary-foreground" title="Mesas com QR Code">
+                                        <span class="px-2.5 py-1 rounded-xl bg-secondary text-secondary-foreground whitespace-nowrap" title="Mesas com QR Code">
                                             <i class="mdi mdi-table-chair text-indigo-500 mr-1"></i>{{ $rest['tables_count'] }} mesas
                                         </span>
                                     @endif

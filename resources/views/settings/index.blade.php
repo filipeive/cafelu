@@ -249,24 +249,22 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs por Categorias de Configuração -->
-    <div class="bg-white dark:bg-gray-800 rounded-3xl p-3 border border-gray-100 dark:border-gray-700/80 shadow-xs">
-        <div class="flex flex-wrap gap-2">
-            @foreach($settings as $group => $groupSettings)
-                <button type="button" @click="activeTab = '{{ $group }}'"
-                    class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
-                    :class="activeTab === '{{ $group }}' 
-                        ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' 
-                        : 'bg-gray-100 dark:bg-gray-700/70 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-650'">
-                    <i class="mdi {{ $groupIcons[$group] ?? 'mdi-cog-outline' }} text-base"></i>
-                    <span>{{ __('messages.' . $group) }}</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px]"
-                        :class="activeTab === '{{ $group }}' ? 'bg-white/20 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400'">
-                        {{ count($groupSettings) }}
-                    </span>
-                </button>
-            @endforeach
-        </div>
+    <!-- Navigation Tabs por Categorias de Configuração (shadcn TabsList) -->
+    <div class="rounded-xl border border-border/70 bg-muted/60 p-1 text-muted-foreground inline-flex flex-wrap gap-1 w-full sm:w-auto shadow-2xs">
+        @foreach($settings as $group => $groupSettings)
+            <button type="button" @click="activeTab = '{{ $group }}'"
+                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap"
+                :class="activeTab === '{{ $group }}' 
+                    ? 'bg-background text-foreground shadow-xs font-semibold' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/40'">
+                <i class="mdi {{ $groupIcons[$group] ?? 'mdi-cog-outline' }} text-base"></i>
+                <span>{{ __('messages.' . $group) }}</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px]"
+                    :class="activeTab === '{{ $group }}' ? 'bg-primary/10 text-primary font-bold' : 'bg-muted-foreground/15 text-muted-foreground'">
+                    {{ count($groupSettings) }}
+                </span>
+            </button>
+        @endforeach
     </div>
 
     <!-- Formulário Principal das Configurações em Abas -->
@@ -278,31 +276,31 @@
                      x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="opacity-0 translate-y-1"
                      x-transition:enter-end="opacity-100 translate-y-0"
-                     class="bg-white dark:bg-gray-800 rounded-3xl shadow-xs border border-gray-100 dark:border-gray-700/80 overflow-hidden">
+                     class="rounded-xl border border-border/80 bg-card text-card-foreground shadow-xs overflow-hidden">
                     
                     <!-- Cabeçalho do Grupo -->
-                    <div class="px-8 py-5 bg-gray-50/80 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                    <div class="px-6 py-4 bg-muted/40 border-b border-border/70 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-orange-500 flex items-center justify-center text-xl">
+                            <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-lg">
                                 <i class="mdi {{ $groupIcons[$group] ?? 'mdi-cog-outline' }}"></i>
                             </div>
                             <div>
-                                <h2 class="text-base font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                                <h2 class="text-sm font-semibold text-foreground uppercase tracking-wider">
                                     {{ __('messages.' . $group) }}
                                 </h2>
-                                <p class="text-xs text-gray-400">Gerencie todos os parâmetros relacionados a este módulo</p>
+                                <p class="text-xs text-muted-foreground">Gerencie os parâmetros relacionados a este módulo</p>
                             </div>
                         </div>
 
                         <button type="submit"
-                            class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-500/20 transition-all cursor-pointer">
+                            class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs rounded-lg shadow-xs transition-all cursor-pointer">
                             <i class="mdi mdi-content-save"></i>
                             <span>{{ __('messages.save_settings') }}</span>
                         </button>
                     </div>
 
                     <!-- Campos do Grupo -->
-                    <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         @foreach($groupSettings as $setting)
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">
@@ -314,15 +312,15 @@
 
                                 @if($setting->type === 'text')
                                     <input type="text" name="{{ $setting->key }}" value="{{ $setting->value }}"
-                                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium text-xs focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+                                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground font-medium text-xs focus:ring-1 focus:ring-ring focus:border-ring transition-all shadow-2xs">
 
                                 @elseif($setting->type === 'number')
                                     <input type="number" name="{{ $setting->key }}" value="{{ $setting->value }}"
-                                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium text-xs focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+                                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground font-medium text-xs focus:ring-1 focus:ring-ring focus:border-ring transition-all shadow-2xs">
 
                                 @elseif($setting->type === 'textarea')
                                     <textarea name="{{ $setting->key }}" rows="3"
-                                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-medium text-xs focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">{{ $setting->value }}</textarea>
+                                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground font-medium text-xs focus:ring-1 focus:ring-ring focus:border-ring transition-all shadow-2xs">{{ $setting->value }}</textarea>
 
                                 @elseif($setting->type === 'file')
                                     <div class="space-y-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700">

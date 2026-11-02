@@ -40,15 +40,56 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
-                        secondary: '{{ \App\Models\Setting::get('secondary_color', '#10B981') }}',
+                        border: 'hsl(var(--border))',
+                        input: 'hsl(var(--input))',
+                        ring: 'hsl(var(--ring))',
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                        primary: {
+                            DEFAULT: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
+                            foreground: 'hsl(var(--primary-foreground))',
+                            50: '#FFF8E6',
+                            100: '#FFECC2',
+                            500: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
+                            600: '#E69500',
+                            700: '#CC8400',
+                        },
+                        secondary: {
+                            DEFAULT: 'hsl(var(--secondary))',
+                            foreground: 'hsl(var(--secondary-foreground))',
+                        },
+                        destructive: {
+                            DEFAULT: 'hsl(var(--destructive))',
+                            foreground: 'hsl(var(--destructive-foreground))',
+                        },
+                        muted: {
+                            DEFAULT: 'hsl(var(--muted))',
+                            foreground: 'hsl(var(--muted-foreground))',
+                        },
+                        accent: {
+                            DEFAULT: 'hsl(var(--accent))',
+                            foreground: 'hsl(var(--accent-foreground))',
+                        },
+                        popover: {
+                            DEFAULT: 'hsl(var(--popover))',
+                            foreground: 'hsl(var(--popover-foreground))',
+                        },
+                        card: {
+                            DEFAULT: 'hsl(var(--card))',
+                            foreground: 'hsl(var(--card-foreground))',
+                        },
                         warning: '{{ \App\Models\Setting::get('primary_color', '#FFA500') }}',
                         danger: '#EF4444',
                         success: '#10B981',
                         info: '#3B82F6',
                     },
+                    borderRadius: {
+                        lg: 'var(--radius)',
+                        md: 'calc(var(--radius) - 2px)',
+                        sm: 'calc(var(--radius) - 4px)',
+                    },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
                     },
                 }
             }
@@ -63,6 +104,51 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 240 10% 3.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 240 10% 3.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 240 10% 3.9%;
+            --primary: 24.6 95% 53.1%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 240 4.8% 95.9%;
+            --secondary-foreground: 240 5.9% 10%;
+            --muted: 240 4.8% 95.9%;
+            --muted-foreground: 240 3.8% 46.1%;
+            --accent: 240 4.8% 95.9%;
+            --accent-foreground: 240 5.9% 10%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 240 5.9% 90%;
+            --input: 240 5.9% 90%;
+            --ring: 240 5.9% 10%;
+            --radius: 0.625rem;
+        }
+
+        .dark {
+            --background: 240 10% 3.9%;
+            --foreground: 0 0% 98%;
+            --card: 240 10% 3.9%;
+            --card-foreground: 0 0% 98%;
+            --popover: 240 10% 3.9%;
+            --popover-foreground: 0 0% 98%;
+            --primary: 24.6 95% 53.1%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 240 3.7% 15.9%;
+            --secondary-foreground: 0 0% 98%;
+            --muted: 240 3.7% 15.9%;
+            --muted-foreground: 240 5% 64.9%;
+            --accent: 240 3.7% 15.9%;
+            --accent-foreground: 0 0% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 240 3.7% 15.9%;
+            --input: 240 3.7% 15.9%;
+            --ring: 240 4.9% 83.9%;
+        }
+
         [x-cloak] {
             display: none !important;
         }
@@ -141,7 +227,7 @@
     @stack('styles')
 </head>
 
-<body class="h-full bg-gray-50 dark:bg-gray-900 font-['Inter'] antialiased text-gray-900 dark:text-gray-100" x-data="{ 
+<body class="h-full bg-background font-sans antialiased text-foreground selection:bg-primary selection:text-primary-foreground" x-data="{ 
           sidebarOpen: false, 
           sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' 
       }" @resize.window="if (window.innerWidth >= 1024) sidebarOpen = false">
@@ -187,14 +273,14 @@
                 x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm lg:hidden z-30" x-cloak>
+                class="fixed inset-0 bg-background/80 backdrop-blur-xs lg:hidden z-30" x-cloak>
             </div>
 
             <!-- Sidebar -->
             @include('layouts.sidebar')
 
             <!-- Main Content -->
-            <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-all duration-300 pb-24 lg:pb-6"
+            <main class="flex-1 overflow-y-auto bg-background transition-all duration-300 pb-24 lg:pb-6"
                 :class="{ 'lg:ml-64': !sidebarCollapsed, 'lg:ml-20': sidebarCollapsed }">
                 <div class="w-full px-4 sm:px-6 lg:px-8 py-6">
                     <!-- Page Header -->

@@ -1,5 +1,5 @@
 <div 
-    class="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 border-r border-gray-200/80 dark:border-gray-800 transition-all duration-300 z-40 flex flex-col shadow-xs"
+    class="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-card border-r border-border/80 transition-all duration-300 z-40 flex flex-col shadow-xs"
     :class="{ 
         'w-64': !sidebarCollapsed, 
         'w-20': sidebarCollapsed,
@@ -8,7 +8,7 @@
     }"
 >
     <!-- Menu de Navegação Principal -->
-    <ul class="flex-1 overflow-y-auto py-3 px-3 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 overflow-x-hidden">
+    <ul class="flex-1 overflow-y-auto py-3 px-3 flex flex-col gap-1 scrollbar-thin scrollbar-thumb-border overflow-x-hidden">
         
         @php
             $isOwnerConsole = function_exists('is_owner_console') ? is_owner_console() : (Auth::user()->role === 'superadmin' && !session('is_support_mode'));
@@ -60,7 +60,7 @@
             <!-- ADMINISTRAÇÃO GLOBAL DA PLATAFORMA -->
             <div class="pt-3 pb-1">
                 <div class="px-3 mb-2 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
-                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <span class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                         Administração Global
                     </span>
                 </div>
@@ -136,7 +136,7 @@
             <!-- OPERACIONAL -->
             <div class="pt-3 pb-1">
                 <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
-                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <span class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                         {{ __('messages.operational') }}
                     </span>
                 </div>
@@ -192,7 +192,7 @@
             <!-- CARDÁPIO & ESTOQUE -->
             <div class="pt-3 pb-1">
                 <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
-                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <span class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                         {{ __('messages.menu') }}
                     </span>
                 </div>
@@ -227,7 +227,7 @@
             <!-- FINANCEIRO -->
             <div class="pt-3 pb-1">
                 <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
-                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <span class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                         {{ __('messages.financial') }}
                     </span>
                 </div>
@@ -292,7 +292,7 @@
             <!-- PESSOAS & EQUIPE -->
             <div class="pt-3 pb-1">
                 <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
-                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <span class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                         {{ __('messages.clients') }}
                     </span>
                 </div>
@@ -323,7 +323,7 @@
             @if(in_array(Auth::user()->role, ['admin', 'superadmin', 'super_admin']))
                 <div class="pt-3 pb-1">
                     <div class="px-3 mb-1.5 flex items-center justify-between" x-show="!sidebarCollapsed" x-transition>
-                        <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        <span class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                             {{ __('messages.settings') }}
                         </span>
                     </div>
@@ -389,16 +389,16 @@
     </ul>
 
     <!-- Rodapé Unificado da Sidebar -->
-    <div class="p-3 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/60 flex items-center justify-between transition-all">
+    <div class="p-3 border-t border-border/80 bg-muted/30 flex items-center justify-between transition-all">
         <!-- Status Online com pulso suave -->
         <div class="flex items-center gap-2 pl-1" x-show="!sidebarCollapsed" x-transition>
-            <span class="relative flex h-2 w-2">
+            <span class="relative flex size-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span class="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
             </span>
             <div class="leading-none">
-                <span class="text-[11px] font-medium text-gray-600 dark:text-gray-300 block">Online</span>
-                <span class="text-[9px] text-gray-400 dark:text-gray-500 block mt-0.5">v1.0.0</span>
+                <span class="text-[11px] font-medium text-foreground block">Online</span>
+                <span class="text-[9px] text-muted-foreground block mt-0.5">RestPOS v1.3</span>
             </div>
         </div>
 
@@ -406,7 +406,7 @@
         <div class="flex items-center gap-1" :class="{ 'w-full justify-center': sidebarCollapsed }">
             @if(Auth::user()->role == 'admin')
                 <button type="button" 
-                        class="p-2 rounded-xl hover:bg-gray-200/80 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" 
+                        class="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer" 
                         onclick="toggleSystemStats()" 
                         title="Status do Sistema"
                         x-show="!sidebarCollapsed">
@@ -415,7 +415,7 @@
             @endif
 
             <button type="button" 
-                    class="p-2 rounded-xl hover:bg-gray-200/80 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors hidden lg:flex items-center justify-center" 
+                    class="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors hidden lg:flex items-center justify-center cursor-pointer" 
                     @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)" 
                     :title="sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'">
                 <i class="mdi text-lg transition-transform duration-200" :class="sidebarCollapsed ? 'mdi-chevron-double-right' : 'mdi-chevron-double-left'"></i>

@@ -23,17 +23,17 @@
 <li>
     <a href="{{ $href }}"
        @if($external) target="_blank" @endif
-       class="group flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 {{ $isActive 
-            ? 'text-orange-600 dark:text-orange-400 font-semibold bg-orange-500/10' 
-            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-gray-800/50' }}">
+       class="group flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-150 {{ $isActive 
+            ? 'text-primary font-semibold bg-primary/10' 
+            : 'text-muted-foreground hover:text-foreground hover:bg-accent/60' }}">
         
         @if($icon)
-            <i class="mdi {{ $icon }} mr-2 text-base {{ $isActive ? 'text-orange-500' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300' }}"></i>
+            <i class="mdi {{ $icon }} mr-2 text-base {{ $isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground' }}"></i>
         @else
-            <span class="w-1.5 h-1.5 rounded-full mr-2 transition-colors {{ $isActive ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600 group-hover:bg-gray-500' }}"></span>
+            <span class="size-1.5 rounded-full mr-2 transition-colors {{ $isActive ? 'bg-primary' : 'bg-muted-foreground/40 group-hover:bg-muted-foreground' }}"></span>
         @endif
 
-        <span class="flex-1 truncate">{{ $title }}</span>
+        <span class="flex-1 truncate tracking-tight">{{ $title }}</span>
 
         @if(isset($badge) && $showBadge && $badge !== null && $badge !== '')
             <span class="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full {{ $badgeClass }}">

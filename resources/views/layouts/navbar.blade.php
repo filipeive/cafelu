@@ -1,11 +1,11 @@
 <nav
-    class="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex z-50 transition-colors duration-300">
+    class="fixed top-0 left-0 right-0 h-16 bg-card/95 backdrop-blur-md border-b border-border/80 flex z-50 transition-colors duration-200">
     @php
         $isOwnerConsole = function_exists('is_owner_console') ? is_owner_console() : (auth()->check() && auth()->user()->isSuperAdmin() && !session('is_support_mode'));
         $displayUserName = trim(preg_replace('/\s*\(.*?\)\s*/', '', Auth::user()->name));
     @endphp
     <!-- Logo Area -->
-    <div class="flex items-center justify-center border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300"
+    <div class="flex items-center justify-center border-r border-border/80 bg-card transition-all duration-300"
         :class="sidebarCollapsed ? 'w-20' : 'w-64'">
         <a href="{{ $isOwnerConsole ? route('admin.tenants.index') : route('dashboard') }}" class="flex items-center gap-2 text-decoration-none">
             @if(!$isOwnerConsole && ($logo = \App\Models\Setting::get('system_logo')))
@@ -14,10 +14,10 @@
                 <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="h-8 w-auto">
             @endif
             <div class="hidden lg:block leading-tight" x-show="!sidebarCollapsed" x-transition>
-                <span class="block font-bold text-gray-800 dark:text-white tracking-wide truncate max-w-[160px]">
+                <span class="block font-bold text-card-foreground tracking-tight truncate max-w-[160px]">
                     {{ $isOwnerConsole ? 'RestPOS SaaS' : (current_tenant()?->name ?? \App\Models\Setting::get('company_name', 'RestPOS')) }}
                 </span>
-                <span class="block text-[10px] text-warning font-bold uppercase tracking-wider">
+                <span class="block text-[10px] text-primary font-bold uppercase tracking-wider">
                     {{ $isOwnerConsole ? 'OWNER CONSOLE' : 'POS SYSTEM' }}
                 </span>
             </div>
@@ -25,10 +25,10 @@
     </div>
 
     <!-- Main Navbar Content -->
-    <div class="flex-1 flex items-center justify-between px-6 bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div class="flex-1 flex items-center justify-between px-6 bg-card/95 transition-colors duration-200">
         <!-- Left Side: Toggle & Welcome -->
         <div class="flex items-center gap-4">
-            <button class="lg:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+            <button class="lg:hidden p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors"
                 type="button" @click="sidebarOpen = !sidebarOpen">
                 <i class="mdi mdi-menu text-2xl"></i>
             </button>
@@ -36,18 +36,18 @@
             @if(auth()->user()->role !== 'customer' && !$isOwnerConsole)
                 <!-- Global Search -->
                 <form action="{{ route('search') }}" method="GET" class="hidden md:block relative group">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <i class="mdi mdi-magnify text-gray-400 group-focus-within:text-orange-500 transition-colors text-base"></i>
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="mdi mdi-magnify text-muted-foreground group-focus-within:text-primary transition-colors text-base"></i>
                     </div>
                     <input type="text" name="q" value="{{ request('q') }}"
                         placeholder="Pesquisar produto, pedido, factura, cliente..."
-                        class="block w-72 lg:w-80 pl-10 pr-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 text-xs font-medium transition-all duration-300 focus:w-96">
+                        class="block w-72 lg:w-80 pl-9 pr-4 py-1.5 border border-input rounded-lg leading-5 bg-muted/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:bg-background focus:ring-1 focus:ring-ring focus:border-ring text-xs font-medium transition-all duration-200 focus:w-96 shadow-2xs">
                 </form>
             @endif
 
             <div class="hidden xl:block">
-                <h1 class="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                    {{ __('messages.welcome') }}, <span class="text-warning font-bold">{{ $displayUserName }}</span>
+                <h1 class="text-sm font-medium text-muted-foreground">
+                    {{ __('messages.welcome') }}, <span class="text-foreground font-semibold">{{ $displayUserName }}</span>
                 </h1>
             </div>
         </div>
@@ -58,35 +58,36 @@
                 <!-- Quick Actions Dropdown (Atalhos) -->
                 <li class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.outside="open = false"
-                        class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer">
-                        <i class="mdi mdi-lightning-bolt-outline text-base text-orange-500"></i>
+                        class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/80 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer shadow-2xs">
+                        <i class="mdi mdi-lightning-bolt-outline text-base text-primary"></i>
                         <span>Atalhos</span>
-                        <i class="mdi mdi-chevron-down text-xs text-gray-400"></i>
+                        <i class="mdi mdi-chevron-down text-xs text-muted-foreground"></i>
                     </button>
 
                     <div x-show="open" x-transition
-                        class="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+                        class="absolute right-0 mt-2 w-52 bg-popover text-popover-foreground rounded-xl shadow-lg border border-border p-1 z-50"
                         style="display: none;">
                         <a href="{{ route('orders.index') }}"
-                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-cart-plus text-success"></i> {{ __('messages.orders') }}
+                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                            <i class="mdi mdi-cart-plus text-emerald-500"></i> {{ __('messages.orders') }}
                         </a>
                         <a href="{{ route('quotations.create') }}"
-                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
                             <i class="mdi mdi-file-document-plus-outline text-sky-500"></i> Nova Cotação
                         </a>
                         <a href="{{ route('tables.index') }}"
-                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-qrcode-scan text-info"></i> Mesas & QR Codes
+                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                            <i class="mdi mdi-qrcode-scan text-blue-500"></i> Mesas & QR Codes
                         </a>
                         <a href="{{ route('products.index', ['create' => 1]) }}"
-                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-food-variant text-warning"></i> {{ __('messages.add_product') }}
+                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                            <i class="mdi mdi-food-variant text-amber-500"></i> {{ __('messages.add_product') }}
                         </a>
                         @if(in_array(auth()->user()->role, ['admin', 'superadmin']))
+                            <div class="h-px bg-border/60 my-1"></div>
                             <a href="{{ route('settings.index') }}"
-                                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700">
-                                <i class="mdi mdi-store-cog text-warning"></i> {{ __('messages.change_establishment_name') }}
+                                class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                                <i class="mdi mdi-store-cog text-primary"></i> {{ __('messages.change_establishment_name') }}
                             </a>
                         @endif
                     </div>
@@ -321,30 +322,30 @@
                 </template>
 
                 <div x-show="open" x-transition
-                    class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+                    class="absolute right-0 mt-2 w-80 bg-popover text-popover-foreground rounded-xl shadow-lg border border-border z-50 overflow-hidden"
                     style="display: none;">
                     <div
-                        class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-lg">
-                        <h6 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        class="px-4 py-3 border-b border-border/70 flex justify-between items-center bg-muted/40">
+                        <h6 class="text-xs font-semibold text-foreground uppercase tracking-wider">
                             {{ __('messages.notifications') }}
                         </h6>
                         <span x-text="unreadCount + ' {{ __('messages.new_plural') }}'"
-                            class="px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"></span>
+                            class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 text-primary"></span>
                     </div>
 
                     <div class="max-h-96 overflow-y-auto">
                         <template x-if="notifications.length > 0">
-                            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                            <div class="divide-y divide-border/50">
                                 <template x-for="notification in notifications" :key="notification.id">
                                     <button @click="markAsRead(notification.id, notification.link)"
-                                        class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex gap-3">
-                                        <div :class="notification.color + ' mt-1'">
+                                        class="w-full text-left px-4 py-3 hover:bg-accent/60 transition-colors flex gap-3 cursor-pointer">
+                                        <div :class="notification.color + ' mt-1 flex-shrink-0'">
                                             <i :class="'mdi ' + notification.icon + ' text-xl'"></i>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm text-gray-800 dark:text-gray-200 leading-snug"
+                                            <p class="text-xs text-foreground font-medium leading-snug"
                                                 x-text="notification.message"></p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                                            <p class="text-[11px] text-muted-foreground mt-1"
                                                 x-text="notification.time"></p>
                                         </div>
                                     </button>
@@ -353,17 +354,17 @@
                         </template>
 
                         <template x-if="notifications.length === 0">
-                            <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                                <i class="mdi mdi-bell-off-outline text-3xl mb-2 block"></i>
-                                <p class="text-sm">{{ __('messages.no_new_notifications') }}</p>
+                            <div class="p-8 text-center text-muted-foreground">
+                                <i class="mdi mdi-bell-off-outline text-3xl mb-2 block opacity-50"></i>
+                                <p class="text-xs font-medium">{{ __('messages.no_new_notifications') }}</p>
                             </div>
                         </template>
                     </div>
 
                     <div
-                        class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center bg-gray-50 dark:bg-gray-900/50 rounded-b-lg">
+                        class="px-4 py-2 border-t border-border/70 text-center bg-muted/30">
                         <a href="{{ route('notifications.index') }}"
-                            class="text-xs font-semibold text-warning hover:text-orange-600">
+                            class="text-xs font-semibold text-primary hover:underline">
                             {{ __('messages.view_all_notifications') }}
                         </a>
                     </div>
@@ -373,65 +374,65 @@
             <!-- User Profile -->
             <li class="relative ml-2" x-data="{ open: false }">
                 <button @click="open = !open" @click.outside="open = false"
-                    class="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 p-1.5 rounded-lg transition-colors">
+                    class="flex items-center gap-2.5 hover:bg-accent hover:text-accent-foreground p-1.5 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-border/60">
                     @if (Auth::user()->profile_photo_path)
-                        <img class="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                        <img class="size-8 rounded-full object-cover border border-border"
                             src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="Perfil">
                     @else
                         <div
-                            class="h-8 w-8 rounded-full bg-orange-100 dark:bg-gray-700 flex items-center justify-center text-warning border border-orange-200 dark:border-gray-600">
-                            <i class="mdi mdi-account text-lg"></i>
+                            class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
+                            <i class="mdi mdi-account text-base"></i>
                         </div>
                     @endif
-                    <div class="hidden md:block text-left">
-                        <p class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-none">
+                    <div class="hidden md:block text-left leading-tight">
+                        <p class="text-xs font-semibold text-foreground leading-none">
                             {{ $displayUserName }}
                         </p>
-                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{{ Auth::user()->role ?? 'Usuário' }}
+                        <p class="text-[10px] text-muted-foreground mt-0.5 capitalize">{{ Auth::user()->role ?? 'Usuário' }}
                         </p>
                     </div>
-                    <i class="mdi mdi-chevron-down text-gray-400 text-sm"></i>
+                    <i class="mdi mdi-chevron-down text-muted-foreground text-xs"></i>
                 </button>
 
                 <div x-show="open" x-transition
-                    class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+                    class="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-xl shadow-lg border border-border p-1 z-50"
                     style="display: none;">
-                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $displayUserName }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p>
+                    <div class="px-3 py-2.5 border-b border-border/70 mb-1">
+                        <p class="text-xs font-semibold text-foreground leading-tight">{{ $displayUserName }}</p>
+                        <p class="text-[11px] text-muted-foreground truncate mt-0.5">{{ Auth::user()->email }}</p>
                     </div>
-                    <div class="py-1">
+                    <div class="flex flex-col gap-0.5">
                         @if(session('is_support_mode'))
-                            <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST" class="px-2 py-1">
+                            <form action="{{ route('admin.tenants.leave-impersonate') }}" method="POST" class="px-1 py-0.5">
                                 @csrf
                                 <button type="submit"
-                                    class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-black text-amber-900 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/50 dark:text-amber-200 dark:hover:bg-amber-900/80 transition-colors cursor-pointer">
-                                    <i class="mdi mdi-exit-to-app text-base text-amber-600 dark:text-amber-400"></i>
+                                    class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 dark:text-amber-200 transition-colors cursor-pointer">
+                                    <i class="mdi mdi-exit-to-app text-sm"></i>
                                     <span>Sair do Modo Suporte</span>
                                 </button>
                             </form>
-                            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                            <div class="h-px bg-border/60 my-1"></div>
                         @endif
                         @if(auth()->user()->isSuperAdmin())
                             <a href="{{ route('admin.tenants.index') }}"
-                                class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-gray-700">
+                                class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-primary hover:bg-accent rounded-lg transition-colors">
                                 <i class="mdi mdi-shield-crown-outline"></i> Painel do Dono (SaaS)
                             </a>
                         @endif
                         <a href="{{ route('profile.edit') }}"
-                            class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <i class="mdi mdi-account-edit-outline text-primary"></i> {{ __('messages.edit_profile') }}
+                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                            <i class="mdi mdi-account-edit-outline text-muted-foreground"></i> {{ __('messages.edit_profile') }}
                         </a>
                         @if(auth()->user()->role !== 'customer' && !$isOwnerConsole)
                             <a href="{{ route('settings.index') }}"
-                                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                <i class="mdi mdi-cog-outline text-primary"></i> {{ __('messages.system_settings') }}
+                                class="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                                <i class="mdi mdi-cog-outline text-muted-foreground"></i> {{ __('messages.system_settings') }}
                             </a>
                         @endif
-                        <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                        <div class="h-px bg-border/60 my-1"></div>
                         <a href="{{ route('logout') }}"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                            class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                             <i class="mdi mdi-logout-variant"></i> {{ __('messages.logout') }}
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">

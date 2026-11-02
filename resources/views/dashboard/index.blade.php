@@ -4,454 +4,425 @@
 @section('icon', 'view-dashboard')
 
 @section('content')
-    <div class="space-y-6">
+    <div class="flex flex-col gap-6">
         <!-- Header -->
-        <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                <i class="mdi mdi-view-dashboard text-primary"></i> Dashboard
-            </h1>
-            <div class="flex gap-3">
-                <a href="{{ route('pos.index') }}"
-                    class="flex items-center gap-2 px-4 py-2 bg-warning hover:bg-warning/90 text-white rounded-lg transition-colors font-medium">
-                    <i class="mdi mdi-cash-register"></i> Ir para POS
-                </a>
-                <button
-                    class="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    onclick="refreshDashboard()">
-                    <i class="mdi mdi-refresh text-xl"></i>
-                </button>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-1">
+            <div class="flex flex-col gap-1">
+                <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+                    <i class="mdi mdi-view-dashboard text-primary"></i> Dashboard
+                </h1>
+                <p class="text-xs sm:text-sm text-muted-foreground">
+                    Acompanhamento operacional, desempenho de vendas e status em tempo real.
+                </p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <x-ui.button variant="outline" size="sm" onclick="refreshDashboard()" title="Atualizar dados">
+                    <i class="mdi mdi-refresh text-base"></i>
+                    <span>Atualizar</span>
+                </x-ui.button>
+                <x-ui.button href="{{ route('pos.index') }}" variant="default" size="sm">
+                    <i class="mdi mdi-cash-register text-base"></i>
+                    <span>Ir para POS</span>
+                </x-ui.button>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <!-- Stats Cards (shadcn KPI style) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <!-- Vendas Hoje -->
-            <div
-                class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                    <i class="mdi mdi-cash-multiple text-6xl"></i>
-                </div>
-                <div class="relative z-10">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <i class="mdi mdi-cash-multiple text-2xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-blue-100 text-sm font-medium">Vendas Hoje</p>
-                            <h3 class="text-2xl font-bold">{{ number_format($todaySales ?? 0, 2, ',', '.') }} MT</h3>
-                        </div>
+            <x-ui.card class="hover:border-border transition-colors">
+                <x-ui.card-header class="flex-row items-center justify-between pb-2 space-y-0">
+                    <x-ui.card-title class="text-xs font-medium text-muted-foreground">Vendas Hoje</x-ui.card-title>
+                    <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                        <i class="mdi mdi-cash-multiple text-lg"></i>
                     </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-blue-100">Vs ontem</span>
-                        <span
-                            class="flex items-center gap-1 {{ ($salesGrowth ?? 0) >= 0 ? 'text-green-300' : 'text-red-300' }} font-medium bg-white/10 px-2 py-0.5 rounded">
-                            {{ number_format($salesGrowth ?? 0, 1) }}%
-                            <i class="mdi mdi-arrow-{{ ($salesGrowth ?? 0) >= 0 ? 'up' : 'down' }}"></i>
+                </x-ui.card-header>
+                <x-ui.card-content class="flex flex-col gap-1.5">
+                    <div class="text-2xl font-bold tracking-tight text-foreground">{{ number_format($todaySales ?? 0, 2, ',', '.') }} MT</div>
+                    <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <span class="inline-flex items-center gap-0.5 font-semibold {{ ($salesGrowth ?? 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive' }}">
+                            <i class="mdi mdi-arrow-{{ ($salesGrowth ?? 0) >= 0 ? 'up' : 'down' }}-bold"></i>
+                            {{ number_format(abs($salesGrowth ?? 0), 1) }}%
                         </span>
+                        <span>vs. dia anterior</span>
                     </div>
-                </div>
-            </div>
+                </x-ui.card-content>
+            </x-ui.card>
 
             <!-- Pedidos Ativos -->
-            <div
-                class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                    <i class="mdi mdi-cart text-6xl"></i>
-                </div>
-                <div class="relative z-10">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <i class="mdi mdi-cart text-2xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-amber-100 text-sm font-medium">Pedidos Ativos</p>
-                            <h3 class="text-2xl font-bold">{{ $openOrders ?? 0 }}</h3>
-                        </div>
+            <x-ui.card class="hover:border-border transition-colors">
+                <x-ui.card-header class="flex-row items-center justify-between pb-2 space-y-0">
+                    <x-ui.card-title class="text-xs font-medium text-muted-foreground">Pedidos Ativos</x-ui.card-title>
+                    <div class="size-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                        <i class="mdi mdi-cart-outline text-lg"></i>
                     </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-amber-100">Pendentes: {{ $pendingOrders ?? 0 }}</span>
-                        <a href="{{ route('orders.index') }}"
-                            class="text-white hover:text-amber-100 underline decoration-amber-300/50 hover:decoration-amber-100 transition-colors">
-                            Ver Todos
+                </x-ui.card-header>
+                <x-ui.card-content class="flex flex-col gap-1.5">
+                    <div class="text-2xl font-bold tracking-tight text-foreground">{{ $openOrders ?? 0 }}</div>
+                    <div class="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Pendentes: {{ $pendingOrders ?? 0 }}</span>
+                        <a href="{{ route('orders.index') }}" class="text-primary hover:underline font-medium inline-flex items-center gap-0.5">
+                            <span>Ver Todos</span>
+                            <i class="mdi mdi-arrow-right text-xs"></i>
                         </a>
                     </div>
-                </div>
-            </div>
+                </x-ui.card-content>
+            </x-ui.card>
 
             <!-- Estoque Baixo -->
-            <div
-                class="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                    <i class="mdi mdi-alert-circle text-6xl"></i>
-                </div>
-                <div class="relative z-10">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <i class="mdi mdi-alert-circle text-2xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-red-100 text-sm font-medium">Estoque Baixo</p>
-                            <h3 class="text-2xl font-bold">{{ $lowStockProducts->count() ?? 0 }}</h3>
-                        </div>
+            <x-ui.card class="hover:border-border transition-colors">
+                <x-ui.card-header class="flex-row items-center justify-between pb-2 space-y-0">
+                    <x-ui.card-title class="text-xs font-medium text-muted-foreground">Estoque Baixo</x-ui.card-title>
+                    <div class="size-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
+                        <i class="mdi mdi-alert-circle-outline text-lg"></i>
                     </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-red-100">Total: {{ $totalProducts ?? 0 }}</span>
-                        <a href="{{ route('products.index') }}"
-                            class="px-2 py-1 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors">
-                            Gerenciar
+                </x-ui.card-header>
+                <x-ui.card-content class="flex flex-col gap-1.5">
+                    <div class="text-2xl font-bold tracking-tight text-foreground">{{ $lowStockProducts->count() ?? 0 }}</div>
+                    <div class="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Total: {{ $totalProducts ?? 0 }}</span>
+                        <a href="{{ route('products.index') }}" class="text-primary hover:underline font-medium inline-flex items-center gap-0.5">
+                            <span>Gerenciar</span>
+                            <i class="mdi mdi-arrow-right text-xs"></i>
                         </a>
                     </div>
-                </div>
-            </div>
+                </x-ui.card-content>
+            </x-ui.card>
 
             <!-- Status Mesas -->
-            <div
-                class="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                    <i class="mdi mdi-table-furniture text-6xl"></i>
-                </div>
-                <div class="relative z-10">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <i class="mdi mdi-table-furniture text-2xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-teal-100 text-sm font-medium">Status das Mesas</p>
-                            <h3 class="text-2xl font-bold">{{ $availableTables ?? 0 }}/{{ $tables->count() ?? 0 }}</h3>
-                        </div>
+            <x-ui.card class="hover:border-border transition-colors">
+                <x-ui.card-header class="flex-row items-center justify-between pb-2 space-y-0">
+                    <x-ui.card-title class="text-xs font-medium text-muted-foreground">Status das Mesas</x-ui.card-title>
+                    <div class="size-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <i class="mdi mdi-table-furniture text-lg"></i>
                     </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-teal-100">{{ $occupiedTables ?? 0 }} ocupadas</span>
-                        <a href="{{ route('tables.index') }}"
-                            class="text-white hover:text-teal-100 underline decoration-teal-300/50 hover:decoration-teal-100 transition-colors">
-                            Ver Mesas
+                </x-ui.card-header>
+                <x-ui.card-content class="flex flex-col gap-1.5">
+                    <div class="text-2xl font-bold tracking-tight text-foreground">{{ $availableTables ?? 0 }} <span class="text-sm font-normal text-muted-foreground">/ {{ $tables->count() ?? 0 }} livres</span></div>
+                    <div class="flex items-center justify-between text-xs text-muted-foreground">
+                        <span class="text-amber-600 dark:text-amber-400 font-medium">{{ $occupiedTables ?? 0 }} ocupadas</span>
+                        <a href="{{ route('tables.index') }}" class="text-primary hover:underline font-medium inline-flex items-center gap-0.5">
+                            <span>Ver Mesas</span>
+                            <i class="mdi mdi-arrow-right text-xs"></i>
                         </a>
                     </div>
-                </div>
-            </div>
+                </x-ui.card-content>
+            </x-ui.card>
         </div>
 
-        <!-- Charts and Info -->
         <!-- Charts and Info -->
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <!-- Sales Chart -->
             <div class="xl:col-span-2">
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
-                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h5 class="font-semibold text-gray-800 dark:text-dark flex items-center gap-2">
-                            <i class="mdi mdi-chart-line text-primary"></i>
-                            Desempenho de Vendas
-                        </h5>
-                        <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <x-ui.card class="h-full">
+                    <x-ui.card-header class="flex-row items-center justify-between border-b border-border/60 pb-4">
+                        <div class="flex flex-col gap-0.5">
+                            <x-ui.card-title class="flex items-center gap-2 text-base">
+                                <i class="mdi mdi-chart-line text-primary"></i>
+                                Desempenho de Vendas
+                            </x-ui.card-title>
+                            <x-ui.card-description>Análise comparativa das vendas do restaurante</x-ui.card-description>
+                        </div>
+                        <div class="inline-flex items-center rounded-lg bg-muted p-1 text-muted-foreground">
                             <button type="button"
-                                class="px-3 py-1 text-sm font-medium rounded-md transition-colors active bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white"
+                                class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active bg-background text-foreground shadow-xs"
                                 onclick="changeChartPeriod('daily')">
                                 Diário
                             </button>
                             <button type="button"
-                                class="px-3 py-1 text-sm font-medium rounded-md transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:text-foreground"
                                 onclick="changeChartPeriod('hourly')">
                                 Por Hora
                             </button>
                         </div>
-                    </div>
-                    <div class="p-6">
+                    </x-ui.card-header>
+                    <x-ui.card-content class="pt-6">
                         <div class="h-80 w-full">
                             <canvas id="salesChart"></canvas>
                         </div>
-                    </div>
-                </div>
+                    </x-ui.card-content>
+                </x-ui.card>
             </div>
 
             <!-- Real-time Status -->
             <div class="xl:col-span-1">
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-                        <div class="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3.5">
+                    <x-ui.card class="p-4 flex items-center gap-4">
+                        <div class="size-11 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
                             <i class="mdi mdi-cart-plus text-2xl"></i>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Pedidos em Andamento</p>
-                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">{{ $openOrders ?? 0 }}</h4>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-medium text-muted-foreground">Pedidos em Andamento</p>
+                            <h4 class="text-xl font-bold tracking-tight text-foreground">{{ $openOrders ?? 0 }}</h4>
                         </div>
-                    </div>
+                    </x-ui.card>
 
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-                        <div class="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg">
+                    <x-ui.card class="p-4 flex items-center gap-4">
+                        <div class="size-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
                             <i class="mdi mdi-check-circle text-2xl"></i>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Pedidos Hoje</p>
-                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">{{ $completedOrdersToday ?? 0 }}
-                            </h4>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-medium text-muted-foreground">Pedidos Hoje</p>
+                            <h4 class="text-xl font-bold tracking-tight text-foreground">{{ $completedOrdersToday ?? 0 }}</h4>
                         </div>
-                    </div>
+                    </x-ui.card>
 
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-                        <div class="p-3 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-lg">
+                    <x-ui.card class="p-4 flex items-center gap-4">
+                        <div class="size-11 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-shrink-0">
                             <i class="mdi mdi-account-multiple text-2xl"></i>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Novos Clientes</p>
-                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">+{{ $newClientsToday ?? 0 }}</h4>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-medium text-muted-foreground">Novos Clientes</p>
+                            <h4 class="text-xl font-bold tracking-tight text-foreground">+{{ $newClientsToday ?? 0 }}</h4>
                         </div>
-                    </div>
+                    </x-ui.card>
 
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-                        <div class="p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg">
+                    <x-ui.card class="p-4 flex items-center gap-4">
+                        <div class="size-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
                             <i class="mdi mdi-calendar-clock text-2xl"></i>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Vendas da Semana</p>
-                            <h4 class="text-xl font-bold text-gray-800 dark:text-white">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-medium text-muted-foreground">Vendas da Semana</p>
+                            <h4 class="text-xl font-bold tracking-tight text-foreground">
                                 {{ number_format($weekSales ?? 0, 2, ',', '.') }} MT</h4>
                         </div>
-                    </div>
+                    </x-ui.card>
                 </div>
             </div>
         </div>
+
         <!-- Top Products and Recent Orders -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <!-- Top Products -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
-                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                    <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                        <i class="mdi mdi-trophy text-warning"></i>
+            <x-ui.card class="h-full">
+                <x-ui.card-header class="border-b border-border/60 pb-3">
+                    <x-ui.card-title class="flex items-center gap-2 text-base">
+                        <i class="mdi mdi-trophy text-amber-500"></i>
                         Produtos Mais Vendidos
-                    </h5>
-                </div>
-                <div class="p-4">
-                    <div class="space-y-4">
+                    </x-ui.card-title>
+                </x-ui.card-header>
+                <x-ui.card-content class="pt-4">
+                    <div class="flex flex-col gap-2.5">
                         @forelse($topProducts ?? [] as $index => $product)
-                            <div
-                                class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-sm">
+                            <div class="flex items-center gap-3.5 p-2.5 rounded-lg hover:bg-muted/60 transition-colors">
+                                <div class="size-7 flex items-center justify-center rounded-full bg-muted text-muted-foreground font-bold text-xs flex-shrink-0">
                                     {{ $index + 1 }}
                                 </div>
                                 <div class="flex-grow min-w-0">
-                                    <h6 class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $product->name }}
-                                    </h6>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    <h6 class="text-sm font-medium text-foreground truncate">{{ $product->name }}</h6>
+                                    <p class="text-xs text-muted-foreground truncate">
                                         {{ optional($product->category)->name ?? 'Sem categoria' }}</p>
                                 </div>
                                 <div class="flex-shrink-0">
-                                    <span
-                                        class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-lg">
+                                    <x-ui.badge variant="secondary">
                                         {{ $product->total_sold ?? 0 }} vendas
-                                    </span>
+                                    </x-ui.badge>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-center text-gray-500 dark:text-gray-400 py-4">Nenhum produto vendido</p>
+                            <p class="text-center text-muted-foreground text-sm py-6">Nenhum produto vendido</p>
                         @endforelse
                     </div>
-                </div>
-            </div>
+                </x-ui.card-content>
+            </x-ui.card>
 
             <!-- Recent Orders -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
-                <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                    <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                        <i class="mdi mdi-clock-fast text-info"></i>
+            <x-ui.card class="h-full overflow-hidden">
+                <x-ui.card-header class="flex-row items-center justify-between border-b border-border/60 pb-3 space-y-0">
+                    <x-ui.card-title class="flex items-center gap-2 text-base">
+                        <i class="mdi mdi-clock-fast text-primary"></i>
                         Pedidos Recentes
-                    </h5>
+                    </x-ui.card-title>
                     <a href="{{ route('orders.index') }}"
-                        class="text-sm text-warning hover:text-warning/80 font-medium transition-colors">
-                        Ver Todos
+                        class="text-xs text-primary hover:underline font-medium transition-colors inline-flex items-center gap-1">
+                        <span>Ver Todos</span>
+                        <i class="mdi mdi-arrow-right text-xs"></i>
                     </a>
-                </div>
+                </x-ui.card-header>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead
-                            class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs uppercase font-medium">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-muted/50 text-muted-foreground text-xs uppercase font-medium border-b border-border/60">
                             <tr>
-                                <th class="px-4 py-3 rounded-tl-lg">ID</th>
-                                <th class="px-4 py-3">Cliente</th>
-                                <th class="px-4 py-3">Total</th>
-                                <th class="px-4 py-3">Status</th>
-                                <th class="px-4 py-3 rounded-tr-lg">Hora</th>
+                                <th class="px-4 py-2.5">ID</th>
+                                <th class="px-4 py-2.5">Cliente</th>
+                                <th class="px-4 py-2.5">Total</th>
+                                <th class="px-4 py-2.5">Status</th>
+                                <th class="px-4 py-2.5">Hora</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                        <tbody class="divide-y divide-border/50">
                             @forelse($recentOrders ?? [] as $order)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium">#{{ $order->id }}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-                                        {{ $order->client_name ?? 'Consumidor Final' }}</td>
-                                    <td class="px-4 py-3 text-sm font-bold text-gray-800 dark:text-white">
-                                        {{ number_format($order->total_amount, 2, ',', '.') }} MT</td>
-                                    <td class="px-4 py-3">
-                                        <span
-                                            class="px-2 py-1 text-xs font-medium rounded-lg bg-{{ $order->status_color ?? 'success' }}-100 text-{{ $order->status_color ?? 'success' }}-600 dark:bg-{{ $order->status_color ?? 'success' }}-900/30 dark:text-{{ $order->status_color ?? 'success' }}-400">
+                                <tr class="hover:bg-muted/40 transition-colors">
+                                    <td class="px-4 py-2.5 font-medium text-foreground">#{{ $order->id }}</td>
+                                    <td class="px-4 py-2.5 text-muted-foreground">{{ $order->client_name ?? 'Consumidor Final' }}</td>
+                                    <td class="px-4 py-2.5 font-semibold text-foreground">{{ number_format($order->total_amount, 2, ',', '.') }} MT</td>
+                                    <td class="px-4 py-2.5">
+                                        <x-ui.badge variant="{{ ($order->status ?? '') === 'completed' ? 'success' : (($order->status ?? '') === 'cancelled' ? 'destructive' : 'secondary') }}">
                                             {{ $order->status_label ?? 'N/A' }}
-                                        </span>
+                                        </x-ui.badge>
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $order->created_at->format('H:i') }}</td>
+                                    <td class="px-4 py-2.5 text-xs text-muted-foreground">{{ $order->created_at->format('H:i') }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum pedido
-                                        recente</td>
+                                    <td colspan="5" class="px-4 py-8 text-center text-muted-foreground text-sm">Nenhum pedido recente</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </x-ui.card>
         </div>
+
         <!-- Tables and Low Stock -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <!-- Tables Status -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
-                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                                <i class="mdi mdi-table-furniture text-info"></i>
-                                Status das Mesas
-                            </h5>
-                            <a href="{{ route('tables.index') }}" class="text-sm text-warning hover:text-warning/80 font-medium transition-colors">
-                                Ver Todas
-                            </a>
-                        </div>
-                        <div class="p-4">
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                @forelse($tables->take(8) ?? [] as $table)
-                                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow cursor-pointer flex flex-col items-center text-center h-full"
-                                        role="button" tabindex="0"
-                                        onclick="openTableInstructionsModal({{ $table->id }}, '{{ $table->number }}', '{{ $table->status }}')"
-                                        data-status="{{ $table->status }}">
-                                        <div class="mb-2">
-                                            <i class="mdi mdi-table-furniture text-3xl {{ $table->status === 'occupied' ? 'text-red-500' : 'text-green-500' }}"></i>
-                                        </div>
-                                        <h6 class="font-medium text-gray-900 dark:text-white mb-1">Mesa {{ $table->number }}</h6>
-                                        <small class="text-gray-500 dark:text-gray-400 mb-2 block">{{ $table->capacity }} lugares</small>
+            <!-- Tables Status -->
+            <x-ui.card class="h-full">
+                <x-ui.card-header class="flex-row items-center justify-between border-b border-border/60 pb-3 space-y-0">
+                    <x-ui.card-title class="flex items-center gap-2 text-base">
+                        <i class="mdi mdi-table-furniture text-primary"></i>
+                        Status das Mesas
+                    </x-ui.card-title>
+                    <a href="{{ route('tables.index') }}" class="text-xs text-primary hover:underline font-medium transition-colors inline-flex items-center gap-1">
+                        <span>Ver Todas</span>
+                        <i class="mdi mdi-arrow-right text-xs"></i>
+                    </a>
+                </x-ui.card-header>
+                <x-ui.card-content class="pt-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        @forelse($tables->take(8) ?? [] as $table)
+                            <div class="rounded-xl border border-border/70 bg-card p-3 hover:border-border hover:shadow-xs transition-all cursor-pointer flex flex-col items-center text-center h-full select-none"
+                                role="button" tabindex="0"
+                                onclick="openTableInstructionsModal({{ $table->id }}, '{{ $table->number }}', '{{ $table->status }}')"
+                                data-status="{{ $table->status }}">
+                                <div class="mb-1.5 size-10 rounded-full flex items-center justify-center {{ $table->status === 'occupied' ? 'bg-destructive/10 text-destructive' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' }}">
+                                    <i class="mdi mdi-table-furniture text-xl"></i>
+                                </div>
+                                <h6 class="font-semibold text-foreground text-sm">Mesa {{ $table->number }}</h6>
+                                <span class="text-xs text-muted-foreground mb-2">{{ $table->capacity }} lugares</span>
 
-                                        @if (isset($table->current_order) && $table->current_order)
-                                            <div class="w-full mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30">
-                                                <small class="block truncate text-amber-600 dark:text-amber-400 font-bold">
-                                                    Pedido: #{{ $table->current_order->id ?? '—' }}
-                                                </small>
-                                                <small class="text-gray-500 dark:text-gray-400">
-                                                    {{ number_format($table->current_order->total_amount ?? 0, 2, ',', '.') }} MT
-                                                </small>
-                                            </div>
-                                        @endif
+                                @if (isset($table->current_order) && $table->current_order)
+                                    <div class="w-full mb-2 p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left">
+                                        <span class="block truncate text-amber-600 dark:text-amber-400 text-[11px] font-bold">
+                                            #{{ $table->current_order->id ?? '—' }}
+                                        </span>
+                                        <span class="text-[11px] text-muted-foreground font-semibold">
+                                            {{ number_format($table->current_order->total_amount ?? 0, 2, ',', '.') }} MT
+                                        </span>
+                                    </div>
+                                @endif
 
-                                        <div class="mt-auto">
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $table->status === 'occupied' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' }}">
-                                                {{ $table->status === 'occupied' ? 'Ocupada' : 'Disponível' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="col-span-full">
-                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">Nenhuma mesa cadastrada</p>
-                                    </div>
-                                @endforelse
+                                <div class="mt-auto pt-1">
+                                    <x-ui.badge variant="{{ $table->status === 'occupied' ? 'destructive' : 'success' }}" class="text-[10px] px-2 py-0">
+                                        {{ $table->status === 'occupied' ? 'Ocupada' : 'Disponível' }}
+                                    </x-ui.badge>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Low Stock -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full">
-                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                                <i class="mdi mdi-alert text-danger"></i>
-                                Estoque Baixo
-                            </h5>
-                            <a href="{{ route('products.index') }}" class="text-sm text-warning hover:text-warning/80 font-medium transition-colors">
-                                Ver Todos
-                            </a>
-                        </div>
-                        <div class="p-4">
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                @forelse($lowStockProducts->take(8) ?? [] as $product)
-                                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow cursor-pointer h-full"
-                                        role="button" tabindex="0"
-                                        onclick="openProductInstructionsModal({{ $product->id }}, '{{ $product->name }}', {{ $product->stock_quantity }})">
-                                        <div class="aspect-square mb-3 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
-                                            @if ($product->image)
-                                                <img src="{{ asset('storage/' . $product->image) }}"
-                                                    alt="{{ $product->name }}" class="w-full h-full object-cover">
-                                            @else
-                                                <i class="mdi mdi-food text-3xl text-gray-400"></i>
-                                            @endif
-                                        </div>
-                                        <h6 class="font-medium text-gray-900 dark:text-white text-sm truncate mb-1" title="{{ $product->name }}">{{ $product->name }}</h6>
-                                        <small class="text-red-500 font-medium block">Estoque: {{ $product->stock_quantity }}</small>
-                                    </div>
-                                @empty
-                                    <div class="col-span-full">
-                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">Estoque adequado</p>
-                                    </div>
-                                @endforelse
+                        @empty
+                            <div class="col-span-full">
+                                <p class="text-center text-muted-foreground text-sm py-4">Nenhuma mesa cadastrada</p>
                             </div>
+                        @endforelse
+                    </div>
+                </x-ui.card-content>
+            </x-ui.card>
+
+            <!-- Low Stock -->
+            <x-ui.card class="h-full">
+                <x-ui.card-header class="flex-row items-center justify-between border-b border-border/60 pb-3 space-y-0">
+                    <x-ui.card-title class="flex items-center gap-2 text-base">
+                        <i class="mdi mdi-alert text-destructive"></i>
+                        Estoque Baixo
+                    </x-ui.card-title>
+                    <a href="{{ route('products.index') }}" class="text-xs text-primary hover:underline font-medium transition-colors inline-flex items-center gap-1">
+                        <span>Ver Todos</span>
+                        <i class="mdi mdi-arrow-right text-xs"></i>
+                    </a>
+                </x-ui.card-header>
+                <x-ui.card-content class="pt-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        @forelse($lowStockProducts->take(8) ?? [] as $product)
+                            <div class="rounded-xl border border-border/70 bg-card p-2.5 hover:border-border hover:shadow-xs transition-all cursor-pointer h-full flex flex-col justify-between"
+                                role="button" tabindex="0"
+                                onclick="openProductInstructionsModal({{ $product->id }}, '{{ $product->name }}', {{ $product->stock_quantity }})">
+                                <div class="aspect-square mb-2 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                                    @if ($product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}"
+                                            alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <i class="mdi mdi-food text-2xl text-muted-foreground"></i>
+                                    @endif
+                                </div>
+                                <div>
+                                    <h6 class="font-medium text-foreground text-xs truncate" title="{{ $product->name }}">{{ $product->name }}</h6>
+                                    <span class="text-destructive font-semibold text-[11px] block mt-0.5">Qtd: {{ $product->stock_quantity }}</span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full">
+                                <p class="text-center text-muted-foreground text-sm py-4">Estoque adequado</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </x-ui.card-content>
+            </x-ui.card>
+        </div>
+
+        <!-- Quick Actions -->
+        <x-ui.card>
+            <x-ui.card-header class="border-b border-border/60 pb-3">
+                <x-ui.card-title class="flex items-center gap-2 text-base">
+                    <i class="mdi mdi-lightning-bolt text-amber-500"></i>
+                    Ações Rápidas
+                </x-ui.card-title>
+            </x-ui.card-header>
+            <x-ui.card-content class="pt-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <a href="{{ route('pos.index') }}" class="flex flex-col items-center justify-center p-3.5 rounded-xl border border-border/70 bg-card hover:bg-accent hover:text-accent-foreground transition-all group shadow-2xs">
+                        <div class="size-10 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-cash-register text-xl"></i>
                         </div>
-                    </div>
-                </div>
+                        <span class="text-xs font-medium text-foreground group-hover:text-primary">Novo Pedido</span>
+                    </a>
 
-                <!-- Quick Actions -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <h5 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                            <i class="mdi mdi-lightning-bolt text-warning"></i>
-                            Ações Rápidas
-                        </h5>
-                    </div>
-                    <div class="p-6">
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            <a href="{{ route('pos.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all group">
-                                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                    <i class="mdi mdi-cash-register text-2xl"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Novo Pedido</span>
-                            </a>
-
-                            <a href="{{ route('tables.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-600 dark:hover:text-teal-400 transition-all group">
-                                <div class="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                    <i class="mdi mdi-table-furniture text-2xl"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-teal-600 dark:group-hover:text-teal-400">Mesas</span>
-                            </a>
-
-                            <a href="{{ route('products.create') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all group">
-                                <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                    <i class="mdi mdi-plus-circle text-2xl"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400">Add Produto</span>
-                            </a>
-
-                            <a href="{{ route('clients.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all group">
-                                <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                    <i class="mdi mdi-account-plus text-2xl"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-orange-600 dark:group-hover:text-orange-400">Novo Cliente</span>
-                            </a>
-
-                            <a href="{{ route('reports.index') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all group">
-                                <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                    <i class="mdi mdi-chart-bar text-2xl"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Relatórios</span>
-                            </a>
-
-                            <a href="#" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-600 dark:hover:text-pink-400 transition-all group opacity-50 cursor-not-allowed">
-                                <div class="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                    <i class="mdi mdi-calendar-plus text-2xl"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-400">Reserva</span>
-                            </a>
+                    <a href="{{ route('tables.index') }}" class="flex flex-col items-center justify-center p-3.5 rounded-xl border border-border/70 bg-card hover:bg-accent hover:text-accent-foreground transition-all group shadow-2xs">
+                        <div class="size-10 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-table-furniture text-xl"></i>
                         </div>
-                    </div>
+                        <span class="text-xs font-medium text-foreground group-hover:text-primary">Mesas</span>
+                    </a>
+
+                    <a href="{{ route('products.create') }}" class="flex flex-col items-center justify-center p-3.5 rounded-xl border border-border/70 bg-card hover:bg-accent hover:text-accent-foreground transition-all group shadow-2xs">
+                        <div class="size-10 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-plus-circle text-xl"></i>
+                        </div>
+                        <span class="text-xs font-medium text-foreground group-hover:text-primary">Add Produto</span>
+                    </a>
+
+                    <a href="{{ route('clients.index') }}" class="flex flex-col items-center justify-center p-3.5 rounded-xl border border-border/70 bg-card hover:bg-accent hover:text-accent-foreground transition-all group shadow-2xs">
+                        <div class="size-10 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-account-plus text-xl"></i>
+                        </div>
+                        <span class="text-xs font-medium text-foreground group-hover:text-primary">Novo Cliente</span>
+                    </a>
+
+                    <a href="{{ route('reports.index') }}" class="flex flex-col items-center justify-center p-3.5 rounded-xl border border-border/70 bg-card hover:bg-accent hover:text-accent-foreground transition-all group shadow-2xs">
+                        <div class="size-10 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                            <i class="mdi mdi-chart-bar text-xl"></i>
+                        </div>
+                        <span class="text-xs font-medium text-foreground group-hover:text-primary">Relatórios</span>
+                    </a>
+
+                    <a href="#" class="flex flex-col items-center justify-center p-3.5 rounded-xl border border-border/70 bg-card opacity-50 cursor-not-allowed">
+                        <div class="size-10 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center mb-2">
+                            <i class="mdi mdi-calendar-plus text-xl"></i>
+                        </div>
+                        <span class="text-xs font-medium text-muted-foreground">Reserva</span>
+                    </a>
                 </div>
-            </div>
+            </x-ui.card-content>
+        </x-ui.card>
+    </div>
 
             <!-- Table Instructions Modal -->
         <div x-data="{ 

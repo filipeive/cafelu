@@ -330,12 +330,12 @@
                             <i class="mdi mdi-arrow-right text-base"></i>
                         </a>
 
-                        @if(!empty($featuredRestaurant['whatsapp']))
-                            <a href="https://wa.me/{{ preg_replace('/\D/', '', $featuredRestaurant['whatsapp']) }}" target="_blank" rel="noopener"
-                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold transition-colors shadow-sm"
-                                title="Contactar via WhatsApp">
-                                <i class="mdi mdi-whatsapp text-lg"></i>
-                                <span class="lg:hidden">WhatsApp</span>
+                        @if(!empty($featuredRestaurant['whatsapp_url']))
+                            <a href="{{ $featuredRestaurant['whatsapp_url'] }}" target="_blank" rel="noopener"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold transition-all shadow-md shadow-emerald-500/20"
+                                title="Falar com {{ $featuredRestaurant['name'] }} no WhatsApp">
+                                <i class="mdi mdi-whatsapp text-xl"></i>
+                                <span>WhatsApp</span>
                             </a>
                         @endif
                     </div>
@@ -441,7 +441,20 @@
                                     <i class="mdi mdi-map-marker-outline text-slate-400 text-sm mt-0.5 shrink-0"></i>
                                     <span class="truncate">{{ $rest['address'] }}</span>
                                 </div>
-                                @if($rest['phone'])
+                                @if(!empty($rest['whatsapp_url']))
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 truncate">
+                                            <i class="mdi mdi-phone-outline text-slate-400 text-sm shrink-0"></i>
+                                            <span class="truncate">{{ $rest['phone'] ?: 'Contacto disponível' }}</span>
+                                        </div>
+                                        <a href="{{ $rest['whatsapp_url'] }}" target="_blank" rel="noopener"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 font-bold text-[11px] transition-colors shrink-0"
+                                            title="Conversar no WhatsApp">
+                                            <i class="mdi mdi-whatsapp text-sm text-emerald-600 dark:text-emerald-400"></i>
+                                            <span>WhatsApp</span>
+                                        </a>
+                                    </div>
+                                @elseif($rest['phone'])
                                     <div class="flex items-center gap-2">
                                         <i class="mdi mdi-phone-outline text-slate-400 text-sm shrink-0"></i>
                                         <span>{{ $rest['phone'] }}</span>
@@ -453,15 +466,16 @@
                                 <a href="{{ $rest['short_url'] }}"
                                     class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 group-hover:bg-primary text-white text-xs sm:text-sm font-bold transition-all shadow-xs">
                                     <i class="mdi mdi-book-open-page-variant-outline text-base"></i>
-                                    <span>Abrir Cardápio Digital</span>
+                                    <span>Abrir Cardápio</span>
                                     <i class="mdi mdi-arrow-right text-base"></i>
                                 </a>
 
-                                @if(!empty($rest['whatsapp']))
-                                    <a href="https://wa.me/{{ preg_replace('/\D/', '', $rest['whatsapp']) }}" target="_blank" rel="noopener"
-                                        class="size-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 hover:text-white flex items-center justify-center transition-colors shrink-0"
-                                        title="Contactar via WhatsApp">
-                                        <i class="mdi mdi-whatsapp text-xl"></i>
+                                @if(!empty($rest['whatsapp_url']))
+                                    <a href="{{ $rest['whatsapp_url'] }}" target="_blank" rel="noopener"
+                                        class="inline-flex items-center justify-center gap-1.5 px-3.5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm font-bold transition-all shadow-sm shadow-emerald-500/20 shrink-0"
+                                        title="Falar no WhatsApp com {{ $rest['name'] }}">
+                                        <i class="mdi mdi-whatsapp text-lg"></i>
+                                        <span class="hidden sm:inline">WhatsApp</span>
                                     </a>
                                 @endif
                             </div>

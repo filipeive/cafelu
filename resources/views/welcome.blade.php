@@ -25,6 +25,11 @@
     $openingHours = \App\Models\Setting::get('site_opening_hours', 'Segunda a Domingo: 07:00 - 22:00');
     $whatsappNumber = \App\Models\Setting::get('site_whatsapp', $companyPhone);
     $whatsappClean = preg_replace('/[^0-9]/', '', (string) $whatsappNumber);
+    if (!empty($whatsappClean) && strlen($whatsappClean) === 9 && in_array(substr($whatsappClean, 0, 2), ['82', '83', '84', '85', '86', '87'])) {
+        $whatsappClean = '258' . $whatsappClean;
+    }
+    $whatsappDefaultMsg = rawurlencode("Olá! Gostaria de informações sobre o cardápio e pedidos no {$companyName}.");
+    $whatsappUrl = !empty($whatsappClean) ? "https://wa.me/{$whatsappClean}?text={$whatsappDefaultMsg}" : null;
     $instagramUrl = \App\Models\Setting::get('site_instagram', '');
     $facebookUrl = \App\Models\Setting::get('site_facebook', '');
     $onlineOrdersEnabled = \App\Models\Setting::get('site_online_orders', '1') !== '0';
@@ -391,10 +396,25 @@
                         <i class="mdi mdi-cellphone text-base text-emerald-600"></i>
                         App Móvel
                     </a>
+                    @if(!empty($whatsappUrl))
+                        <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener" class="py-1 text-emerald-600 hover:text-emerald-700 transition-colors inline-flex items-center gap-1 font-bold" title="Falar no WhatsApp com {{ $companyName }}">
+                            <i class="mdi mdi-whatsapp text-base"></i>
+                            <span>WhatsApp</span>
+                        </a>
+                    @endif
                 </nav>
 
                 <!-- Ações Inteligentes & Contextuais (Direita) -->
                 <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap">
+                    
+                    @if(!empty($whatsappUrl))
+                        <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener"
+                           class="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all border border-emerald-200 shadow-2xs"
+                           title="Conversar no WhatsApp com o restaurante">
+                            <i class="mdi mdi-whatsapp text-base text-emerald-600"></i>
+                            <span class="hidden sm:inline">WhatsApp</span>
+                        </a>
+                    @endif
                     
                     <!-- Link Discreto para Rede em Telas Médias -->
                     <a href="{{ route('welcome') }}"
@@ -960,8 +980,8 @@
                                 <span>Fazer Pedido Online</span>
                             </button>
 
-                            @if(!empty($whatsappClean))
-                                <a href="https://wa.me/{{ $whatsappClean }}"
+                            @if(!empty($whatsappUrl))
+                                <a href="{{ $whatsappUrl }}"
                                    target="_blank"
                                    rel="noopener"
                                    class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2">
@@ -976,6 +996,19 @@
         </section>
 
     </main>
+
+    <!-- Botão Flutuante de WhatsApp do Restaurante -->
+    @if(!empty($whatsappUrl))
+        <a href="{{ $whatsappUrl }}"
+           target="_blank"
+           rel="noopener"
+           :class="cartCount > 0 ? 'bottom-24 right-4 sm:bottom-6 sm:right-6' : 'bottom-6 right-4 sm:bottom-6 sm:right-6'"
+           class="fixed z-40 size-12 sm:size-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/35 flex items-center justify-center transition-all hover:scale-105 active:scale-95 group cursor-pointer"
+           title="Falar no WhatsApp com {{ $companyName }}">
+            <i class="mdi mdi-whatsapp text-2xl sm:text-3xl"></i>
+            <span class="sr-only">Falar no WhatsApp</span>
+        </a>
+    @endif
 
     <!-- Botão Flutuante Inferior (Mobile) -->
     <div x-show="cartCount > 0"
@@ -1341,6 +1374,16 @@
                                 </span>
                             </template>
                         </button>
+
+                        @if(!empty($whatsappUrl))
+                            <div class="pt-3 text-center">
+                                <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener"
+                                   class="inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">
+                                    <i class="mdi mdi-whatsapp text-emerald-600 text-sm"></i>
+                                    <span>Dúvidas ou pedidos especiais? Fale no WhatsApp</span>
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </template>
 

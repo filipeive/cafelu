@@ -142,15 +142,29 @@ class WelcomeController extends Controller
                     ->take(4)
                     ->pluck('name');
 
+                $phone = $tenantSettings['company_phone'] ?? $tenant->phone;
+                $rawWhatsapp = !empty($tenantSettings['site_whatsapp']) ? $tenantSettings['site_whatsapp'] : $phone;
+                $cleanWhatsapp = preg_replace('/\D/', '', (string) $rawWhatsapp);
+                if (!empty($cleanWhatsapp)) {
+                    if (strlen($cleanWhatsapp) === 9 && in_array(substr($cleanWhatsapp, 0, 2), ['82', '83', '84', '85', '86', '87'])) {
+                        $cleanWhatsapp = '258' . $cleanWhatsapp;
+                    }
+                }
+                $restaurantName = $tenantSettings['company_name'] ?? $tenant->name;
+                $whatsappMsg = rawurlencode("Olá! Gostaria de informações sobre o cardápio e pedidos no " . $restaurantName . ".");
+                $whatsappUrl = !empty($cleanWhatsapp) ? "https://wa.me/{$cleanWhatsapp}?text={$whatsappMsg}" : null;
+
                 return [
                     'model'            => $tenant,
                     'id'               => $tenant->id,
-                    'name'             => $tenantSettings['company_name'] ?? $tenant->name,
+                    'name'             => $restaurantName,
                     'slug'             => $tenant->slug,
                     'city'             => $tenant->city ?: 'Moçambique',
                     'address'          => $tenantSettings['company_address'] ?? $tenant->address ?: 'Endereço disponível no perfil',
-                    'phone'            => $tenantSettings['company_phone'] ?? $tenant->phone,
-                    'whatsapp'         => $tenantSettings['site_whatsapp'] ?? null,
+                    'phone'            => $phone,
+                    'whatsapp'         => $rawWhatsapp,
+                    'whatsapp_clean'   => $cleanWhatsapp,
+                    'whatsapp_url'     => $whatsappUrl,
                     'logo'             => !empty($tenantSettings['system_logo']) ? asset('storage/' . $tenantSettings['system_logo']) : ($tenant->logo ? asset('storage/' . $tenant->logo) : null),
                     'hero_badge'       => $tenantSettings['site_hero_badge'] ?? 'Cardápio Digital & Pedidos Online',
                     'hero_subtitle'    => $tenantSettings['site_hero_subtitle'] ?? 'Explore o nosso menu digital, faça pedidos na mesa via QR Code ou encomende para levar.',

@@ -17,7 +17,8 @@ class CreateAdminCommand extends Command
                             {--password=admin1234 : Palavra-passe (mínimo 8 caracteres)}
                             {--email=admin@cafelu.test : Endereço de e-mail}
                             {--name=Administrador : Nome completo}
-                            {--role=admin : Papel no sistema (admin)}';
+                            {--role=admin : Papel no sistema (admin, manager, cashier, superadmin)}
+                            {--tenant_id= : ID do restaurante / tenant associado}';
 
     /**
      * The console command description.
@@ -36,10 +37,17 @@ class CreateAdminCommand extends Command
         $email = $this->option('email') ?: 'admin@cafelu.test';
         $name = $this->option('name') ?: 'Administrador';
         $role = $this->option('role') ?: 'admin';
+        $tenantId = $this->option('tenant_id');
+
+        if (!$tenantId && $role !== 'superadmin') {
+            $defaultTenant = \App\Models\Tenant::where('status', 'active')->first() ?? \App\Models\Tenant::first();
+            $tenantId = $defaultTenant?->id;
+        }
 
         $user = User::updateOrCreate(
             ['username' => $username],
             [
+                'tenant_id' => $tenantId,
                 'name' => $name,
                 'email' => $email,
                 'password' => $password,
@@ -59,6 +67,7 @@ class CreateAdminCommand extends Command
                 ['Password', $password],
                 ['Role', $user->role],
                 ['Status', $user->status],
+                ['Tenant ID', $user->tenant_id ?? 'Nenhum (SuperAdmin)'],
             ]
         );
 

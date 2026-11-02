@@ -13,9 +13,12 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $tenant = \App\Models\Tenant::where('status', 'active')->first() ?? \App\Models\Tenant::first();
+
         User::updateOrCreate(
             ['username' => 'admin'],
             [
+                'tenant_id' => $tenant?->id ?? 1,
                 'name' => 'Administrador',
                 'email' => 'admin@cafelu.test',
                 'password' => 'admin1234',

@@ -186,7 +186,7 @@
                         <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors">
                             <i class="mdi mdi-qrcode-scan"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900">Cardápio Digital & QR Code</h3>
+                        <h3 class="text-lg font-bold text-slate-900">Menu Digital & QR Code</h3>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
                             Aponte a câmara para o código da sua mesa e aceda imediatamente ao menu completo, com fotos, descrições detalhadas e preços atualizados sem esperar pelo menu em papel.
                         </p>
@@ -341,7 +341,7 @@
                     <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
                         <h4 class="text-sm font-bold text-slate-900">O aplicativo funciona em iPhones / iOS?</h4>
                         <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-                            Em utilizadores com iPhone (iOS), pode aceder ao cardápio pelo Safari e tocar no botão <strong>"Partilhar" &rarr; "Adicionar ao Ecrã Principal"</strong>. O sistema funciona como Progressive Web App (PWA) de forma idêntica à aplicação nativa.
+                            Em utilizadores com iPhone (iOS), pode aceder ao menu pelo Safari e tocar no botão <strong>"Partilhar" &rarr; "Adicionar ao Ecrã Principal"</strong>. O sistema funciona como Progressive Web App (PWA) de forma idêntica à aplicação nativa.
                         </p>
                     </div>
 

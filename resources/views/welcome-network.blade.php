@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Rede de Restaurantes — RestPOS | Cardápios Digitais & Pedidos Online</title>
+    <title>Rede de Restaurantes — RestPOS | Menus Digitais & Pedidos Online</title>
     <link rel="icon" href="{{ asset('assets/images/favicon.ico') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,7 +99,7 @@
                     <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     Rede Online
                 </span>
-                <span class="hidden sm:inline text-slate-400">Cardápios Digitais Interativos & Pedidos em Tempo Real</span>
+                <span class="hidden sm:inline text-slate-400">Menus Digitais Interativos & Pedidos em Tempo Real</span>
             </div>
             <div class="flex items-center gap-4 text-slate-400">
                 <a href="#como-funciona" class="hover:text-white transition-colors hidden md:inline">Como Funciona</a>
@@ -124,7 +124,7 @@
                         <span class="font-extrabold text-xl tracking-tight text-foreground">RestPOS</span>
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300">Rede Digital</span>
                     </div>
-                    <p class="text-xs text-muted-foreground">Diretório de Restaurantes & Cardápios Online</p>
+                    <p class="text-xs text-muted-foreground">Diretório de Restaurantes & Menus Online</p>
                 </div>
             </a>
 
@@ -177,7 +177,7 @@
                 </h1>
 
                 <p class="mt-5 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-                    Aceda aos cardápios digitais interativos, faça pedidos diretamente na mesa via QR Code ou encomende para takeaway com confirmação imediata.
+                    Aceda aos menus digitais interativos, faça pedidos diretamente na mesa via QR Code ou encomende para takeaway com confirmação imediata.
                 </p>
 
                 <!-- Modern Search Bar -->
@@ -236,7 +236,7 @@
                         <i class="mdi mdi-qrcode-scan text-2xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-sm text-foreground">Cardápio na Mesa via QR Code</h4>
+                        <h4 class="font-bold text-sm text-foreground">Menu na Mesa via QR Code</h4>
                         <p class="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                             Aceda instantaneamente ao menu sem esperar pelo garçom. Peça diretamente do seu smartphone.
                         </p>
@@ -326,7 +326,7 @@
                         <a href="{{ $featuredRestaurant['short_url'] }}"
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-primary hover:bg-orange-600 text-white text-sm font-bold transition-all shadow-md shadow-orange-500/25">
                             <i class="mdi mdi-book-open-page-variant-outline text-lg"></i>
-                            <span>Abrir Cardápio Digital</span>
+                            <span>Ver Menu Digital</span>
                             <i class="mdi mdi-arrow-right text-base"></i>
                         </a>
 
@@ -351,7 +351,7 @@
                     Restaurantes Disponíveis
                 </h2>
                 <p class="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                    Selecione um estabelecimento para abrir o respetivo cardápio digital e fazer pedidos
+                    Selecione um estabelecimento para ver o respetivo menu digital e fazer pedidos
                 </p>
             </div>
 
@@ -405,7 +405,7 @@
                                 </div>
 
                                 <div class="flex items-center gap-2 text-xs font-bold text-muted-foreground whitespace-nowrap">
-                                    <span class="px-2.5 py-1 rounded-xl bg-secondary text-secondary-foreground whitespace-nowrap" title="Produtos ativos no cardápio">
+                                    <span class="px-2.5 py-1 rounded-xl bg-secondary text-secondary-foreground whitespace-nowrap" title="Produtos ativos no menu">
                                         <i class="mdi mdi-food-fork-drink text-primary mr-1"></i>{{ $rest['products_count'] }} itens
                                     </span>
                                     @if($rest['tables_count'] > 0)
@@ -466,7 +466,7 @@
                                 <a href="{{ $rest['short_url'] }}"
                                     class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 group-hover:bg-primary text-white text-xs sm:text-sm font-bold transition-all shadow-xs">
                                     <i class="mdi mdi-book-open-page-variant-outline text-base"></i>
-                                    <span>Abrir Cardápio</span>
+                                    <span>Ver Menu</span>
                                     <i class="mdi mdi-arrow-right text-base"></i>
                                 </a>
 
@@ -546,7 +546,7 @@
                         Leve o RestPOS no seu Smartphone
                     </h3>
                     <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-                        Tenha acesso direto aos cardápios, pedidos instantâneos e notificações em tempo real. Instale o APK oficial ou adicione diretamente ao ecrã principal.
+                        Tenha acesso direto aos menus, pedidos instantâneos e notificações em tempo real. Instale o APK oficial ou adicione diretamente ao ecrã principal.
                     </p>
                 </div>
 
@@ -576,7 +576,7 @@
                 </div>
                 <div>
                     <span class="font-bold text-foreground">RestPOS Suite</span>
-                    <span class="text-muted-foreground"> — Plataforma de Gestão, POS, Cardápios Digitais & Faturação</span>
+                    <span class="text-muted-foreground"> — Plataforma de Gestão, POS, Menus Digitais & Faturação</span>
                 </div>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">

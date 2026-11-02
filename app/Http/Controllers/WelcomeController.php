@@ -151,7 +151,7 @@ class WelcomeController extends Controller
                     }
                 }
                 $restaurantName = $tenantSettings['company_name'] ?? $tenant->name;
-                $whatsappMsg = rawurlencode("Olá! Gostaria de informações sobre o cardápio e pedidos no " . $restaurantName . ".");
+                $whatsappMsg = rawurlencode("Olá! Gostaria de informações sobre o menu e pedidos no " . $restaurantName . ".");
                 $whatsappUrl = !empty($cleanWhatsapp) ? "https://wa.me/{$cleanWhatsapp}?text={$whatsappMsg}" : null;
 
                 return [
@@ -166,7 +166,7 @@ class WelcomeController extends Controller
                     'whatsapp_clean'   => $cleanWhatsapp,
                     'whatsapp_url'     => $whatsappUrl,
                     'logo'             => !empty($tenantSettings['system_logo']) ? asset('storage/' . $tenantSettings['system_logo']) : ($tenant->logo ? asset('storage/' . $tenant->logo) : null),
-                    'hero_badge'       => $tenantSettings['site_hero_badge'] ?? 'Cardápio Digital & Pedidos Online',
+                    'hero_badge'       => $tenantSettings['site_hero_badge'] ?? 'Menu Digital & Pedidos Online',
                     'hero_subtitle'    => $tenantSettings['site_hero_subtitle'] ?? 'Explore o nosso menu digital, faça pedidos na mesa via QR Code ou encomende para levar.',
                     'opening_hours'    => $tenantSettings['site_opening_hours'] ?? 'Aberto hoje',
                     'primary_color'    => $tenantSettings['primary_color'] ?? '#f97316',

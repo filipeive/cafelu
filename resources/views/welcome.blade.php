@@ -4,7 +4,7 @@
 @php
     $currentTenantModel = current_tenant();
     $companyName = \App\Models\Setting::get('company_name', $currentTenantModel?->name ?? 'Café & Restaurante');
-    $companySubtitle = \App\Models\Setting::get('company_subtitle', 'Cardápio Digital & Pedidos Online');
+    $companySubtitle = \App\Models\Setting::get('company_subtitle', 'Menu Digital & Pedidos Online');
     $companyPhone = \App\Models\Setting::get('company_phone', $currentTenantModel?->phone ?? '');
     $companyEmail = \App\Models\Setting::get('company_email', $currentTenantModel?->email ?? '');
     $companyAddress = \App\Models\Setting::get('company_address', $currentTenantModel?->address ?? '');
@@ -15,7 +15,7 @@
     $loginBg = \App\Models\Setting::get('login_background');
 
     // Website CMS Settings
-    $heroBadge = \App\Models\Setting::get('site_hero_badge', 'Cardápio Digital & Pedidos Online');
+    $heroBadge = \App\Models\Setting::get('site_hero_badge', 'Menu Digital & Pedidos Online');
     $heroTitle = \App\Models\Setting::get('site_hero_title', 'Sabores Autênticos Preparados na Hora');
     $heroSubtitle = \App\Models\Setting::get('site_hero_subtitle', 'Explore o nosso menu completo, faça o seu pedido diretamente para a sua mesa ou encomende online para levar.');
     $siteAnnouncement = \App\Models\Setting::get('site_announcement', '');
@@ -28,7 +28,7 @@
     if (!empty($whatsappClean) && strlen($whatsappClean) === 9 && in_array(substr($whatsappClean, 0, 2), ['82', '83', '84', '85', '86', '87'])) {
         $whatsappClean = '258' . $whatsappClean;
     }
-    $whatsappDefaultMsg = rawurlencode("Olá! Gostaria de informações sobre o cardápio e pedidos no {$companyName}.");
+    $whatsappDefaultMsg = rawurlencode("Olá! Gostaria de informações sobre o menu e pedidos no {$companyName}.");
     $whatsappUrl = !empty($whatsappClean) ? "https://wa.me/{$whatsappClean}?text={$whatsappDefaultMsg}" : null;
     $instagramUrl = \App\Models\Setting::get('site_instagram', '');
     $facebookUrl = \App\Models\Setting::get('site_facebook', '');
@@ -56,7 +56,7 @@
                 'badge' => $s->badge ?: $heroBadge,
                 'title' => $s->title ?: $heroTitle,
                 'subtitle' => $s->subtitle ?: $heroSubtitle,
-                'cta_text' => $s->button_text ?: ($s->cta_text ?: 'Explorar Cardápio'),
+                'cta_text' => $s->button_text ?: ($s->cta_text ?: 'Explorar Menu'),
                 'cta_link' => $s->button_link ?: ($s->cta_link ?: '#menu'),
                 'image_url' => $s->image_url ?: $defaultHeroBg,
             ];
@@ -68,7 +68,7 @@
                 'badge' => $heroBadge,
                 'title' => $heroTitle,
                 'subtitle' => $heroSubtitle,
-                'cta_text' => 'Ver Cardápio Completo',
+                'cta_text' => 'Ver Menu Completo',
                 'cta_link' => '#menu',
                 'image_url' => $defaultHeroBg,
             ],
@@ -377,7 +377,7 @@
                 <!-- Navegação Editorial Central (Desktop / Grande) -->
                 <nav class="hidden xl:flex items-center gap-6 text-[13px] font-semibold text-gray-600 whitespace-nowrap">
                     <a href="#menu" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
-                        Cardápio
+                        Menu
                     </a>
                     <a href="#destaques" class="py-1 hover:text-gray-950 transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-orange-500 hover:after:w-full after:transition-all">
                         Destaques
@@ -429,7 +429,7 @@
                             @click="toggleSearchBar()"
                             :class="searchBarOpen || searchQuery ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-stone-100/80 hover:bg-stone-200/70 text-gray-700 border-transparent'"
                             class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
-                            title="Pesquisar no Cardápio">
+                            title="Pesquisar no Menu">
                         <i class="mdi text-lg" :class="searchBarOpen ? 'mdi-close' : 'mdi-magnify'"></i>
                     </button>
 
@@ -499,7 +499,7 @@
                            x-ref="searchInput"
                            x-model="searchQuery"
                            @input="scrollToMenuIfSearching()"
-                           placeholder="Pesquisar prato, bebida ou ingrediente no cardápio..."
+                           placeholder="Pesquisar prato, bebida ou ingrediente no menu..."
                            class="w-full pl-11 pr-10 py-2.5 rounded-xl bg-stone-100 border border-stone-200 text-xs font-semibold text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
                     <button x-show="searchQuery"
                             @click="searchQuery = ''; searchBarOpen = false"
@@ -562,7 +562,7 @@
                                    style="background-color: {{ $primaryColor }};"
                                    class="px-6 py-3.5 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-orange-500/30 hover:opacity-95 active:scale-95 transition-all inline-flex items-center gap-2">
                                     <i class="mdi mdi-silverware-fork-knife text-base"></i>
-                                    <span>{{ $slide['cta_text'] ?: 'Explorar Cardápio' }}</span>
+                                    <span>{{ $slide['cta_text'] ?: 'Explorar Menu' }}</span>
                                 </a>
 
                                 <button type="button"
@@ -702,11 +702,11 @@
         <!-- SECÇÃO PRINCIPAL DO MENU (ESTILO SOUTH BEACH: GALERIA DE FOTOS + LISTA CLÁSSICA DE RESTAURANTE) -->
         <section id="menu" class="scroll-mt-24 space-y-6">
 
-            <!-- Cabeçalho do Cardápio & Alternador de Vista -->
+            <!-- Cabeçalho do Menu & Alternador de Vista -->
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200 pb-4">
                 <div>
                     <span class="text-[11px] font-extrabold uppercase tracking-widest text-orange-600 block">Gastronomia & Bebidas</span>
-                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Nosso Cardápio Completo</h2>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Nosso Menu Completo</h2>
                 </div>
 
                 <!-- Alternador de Vista: Galeria de Fotos vs Lista Clássica -->
@@ -739,7 +739,7 @@
                             :class="selectedCategory === 'all' ? 'bg-gray-900 text-white shadow-md shadow-gray-900/20' : 'bg-white text-gray-700 hover:bg-stone-100 border border-stone-200'"
                             class="px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer">
                         <i class="mdi mdi-silverware-variant text-base"></i>
-                        <span>Todo o Cardápio</span>
+                        <span>Todo o Menu</span>
                         <span class="px-1.5 py-0.5 rounded-full text-[10px]"
                               :class="selectedCategory === 'all' ? 'bg-white/20 text-white' : 'bg-stone-100 text-gray-500'"
                               x-text="products.length">
@@ -1095,7 +1095,7 @@
                             </p>
                             <button type="button" @click="cartOpen = false"
                                     class="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-bold text-xs hover:bg-black transition-colors cursor-pointer">
-                                Explorar o Cardápio
+                                Explorar o Menu
                             </button>
                         </div>
                     </template>
@@ -1458,7 +1458,7 @@
                 </span>
                 <h3 class="font-serif text-2xl font-bold text-gray-950">Como deseja ser atendido hoje?</h3>
                 <p class="text-xs text-gray-500 max-w-sm mx-auto">
-                    Selecione uma opção abaixo para personalizarmos o seu cardápio e experiência de atendimento.
+                    Selecione uma opção abaixo para personalizarmos o seu menu e experiência de atendimento.
                 </p>
             </div>
 
@@ -1941,7 +1941,7 @@
                 <div class="space-y-2">
                     <h5 class="text-xs font-extrabold uppercase tracking-wider text-gray-300">Acesso Rápido</h5>
                     <ul class="space-y-1.5 text-xs">
-                        <li><a href="#menu" class="hover:text-white transition-colors">Cardápio Digital</a></li>
+                        <li><a href="#menu" class="hover:text-white transition-colors">Menu Digital</a></li>
                         <li><a href="#destaques" class="hover:text-white transition-colors">Sugestões do Chef</a></li>
                         <li><a href="#sobre" class="hover:text-white transition-colors">Sobre Nós</a></li>
                         <li><a href="{{ isset($tenant) ? route('restaurant.app', $tenant->slug) : route('app.download') }}" class="hover:text-white transition-colors inline-flex items-center gap-1"><i class="mdi mdi-cellphone-check text-emerald-400"></i> Baixe a Nossa App</a></li>
@@ -1965,7 +1965,7 @@
 
             <div class="pt-6 text-center text-[11px] text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-2">
                 <p>&copy; {{ date('Y') }} {{ $companyName }}. Todos os direitos reservados.</p>
-                <p>Cardápio Digital & Pedidos Online powered by RestPOS</p>
+                <p>Menu Digital & Pedidos Online powered by RestPOS</p>
             </div>
         </div>
     </footer>
@@ -2295,7 +2295,7 @@
             get categoryTitle() {
                 if (this.selectedCategory === 'all') return 'Todos os Pratos e Bebidas';
                 const p = this.products.find(i => i.category_id === this.selectedCategory);
-                return p ? p.category_name : 'Cardápio';
+                return p ? p.category_name : 'Menu';
             },
 
             get cartCount() {
